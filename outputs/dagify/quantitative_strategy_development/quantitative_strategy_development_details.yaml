@@ -1,0 +1,64 @@
+dag_type: plain_text
+description: A workflow for developing a quantitative strategy, from ingesting user
+  input to generating a detailed strategy specification.
+name: quantitative_strategy_development
+nodes:
+  evaluate_feasibility:
+    agent: false
+    description: Evaluate the feasibility of each divergent thinking node.
+    name: evaluate_feasibility
+    nodes_depended_on:
+    - generate_divergent_thinking_nodes
+    nodes_dependent_on: []
+    prompt: Evaluate the feasibility of each divergent thinking node, considering
+      factors such as data availability, statistical significance, and economic intuition.
+  generate_divergent_thinking_nodes:
+    agent: false
+    description: 'Generate divergent ''thinking'' nodes that explore all relevant
+      aspects: data sources, factor hypotheses, risk frameworks, modeling approaches,
+      and edge cases.'
+    name: generate_divergent_thinking_nodes
+    nodes_depended_on:
+    - ingest_user_input
+    nodes_dependent_on: []
+    prompt: 'Based on the user input, generate a list of divergent ''thinking'' nodes
+      that explore all relevant aspects: data sources, factor hypotheses, risk frameworks,
+      modeling approaches, and edge cases.'
+  generate_strategy_specification:
+    agent: false
+    description: Generate a detailed, implementable strategy specification.
+    name: generate_strategy_specification
+    nodes_depended_on:
+    - integrate_risk_management
+    nodes_dependent_on: []
+    prompt: Generate a detailed, implementable strategy specification, including factor
+      formulas, backtest results, parameter settings, and expected performance metrics.
+  ingest_user_input:
+    agent: false
+    description: Ingest high-level user input describing an investment theme, universe,
+      or alpha concept.
+    name: ingest_user_input
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Please provide a high-level description of the investment theme, universe,
+      or alpha concept.
+  integrate_risk_management:
+    agent: false
+    description: Integrate risk management, transaction-cost simulation, and robustness
+      checks.
+    name: integrate_risk_management
+    nodes_depended_on:
+    - refine_factor_definitions
+    nodes_dependent_on: []
+    prompt: Integrate risk management, transaction-cost simulation, and robustness
+      checks into the strategy.
+  refine_factor_definitions:
+    agent: false
+    description: Refine factor definitions, signal processing, and portfolio construction
+      based on evaluation results.
+    name: refine_factor_definitions
+    nodes_depended_on:
+    - evaluate_feasibility
+    nodes_dependent_on: []
+    prompt: Refine factor definitions, signal processing, and portfolio construction
+      based on the evaluation results.

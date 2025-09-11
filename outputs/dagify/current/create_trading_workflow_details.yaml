@@ -1,0 +1,109 @@
+dag_type: plain_text
+description: A workflow to create a trading workflow, which includes identifying trading
+  instruments, selecting a trading strategy, and determining trading rules.
+name: create_trading_workflow
+nodes:
+  calculate_position_sizing:
+    agent: false
+    description: Calculate the position sizing for each trading instrument based on
+      the trading rules and strategy.
+    name: calculate_position_sizing
+    nodes_depended_on:
+    - determine_trading_rules
+    nodes_dependent_on: []
+    prompt: Calculate the position sizing for each trading instrument based on the
+      trading rules and strategy, including an explanation of the factors that influence
+      position sizing.
+  configure_trading_system:
+    agent: false
+    description: Configure the trading system to connect to the market environment
+      and implement the trading rules and strategy.
+    name: configure_trading_system
+    nodes_depended_on:
+    - set_market_environment
+    nodes_dependent_on: []
+    prompt: Configure the trading system to connect to the market environment and
+      implement the trading rules and strategy, including an explanation of the configuration
+      parameters used.
+  determine_trading_rules:
+    agent: false
+    description: Determine the trading rules that will be used in the trading workflow,
+      including entry and exit points, stop-loss levels, and position sizing.
+    name: determine_trading_rules
+    nodes_depended_on:
+    - select_trading_strategy
+    nodes_dependent_on: []
+    prompt: Determine the trading rules that will be used in the trading workflow,
+      including entry and exit points, stop-loss levels, and position sizing.
+  develop_trading_dashboard:
+    agent: false
+    description: Develop a trading dashboard to monitor the performance of the trading
+      workflow, including real-time data feeds, analytics, and alerts.
+    name: develop_trading_dashboard
+    nodes_depended_on:
+    - configure_trading_system
+    nodes_dependent_on: []
+    prompt: Develop a trading dashboard to monitor the performance of the trading
+      workflow, including real-time data feeds, analytics, and alerts, along with
+      an explanation of the metrics used.
+  evaluate_trading_performance:
+    agent: false
+    description: Evaluate the trading performance of the trading workflow, including
+      analyzing profit and loss, drawdowns, and other trading metrics.
+    name: evaluate_trading_performance
+    nodes_depended_on:
+    - implement_trading_risk_management
+    nodes_dependent_on: []
+    prompt: Evaluate the trading performance of the trading workflow, including analyzing
+      profit and loss, drawdowns, and other trading metrics, along with an explanation
+      of the evaluation methods used.
+  identify_trading_instruments:
+    agent: false
+    description: Identify the trading instruments to be included in the trading workflow,
+      such as stocks, options, futures, and forex.
+    name: identify_trading_instruments
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: List the trading instruments to be included in the trading workflow, along
+      with their relevant details such as exchange, listing, and market capitalization.
+  implement_order_execution:
+    agent: false
+    description: Implement the order execution logic for each trading instrument,
+      including entry orders, stop-loss orders, and profit targets.
+    name: implement_order_execution
+    nodes_depended_on:
+    - calculate_position_sizing
+    nodes_dependent_on: []
+    prompt: Implement the order execution logic for each trading instrument, including
+      entry orders, stop-loss orders, and profit targets, along with an explanation
+      of the execution algorithms used.
+  implement_trading_risk_management:
+    agent: false
+    description: Implement trading risk management to monitor and control trading
+      risks, including value at risk, expected shortfall, and potential future exposure.
+    name: implement_trading_risk_management
+    nodes_depended_on:
+    - develop_trading_dashboard
+    nodes_dependent_on: []
+    prompt: Implement trading risk management to monitor and control trading risks,
+      including value at risk, expected shortfall, and potential future exposure,
+      along with an explanation of the risk metrics used.
+  select_trading_strategy:
+    agent: false
+    description: Choose the trading strategy to be implemented in the trading workflow,
+      including technical and fundamental analysis.
+    name: select_trading_strategy
+    nodes_depended_on:
+    - identify_trading_instruments
+    nodes_dependent_on: []
+    prompt: Choose a trading strategy to be implemented in the trading workflow, including
+      an explanation of its key principles and metrics.
+  set_market_environment:
+    agent: false
+    description: Set up the market environment for the trading workflow, including
+      setting up trading accounts, setting up APIs, and configuring exchange links.
+    name: set_market_environment
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Set up the market environment for the trading workflow, including setting
+      up trading accounts, setting up APIs, and configuring exchange links.

@@ -1,0 +1,288 @@
+dag_type: typed
+description: Generated workflow from UI.
+name: create_trading_algo
+nodes:
+  brainstorm_algo_name_options:
+    agent: false
+    description: List out at least five algorithm name options that accurately convey
+      the trading strategy and purpose.
+    name: brainstorm_algo_name_options
+    nodes_depended_on:
+    - derive_problem_statement
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of potential trading algorithm names
+      key: algorithm_name_options
+      type: List[str]
+    - description: Description of the naming conventions used
+      key: naming_conventions
+      type: str
+    - description: Whether the descriptions of the algorithm name options are clear
+      key: description_clearness
+      type: bool
+    prompt: Generate a list of potential trading algorithm names based on the problem
+      statement, focusing on unique naming conventions and clear descriptions.
+  conduct_feasibility_study:
+    agent: false
+    description: Assess the practicality of the trading algorithm, addressing issues
+      such as data availability, calculation complexity, and execution risks.
+    name: conduct_feasibility_study
+    nodes_depended_on:
+    - derive_problem_statement
+    - brainstorm_algo_name_options
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of potential data availability risks identified
+      key: data_availability_risks
+      type: List[str]
+    - description: List of potential calculation complexity risks identified
+      key: calculation_complexity_risks
+      type: List[str]
+    - description: List of potential execution risks identified
+      key: execution_risks
+      type: List[str]
+    - description: Summary of the feasibility assessment
+      key: feasibility_assessment_summary
+      type: str
+    - description: List of recommendations for mitigating risks and improving feasibility
+      key: recommendations
+      type: str
+    prompt: Assess the feasibility of the trading algorithm based on problem solvability,
+      performance expectations, and operational requirements.
+  define_market_strategy:
+    agent: false
+    description: Develop a clear market strategy, detailing specific parameters, timeframes,
+      and risk tolerance levels to execute the trading algorithm.
+    name: define_market_strategy
+    nodes_depended_on:
+    - conduct_feasibility_study
+    nodes_dependent_on: []
+    output_structure:
+    - description: Specific parameters, timeframes, and risk tolerance levels for
+        the market strategy
+      key: market_strategy_details
+      type: str
+    - description: List of parameters for the trading algorithm
+      key: trading_algorithm_parameters
+      type: List[str]
+    - description: Timeframe for the market strategy
+      key: timeframe
+      type: str
+    - description: Risk tolerance level for the market strategy
+      key: risk_tolerance_level
+      type: float
+    - description: Whether the market strategy aligns with the algorithm's performance
+        objectives and feasibility assessment
+      key: algorithm_alignment
+      type: bool
+    prompt: Outline a detailed market strategy that aligns with the algorithm's performance
+      objectives and feasibility assessment.
+  derive_problem_statement:
+    agent: false
+    description: Transform a vague problem description into a clear problem statement
+      with defined metrics and performance requirements.
+    name: derive_problem_statement
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    output_structure:
+    - description: Clear problem statement with defined metrics and performance requirements.
+      key: problem_statement
+      type: str
+    - description: Specific markets the trading algorithm will operate in.
+      key: markets
+      type: List[str]
+    - description: Specific indicators used in the trading algorithm.
+      key: indicators
+      type: List[str]
+    - description: Defined metrics and performance requirements for the trading algorithm.
+      key: performance_requirements
+      type: str
+    prompt: Clearly define the problem the trading algorithm will solve, focusing
+      on specific details such as markets, indicators, and objectives.
+  design_trading_setup:
+    agent: false
+    description: Determine specific trading parameters such as instrument selection,
+      position sizing, stop-loss, and position allocation to execute the market strategy.
+    name: design_trading_setup
+    nodes_depended_on:
+    - define_market_strategy
+    nodes_dependent_on: []
+    output_structure:
+    - description: Selected financial instrument for trading
+      key: instrument_selection
+      type: str
+    - description: Proportion of available capital to allocate to each trade
+      key: position_sizing
+      type: float
+    - description: Price threshold at which trade is automatically closed to minimize
+        losses
+      key: stop_loss
+      type: float
+    - description: Strategy for allocating positions across different asset classes
+      key: position_allocation
+      type: str
+    prompt: Setup a detailed trading architecture that accurately implements the strategy,
+      aligns with market conditions, and optimizes performance.
+  document_trading_algo_spec:
+    agent: false
+    description: Write a detailed trading document encapsulating parameters, the market
+      strategy, performance details, and algorithmic workings, including documented
+      code snippets for clear verifiability.
+    name: document_trading_algo_spec
+    nodes_depended_on:
+    - gather_trading_results
+    nodes_dependent_on: []
+    output_structure:
+    - description: The name of the trading algorithm
+      key: algorithm_name
+      type: str
+    - description: A description of the market strategy used in the algorithm
+      key: market_strategy
+      type: str
+    - description: A list of parameters used in the algorithm, including their values
+        and descriptions
+      key: parameters
+      type: str
+    - description: A description of the performance metrics used to evaluate the algorithm's
+        effectiveness
+      key: performance_metrics
+      type: str
+    - description: A list of code snippets from the documented algorithm, including
+        explanations and context
+      key: documented_code_snippets
+      type: str
+    - description: A summary of the results obtained from testing the algorithm, including
+        key findings and recommendations for future development
+      key: results_summary
+      type: str
+    prompt: Synthesize findings into a simple document detailing key specifications,
+      market strategy, performance metrics, and verified parameters.
+  gather_trading_results:
+    agent: false
+    description: Compile a detailed record of trading activity, noting key events,
+      parameters, and results to develop a complete understanding of the trading algorithm.
+    name: gather_trading_results
+    nodes_depended_on:
+    - test_trading_algo
+    nodes_dependent_on: []
+    output_structure:
+    - description: A detailed record of trading activity, including key events, parameters,
+        and results.
+      key: trading_data
+      type: str
+    - description: A list of performance metrics, such as profit factor, drawdown,
+        and information coefficient.
+      key: performance_metrics
+      type: List[float]
+    - description: Observations on algorithm strength and weaknesses, including strengths,
+        weaknesses, opportunities, and threats.
+      key: algorithm_strength_weaknesses
+      type: str
+    prompt: Gather complete trading data, performance metrics, and observations on
+      algorithm strength and weaknesses to document results.
+  review_trading_results:
+    agent: false
+    description: Analyze performance and test results from backtesting to inform algorithm
+      quality, market competitiveness, data quality, effectiveness in different market
+      conditions.
+    name: review_trading_results
+    nodes_depended_on:
+    - test_trading_algo
+    - document_trading_algo_spec
+    nodes_dependent_on: []
+    output_structure:
+    - description: Assessment of the trading algorithm's overall quality
+      key: algorithm_quality_assessment
+      type: str
+    - description: Ranking of the trading algorithm's competitiveness in the market
+      key: market_competitiveness_ranking
+      type: int
+    - description: List of key performance metrics such as profit factor, drawdown,
+        and information coefficient
+      key: performance_metrics
+      type: List[float]
+    - description: Assessment of the trading algorithm's reliance on high-quality
+        data
+      key: data_quality_assessment
+      type: str
+    - description: Assessment of the trading algorithm's effectiveness in various
+        market conditions
+      key: effectiveness_in_different_market_conditions
+      type: str
+    prompt: Review all documentation and results on algorithm effectiveness, historical
+      performance, market observations, and impact of market conditions to revise
+      trading strategy and performance.
+  store_trading_algo_repo:
+    agent: false
+    description: Prepare version-controlled code and documentation for algorithm development
+      and revisions, including secure storage for all supporting data.
+    name: store_trading_algo_repo
+    nodes_depended_on:
+    - document_trading_algo_spec
+    nodes_dependent_on: []
+    output_structure:
+    - description: URL of the version-controlled repository
+      key: repo_url
+      type: str
+    - description: Last commit hash for the code in the repository
+      key: code_commit_hash
+      type: str
+    - description: Status of the documentation for the trading algorithm (e.g., 'in_progress',
+        'complete')
+      key: docs_status
+      type: str
+    prompt: Create and maintain a secure trading algorithm repository for future adjustments
+      and improvements to operational elements.
+  test_trading_algo:
+    agent: false
+    description: Perform a statistically sound backtesting of the trading algorithm
+      using performance metrics such as profit factor, drawdown, and information coefficient.
+    name: test_trading_algo
+    nodes_depended_on:
+    - verify_algo_parameters
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of performance metrics including profit factor, drawdown,
+        and information coefficient.
+      key: backtesting_performance_metrics
+      type: List[float]
+    - description: List of algorithmic backtests performed using different parameters
+        and scenarios.
+      key: algorithmic_backtests
+      type: List[str]
+    - description: Summary of market scenario assessments, including strengths, weaknesses,
+        and insights gained from the testing process.
+      key: market_scenario_assessments
+      type: str
+    - description: Detailed performance results of the trading algorithm, including
+        metrics such as profit factor, drawdown, and information coefficient.
+      key: performance_results
+      type: str
+    prompt: Thoroughly test the trading algorithm using relevant historical market
+      data and assess performance in various market scenarios.
+  verify_algo_parameters:
+    agent: false
+    description: Validate algorithmic rules and settings to identify and mitigate
+      potential errors, inaccuracies, and market-ordering violations.
+    name: verify_algo_parameters
+    nodes_depended_on:
+    - design_trading_setup
+    nodes_dependent_on: []
+    output_structure:
+    - description: Whether the algorithmic rules and settings have been validated
+      key: validated_parameters
+      type: bool
+    - description: List of potential errors, inaccuracies, and market-ordering violations
+        identified
+      key: potential_errors
+      type: List[str]
+    - description: List of proposed mitigation strategies for potential errors, inaccuracies,
+        and market-ordering violations
+      key: mitigation_strategies
+      type: List[str]
+    - description: Status of the validation process (e.g., successful, incomplete,
+        failed)
+      key: validation_status
+      type: str
+    prompt: Rigorously verify and validate the trading algorithm's parameters to ensure
+      alignment with the defined market strategy and performance expectations.

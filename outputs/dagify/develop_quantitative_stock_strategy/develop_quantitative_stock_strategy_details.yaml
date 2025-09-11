@@ -1,0 +1,257 @@
+dag_type: plain_text
+description: A comprehensive workflow to develop a quantitative stock trading strategy
+  with high potential for positive Sharpe ratio and strong returns, starting from
+  a general area of the stock market and systematically evaluating possibilities through
+  research and analysis.
+name: develop_quantitative_stock_strategy
+nodes:
+  analyze_backtest_results:
+    agent: false
+    description: Analyze the results of the backtest for performance and robustness.
+    name: analyze_backtest_results
+    nodes_depended_on:
+    - backtest_strategy
+    nodes_dependent_on: []
+    prompt: Outline a plan to analyze the backtest results of the trading strategy.
+      Focus on key performance metrics (returns, Sharpe ratio, drawdown), robustness
+      across market conditions, and any overfitting risks. Present the analysis approach
+      in a structured format.
+  analyze_competitive_landscape:
+    agent: false
+    description: Analyze the competitive landscape of quantitative strategies in the
+      market area.
+    name: analyze_competitive_landscape
+    nodes_depended_on:
+    - research_existing_strategies
+    nodes_dependent_on: []
+    prompt: Analyze the competitive landscape of quantitative strategies in the defined
+      stock market area. Identify 3 key challenges or saturation points in existing
+      strategies and suggest 2 potential niches or differentiators for a new strategy.
+  assess_data_availability:
+    agent: false
+    description: Evaluate the availability and quality of data required for strategy
+      development.
+    name: assess_data_availability
+    nodes_depended_on:
+    - gather_historical_data
+    nodes_dependent_on: []
+    prompt: 'Assess the availability, reliability, and quality of the specified historical
+      data categories for the defined stock market area. Provide a table with columns:
+      Data Category | Availability (High/Medium/Low) | Quality (High/Medium/Low) |
+      Notes on Limitations.'
+  assess_implementation_feasibility:
+    agent: false
+    description: Evaluate the practical feasibility of implementing the strategy.
+    name: assess_implementation_feasibility
+    nodes_depended_on:
+    - refine_strategy_rules
+    nodes_dependent_on: []
+    prompt: 'Assess the practical feasibility of implementing the refined trading
+      strategy, considering factors like data latency, transaction costs, execution
+      speed, and infrastructure needs. Provide a table with columns: Factor | Feasibility
+      (High/Medium/Low) | Notes.'
+  backtest_strategy:
+    agent: false
+    description: Design a backtest framework to evaluate the strategy’s historical
+      performance.
+    name: backtest_strategy
+    nodes_depended_on:
+    - optimize_strategy_parameters
+    - define_risk_constraints
+    nodes_dependent_on: []
+    prompt: Design a detailed backtest framework to evaluate the optimized trading
+      strategy. Specify the historical time period, data inputs, performance metrics
+      (e.g., returns, Sharpe ratio, max drawdown), and risk constraints to incorporate
+      in the backtest.
+  define_input_area:
+    agent: false
+    description: Define the general area of the stock market to focus on for strategy
+      development.
+    name: define_input_area
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Identify and clearly articulate the specific area or segment of the stock
+      market to focus on for developing a quantitative trading strategy. Provide a
+      brief description of the chosen focus area (e.g., sector, market cap range,
+      geographic region) and a one-sentence rationale for why this area presents opportunities
+      for alpha.
+  define_risk_constraints:
+    agent: false
+    description: Define specific risk constraints for the trading strategy.
+    name: define_risk_constraints
+    nodes_depended_on:
+    - evaluate_risk_factors
+    nodes_dependent_on: []
+    prompt: Based on the identified risk factors for the defined market area, define
+      4-6 specific risk constraints for the quantitative strategy (e.g., maximum drawdown
+      limit, sector exposure limits). Provide a one-sentence rationale for each constraint.
+  design_factor_tests:
+    agent: false
+    description: Design statistical tests to validate the prioritized alpha hypotheses.
+    name: design_factor_tests
+    nodes_depended_on:
+    - prioritize_alpha_hypotheses
+    - identify_relevant_indicators
+    nodes_dependent_on: []
+    prompt: Design specific statistical tests to validate the top 3 prioritized alpha
+      factor hypotheses. For each hypothesis, outline the test methodology, including
+      data inputs, indicators to use, and expected outcome in a structured format.
+  document_final_strategy:
+    agent: false
+    description: Compile the final quantitative trading strategy documentation.
+    name: document_final_strategy
+    nodes_depended_on:
+    - stress_test_strategy
+    - assess_implementation_feasibility
+    - analyze_competitive_landscape
+    nodes_dependent_on: []
+    prompt: Compile a comprehensive document for the final quantitative trading strategy.
+      Include sections on strategy overview, alpha factors, trading rules, risk constraints,
+      backtest performance, stress test results, competitive differentiation, and
+      implementation plan. Structure the content with clear headings and concise descriptions.
+  evaluate_market_dynamics:
+    agent: false
+    description: Analyze the key market dynamics and structural factors in the defined
+      area.
+    name: evaluate_market_dynamics
+    nodes_depended_on:
+    - define_input_area
+    nodes_dependent_on: []
+    prompt: Analyze the market dynamics of the defined stock market area, focusing
+      on structural factors such as liquidity, volatility, participant behavior, and
+      regulatory influences. List 5 key observations with a brief explanation for
+      each.
+  evaluate_risk_factors:
+    agent: false
+    description: Identify and evaluate risk factors associated with the defined market
+      area.
+    name: evaluate_risk_factors
+    nodes_depended_on:
+    - evaluate_market_dynamics
+    nodes_dependent_on: []
+    prompt: Identify 5-7 key risk factors (e.g., sector concentration risk, liquidity
+      risk) associated with trading in the defined stock market area. Provide a brief
+      description of each risk and its potential impact on a quantitative strategy.
+  formulate_trading_rules:
+    agent: false
+    description: Develop preliminary trading rules based on validated factors.
+    name: formulate_trading_rules
+    nodes_depended_on:
+    - simulate_factor_performance
+    nodes_dependent_on: []
+    prompt: Based on the simulation plan for alpha factors, formulate preliminary
+      trading rules for the top-performing factor. Specify entry and exit conditions,
+      position sizing, and any stop-loss rules in a clear, structured format.
+  gather_historical_data:
+    agent: false
+    description: Collect historical data for the defined stock market area.
+    name: gather_historical_data
+    nodes_depended_on:
+    - define_input_area
+    nodes_dependent_on: []
+    prompt: Specify the types of historical data to collect for the defined stock
+      market area (e.g., price data, volume, fundamentals, macroeconomic indicators).
+      Outline the data requirements in a list format with at least 5 key data categories
+      and their relevance to strategy development.
+  hypothesize_alpha_factors:
+    agent: false
+    description: Formulate specific alpha-generating factor hypotheses based on identified
+      sources.
+    name: hypothesize_alpha_factors
+    nodes_depended_on:
+    - identify_potential_alpha_sources
+    nodes_dependent_on: []
+    prompt: Formulate 3-5 specific hypotheses for alpha-generating factors based on
+      the identified sources of alpha. Structure each hypothesis as a clear, testable
+      statement (e.g., 'Stocks with high short interest underperform in down markets').
+  identify_potential_alpha_sources:
+    agent: false
+    description: Brainstorm potential sources of alpha within the defined stock market
+      area.
+    name: identify_potential_alpha_sources
+    nodes_depended_on:
+    - define_input_area
+    nodes_dependent_on: []
+    prompt: Based on the defined stock market area, list 5-10 potential sources of
+      alpha (e.g., mispricing due to behavioral biases, structural inefficiencies).
+      Provide a one-sentence explanation for each source.
+  identify_relevant_indicators:
+    agent: false
+    description: Identify technical and fundamental indicators relevant to the market
+      area.
+    name: identify_relevant_indicators
+    nodes_depended_on:
+    - gather_historical_data
+    nodes_dependent_on: []
+    prompt: List 5-8 technical and fundamental indicators that are most relevant to
+      the defined stock market area for potential use in a quantitative strategy.
+      Include a one-sentence rationale for each indicator’s relevance.
+  optimize_strategy_parameters:
+    agent: false
+    description: Optimize the strategy parameters like thresholds and weights for
+      performance.
+    name: optimize_strategy_parameters
+    nodes_depended_on:
+    - formulate_trading_rules
+    nodes_dependent_on: []
+    prompt: Outline an optimization approach for the preliminary trading rules, focusing
+      on parameters such as signal thresholds, position weights, and rebalancing frequency.
+      Describe the objective function (e.g., maximize Sharpe ratio) and constraints
+      to consider.
+  prioritize_alpha_hypotheses:
+    agent: false
+    description: Rank the alpha factor hypotheses based on feasibility and potential
+      impact.
+    name: prioritize_alpha_hypotheses
+    nodes_depended_on:
+    - hypothesize_alpha_factors
+    - assess_data_availability
+    nodes_dependent_on: []
+    prompt: 'Rank the formulated alpha factor hypotheses based on their feasibility
+      (considering data availability) and potential impact (likelihood of generating
+      returns). Present a table with columns: Hypothesis | Feasibility (High/Medium/Low)
+      | Impact (High/Medium/Low) | Rank.'
+  refine_strategy_rules:
+    agent: false
+    description: Refine the trading rules based on backtest analysis insights.
+    name: refine_strategy_rules
+    nodes_depended_on:
+    - analyze_backtest_results
+    nodes_dependent_on: []
+    prompt: Based on the analysis of backtest results, propose specific refinements
+      to the trading strategy rules (e.g., adjust thresholds, add filters). List 3-5
+      actionable changes with a brief rationale for each.
+  research_existing_strategies:
+    agent: false
+    description: Research existing quantitative strategies relevant to the defined
+      market area.
+    name: research_existing_strategies
+    nodes_depended_on:
+    - define_input_area
+    nodes_dependent_on: []
+    prompt: Conduct a review of existing quantitative trading strategies that have
+      been applied to the defined stock market area. Summarize 3-5 strategies, including
+      their core concepts and performance characteristics, in bullet points.
+  simulate_factor_performance:
+    agent: false
+    description: Simulate the performance of alpha factors using historical data assumptions.
+    name: simulate_factor_performance
+    nodes_depended_on:
+    - design_factor_tests
+    - assess_data_availability
+    nodes_dependent_on: []
+    prompt: Outline a simulation plan to test the performance of the top 3 alpha factors
+      using historical data. Specify the time period, data inputs, and performance
+      metrics (e.g., Sharpe ratio, returns) to focus on in the simulation.
+  stress_test_strategy:
+    agent: false
+    description: Design stress tests to evaluate strategy performance under extreme
+      conditions.
+    name: stress_test_strategy
+    nodes_depended_on:
+    - refine_strategy_rules
+    nodes_dependent_on: []
+    prompt: Design 3 stress test scenarios (e.g., market crash, liquidity freeze)
+      to evaluate the refined trading strategy’s performance under extreme conditions.
+      Describe each scenario and the specific metrics to monitor (e.g., drawdown,
+      portfolio loss).

@@ -1,0 +1,82 @@
+dag_type: plain_text
+description: Creates a detailed, step-by-step foundational plan for building a trading
+  workflow.
+name: build_a_trading_workflow
+nodes:
+  backtest_trading_strategy:
+    agent: false
+    description: Evaluate the trading strategy's historical performance.
+    name: backtest_trading_strategy
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Apply the implemented trading algorithms to historical data and assess
+      the trading strategy's performance, volatility, and profit/loss history.
+  choose_trading_strategy:
+    agent: false
+    description: Select a trading strategy to align with objectives.
+    name: choose_trading_strategy
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Based on the clarified objectives, choose a suitable trading strategy
+      (e.g., day trading, swing trading, position trading). Provide a one-sentence
+      rationale.
+  clarify_trading_objectives:
+    agent: false
+    description: Identify the primary trading objectives.
+    name: clarify_trading_objectives
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Based on the trading needs, specify the main goals for trading (e.g.,
+      maximize returns, minimize risk). List the primary objectives in bullet form.
+  define_trading_rules:
+    agent: false
+    description: Develop logical trading rules.
+    name: define_trading_rules
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Using the identified data sources, create a set of logical trading rules
+      (e.g., buy/sell criteria, profit/loss targets, risk management). Summarize in
+      bullet form.
+  design_trading_software_architecture:
+    agent: false
+    description: Sketch the trading software architecture.
+    name: design_trading_software_architecture
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: 'Map the chosen trading strategy, trading rules, and data sources into
+      an executable architecture (e.g., algorithms, indicators, data feeds). Present
+      as a 2-column table: Layer | Description.'
+  finalize_trading_setup:
+    agent: false
+    description: Conclude the trading setup by integrating the trading strategy with
+      an account.
+    name: finalize_trading_setup
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Implement the trading strategy within an existing trading account by integrating
+      order execution and integrating with other trading platform or systems.
+  identify_data_sources:
+    agent: false
+    description: List the required data sources for trading.
+    name: identify_data_sources
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Identify the specific data sources needed for the chosen trading strategy
+      (e.g., charts, news feeds, social media).
+  implement_trading_algorithms:
+    agent: false
+    description: Develop executable trading algorithms.
+    name: implement_trading_algorithms
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Transform the designed software architecture into functioning trading
+      algorithms (e.g., order generation, risk management, backtesting).
+  perform_continuous_optimization:
+    agent: false
+    description: Continuously refine and improve the trading strategy.
+    name: perform_continuous_optimization
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Continuously test and refine trading algorithms using real-time data and
+      evaluate new trading strategies. Aim for incremental changes that maintain risk
+      tolerance.

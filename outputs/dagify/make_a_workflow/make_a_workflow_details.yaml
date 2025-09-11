@@ -1,0 +1,74 @@
+dag_type: plain_text
+description: A workflow to create a detailed and maximally concurrent workflow DAG
+  for a given objective.
+name: make_a_workflow
+nodes:
+  connect_nodes:
+    agent: false
+    description: Connect the nodes to form a Directed Acyclic Graph (DAG).
+    name: connect_nodes
+    nodes_depended_on:
+    - create_nodes
+    nodes_dependent_on:
+    - validate_dag
+    prompt: Establish dependencies between nodes to ensure a valid DAG structure.
+      Each node should only depend on its immediate predecessors.
+  create_nodes:
+    agent: false
+    description: Create nodes for each fundamental step in the workflow.
+    name: create_nodes
+    nodes_depended_on:
+    - decompose_objective
+    nodes_dependent_on:
+    - connect_nodes
+    prompt: For each fundamental step identified, create a unique node with a clear
+      name, description, and instructions.
+  decompose_objective:
+    agent: false
+    description: Decompose the objective into fundamental operations/tasks/actions/steps.
+    name: decompose_objective
+    nodes_depended_on:
+    - parse_objective
+    nodes_dependent_on:
+    - create_nodes
+    prompt: Break down the parsed objective into the smallest, most fundamental steps
+      that can be executed independently.
+  define_objective:
+    agent: false
+    description: Identify the specific objective or task description to be achieved.
+    name: define_objective
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - parse_objective
+    prompt: Provide the exact objective or task description that needs to be broken
+      down into a workflow.
+  finalize_workflow:
+    agent: false
+    description: Finalize the workflow by ensuring all steps are correctly defined
+      and connected.
+    name: finalize_workflow
+    nodes_depended_on:
+    - validate_dag
+    nodes_dependent_on: []
+    prompt: Review the entire workflow to ensure all steps are correctly defined,
+      connected, and executable. Make any final adjustments if necessary.
+  parse_objective:
+    agent: false
+    description: Break down the objective into its key components and requirements.
+    name: parse_objective
+    nodes_depended_on:
+    - define_objective
+    nodes_dependent_on:
+    - decompose_objective
+    prompt: Analyze the provided objective and list all the key components, requirements,
+      and constraints.
+  validate_dag:
+    agent: false
+    description: Validate the DAG to ensure it is acyclic and connected.
+    name: validate_dag
+    nodes_depended_on:
+    - connect_nodes
+    nodes_dependent_on:
+    - finalize_workflow
+    prompt: Check the DAG for any cycles or disconnected components. Ensure all nodes
+      are connected and the graph is acyclic.

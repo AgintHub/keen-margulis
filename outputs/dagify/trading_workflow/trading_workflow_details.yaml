@@ -1,0 +1,84 @@
+dag_type: plain_text
+description: A workflow for executing a trading strategy, from data collection to
+  execution and monitoring.
+name: trading_workflow
+nodes:
+  adjust_trades:
+    agent: false
+    description: Adjust trades if necessary based on market conditions or performance.
+    name: adjust_trades
+    nodes_depended_on:
+    - monitor_trades
+    nodes_dependent_on:
+    - record_trade_performance
+    prompt: Make any necessary adjustments to the executed trades, such as closing
+      positions or adjusting stop-loss levels.
+  analyze_market_data:
+    agent: false
+    description: Analyze the collected market data to identify trading opportunities.
+    name: analyze_market_data
+    nodes_depended_on:
+    - collect_market_data
+    nodes_dependent_on:
+    - generate_trading_signals
+    prompt: Process the collected market data using historical analysis and statistical
+      models to detect patterns and trends that indicate potential trades.
+  check_account_balance:
+    agent: false
+    description: Check the current account balance to ensure sufficient funds for
+      trading.
+    name: check_account_balance
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - execute_trades
+    prompt: Query the trading account to retrieve the current balance and available
+      margin.
+  collect_market_data:
+    agent: false
+    description: Collect real-time market data for the trading instruments.
+    name: collect_market_data
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - analyze_market_data
+    prompt: Retrieve the latest market data for the specified trading instruments
+      from reliable financial data providers.
+  execute_trades:
+    agent: false
+    description: Execute trades based on the generated trading signals.
+    name: execute_trades
+    nodes_depended_on:
+    - generate_trading_signals
+    - check_account_balance
+    nodes_dependent_on:
+    - monitor_trades
+    prompt: Place trades in the market according to the generated signals, ensuring
+      that the account has sufficient funds.
+  generate_trading_signals:
+    agent: false
+    description: Generate trading signals based on the analysis of market data.
+    name: generate_trading_signals
+    nodes_depended_on:
+    - analyze_market_data
+    nodes_dependent_on:
+    - execute_trades
+    prompt: Based on the analyzed market data, generate buy, sell, or hold signals
+      for the trading instruments.
+  monitor_trades:
+    agent: false
+    description: Monitor the executed trades for any issues or changes in market conditions.
+    name: monitor_trades
+    nodes_depended_on:
+    - execute_trades
+    nodes_dependent_on:
+    - adjust_trades
+    prompt: Continuously monitor the executed trades to ensure they are performing
+      as expected and to detect any potential problems.
+  record_trade_performance:
+    agent: false
+    description: Record the performance of the executed trades.
+    name: record_trade_performance
+    nodes_depended_on:
+    - adjust_trades
+    nodes_dependent_on: []
+    prompt: Log the performance of the executed trades, including entry and exit prices,
+      profit/loss, and any other relevant metrics.

@@ -1,0 +1,84 @@
+dag_type: plain_text
+description: A workflow for generating a quantitative strategy given a general area
+  of the stock market universe of stocks and an idea on alpha.
+name: generate_quantitative_strategy
+nodes:
+  brainstorm_alpha_ideas:
+    agent: false
+    description: Generate a list of potential alpha ideas related to the market area.
+    name: brainstorm_alpha_ideas
+    nodes_depended_on:
+    - ingest_market_description
+    nodes_dependent_on: []
+    prompt: Based on the market area description, generate a list of 10 potential
+      alpha ideas.
+  develop_quantitative_strategy:
+    agent: false
+    description: Develop a quantitative strategy based on the research.
+    name: develop_quantitative_strategy
+    nodes_depended_on:
+    - research_selected_alpha_ideas
+    nodes_dependent_on: []
+    prompt: Develop a quantitative strategy based on the research, including defining
+      the strategy's objectives, risk management, and performance metrics.
+  evaluate_alpha_ideas:
+    agent: false
+    description: Evaluate each alpha idea and score its potential.
+    name: evaluate_alpha_ideas
+    nodes_depended_on:
+    - brainstorm_alpha_ideas
+    nodes_dependent_on: []
+    prompt: Evaluate each of the 10 alpha ideas and score its potential on a scale
+      of 1-10.
+  evaluate_strategy_risk:
+    agent: false
+    description: Evaluate the risk of the quantitative strategy.
+    name: evaluate_strategy_risk
+    nodes_depended_on:
+    - develop_quantitative_strategy
+    nodes_dependent_on: []
+    prompt: Evaluate the risk of the quantitative strategy, including backtesting
+      and stress testing.
+  ingest_market_description:
+    agent: false
+    description: Ingest a general description of the market area of interest.
+    name: ingest_market_description
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Provide a general description of the market area of interest (e.g. sector,
+      industry, geographic region).
+  output_quantitative_strategy:
+    agent: false
+    description: Output the final quantitative strategy.
+    name: output_quantitative_strategy
+    nodes_depended_on:
+    - refine_quantitative_strategy
+    nodes_dependent_on: []
+    prompt: Output the final quantitative strategy, including a detailed report of
+      the strategy's objectives, risk management, and performance metrics.
+  refine_quantitative_strategy:
+    agent: false
+    description: Refine the quantitative strategy based on the risk evaluation.
+    name: refine_quantitative_strategy
+    nodes_depended_on:
+    - evaluate_strategy_risk
+    nodes_dependent_on: []
+    prompt: Refine the quantitative strategy based on the risk evaluation, including
+      adjusting parameters and re-evaluating performance.
+  research_selected_alpha_ideas:
+    agent: false
+    description: Conduct research on each of the top 3 alpha ideas.
+    name: research_selected_alpha_ideas
+    nodes_depended_on:
+    - select_top_alpha_ideas
+    nodes_dependent_on: []
+    prompt: Conduct research on each of the top 3 alpha ideas, including reviewing
+      existing literature and data.
+  select_top_alpha_ideas:
+    agent: false
+    description: Select the top 3 alpha ideas to pursue further.
+    name: select_top_alpha_ideas
+    nodes_depended_on:
+    - evaluate_alpha_ideas
+    nodes_dependent_on: []
+    prompt: Select the top 3 alpha ideas based on their potential score.

@@ -1,0 +1,92 @@
+dag_type: plain_text
+description: A workflow for developing a quantitative strategy given an input about
+  a general area of the stock market universe of stocks, potentially with some idea
+  on alpha.
+name: develop_quantitative_strategy
+nodes:
+  backtest_alpha_hypothesis:
+    agent: false
+    description: Backtest the alpha hypothesis using historical data.
+    name: backtest_alpha_hypothesis
+    nodes_depended_on:
+    - define_alpha_hypothesis
+    - feature_engineering
+    nodes_dependent_on: []
+    prompt: Backtest the alpha hypothesis using the generated features and historical
+      market data. Evaluate performance metrics such as return, volatility, and Sharpe
+      ratio.
+  define_alpha_hypothesis:
+    agent: false
+    description: Formulate an alpha hypothesis based on the input ideas and market
+      analysis.
+    name: define_alpha_hypothesis
+    nodes_depended_on:
+    - define_input_scope
+    - feature_engineering
+    nodes_dependent_on: []
+    prompt: Develop an alpha hypothesis based on the initial ideas, market analysis,
+      and generated features. Describe the rationale behind the hypothesis.
+  define_input_scope:
+    agent: false
+    description: Clarify the general area of the stock market universe and any initial
+      alpha ideas provided.
+    name: define_input_scope
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Define the specific stock market universe and any initial alpha ideas
+      provided. Provide a concise description.
+  evaluate_strategy_performance:
+    agent: false
+    description: Evaluate the performance of the refined quantitative strategy.
+    name: evaluate_strategy_performance
+    nodes_depended_on:
+    - refine_strategy
+    nodes_dependent_on: []
+    prompt: Evaluate the performance of the refined quantitative strategy using metrics
+      such as return, volatility, Sharpe ratio, and maximum drawdown.
+  feature_engineering:
+    agent: false
+    description: Generate relevant features from the preprocessed market data.
+    name: feature_engineering
+    nodes_depended_on:
+    - preprocess_market_data
+    nodes_dependent_on: []
+    prompt: Create technical indicators, moving averages, and other relevant features
+      from the preprocessed market data.
+  finalize_strategy:
+    agent: false
+    description: Finalize the quantitative strategy and prepare for implementation.
+    name: finalize_strategy
+    nodes_depended_on:
+    - evaluate_strategy_performance
+    nodes_dependent_on: []
+    prompt: Finalize the quantitative strategy and prepare for implementation. Document
+      the strategy, including data sources, feature generation, trading logic, and
+      risk controls.
+  gather_market_data:
+    agent: false
+    description: Collect historical market data for the defined stock market universe.
+    name: gather_market_data
+    nodes_depended_on:
+    - define_input_scope
+    nodes_dependent_on: []
+    prompt: Gather historical price and volume data for the specified stock market
+      universe. Focus on daily open, high, low, close, and adjusted close values.
+  preprocess_market_data:
+    agent: false
+    description: Clean and preprocess the collected market data.
+    name: preprocess_market_data
+    nodes_depended_on:
+    - gather_market_data
+    nodes_dependent_on: []
+    prompt: Clean and preprocess the market data by handling missing values, outliers,
+      and normalizing the data as necessary.
+  refine_strategy:
+    agent: false
+    description: Refine the quantitative strategy based on backtesting results.
+    name: refine_strategy
+    nodes_depended_on:
+    - backtest_alpha_hypothesis
+    nodes_dependent_on: []
+    prompt: Refine the quantitative strategy based on the backtesting results. Adjust
+      parameters, risk controls, and other variables to improve performance.

@@ -1,0 +1,98 @@
+dag_type: plain_text
+description: A workflow to simulate testing, including steps to identify, prepare,
+  execute, validate, and report the process.
+name: testing_workflow
+nodes:
+  analyze_test_results:
+    agent: false
+    description: Analyze test results
+    name: analyze_test_results
+    nodes_depended_on:
+    - validate_test_results
+    nodes_dependent_on:
+    - report_test_results
+    prompt: Analyze the test results to identify trends, patterns, and areas for improvement
+  execute_test_cases:
+    agent: false
+    description: Execute test cases
+    name: execute_test_cases
+    nodes_depended_on:
+    - test_case_design
+    nodes_dependent_on:
+    - validate_test_results
+    prompt: Run the test cases and verify that the system behaves as expected. Record
+      any defects or issues encountered
+  gather_test_requirements:
+    agent: false
+    description: Gather test requirements
+    name: gather_test_requirements
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - clarify_testing_objectives
+    prompt: Determine the specific testing goals and deliverables based on the objectives
+      and scope. Identify any relevant test data or samples.
+  identify_test_cases:
+    agent: false
+    description: Identify test cases
+    name: identify_test_cases
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Create an exhaustive list of test cases that cover the entire scope of
+      testing
+  report_test_results:
+    agent: false
+    description: Report test results
+    name: report_test_results
+    nodes_depended_on:
+    - analyze_test_results
+    nodes_dependent_on: []
+    prompt: Create a comprehensive report that summarizes the testing results, highlighting
+      successes and areas for improvement
+  test_case_design:
+    agent: false
+    description: Design test cases
+    name: test_case_design
+    nodes_depended_on:
+    - test_planning
+    nodes_dependent_on:
+    - execute_test_cases
+    prompt: For each identified test case, create a detailed design that outlines
+      the test steps and expected results
+  test_planning:
+    agent: false
+    description: Develop a test plan
+    name: test_planning
+    nodes_depended_on:
+    - gather_test_requirements
+    nodes_dependent_on:
+    - identify_test_cases
+    prompt: Create a comprehensive test plan that outlines the approach, timeline,
+      and resources needed to execute testing
+  test_post_mortem:
+    agent: false
+    description: Perform a test post-mortem
+    name: test_post_mortem
+    nodes_depended_on:
+    - report_test_results
+    nodes_dependent_on: []
+    prompt: Conduct a thorough review of the testing process to identify areas for
+      improvement and lessons learned
+  test_preparation:
+    agent: false
+    description: Prepare for testing
+    name: test_preparation
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - gather_test_requirements
+    prompt: List the essential items and resources needed to execute testing, such
+      as equipment and materials.
+  validate_test_results:
+    agent: false
+    description: Validate test results
+    name: validate_test_results
+    nodes_depended_on:
+    - execute_test_cases
+    nodes_dependent_on:
+    - analyze_test_results
+    prompt: Verify that the test results are accurate and comprehensive. Identify
+      any areas that require re-testing or further investigation

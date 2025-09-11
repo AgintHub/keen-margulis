@@ -1,0 +1,115 @@
+dag_type: stub
+description: Generated workflow from UI.
+name: improved_workflow
+nodes:
+  step1_testprompt:
+    agent: false
+    code_node_type: stub
+    description: Print a test message.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass Step1TestpromptOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for step1_testprompt node outputs.\"\"\"\n    test_output:\
+      \ str = Field(..., description=\"Test output from this step.\")\n\n\ndef step1_testprompt(general_input:\
+      \ str, **kwargs) -> Step1TestpromptOutput:\n    \"\"\"Print a test message.\n\
+      \n    Args:\n        general_input: General input string for the root node.\n\
+      \        **kwargs: Additional keyword arguments.\n\n    Returns:\n        Step1TestpromptOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ Step1TestpromptOutput(\n        test_output=\"\",\n    )"
+    name: step1_testprompt
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    output_structure:
+    - description: Test output from this step.
+      key: test_output
+      type: str
+    prd:
+      bullets: []
+    prompt: Test prompt to check the model execution.
+    shims: []
+  step2_calculatesum:
+    agent: false
+    code_node_type: stub
+    description: Calculate the sum of two input numbers.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass Step1TestpromptOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for step1_testprompt node outputs.\"\"\"\n    test_output:\
+      \ str = Field(..., description=\"Test output from this step.\")\n\n\nclass Step2CalculatesumOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for step2_calculatesum node outputs.\"\"\"\n    sum:\
+      \ int = Field(..., description=\"The sum of the two input numbers.\")\n\n\n\
+      def step2_calculatesum(step1_testprompt_input: Step1TestpromptOutput, **kwargs)\
+      \ -> Step2CalculatesumOutput:\n    \"\"\"Calculate the sum of two input numbers.\n\
+      \n    Args:\n        step1_testprompt_input: Input from the 'step1_testprompt'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       Step2CalculatesumOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return Step2CalculatesumOutput(\n        sum=0,\n\
+      \    )"
+    name: step2_calculatesum
+    nodes_depended_on:
+    - step1_testprompt
+    nodes_dependent_on: []
+    output_structure:
+    - description: The sum of the two input numbers.
+      key: sum
+      type: int
+    prd:
+      bullets: []
+    prompt: Calculate the sum of two input numbers.
+    shims: []
+  step3_checkcondition:
+    agent: false
+    code_node_type: stub
+    description: Check if the sum is greater than the threshold.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass Step2CalculatesumOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for step2_calculatesum node outputs.\"\"\"\n    sum:\
+      \ int = Field(..., description=\"The sum of the two input numbers.\")\n\n\n\
+      class Step3CheckconditionOutput(BaseModel):\n    \"\"\"Pydantic model for step3_checkcondition\
+      \ node outputs.\"\"\"\n    result: bool = Field(..., description=\"The result\
+      \ of the condition check.\")\n\n\ndef step3_checkcondition(step2_calculatesum_input:\
+      \ Step2CalculatesumOutput, **kwargs) -> Step3CheckconditionOutput:\n    \"\"\
+      \"Check if the sum is greater than the threshold.\n\n    Args:\n        step2_calculatesum_input:\
+      \ Input from the 'step2_calculatesum' node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        Step3CheckconditionOutput: Object containing\
+      \ outputs for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n\
+      \    # Return stub output with placeholder values\n    return Step3CheckconditionOutput(\n\
+      \        result=False,\n    )"
+    name: step3_checkcondition
+    nodes_depended_on:
+    - step2_calculatesum
+    nodes_dependent_on: []
+    output_structure:
+    - description: The result of the condition check.
+      key: result
+      type: bool
+    prd:
+      bullets: []
+    prompt: Check if the sum is greater than the threshold 5.
+    shims: []
+  step4_printresult:
+    agent: false
+    code_node_type: stub
+    description: Print the result of the condition check.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass Step3CheckconditionOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for step3_checkcondition node outputs.\"\"\"\n   \
+      \ result: bool = Field(..., description=\"The result of the condition check.\"\
+      )\n\n\nclass Step4PrintresultOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ step4_printresult node outputs.\"\"\"\n    result: bool = Field(..., description=\"\
+      The result of the condition check.\")\n\n\ndef step4_printresult(step3_checkcondition_input:\
+      \ Step3CheckconditionOutput, **kwargs) -> Step4PrintresultOutput:\n    \"\"\"\
+      Print the result of the condition check.\n\n    Args:\n        step3_checkcondition_input:\
+      \ Input from the 'step3_checkcondition' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        Step4PrintresultOutput: Object\
+      \ containing outputs for this node.\n    \"\"\"\n    # TODO: Implement this\
+      \ function\n\n    # Return stub output with placeholder values\n    return Step4PrintresultOutput(\n\
+      \        result=False,\n    )"
+    name: step4_printresult
+    nodes_depended_on:
+    - step3_checkcondition
+    nodes_dependent_on: []
+    output_structure:
+    - description: The result of the condition check.
+      key: result
+      type: bool
+    prd:
+      bullets: []
+    prompt: Print the result of the condition check.
+    shims: []

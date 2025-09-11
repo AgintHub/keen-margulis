@@ -1,0 +1,88 @@
+dag_type: plain_text
+description: A workflow to build a specific, granular execution plan for a given task
+  or objective. This involves decomposing the task into fundamental steps, ensuring
+  each step is self-contained and executable independently.
+name: build_workflow
+nodes:
+  assign_tasks_to_steps:
+    agent: false
+    description: Map each task to a specific step in the workflow.
+    name: assign_tasks_to_steps
+    nodes_depended_on:
+    - create_task_list
+    nodes_dependent_on:
+    - define_dependencies
+    prompt: Assign each task from the list to a specific step in the workflow. Ensure
+      each step is uniquely named and clearly describes its purpose.
+  create_task_list:
+    agent: false
+    description: Generate a detailed list of tasks based on the decomposition.
+    name: create_task_list
+    nodes_depended_on:
+    - decompose_objective
+    nodes_dependent_on:
+    - assign_tasks_to_steps
+    prompt: Create a comprehensive list of tasks that collectively achieve the objective.
+      Each task should be described in detail and be independently executable.
+  decompose_objective:
+    agent: false
+    description: Break down the objective into smaller, manageable, and independent
+      tasks.
+    name: decompose_objective
+    nodes_depended_on:
+    - define_objective
+    nodes_dependent_on:
+    - create_task_list
+    prompt: Decompose the defined objective into a list of fundamental, self-contained
+      tasks. Each task should achieve a single, well-defined outcome.
+  define_dependencies:
+    agent: false
+    description: Identify and define the dependencies between steps.
+    name: define_dependencies
+    nodes_depended_on:
+    - assign_tasks_to_steps
+    nodes_dependent_on:
+    - generate_workflow_dag
+    prompt: Define the dependencies between steps. Ensure each step depends only on
+      its direct inputs and not on external context or prior steps.
+  define_objective:
+    agent: false
+    description: Identify and clearly state the objective or task to be accomplished.
+    name: define_objective
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - decompose_objective
+    prompt: Define the clear and specific objective or task that needs to be achieved.
+      Ensure it is unambiguous and well-defined.
+  finalize_workflow:
+    agent: false
+    description: Finalize the workflow and prepare it for execution.
+    name: finalize_workflow
+    nodes_depended_on:
+    - validate_workflow
+    nodes_dependent_on: []
+    prompt: Finalize the workflow by ensuring all steps are correctly defined, dependencies
+      are accurately represented, and the DAG is acyclic. Prepare the workflow for
+      execution by generating the final DAG model.
+  generate_workflow_dag:
+    agent: false
+    description: Create a Directed Acyclic Graph (DAG) representation of the workflow.
+    name: generate_workflow_dag
+    nodes_depended_on:
+    - define_dependencies
+    nodes_dependent_on:
+    - validate_workflow
+    prompt: Generate a DAG representation of the workflow, ensuring all nodes are
+      connected and the graph is acyclic. Use the defined dependencies to create the
+      connections.
+  validate_workflow:
+    agent: false
+    description: Verify the correctness and completeness of the workflow.
+    name: validate_workflow
+    nodes_depended_on:
+    - generate_workflow_dag
+    nodes_dependent_on:
+    - finalize_workflow
+    prompt: Validate the workflow by checking that all steps are correctly defined,
+      dependencies are accurate, and the DAG is acyclic. Ensure there are no disconnected
+      components or circular dependencies.

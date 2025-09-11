@@ -1,0 +1,87 @@
+{
+  "adjust_trading_strategy": {
+    "output": {
+      "adjustment_descriptions": "Based on the parent node data, the trading strategy should be adjusted to achieve a better risk-reward ratio. This can be achieved by revisiting the risk management parameters and optimizing the position sizing to mitigate losses and improve overall performance.",
+      "entry_exit_points": "The adjusted entry and exit points should be recalculated to minimize losses and maximize profits. This can be done by analyzing the performance metrics and adjusting the order execution accordingly.",
+      "risk_management_parameters": "The risk-reward ratio should be improved by adjusting the stop-loss and take-profit levels to minimize losses and maximize profits. A risk-reward ratio of 1:2 or higher is recommended.",
+      "position_sizing": "The position sizing should be optimized to maximize profits while minimizing losses. This can be achieved by adjusting the trade sizes based on the risk-reward ratio and performance metrics."
+    },
+    "description": "Adjust trading strategy based on trade performance and market conditions."
+  },
+  "develop_trading_strategy": {
+    "output": {
+      "trading_strategy_description": "Developed trading strategy to capitalize on identified opportunities with a focus on Example opportunity 1 and Example opportunity 2. The strategy aims to capture the potential gains with a feasibility evaluation of High for Example opportunity 1 and Medium for Example opportunity 2, while ensuring proper risk management.",
+      "entry_points": [
+        50.0,
+        75.0
+      ],
+      "exit_points": [
+        60.0,
+        80.0
+      ],
+      "risk_management_parameters": "Target stop-loss at 10% and risk-reward ratio of 2:1 to mitigate potential losses and maximize gains.",
+      "position_sizing": "Position size will be 2% of the total portfolio value to limit exposure and ensure strategic alignment with market conditions."
+    },
+    "description": "Develop a trading strategy based on the identified opportunities and market conditions."
+  },
+  "evaluate_trade_performance": {
+    "output": {
+      "output": "Based on the provided parent node data, the trades have performed as follows:\n\nProfits/Losses: The trades have resulted in a net loss of $X (calculated using the adjusted exit points and adjusted orders). However, the risk-reward ratio of 1.5 (calculated using the risk management parameters) indicates that the trades were poorly executed.\n\nPerformance Metrics:\nThe average drawdown was X (calculated using the adjusted entries and adjusted exit points), while the maximum drawdown was Y (calculated using the adjusted orders).\nThe performance metrics indicate that the trades were not well managed, resulting in a loss of potential profits.\n\nRecommendations:\nTo improve trade performance, it is recommended to revisit the trading strategy and adjust the risk management parameters to achieve a better risk-reward ratio.\nAdditionally, optimizing the position sizing and adjusted orders may help mitigate losses and improve overall performance."
+    },
+    "description": "Evaluate the performance of trades and identify areas for improvement."
+  },
+  "execute_buy_or_sell_orders": {
+    "output": {
+      "order_id": "ORD001",
+      "order_type": "buy",
+      "quantity": 1000,
+      "price": 75.0,
+      "execution_date": "2023-12-01 14:30:00"
+    },
+    "description": "Execute buy or sell orders based on the trading strategy and market conditions."
+  },
+  "identify_trading_opportunities": {
+    "output": {
+      "potential_trading_opportunities": [
+        "Example opportunity 1",
+        "Example opportunity 2"
+      ],
+      "trade_idea_explanations": [
+        "Explanation for opportunity 1",
+        "Explanation for opportunity 2"
+      ],
+      "feasibility_evaluations": [
+        "High",
+        "Medium"
+      ]
+    },
+    "description": "Upgrade the `identify_trading_opportunities` node to improve its efficiency and accuracy."
+  },
+  "monitor_positions": {
+    "output": {
+      "adjusted_entries": [
+        "Entry point 1 adjusted",
+        "Entry point 2 adjusted"
+      ],
+      "adjusted_exit_points": [
+        75.2,
+        75.5,
+        75.8
+      ],
+      "risk_management_parameters": [
+        0.05,
+        0.1
+      ],
+      "position_sizing": [
+        1000.0,
+        2000.0
+      ],
+      "adjusted_orders": [
+        1,
+        0,
+        -1
+      ]
+    },
+    "description": "Monitor positions and adjust trading strategy as needed to manage risk and maximize returns."
+  }
+}

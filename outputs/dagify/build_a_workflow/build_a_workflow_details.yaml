@@ -1,0 +1,100 @@
+dag_type: plain_text
+description: Create a workflow from scratch, with minimal assumptions
+name: build_a_workflow
+nodes:
+  choose_workload_type:
+    agent: false
+    description: Determine the type of system to build (e.g., batch, real-time, cloud-based)
+    name: choose_workload_type
+    nodes_depended_on:
+    - parse_objective
+    nodes_dependent_on: []
+    prompt: Based on the objective, determine the workload type for the system to
+      be built. Consider the volume, frequency, and characteristics of the data or
+      requests the system will receive.
+  craft_business_logic:
+    agent: false
+    description: Develop the core logic of the workflow, including processing and
+      decision-making rules
+    name: craft_business_logic
+    nodes_depended_on:
+    - choose_workload_type
+    - design_input_validation
+    - implement_data_storage
+    nodes_dependent_on: []
+    prompt: Describe the core business logic of the workflow, including processing
+      and decision-making rules. Outline any relevant conditional statements, loops,
+      or branching logic.
+  define_output_processing:
+    agent: false
+    description: Specify the output processing and formatting rules for data retrieval
+      and export
+    name: define_output_processing
+    nodes_depended_on:
+    - craft_business_logic
+    nodes_dependent_on: []
+    prompt: Outline the output processing and formatting rules for data retrieval
+      and export. Specify any export formats, such as CSV, JSON, or XML, and any formatting
+      options, such as date or time formatting.
+  design_input_validation:
+    agent: false
+    description: Define the rules for input validation and sanitization
+    name: design_input_validation
+    nodes_depended_on:
+    - choose_workload_type
+    nodes_dependent_on: []
+    prompt: Outline the input validation and sanitization process, including any data
+      normalization, transformation, or formatting. Specify any error handling or
+      default value logic.
+  establish_audit_trail:
+    agent: false
+    description: Configure auditing and logging to track changes, errors, and successes
+    name: establish_audit_trail
+    nodes_depended_on:
+    - craft_business_logic
+    - define_output_processing
+    nodes_dependent_on: []
+    prompt: Describe the audit logging and tracking process for the workflow. Specify
+      the types of events, errors, and successes to be logged or tracked. Consider
+      any necessary retention periods, access controls, or audit trails.
+  finalize_and_deploy:
+    agent: false
+    description: Publish and deploy the final version of the workflow
+    name: finalize_and_deploy
+    nodes_depended_on:
+    - perform_final_checks
+    nodes_dependent_on: []
+    prompt: Deploy the final version of the workflow, including configuration files,
+      code, and any necessary supporting resources. Ensure that the workflow meets
+      the production requirements and that all necessary documentation is in place.
+  implement_data_storage:
+    agent: false
+    description: Choose a data storage system and configure it according to the workload
+      type
+    name: implement_data_storage
+    nodes_depended_on:
+    - choose_workload_type
+    - design_input_validation
+    nodes_dependent_on: []
+    prompt: Select a data storage system that meets the workload requirements. Configure
+      the system to handle input validation, normalization, and storage. Specify the
+      file system, database schema, or other relevant configuration details.
+  parse_objective:
+    agent: false
+    description: Understand the objective and break it down into tasks
+    name: parse_objective
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Describe the final workflow that will be built. Use clear and concise
+      language. Identify the main tasks that will be executed to achieve the objective.
+  perform_final_checks:
+    agent: false
+    description: Execute a series of checks to ensure the workflow meets the required
+      specifications
+    name: perform_final_checks
+    nodes_depended_on:
+    - establish_audit_trail
+    nodes_dependent_on: []
+    prompt: Perform a series of checks to confirm the workflow meets the required
+      specifications. Test input validation, business logic, data storage, output
+      processing, and audit logging to ensure correctness and robustness.

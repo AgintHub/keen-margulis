@@ -1,0 +1,1076 @@
+dag_type: typed
+description: Generated workflow from UI.
+name: simulate_probability_distributions
+nodes:
+  analyze_convergence_rates:
+    agent: false
+    description: Study convergence to theoretical values across sample sizes
+    name: analyze_convergence_rates
+    nodes_depended_on:
+    - calculate_empirical_moments
+    - calculate_theoretical_moments
+    nodes_dependent_on: []
+    output_structure:
+    - description: Names of the probability distributions analyzed (Normal, Binomial,
+        Poisson, Exponential, Gamma, Beta)
+      key: distribution_names
+      type: List[str]
+    - description: Sample sizes used for convergence analysis (100, 1000, 10000)
+      key: sample_sizes
+      type: List[int]
+    - description: Absolute errors between empirical and theoretical means at sample
+        size 100 for each distribution
+      key: mean_absolute_errors_100
+      type: List[float]
+    - description: Absolute errors between empirical and theoretical means at sample
+        size 1000 for each distribution
+      key: mean_absolute_errors_1000
+      type: List[float]
+    - description: Absolute errors between empirical and theoretical means at sample
+        size 10000 for each distribution
+      key: mean_absolute_errors_10000
+      type: List[float]
+    - description: Rate of convergence for each distribution, calculated as the ratio
+        of error reduction between consecutive sample sizes
+      key: convergence_rates
+      type: List[float]
+    - description: Formatted convergence analysis table showing distribution names,
+        sample sizes, absolute errors, and convergence rates
+      key: convergence_table
+      type: str
+    prompt: Analyze convergence of sample mean to theoretical mean for increasing
+      sample sizes (100, 1000, 10000). Calculate absolute error at each size. Present
+      convergence table.
+  analyze_tail_behavior:
+    agent: false
+    description: Study extreme value behavior of distributions
+    name: analyze_tail_behavior
+    nodes_depended_on:
+    - simulate_normal_distribution
+    - simulate_exponential_distribution
+    - simulate_gamma_distribution
+    - compute_percentiles
+    nodes_dependent_on: []
+    output_structure:
+    - description: Names of distributions analyzed (Normal, Exponential, Gamma)
+      key: distribution_names
+      type: List[str]
+    - description: Empirical P(X > 2σ) for each distribution
+      key: empirical_tail_prob_k2
+      type: List[float]
+    - description: Empirical P(X > 3σ) for each distribution
+      key: empirical_tail_prob_k3
+      type: List[float]
+    - description: Empirical P(X > 4σ) for each distribution
+      key: empirical_tail_prob_k4
+      type: List[float]
+    - description: Theoretical P(X > 2σ) for each distribution
+      key: theoretical_tail_prob_k2
+      type: List[float]
+    - description: Theoretical P(X > 3σ) for each distribution
+      key: theoretical_tail_prob_k3
+      type: List[float]
+    - description: Theoretical P(X > 4σ) for each distribution
+      key: theoretical_tail_prob_k4
+      type: List[float]
+    - description: Excess kurtosis for each distribution
+      key: excess_kurtosis_values
+      type: List[float]
+    - description: Assessment of tail thickness for each distribution (e.g., 'heavy-tailed',
+        'normal-tailed', 'light-tailed')
+      key: tail_thickness_assessment
+      type: List[str]
+    - description: Summary analysis of how excess kurtosis relates to tail thickness
+        across distributions
+      key: kurtosis_impact_summary
+      type: str
+    prompt: Analyze tail behavior by computing P(X > kσ) for k=2,3,4 and comparing
+      to theoretical tail probabilities. Report excess kurtosis impact on tail thickness.
+  calculate_empirical_moments:
+    agent: false
+    description: Compute sample moments from simulated data
+    name: calculate_empirical_moments
+    nodes_depended_on:
+    - simulate_normal_distribution
+    - simulate_exponential_distribution
+    - simulate_binomial_distribution
+    - simulate_poisson_distribution
+    - simulate_gamma_distribution
+    - simulate_beta_distribution
+    nodes_dependent_on: []
+    output_structure:
+    - description: Names of the distributions analyzed (Normal, Exponential, Binomial,
+        Poisson, Gamma, Beta)
+      key: distribution_names
+      type: List[str]
+    - description: Empirical mean values for each distribution in order
+      key: empirical_means
+      type: List[float]
+    - description: Empirical variance values for each distribution in order
+      key: empirical_variances
+      type: List[float]
+    - description: Empirical skewness values for each distribution in order
+      key: empirical_skewness
+      type: List[float]
+    - description: Empirical kurtosis values for each distribution in order
+      key: empirical_kurtosis
+      type: List[float]
+    prompt: Calculate empirical mean, variance, skewness, and kurtosis for each simulated
+      distribution. Use unbiased estimators. Present in same table format as theoretical
+      moments.
+  calculate_entropy_measures:
+    agent: false
+    description: Compute information-theoretic entropy for distributions
+    name: calculate_entropy_measures
+    nodes_depended_on:
+    - generate_histogram_data
+    nodes_dependent_on: []
+    output_structure:
+    - description: Names of the distributions analyzed (normal, exponential, binomial,
+        poisson, gamma, beta)
+      key: distribution_names
+      type: List[str]
+    - description: Shannon entropy values for each distribution in the same order
+        as distribution_names
+      key: entropy_values
+      type: List[float]
+    - description: Overall interpretation of the entropy results explaining their
+        meaning and relative comparison
+      key: interpretation
+      type: str
+    - description: Name of the distribution with the highest entropy
+      key: max_entropy_distribution
+      type: str
+    - description: Name of the distribution with the lowest entropy
+      key: min_entropy_distribution
+      type: str
+    - description: Difference between maximum and minimum entropy values
+      key: entropy_range
+      type: float
+    prompt: 'Calculate Shannon entropy for each distribution using histogram bins
+      as discrete approximation. Formula: H = -Σ p(x)log(p(x)). Report entropy values
+      and interpretation.'
+  calculate_theoretical_moments:
+    agent: false
+    description: Compute theoretical moments for each distribution
+    name: calculate_theoretical_moments
+    nodes_depended_on:
+    - define_distribution_parameters
+    nodes_dependent_on: []
+    output_structure:
+    - description: Names of the distributions (Normal, Binomial, Poisson, Exponential,
+        Gamma, Beta)
+      key: distribution_names
+      type: List[str]
+    - description: Theoretical mean values for each distribution
+      key: theoretical_means
+      type: List[float]
+    - description: Theoretical variance values for each distribution
+      key: theoretical_variances
+      type: List[float]
+    - description: Theoretical skewness values for each distribution
+      key: theoretical_skewness
+      type: List[float]
+    - description: Theoretical kurtosis values for each distribution
+      key: theoretical_kurtosis
+      type: List[float]
+    - description: 'Formatted table showing all theoretical moments: Distribution
+        | Mean | Variance | Skewness | Kurtosis'
+      key: moments_table
+      type: str
+    prompt: 'Calculate theoretical mean, variance, skewness, and kurtosis for each
+      distribution using their analytical formulas. Present as table: Distribution
+      | Mean | Variance | Skewness | Kurtosis.'
+  compile_simulation_report:
+    agent: false
+    description: Produce comprehensive simulation analysis report
+    name: compile_simulation_report
+    nodes_depended_on:
+    - generate_summary_statistics
+    - create_visualization_descriptions
+    - analyze_tail_behavior
+    - calculate_entropy_measures
+    nodes_dependent_on: []
+    output_structure:
+    - description: Complete executive summary text (max 500 words) covering all key
+        findings
+      key: executive_summary
+      type: str
+    - description: Summary of simulation methods and techniques used
+      key: simulation_methodology_summary
+      type: str
+    - description: Summary of key distribution characteristics observed
+      key: distribution_characteristics_summary
+      type: str
+    - description: Summary of statistical validation results and tests performed
+      key: statistical_validation_summary
+      type: str
+    - description: Summary of convergence behavior analysis
+      key: convergence_behavior_summary
+      type: str
+    - description: List of key insights and findings from the simulation
+      key: key_insights
+      type: List[str]
+    - description: List of recommended visualizations based on analysis
+      key: recommended_visualizations
+      type: List[str]
+    - description: Summary of tail behavior analysis findings
+      key: tail_behavior_findings
+      type: str
+    - description: Summary of entropy analysis results and interpretations
+      key: entropy_analysis_findings
+      type: str
+    - description: Total word count of the executive summary
+      key: report_word_count
+      type: int
+    prompt: 'Synthesize all analyses into executive summary covering: simulation methodology,
+      distribution characteristics, statistical validation, convergence behavior,
+      and key insights. Maximum 500 words.'
+  compute_percentiles:
+    agent: false
+    description: Calculate key percentiles for each distribution
+    name: compute_percentiles
+    nodes_depended_on:
+    - simulate_normal_distribution
+    - simulate_exponential_distribution
+    - simulate_binomial_distribution
+    - simulate_poisson_distribution
+    - simulate_gamma_distribution
+    - simulate_beta_distribution
+    nodes_dependent_on: []
+    output_structure:
+    - description: Names of the distributions in order (Normal, Exponential, Binomial,
+        Poisson, Gamma, Beta)
+      key: distribution_names
+      type: List[str]
+    - description: 5th percentile values for each distribution in the same order as
+        distribution_names
+      key: percentile_5th
+      type: List[float]
+    - description: 25th percentile (first quartile) values for each distribution
+      key: percentile_25th
+      type: List[float]
+    - description: 50th percentile (median) values for each distribution
+      key: percentile_50th
+      type: List[float]
+    - description: 75th percentile (third quartile) values for each distribution
+      key: percentile_75th
+      type: List[float]
+    - description: 95th percentile values for each distribution
+      key: percentile_95th
+      type: List[float]
+    - description: Sample size used for each distribution's percentile calculation
+      key: sample_sizes
+      type: List[int]
+    prompt: Compute 5th, 25th, 50th, 75th, and 95th percentiles for each simulated
+      distribution. Present as table with distributions as rows and percentiles as
+      columns.
+  create_probability_tables:
+    agent: false
+    description: Generate probability mass/density function tables
+    name: create_probability_tables
+    nodes_depended_on:
+    - define_distribution_parameters
+    - generate_histogram_data
+    nodes_dependent_on: []
+    output_structure:
+    - description: Names of all distributions (Normal, Binomial, Poisson, Exponential,
+        Gamma, Beta)
+      key: distribution_names
+      type: List[str]
+    - description: X-axis values for all distributions (flattened list)
+      key: x_values
+      type: List[float]
+    - description: PMF values for discrete distributions and PDF values for continuous
+        distributions (flattened list)
+      key: pmf_pdf_values
+      type: List[float]
+    - description: Cumulative probability values corresponding to each x value (flattened
+        list)
+      key: cumulative_probabilities
+      type: List[float]
+    - description: Type of each distribution ('discrete' or 'continuous')
+      key: distribution_types
+      type: List[str]
+    - description: Number of rows in each distribution's table for parsing the flattened
+        lists
+      key: table_sizes
+      type: List[int]
+    prompt: Create PMF tables for discrete distributions (x, P(X=x)) and PDF approximations
+      for continuous distributions at key points. Include cumulative probabilities.
+  create_qq_plot_data:
+    agent: false
+    description: Generate quantile-quantile plot data points
+    name: create_qq_plot_data
+    nodes_depended_on:
+    - simulate_normal_distribution
+    - simulate_exponential_distribution
+    - simulate_gamma_distribution
+    - simulate_beta_distribution
+    - calculate_theoretical_moments
+    nodes_dependent_on: []
+    output_structure:
+    - description: 100 evenly spaced probability points between 0 and 1 used for quantile
+        calculation
+      key: probability_points
+      type: List[float]
+    - description: Theoretical quantiles for normal distribution at each probability
+        point
+      key: normal_theoretical_quantiles
+      type: List[float]
+    - description: Empirical quantiles from simulated normal distribution samples
+      key: normal_empirical_quantiles
+      type: List[float]
+    - description: Theoretical quantiles for exponential distribution at each probability
+        point
+      key: exponential_theoretical_quantiles
+      type: List[float]
+    - description: Empirical quantiles from simulated exponential distribution samples
+      key: exponential_empirical_quantiles
+      type: List[float]
+    - description: Theoretical quantiles for gamma distribution at each probability
+        point
+      key: gamma_theoretical_quantiles
+      type: List[float]
+    - description: Empirical quantiles from simulated gamma distribution samples
+      key: gamma_empirical_quantiles
+      type: List[float]
+    - description: Theoretical quantiles for beta distribution at each probability
+        point
+      key: beta_theoretical_quantiles
+      type: List[float]
+    - description: Empirical quantiles from simulated beta distribution samples
+      key: beta_empirical_quantiles
+      type: List[float]
+    prompt: Generate Q-Q plot coordinates comparing empirical quantiles against theoretical
+      quantiles for continuous distributions. Use 100 evenly spaced probability points.
+      Output as (theoretical, empirical) pairs.
+  create_visualization_descriptions:
+    agent: false
+    description: Generate detailed descriptions for visualizing results
+    name: create_visualization_descriptions
+    nodes_depended_on:
+    - generate_histogram_data
+    - create_qq_plot_data
+    - analyze_convergence_rates
+    nodes_dependent_on: []
+    output_structure:
+    - description: Description of overlaid histogram with theoretical PDF visualization
+      key: histogram_pdf_description
+      type: str
+    - description: Description of quantile-quantile plot visualization
+      key: qq_plot_description
+      type: str
+    - description: Description of convergence rate plot visualization
+      key: convergence_plot_description
+      type: str
+    - description: Description of correlation heatmap visualization
+      key: correlation_heatmap_description
+      type: str
+    - description: Description of mixture distribution visualization
+      key: mixture_distribution_description
+      type: str
+    - description: Description of tail probability plot visualization
+      key: tail_probability_plot_description
+      type: str
+    - description: List of titles for each visualization
+      key: visualization_titles
+      type: List[str]
+    - description: List of axis label pairs (x,y) for each visualization
+      key: axis_labels
+      type: List[str]
+    - description: List of recommended color schemes for each visualization
+      key: color_schemes
+      type: List[str]
+    - description: List of key insights to highlight in each visualization
+      key: key_insights
+      type: List[str]
+    prompt: 'Describe 6 key visualizations: overlaid histograms with theoretical PDFs,
+      Q-Q plots, convergence plots, correlation heatmap, mixture distribution, and
+      tail probability plots.'
+  define_distribution_parameters:
+    agent: false
+    description: Establish the core parameters for multiple probability distributions
+      to simulate
+    name: define_distribution_parameters
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of distribution names (Normal, Binomial, Poisson, Exponential,
+        Gamma, Beta)
+      key: distribution_names
+      type: List[str]
+    - description: List of parameter names for each distribution (e.g., 'μ, σ' for
+        Normal, 'n, p' for Binomial)
+      key: distribution_parameters
+      type: List[str]
+    - description: List of parameter values for each distribution formatted as strings
+        (e.g., '0, 1' for Normal)
+      key: parameter_values
+      type: List[str]
+    - description: Mean parameter (μ) for the normal distribution
+      key: normal_mu
+      type: float
+    - description: Standard deviation parameter (σ) for the normal distribution
+      key: normal_sigma
+      type: float
+    - description: Number of trials parameter (n) for the binomial distribution
+      key: binomial_n
+      type: int
+    - description: Success probability parameter (p) for the binomial distribution
+      key: binomial_p
+      type: float
+    - description: Rate parameter (λ) for the Poisson distribution
+      key: poisson_lambda
+      type: float
+    - description: Rate parameter (λ) for the exponential distribution
+      key: exponential_lambda
+      type: float
+    - description: Shape parameter (α) for the gamma distribution
+      key: gamma_alpha
+      type: float
+    - description: Rate parameter (β) for the gamma distribution
+      key: gamma_beta
+      type: float
+    - description: First shape parameter (α) for the beta distribution
+      key: beta_alpha
+      type: float
+    - description: Second shape parameter (β) for the beta distribution
+      key: beta_beta
+      type: float
+    prompt: 'Define parameters for 6 different probability distributions: Normal (μ,
+      σ), Binomial (n, p), Poisson (λ), Exponential (λ), Gamma (α, β), and Beta (α,
+      β). Present as a table with columns: Distribution | Parameters | Values.'
+  generate_correlation_matrix:
+    agent: false
+    description: Create correlation matrix for multivariate analysis
+    name: generate_correlation_matrix
+    nodes_depended_on:
+    - simulate_normal_distribution
+    nodes_dependent_on: []
+    output_structure:
+    - description: Flattened 3x3 correlation matrix values in row-major order (9 values
+        total)
+      key: correlation_matrix_values
+      type: List[float]
+    - description: Number of rows in the correlation matrix (should be 3)
+      key: correlation_matrix_rows
+      type: int
+    - description: Number of columns in the correlation matrix (should be 3)
+      key: correlation_matrix_cols
+      type: int
+    - description: Flattened lower triangular Cholesky decomposition matrix values
+      key: cholesky_decomposition_values
+      type: List[float]
+    - description: First correlated normal variable samples
+      key: correlated_variable_1
+      type: List[float]
+    - description: Second correlated normal variable samples
+      key: correlated_variable_2
+      type: List[float]
+    - description: Third correlated normal variable samples
+      key: correlated_variable_3
+      type: List[float]
+    - description: Sample correlation between variables 1 and 2
+      key: sample_correlation_12
+      type: float
+    - description: Sample correlation between variables 1 and 3
+      key: sample_correlation_13
+      type: float
+    - description: Sample correlation between variables 2 and 3
+      key: sample_correlation_23
+      type: float
+    - description: Number of samples generated for each correlated variable
+      key: sample_size
+      type: int
+    prompt: Generate a 3x3 correlation matrix and use it to create correlated normal
+      variables via Cholesky decomposition. Report the correlation matrix and sample
+      correlations.
+  generate_histogram_data:
+    agent: false
+    description: Create binned frequency data for histogram visualization
+    name: generate_histogram_data
+    nodes_depended_on:
+    - simulate_normal_distribution
+    - simulate_exponential_distribution
+    - simulate_binomial_distribution
+    - simulate_poisson_distribution
+    - simulate_gamma_distribution
+    - simulate_beta_distribution
+    nodes_dependent_on: []
+    output_structure:
+    - description: Names of distributions in order (Normal, Exponential, Binomial,
+        Poisson, Gamma, Beta)
+      key: distribution_names
+      type: List[str]
+    - description: Histogram bin edges for normal distribution (51 values for 50 bins)
+      key: bin_edges_normal
+      type: List[float]
+    - description: Frequency counts for each bin in normal distribution histogram
+        (50 values)
+      key: bin_counts_normal
+      type: List[int]
+    - description: Histogram bin edges for exponential distribution (51 values for
+        50 bins)
+      key: bin_edges_exponential
+      type: List[float]
+    - description: Frequency counts for each bin in exponential distribution histogram
+        (50 values)
+      key: bin_counts_exponential
+      type: List[int]
+    - description: Natural bin edges for binomial distribution based on discrete values
+      key: bin_edges_binomial
+      type: List[float]
+    - description: Frequency counts for each value in binomial distribution
+      key: bin_counts_binomial
+      type: List[int]
+    - description: Natural bin edges for Poisson distribution based on discrete values
+      key: bin_edges_poisson
+      type: List[float]
+    - description: Frequency counts for each value in Poisson distribution
+      key: bin_counts_poisson
+      type: List[int]
+    - description: Histogram bin edges for gamma distribution (51 values for 50 bins)
+      key: bin_edges_gamma
+      type: List[float]
+    - description: Frequency counts for each bin in gamma distribution histogram (50
+        values)
+      key: bin_counts_gamma
+      type: List[int]
+    - description: Histogram bin edges for beta distribution (51 values for 50 bins)
+      key: bin_edges_beta
+      type: List[float]
+    - description: Frequency counts for each bin in beta distribution histogram (50
+        values)
+      key: bin_counts_beta
+      type: List[int]
+    - description: Bin widths for each distribution in same order as distribution_names
+      key: bin_widths
+      type: List[float]
+    prompt: Create histogram bin edges and frequencies for each distribution. Use
+      50 bins for continuous distributions, natural bins for discrete. Output bin
+      edges and counts.
+  generate_summary_statistics:
+    agent: false
+    description: Compile comprehensive statistical summary
+    name: generate_summary_statistics
+    nodes_depended_on:
+    - calculate_empirical_moments
+    - calculate_theoretical_moments
+    - compute_percentiles
+    - perform_ks_test
+    - perform_chi_square_test
+    nodes_dependent_on: []
+    output_structure:
+    - description: Names of all distributions analyzed (Normal, Binomial, Poisson,
+        Exponential, Gamma, Beta)
+      key: distribution_names
+      type: List[str]
+    - description: Theoretical mean values for each distribution
+      key: theoretical_means
+      type: List[float]
+    - description: Empirical mean values calculated from simulated data
+      key: empirical_means
+      type: List[float]
+    - description: Relative errors between theoretical and empirical means as percentages
+      key: mean_relative_errors
+      type: List[float]
+    - description: Theoretical variance values for each distribution
+      key: theoretical_variances
+      type: List[float]
+    - description: Empirical variance values calculated from simulated data
+      key: empirical_variances
+      type: List[float]
+    - description: Relative errors between theoretical and empirical variances as
+        percentages
+      key: variance_relative_errors
+      type: List[float]
+    - description: Theoretical skewness values for each distribution
+      key: theoretical_skewness
+      type: List[float]
+    - description: Empirical skewness values calculated from simulated data
+      key: empirical_skewness
+      type: List[float]
+    - description: Theoretical kurtosis values for each distribution
+      key: theoretical_kurtosis
+      type: List[float]
+    - description: Empirical kurtosis values calculated from simulated data
+      key: empirical_kurtosis
+      type: List[float]
+    - description: 5th percentile values for each distribution
+      key: percentile_5th
+      type: List[float]
+    - description: 25th percentile values for each distribution
+      key: percentile_25th
+      type: List[float]
+    - description: 50th percentile (median) values for each distribution
+      key: percentile_50th
+      type: List[float]
+    - description: 75th percentile values for each distribution
+      key: percentile_75th
+      type: List[float]
+    - description: 95th percentile values for each distribution
+      key: percentile_95th
+      type: List[float]
+    - description: Kolmogorov-Smirnov D-statistics for continuous distributions
+      key: ks_test_statistics
+      type: List[float]
+    - description: P-values from Kolmogorov-Smirnov tests
+      key: ks_test_pvalues
+      type: List[float]
+    - description: Whether each continuous distribution passed K-S test at α=0.05
+      key: ks_test_passed
+      type: List[bool]
+    - description: Chi-square test statistics for discrete and binned distributions
+      key: chi_square_statistics
+      type: List[float]
+    - description: P-values from chi-square tests
+      key: chi_square_pvalues
+      type: List[float]
+    - description: Whether each distribution passed chi-square test at α=0.05
+      key: chi_square_test_passed
+      type: List[bool]
+    - description: Formatted text representation of the complete summary table
+      key: summary_table_text
+      type: str
+    prompt: Create summary table combining theoretical vs empirical moments, percentiles,
+      and goodness-of-fit results. Include relative errors and test conclusions.
+  generate_uniform_random_numbers:
+    agent: false
+    description: Create base uniform random numbers for transformation methods
+    name: generate_uniform_random_numbers
+    nodes_depended_on:
+    - set_simulation_config
+    nodes_dependent_on: []
+    output_structure:
+    - description: Number of rows in the uniform random number matrix
+      key: matrix_rows
+      type: int
+    - description: Number of columns in the uniform random number matrix
+      key: matrix_columns
+      type: int
+    - description: Total count of uniform random numbers generated
+      key: total_numbers_generated
+      type: int
+    - description: The random seed value used for generating the numbers
+      key: random_seed_used
+      type: int
+    - description: First 10 uniform random values for verification
+      key: first_ten_values
+      type: List[float]
+    - description: Minimum value in the generated uniform random numbers
+      key: min_value
+      type: float
+    - description: Maximum value in the generated uniform random numbers
+      key: max_value
+      type: float
+    - description: Mean of all generated uniform random numbers
+      key: mean_value
+      type: float
+    prompt: Generate a matrix of uniform random numbers [0,1] using the specified
+      seed and sample size. Report dimensions and first 10 values for verification.
+  perform_chi_square_test:
+    agent: false
+    description: Execute chi-square goodness-of-fit tests
+    name: perform_chi_square_test
+    nodes_depended_on:
+    - simulate_binomial_distribution
+    - simulate_poisson_distribution
+    - generate_histogram_data
+    nodes_dependent_on: []
+    output_structure:
+    - description: Names of distributions being tested (e.g., 'binomial', 'poisson',
+        'normal_binned')
+      key: distribution_names
+      type: List[str]
+    - description: Observed frequency counts for each bin/category across all distributions
+      key: observed_frequencies
+      type: List[int]
+    - description: Expected frequency counts under the null hypothesis for each bin/category
+      key: expected_frequencies
+      type: List[float]
+    - description: Chi-square test statistic values for each distribution tested
+      key: chi_square_statistics
+      type: List[float]
+    - description: Degrees of freedom for each chi-square test
+      key: degrees_of_freedom
+      type: List[int]
+    - description: P-values for each chi-square test
+      key: p_values
+      type: List[float]
+    - description: Whether each distribution passed the goodness-of-fit test at significance
+        level 0.05
+      key: test_passed
+      type: List[bool]
+    - description: Labels or ranges for each bin/category used in the tests
+      key: bin_labels
+      type: List[str]
+    prompt: Perform chi-square test for discrete distributions and binned continuous
+      distributions. Calculate expected frequencies, chi-square statistic, degrees
+      of freedom, and p-value.
+  perform_ks_test:
+    agent: false
+    description: Execute Kolmogorov-Smirnov goodness-of-fit tests
+    name: perform_ks_test
+    nodes_depended_on:
+    - simulate_normal_distribution
+    - simulate_exponential_distribution
+    - simulate_gamma_distribution
+    - simulate_beta_distribution
+    nodes_dependent_on: []
+    output_structure:
+    - description: Names of the distributions tested (Normal, Exponential, Gamma,
+        Beta)
+      key: distribution_names
+      type: List[str]
+    - description: K-S D-statistics for each distribution, measuring maximum distance
+        between empirical and theoretical CDFs
+      key: d_statistics
+      type: List[float]
+    - description: P-values from K-S tests for each distribution
+      key: p_values
+      type: List[float]
+    - description: Whether each distribution passed the K-S test at α=0.05 significance
+        level
+      key: test_passed
+      type: List[bool]
+    - description: Number of samples tested for each distribution
+      key: sample_sizes
+      type: List[int]
+    - description: Critical values for K-S test at α=0.05 for each distribution's
+        sample size
+      key: critical_values
+      type: List[float]
+    prompt: Perform K-S test comparing simulated samples to theoretical distributions.
+      Calculate D-statistic and p-value for each continuous distribution. Report test
+      statistics and pass/fail at α=0.05.
+  perform_monte_carlo_integration:
+    agent: false
+    description: Use simulated distributions for Monte Carlo integration
+    name: perform_monte_carlo_integration
+    nodes_depended_on:
+    - simulate_normal_distribution
+    - simulate_exponential_distribution
+    nodes_dependent_on: []
+    output_structure:
+    - description: Monte Carlo estimate of E[X²] for normal distribution
+      key: normal_x_squared_estimate
+      type: float
+    - description: Theoretical value of E[X²] for normal distribution
+      key: normal_x_squared_theoretical
+      type: float
+    - description: Standard error of E[X²] estimate for normal distribution
+      key: normal_x_squared_standard_error
+      type: float
+    - description: Monte Carlo estimate of E[e^X] for normal distribution
+      key: normal_exp_x_estimate
+      type: float
+    - description: Theoretical value of E[e^X] for normal distribution
+      key: normal_exp_x_theoretical
+      type: float
+    - description: Standard error of E[e^X] estimate for normal distribution
+      key: normal_exp_x_standard_error
+      type: float
+    - description: Monte Carlo estimate of E[X²] for exponential distribution
+      key: exponential_x_squared_estimate
+      type: float
+    - description: Theoretical value of E[X²] for exponential distribution
+      key: exponential_x_squared_theoretical
+      type: float
+    - description: Standard error of E[X²] estimate for exponential distribution
+      key: exponential_x_squared_standard_error
+      type: float
+    - description: Monte Carlo estimate of E[e^X] for exponential distribution
+      key: exponential_exp_x_estimate
+      type: float
+    - description: Theoretical value of E[e^X] for exponential distribution
+      key: exponential_exp_x_theoretical
+      type: float
+    - description: Standard error of E[e^X] estimate for exponential distribution
+      key: exponential_exp_x_standard_error
+      type: float
+    - description: Number of samples used for Monte Carlo integration
+      key: sample_size_used
+      type: int
+    prompt: Demonstrate Monte Carlo integration by estimating E[X²] and E[e^X] for
+      normal and exponential distributions. Compare to theoretical values. Report
+      estimates and standard errors.
+  set_simulation_config:
+    agent: false
+    description: Specify the simulation settings including sample sizes and random
+      seeds
+    name: set_simulation_config
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    output_structure:
+    - description: Number of samples to generate per distribution
+      key: sample_size
+      type: int
+    - description: Number of simulation runs to perform
+      key: simulation_runs
+      type: int
+    - description: Random seed value for reproducibility
+      key: random_seed
+      type: int
+    - description: Number of decimal places for precision in calculations
+      key: precision_level
+      type: int
+    - description: List of configuration parameter names
+      key: config_keys
+      type: List[str]
+    - description: List of configuration parameter values as strings
+      key: config_values
+      type: List[str]
+    prompt: 'Create simulation configuration: sample size per distribution (e.g.,
+      10000), number of simulation runs (e.g., 100), random seed value, and precision
+      level (decimal places). Format as key-value pairs.'
+  simulate_beta_distribution:
+    agent: false
+    description: Generate beta distribution samples from gamma variates
+    name: simulate_beta_distribution
+    nodes_depended_on:
+    - define_distribution_parameters
+    - simulate_gamma_distribution
+    nodes_dependent_on: []
+    output_structure:
+    - description: Array of beta distribution samples generated from gamma variates
+      key: samples
+      type: List[float]
+    - description: Mean of the generated beta distribution samples
+      key: sample_mean
+      type: float
+    - description: Variance of the generated beta distribution samples
+      key: sample_variance
+      type: float
+    - description: Minimum value in the beta distribution samples
+      key: min_value
+      type: float
+    - description: Maximum value in the beta distribution samples
+      key: max_value
+      type: float
+    - description: Alpha (shape) parameter used for the beta distribution
+      key: alpha_parameter
+      type: float
+    - description: Beta (shape) parameter used for the beta distribution
+      key: beta_parameter
+      type: float
+    - description: Number of samples generated
+      key: sample_size
+      type: int
+    prompt: 'Generate beta distribution samples using the relationship: X/(X+Y) where
+      X~Gamma(α,1) and Y~Gamma(β,1). Report sample mean, variance, and min/max values.'
+  simulate_binomial_distribution:
+    agent: false
+    description: Generate binomial distribution samples through Bernoulli trials
+    name: simulate_binomial_distribution
+    nodes_depended_on:
+    - define_distribution_parameters
+    - generate_uniform_random_numbers
+    nodes_dependent_on: []
+    output_structure:
+    - description: Array of binomial distribution samples (number of successes in
+        n trials)
+      key: binomial_samples
+      type: List[int]
+    - description: Calculated mean of the binomial samples
+      key: sample_mean
+      type: float
+    - description: Calculated variance of the binomial samples
+      key: sample_variance
+      type: float
+    - description: Unique outcome values (0 to n) that occurred in the samples
+      key: outcome_values
+      type: List[int]
+    - description: Frequency count for each outcome value
+      key: outcome_frequencies
+      type: List[int]
+    - description: Number of trials parameter used for the binomial distribution
+      key: n_parameter
+      type: int
+    - description: Success probability parameter used for the binomial distribution
+      key: p_parameter
+      type: float
+    - description: Total number of binomial samples generated
+      key: sample_size
+      type: int
+    prompt: Simulate binomial distribution by conducting n Bernoulli trials with probability
+      p for each sample. Count successes per trial set. Report mean, variance, and
+      distribution of outcomes.
+  simulate_exponential_distribution:
+    agent: false
+    description: Generate exponential distribution samples using inverse transform
+      method
+    name: simulate_exponential_distribution
+    nodes_depended_on:
+    - define_distribution_parameters
+    - generate_uniform_random_numbers
+    nodes_dependent_on: []
+    output_structure:
+    - description: Generated exponential distribution samples using inverse transform
+        method
+      key: exponential_samples
+      type: List[float]
+    - description: The rate parameter λ used for the exponential distribution
+      key: rate_lambda
+      type: float
+    - description: Mean of the generated exponential samples
+      key: sample_mean
+      type: float
+    - description: Variance of the generated exponential samples
+      key: sample_variance
+      type: float
+    - description: First 5 values from the generated samples for verification
+      key: first_five_values
+      type: List[float]
+    - description: Number of samples generated
+      key: sample_size
+      type: int
+    - description: Minimum value in the generated samples
+      key: min_value
+      type: float
+    - description: Maximum value in the generated samples
+      key: max_value
+      type: float
+    prompt: 'Use inverse transform method on uniform random numbers to generate exponential
+      distribution samples with rate λ. Formula: X = -ln(U)/λ. Report sample mean
+      and first 5 values.'
+  simulate_gamma_distribution:
+    agent: false
+    description: Generate gamma distribution samples using acceptance-rejection method
+    name: simulate_gamma_distribution
+    nodes_depended_on:
+    - define_distribution_parameters
+    - generate_uniform_random_numbers
+    nodes_dependent_on: []
+    output_structure:
+    - description: Generated samples from the gamma distribution
+      key: gamma_samples
+      type: List[float]
+    - description: Empirical mean of the generated gamma samples
+      key: sample_mean
+      type: float
+    - description: Empirical variance of the generated gamma samples
+      key: sample_variance
+      type: float
+    - description: Proportion of accepted samples in the acceptance-rejection algorithm
+      key: acceptance_rate
+      type: float
+    - description: Shape parameter (α) used for the gamma distribution
+      key: shape_parameter
+      type: float
+    - description: Rate parameter (β) used for the gamma distribution
+      key: rate_parameter
+      type: float
+    - description: Total number of gamma distribution samples generated
+      key: num_samples_generated
+      type: int
+    - description: Total number of proposals made in the acceptance-rejection algorithm
+      key: num_proposals_made
+      type: int
+    prompt: Implement acceptance-rejection method to generate gamma distribution samples
+      with shape α and rate β. Report sample mean, variance, and acceptance rate.
+  simulate_mixture_distribution:
+    agent: false
+    description: Create mixture distribution from component distributions
+    name: simulate_mixture_distribution
+    nodes_depended_on:
+    - simulate_normal_distribution
+    - simulate_exponential_distribution
+    nodes_dependent_on: []
+    output_structure:
+    - description: Generated samples from the mixture distribution
+      key: mixture_samples
+      type: List[float]
+    - description: Component assignment for each sample (0 for Normal, 1 for Exponential)
+      key: component_assignments
+      type: List[int]
+    - description: Sample mean of the mixture distribution
+      key: mixture_mean
+      type: float
+    - description: Sample variance of the mixture distribution
+      key: mixture_variance
+      type: float
+    - description: Actual proportion of samples from normal component
+      key: normal_proportion
+      type: float
+    - description: Actual proportion of samples from exponential component
+      key: exponential_proportion
+      type: float
+    - description: Bimodality coefficient (values > 0.555 suggest bimodality)
+      key: bimodality_coefficient
+      type: float
+    - description: Hartigan's dip statistic for testing unimodality
+      key: hartigans_dip_statistic
+      type: float
+    - description: Estimated number of modes in the distribution
+      key: number_of_modes
+      type: int
+    - description: First five samples for verification
+      key: first_five_samples
+      type: List[float]
+    prompt: 'Create a mixture distribution: 70% Normal(μ₁, σ₁) + 30% Exponential(λ).
+      Generate samples by first selecting component then sampling. Report bimodality
+      measures.'
+  simulate_normal_distribution:
+    agent: false
+    description: Generate normal distribution samples using Box-Muller transformation
+    name: simulate_normal_distribution
+    nodes_depended_on:
+    - define_distribution_parameters
+    - generate_uniform_random_numbers
+    nodes_dependent_on: []
+    output_structure:
+    - description: The generated normal distribution samples
+      key: samples
+      type: List[float]
+    - description: The calculated mean of the generated samples
+      key: sample_mean
+      type: float
+    - description: The calculated standard deviation of the generated samples
+      key: sample_std_dev
+      type: float
+    - description: The first 5 values from the generated samples for verification
+      key: first_five_values
+      type: List[float]
+    - description: The mean parameter μ used for generation
+      key: mu_parameter
+      type: float
+    - description: The standard deviation parameter σ used for generation
+      key: sigma_parameter
+      type: float
+    - description: The number of samples generated
+      key: sample_size
+      type: int
+    prompt: Apply Box-Muller transformation to uniform random numbers to generate
+      normal distribution samples with specified μ and σ. Output sample mean, std
+      dev, and first 5 values.
+  simulate_poisson_distribution:
+    agent: false
+    description: Generate Poisson distribution samples using inverse transform algorithm
+    name: simulate_poisson_distribution
+    nodes_depended_on:
+    - define_distribution_parameters
+    - generate_uniform_random_numbers
+    nodes_dependent_on: []
+    output_structure:
+    - description: Generated Poisson distribution samples
+      key: samples
+      type: List[int]
+    - description: Mean of the generated samples
+      key: sample_mean
+      type: float
+    - description: Rate parameter λ used for generation
+      key: lambda_parameter
+      type: float
+    - description: Unique values that appear in the samples
+      key: frequency_values
+      type: List[int]
+    - description: Count of occurrences for each unique value
+      key: frequency_counts
+      type: List[int]
+    - description: Number of samples generated
+      key: sample_size
+      type: int
+    prompt: Generate Poisson distribution samples with rate λ using the inverse transform
+      algorithm. For each sample, accumulate probabilities until exceeding uniform
+      random value. Report mean and frequency table.

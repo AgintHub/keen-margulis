@@ -1,0 +1,74 @@
+dag_type: plain_text
+description: A workflow for creating a complex workflow from elemental tasks
+name: create_complex_workflow
+nodes:
+  create_task_prompts:
+    agent: false
+    description: Craft detailed prompts for each task
+    name: create_task_prompts
+    nodes_depended_on:
+    - define_task_dependencies
+    nodes_dependent_on: []
+    prompt: Write a precise prompt for each task, focusing on its singular objective.
+      Ensure prompts are executable and unambiguous.
+  decompose_objective:
+    agent: false
+    description: Break down the objective into fundamental operations
+    name: decompose_objective
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: List the basic tasks required to achieve the objective of creating a complex
+      workflow. Focus on high-level categories.
+  define_task_dependencies:
+    agent: false
+    description: Determine the dependencies between tasks
+    name: define_task_dependencies
+    nodes_depended_on:
+    - decompose_objective
+    - identify_concurrent_tasks
+    nodes_dependent_on: []
+    prompt: For each task, list the specific tasks it depends on. Use task names only.
+  design_workflow_dag:
+    agent: false
+    description: Construct a Directed Acyclic Graph (DAG) of the workflow
+    name: design_workflow_dag
+    nodes_depended_on:
+    - create_task_prompts
+    nodes_dependent_on: []
+    prompt: Using the task dependencies and prompts, design a workflow DAG. Specify
+      node connections and data flows.
+  finalize_workflow_spec:
+    agent: false
+    description: Compile the final workflow specification
+    name: finalize_workflow_spec
+    nodes_depended_on:
+    - refine_workflow_concurrency
+    nodes_dependent_on: []
+    prompt: Synthesize all prior outputs into a comprehensive workflow specification,
+      including tasks, dependencies, and prompts.
+  identify_concurrent_tasks:
+    agent: false
+    description: Identify tasks that can be executed concurrently
+    name: identify_concurrent_tasks
+    nodes_depended_on:
+    - decompose_objective
+    nodes_dependent_on: []
+    prompt: From the list of tasks, identify which ones can be performed simultaneously.
+      Group them by category.
+  refine_workflow_concurrency:
+    agent: false
+    description: Optimize the workflow for maximum concurrency
+    name: refine_workflow_concurrency
+    nodes_depended_on:
+    - validate_workflow_acyclicity
+    nodes_dependent_on: []
+    prompt: Review the workflow DAG and suggest improvements to maximize concurrent
+      task execution.
+  validate_workflow_acyclicity:
+    agent: false
+    description: Verify that the workflow DAG is acyclic
+    name: validate_workflow_acyclicity
+    nodes_depended_on:
+    - design_workflow_dag
+    nodes_dependent_on: []
+    prompt: Check the workflow DAG for any cycles. Report any issues found.

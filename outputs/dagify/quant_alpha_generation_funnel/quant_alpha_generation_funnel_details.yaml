@@ -1,0 +1,207 @@
+dag_type: plain_text
+description: Iterative thought process for developing novel quantitative trading strategies
+  through exploration of alpha sources, hypothesis stress-testing, and systematic
+  refinement
+name: quant_alpha_generation_funnel
+nodes:
+  analyze_behavioral_biases:
+    agent: false
+    description: Exploit cognitive biases through quantitative models
+    name: analyze_behavioral_biases
+    nodes_depended_on:
+    - categorize_alpha_sources
+    nodes_dependent_on: []
+    prompt: Identify persistent behavioral patterns (overreaction to news, anchoring
+      bias, herding) that create predictable price distortions
+  assess_implementation_shortfall:
+    agent: false
+    description: Model realistic performance expectations
+    name: assess_implementation_shortfall
+    nodes_depended_on:
+    - model_transaction_costs
+    - optimize_portfolio_weights
+    nodes_dependent_on: []
+    prompt: Quantify difference between theoretical and achievable returns through
+      detailed execution simulation
+  audit_data_availability:
+    agent: false
+    description: Evaluate data infrastructure requirements
+    name: audit_data_availability
+    nodes_depended_on:
+    - define_problem_space
+    nodes_dependent_on: []
+    prompt: Assess accessibility and cleanliness of required market data, alternative
+      data sources, and corporate actions data
+  backtest_correlation_clustering:
+    agent: false
+    description: Ensure strategy originality and pure alpha capture
+    name: backtest_correlation_clustering
+    nodes_depended_on:
+    - simulate_out_of_sample
+    nodes_dependent_on: []
+    prompt: Analyze strategy return profile similarity to common risk factors and
+      peer strategies
+  categorize_alpha_sources:
+    agent: false
+    description: Classify fundamental strategy archetypes
+    name: categorize_alpha_sources
+    nodes_depended_on:
+    - conduct_meta_analysis
+    - enumerate_known_anomalies
+    nodes_dependent_on: []
+    prompt: 'Create taxonomy of potential alpha generation mechanisms: factor-based,
+      microstructure, behavioral, event-driven, macro regimes'
+  conduct_meta_analysis:
+    agent: false
+    description: Map existing literature and industry knowledge
+    name: conduct_meta_analysis
+    nodes_depended_on:
+    - define_problem_space
+    nodes_dependent_on: []
+    prompt: Catalog existing academic papers, practitioner research, and known anomalies
+      within the defined problem space
+  define_problem_space:
+    agent: false
+    description: Establish clear boundaries for strategy exploration
+    name: define_problem_space
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Precisely delineate the target market universe including asset classes,
+      geographical focus, and time horizons. Clarify any explicit constraints or preferences
+      provided by the user.
+  design_risk_management_rules:
+    agent: false
+    description: Implement institutional-grade risk protocols
+    name: design_risk_management_rules
+    nodes_depended_on:
+    - stress_test_hypotheses
+    - model_risk_factors
+    nodes_dependent_on: []
+    prompt: Create dynamic position sizing algorithm with volatility targeting, drawdown
+      controls, and regime-adaptive risk limits
+  enumerate_known_anomalies:
+    agent: false
+    description: Identify established market irregularities
+    name: enumerate_known_anomalies
+    nodes_depended_on:
+    - define_problem_space
+    nodes_dependent_on: []
+    prompt: List empirically validated market anomalies (calendar effects, momentum
+      variants, liquidity premia) applicable to chosen universe
+  evaluate_economic_regimes:
+    agent: false
+    description: Model regime-dependent strategy behavior
+    name: evaluate_economic_regimes
+    nodes_depended_on:
+    - define_problem_space
+    nodes_dependent_on: []
+    prompt: Characterize distinct macroeconomic environments and their probabilistic
+      transitions
+  explore_factor_paradigms:
+    agent: false
+    description: Engineer differentiated predictive factors
+    name: explore_factor_paradigms
+    nodes_depended_on:
+    - categorize_alpha_sources
+    nodes_dependent_on: []
+    prompt: Develop novel factor combinations using alternative data sources and non-linear
+      interactions between traditional factors
+  final_strategy_validation:
+    agent: false
+    description: Conduct pre-deployment sanity check
+    name: final_strategy_validation
+    nodes_depended_on:
+    - synthesize_strategy_blueprint
+    nodes_dependent_on: []
+    prompt: Perform adversarial review of strategy assumptions, data dependencies,
+      and forward-looking applicability
+  generate_alpha_vectors:
+    agent: false
+    description: Formalize hypotheses as testable signals
+    name: generate_alpha_vectors
+    nodes_depended_on:
+    - explore_factor_paradigms
+    - model_microstructure_dynamics
+    - analyze_behavioral_biases
+    - audit_data_availability
+    nodes_dependent_on: []
+    prompt: Translate conceptual alpha sources into mathematically defined trading
+      signals with explicit parameterization
+  identify_crowding_risks:
+    agent: false
+    description: Quantify strategy originality and crowding exposure
+    name: identify_crowding_risks
+    nodes_depended_on:
+    - generate_alpha_vectors
+    - conduct_meta_analysis
+    nodes_dependent_on: []
+    prompt: Assess strategy capacity and similarity to widely known approaches through
+      academic citations and hedge fund filings analysis
+  model_microstructure_dynamics:
+    agent: false
+    description: Develop microstructure-based signals
+    name: model_microstructure_dynamics
+    nodes_depended_on:
+    - categorize_alpha_sources
+    nodes_dependent_on: []
+    prompt: Design latency-aware signals from order book dynamics, trade imprinting,
+      and market regime detection
+  model_risk_factors:
+    agent: false
+    description: Establish risk management framework foundations
+    name: model_risk_factors
+    nodes_depended_on:
+    - define_problem_space
+    nodes_dependent_on: []
+    prompt: Define universe-specific risk exposures requiring neutralization (sector,
+      style, liquidity, macro sensitivities)
+  model_transaction_costs:
+    agent: false
+    description: Quantify strategy implementation friction
+    name: model_transaction_costs
+    nodes_depended_on:
+    - generate_alpha_vectors
+    nodes_dependent_on: []
+    prompt: Estimate realistic implementation costs incorporating market impact, spread
+      costs, and execution venue selection
+  optimize_portfolio_weights:
+    agent: false
+    description: Develop optimal alpha aggregation methodology
+    name: optimize_portfolio_weights
+    nodes_depended_on:
+    - stress_test_hypotheses
+    - model_risk_factors
+    nodes_dependent_on: []
+    prompt: Solve for optimal signal combination and position sizing that maximizes
+      Sharpe ratio under constraints
+  simulate_out_of_sample:
+    agent: false
+    description: Verify strategy generalizability
+    name: simulate_out_of_sample
+    nodes_depended_on:
+    - optimize_portfolio_weights
+    - evaluate_economic_regimes
+    nodes_dependent_on: []
+    prompt: Test strategy on completely unseen market periods and across multiple
+      global regions
+  stress_test_hypotheses:
+    agent: false
+    description: Validate robustness through adversity testing
+    name: stress_test_hypotheses
+    nodes_depended_on:
+    - generate_alpha_vectors
+    nodes_dependent_on: []
+    prompt: Simulate strategy performance under extreme market regimes, liquidity
+      shocks, and changing correlation structures
+  synthesize_strategy_blueprint:
+    agent: false
+    description: Produce final strategy documentation
+    name: synthesize_strategy_blueprint
+    nodes_depended_on:
+    - design_risk_management_rules
+    - assess_implementation_shortfall
+    - backtest_correlation_clustering
+    - identify_crowding_risks
+    nodes_dependent_on: []
+    prompt: Combine all validated components into a complete strategy specification
+      including signal logic, risk controls, and implementation guidelines

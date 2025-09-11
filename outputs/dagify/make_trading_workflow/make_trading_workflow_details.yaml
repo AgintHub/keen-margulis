@@ -1,0 +1,104 @@
+dag_type: plain_text
+description: Creates a detailed, step-by-step foundational plan for trading, from
+  setting up accounts and instruments through compiling the final trading strategy
+  blueprint.
+name: make_trading_workflow
+nodes:
+  backtest_trading_strategies:
+    agent: false
+    description: Test trading strategies with historical market data.
+    name: backtest_trading_strategies
+    nodes_depended_on:
+    - compile_trading_indicators
+    nodes_dependent_on: []
+    prompt: Backtest your trading strategies on historical market data to evaluate
+      performance and refine trading rules as needed.
+  choose_exchange_fees:
+    agent: false
+    description: Select the most cost-effective exchanges and fees.
+    name: choose_exchange_fees
+    nodes_depended_on:
+    - register_trading_accounts
+    nodes_dependent_on: []
+    prompt: For each trading account, evaluate and select the most competitive exchange
+      fees (e.g., maker-taker fees, withdrawal fees). Focus on minimizing trading
+      costs.
+  compile_trading_indicators:
+    agent: false
+    description: Select relevant technical indicators for trading strategies.
+    name: compile_trading_indicators
+    nodes_depended_on:
+    - create_trading_plan
+    nodes_dependent_on: []
+    prompt: Identify relevant technical indicators (e.g., moving averages, RSI, Bollinger
+      bands) to accompany your trading strategy. Choose indicators that complement
+      your trading rules for optimal performance.
+  create_trading_plan:
+    agent: false
+    description: Compile the final trading plan with all selected parameters.
+    name: create_trading_plan
+    nodes_depended_on:
+    - set_risk_management
+    nodes_dependent_on: []
+    prompt: Gather all selected trading parameters (e.g., exchange fees, leverage,
+      position sizing, risk management) from prior steps and create a comprehensive
+      trading plan outlining your strategy.
+  define_position_sizing:
+    agent: false
+    description: Set position size limits for each trading instrument.
+    name: define_position_sizing
+    nodes_depended_on:
+    - select_leverage
+    nodes_dependent_on: []
+    prompt: For each trading strategy, set the maximum allowed position size. Consider
+      position sizing algorithms such as fixed fraction, average true range, or volatility-based
+      methods.
+  develop_trading_rules:
+    agent: false
+    description: Create entry, exit, and stop-loss rules for trading strategies.
+    name: develop_trading_rules
+    nodes_depended_on:
+    - define_position_sizing
+    nodes_dependent_on: []
+    prompt: Develop a trading strategy for each selected instrument, including entry
+      and exit rules, stop-loss levels, and take-profit targets. Ensure these rules
+      are consistent across all trading strategies.
+  document_trading_strategy:
+    agent: false
+    description: Create documentation for the final trading strategy.
+    name: document_trading_strategy
+    nodes_depended_on:
+    - backtest_trading_strategies
+    nodes_dependent_on: []
+    prompt: Document your trading strategy, including your chosen trading rules, position
+      sizing, risk management, and technical indicators. Include a detailed description
+      of your strategy.
+  register_trading_accounts:
+    agent: false
+    description: Create trading accounts on relevant exchanges and platforms.
+    name: register_trading_accounts
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Sign up for trading accounts on exchanges and trading platforms (e.g.,
+      Binance, Kraken, FTX) for each selected currency or instrument. Provide detailed
+      account information including account names and numbers.
+  select_leverage:
+    agent: false
+    description: Determine optimal leverage for trading strategies.
+    name: select_leverage
+    nodes_depended_on:
+    - choose_exchange_fees
+    nodes_dependent_on: []
+    prompt: For each instrument, determine the optimal leverage level for your trading
+      strategy. Consider both initial margin and maintenance margin requirements.
+      Provide a leverage ratio (e.g., 1:10, 1:20).
+  set_risk_management:
+    agent: false
+    description: Establish position size limits and risk exposure targets.
+    name: set_risk_management
+    nodes_depended_on:
+    - develop_trading_rules
+    nodes_dependent_on: []
+    prompt: Establish position sizing limits and risk exposure targets for each trading
+      strategy, taking into account trading performance and market fluctuations. Focus
+      on achieving a balanced risk-reward profile.

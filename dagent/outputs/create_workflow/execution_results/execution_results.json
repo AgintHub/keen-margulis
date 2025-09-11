@@ -1,0 +1,56 @@
+{
+  "define_workflow_objective": {
+    "output": {
+      "output": "Workflow optimization"
+    },
+    "description": "Specify the objective for the workflow"
+  },
+  "design_workflow_workflow": {
+    "output": {
+      "output": "A high-level workflow diagram illustrating the Microservices architecture workflow for Workflow optimization, encompassing data collection, workflow optimization, and storage of optimized workflow architecture, with key components labeled and control flows indicated by arrows."
+    },
+    "description": "Generate the workflow workflow"
+  },
+  "determine_workflow_scope": {
+    "output": {
+      "output": "data collection, workflow optimization, storage of optimized workflow architecture"
+    },
+    "description": "Identify the scope of the workflow"
+  },
+  "develop_workflow_description": {
+    "output": {
+      "output": "A detailed workflow description for Workflow optimization. The Microservices architecture workflow encompasses data collection, workflow optimization, and storage of optimized workflow architecture. Key components include data collection, workflow optimization, and storage, which are labeled and interconnected with arrows to indicate control flows. This workflow is designed to produce a high-level diagram illustrating the Workflow optimization process, ensuring clarity and precision in its communication and step-by-step execution."
+    },
+    "description": "Write a detailed workflow description"
+  },
+  "formulate_workflow_prompts": {
+    "output": {
+      "output": "## Workflow Optimization Node Descriptions\n\n### Node 1: Data Collection\n\n* Task: Collect necessary data for workflow optimization.\n* Description: Gather relevant data from various sources to facilitate workflow optimization.\n\n### Node 2: Workflow Optimization\n\n* Task: Optimize the workflow architecture.\n* Description: Analyze the collected data to identify areas for improvement in the workflow architecture and implement necessary changes.\n\n### Node 3: Storage of Optimized Workflow Architecture\n\n* Task: Store the optimized workflow architecture.\n* Description: Save the optimized workflow architecture for future reference and maintenance.\n\n### Node 4: Produce Workflow Blueprint\n\n* Task: Create the final workflow blueprint.\n* Description: Use the optimized workflow architecture to generate a final workflow blueprint that outlines the entire workflow optimization process."
+    },
+    "description": "Craft markdown prompts for each workflow node"
+  },
+  "generate_workflow_nodes": {
+    "output": {
+      "output": "Populate workflow nodes with specific tasks such as data collection, workflow optimization, and storage of optimized workflow architecture, as described in the develop_workflow_description output: A detailed workflow description for Workflow optimization. The Microservices architecture workflow encompasses data collection, workflow optimization, and storage of optimized workflow architecture. Key components include data collection, workflow optimization, and storage, which are labeled and interconnected with arrows to indicate control flows. This workflow is designed to produce a high-level diagram illustrating the Workflow optimization process, ensuring clarity and precision in its communication and step-by-step execution."
+    },
+    "description": "Populate workflow nodes with specific tasks"
+  },
+  "produce_workflow_blueprint": {
+    "output": {
+      "output": "## Comprehensive Workflow Blueprint\n\n### Workflow Architecture\n\n* Description: The microservices architecture workflow encompasses data collection, workflow optimization, and storage of optimized workflow architecture.\n\n### Workflow Steps\n\n* Description: The workflow consists of four main steps: data collection, workflow optimization, storage of optimized workflow architecture, and production of the final workflow blueprint.\n\n### Workflow Processes\n\n* Description: Key components include data collection, workflow optimization, and storage, which are labeled and interconnected with arrows to indicate control flows."
+    },
+    "description": "Create the final workflow blueprint"
+  },
+  "review_and_refine_workflow": {
+    "output": {
+      "output": "## Revised Workflow Blueprint\n\n### Workflow Architecture\n\n* Description: The microservices architecture workflow encompasses data collection, workflow optimization, and storage of optimized workflow architecture.\n\n### Workflow Steps\n\n* Description: The workflow consists of four main steps: data collection, workflow optimization, storage of optimized workflow architecture, and production of the final workflow blueprint.\n\n### Workflow Processes\n\n* Description: Key components include data collection, workflow optimization, and storage, which are labeled and interconnected with arrows to indicate control flows.\n\n* Adjustment: Refactored steps to improve workflow efficiency and effectiveness."
+    },
+    "description": "Evaluate and adjust the workflow"
+  },
+  "select_workflow_architecture": {
+    "output": {
+      "output": "Microservices architecture"
+    },
+    "description": "Choose the workflow architecture"
+  }
+}

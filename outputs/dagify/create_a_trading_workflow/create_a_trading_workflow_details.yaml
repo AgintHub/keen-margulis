@@ -1,0 +1,202 @@
+dag_type: typed
+description: Generated workflow from UI.
+name: create_a_trading_workflow
+nodes:
+  account_management:
+    agent: false
+    description: Rapidly update account balances, manage subscriptions, and facilitate
+      withdrawals with regulatory compliance.
+    name: account_management
+    nodes_depended_on:
+    - trade_monitoring
+    nodes_dependent_on: []
+    output_structure:
+    - description: Current account balance
+      key: account_balance
+      type: float
+    - description: Whether the withdrawal was successful
+      key: withdrawal_status
+      type: bool
+    - description: List of regulatory reports generated
+      key: regulatory_reports
+      type: List[str]
+    - description: Current subscription status (active/inactive)
+      key: subscription_status
+      type: str
+    - description: Amount withdrawn from the account
+      key: withdrawal_amount
+      type: float
+    prompt: Provide users with an intuitive interface to view, manage, and adjust
+      their trading accounts, deposits, and withdrawals.
+  asset_selection:
+    agent: false
+    description: Curate a list of recommended assets with corresponding risk scores
+      and trading strategies.
+    name: asset_selection
+    nodes_depended_on:
+    - risk_assessment
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of recommended assets to the user.
+      key: recommended_assets
+      type: List[str]
+    - description: List of risk scores corresponding to each recommended asset.
+      key: risk_scores
+      type: List[float]
+    - description: List of trading strategies recommended for each asset.
+      key: trading_strategies
+      type: List[str]
+    prompt: Offer a selection of assets (stocks, forex, binary options) to the user
+      based on their risk profile, trading history, and preferences.
+  market_analysis:
+    agent: false
+    description: Deliver timely and crucial market analysis for informed trading decisions.
+    name: market_analysis
+    nodes_depended_on:
+    - asset_selection
+    nodes_dependent_on: []
+    output_structure:
+    - description: Current market trends and directions.
+      key: market_trends
+      type: str
+    - description: Performance metrics for individual sectors.
+      key: sector_performance
+      type: List[str]
+    - description: Key economical indicators such as inflation rate, GDP, and employment
+        rates.
+      key: economical_indicators
+      type: float
+    - description: Expected price movements for various assets.
+      key: expected_priceMovements
+      type: List[float]
+    - description: Buy or Sell recommendations for traders.
+      key: buy_sell_recommendations
+      type: bool
+    prompt: Analyze market trends, sector performance, and economic indicators to
+      provide actionable insights for traders.
+  position_sizing:
+    agent: false
+    description: Generate a personalized trading plan with precise position sizes
+      and stop-loss orders.
+    name: position_sizing
+    nodes_depended_on:
+    - market_analysis
+    nodes_dependent_on: []
+    prompt: Recommend an appropriate position size for each trade based on the user's
+      risk profile, asset choice, and desired risk-reward ratio.
+  risk_assessment:
+    agent: false
+    description: Assess user suitability for trading platforms and binary options.
+    name: risk_assessment
+    nodes_depended_on:
+    - user_registration
+    nodes_dependent_on: []
+    output_structure:
+    - description: Suitability category for the user
+      key: user_suitability_category
+      type: str
+    - description: Level of risk tolerance for the user
+      key: risk_tolerance_level
+      type: int
+    - description: List of user's investment goals
+      key: investment_goals
+      type: List[str]
+    - description: Level of the user's trading experience
+      key: trading_experience_level
+      type: int
+    prompt: Evaluate user's risk tolerance, investment goals, and trading experience
+      level to assign a suitable trading profile category.
+  system_maintenance:
+    agent: false
+    description: Automate critical system maintenance activities to enhance reliability
+      and security.
+    name: system_maintenance
+    nodes_depended_on:
+    - account_management
+    nodes_dependent_on: []
+    output_structure:
+    - description: The date and time of the last database backup.
+      key: last_backup_datetime
+      type: str
+    - description: Whether the database backup was successful.
+      key: db_backup_status
+      type: bool
+    - description: Whether the API updates were successful.
+      key: api_update_status
+      type: bool
+    - description: Whether the performance optimization tasks were successful.
+      key: performance_optimization_status
+      type: bool
+    prompt: Perform routine tasks like database backup, API updates, and performance
+      optimization to ensure the trading platform's stability.
+  trade_execution:
+    agent: false
+    description: Automate trade execution with precision and speed to reduce latency.
+    name: trade_execution
+    nodes_depended_on:
+    - position_sizing
+    nodes_dependent_on: []
+    output_structure:
+    - description: Unique identifier for the executed trade.
+      key: trade_id
+      type: int
+    - description: Current status of the executed trade.
+      key: trade_status
+      type: str
+    - description: Total volume of the executed trade.
+      key: executed_volume
+      type: float
+    - description: Average price of the executed trade.
+      key: filled_price
+      type: float
+    - description: Risk management settings applied to the executed trade.
+      key: risk_management_settings
+      type: str
+    prompt: Execute trades according to the user's preferences, order types (market
+      or limit), and risk management settings.
+  trade_monitoring:
+    agent: false
+    description: Real-time trading monitoring with AI-driven alerts and interventions.
+    name: trade_monitoring
+    nodes_depended_on:
+    - trade_execution
+    nodes_dependent_on: []
+    output_structure:
+    - description: Real-time performance metrics for each trade such as P/L, profit
+        factor, etc.
+      key: trade_performance_metrics
+      type: str
+    - description: List of AI-driven alerts triggered by the trading system including
+        reasons for alerts.
+      key: alerts_triggered
+      type: List[str]
+    - description: List of interventions made by the trading system including adjustments
+        to trade positions or stop-loss orders.
+      key: interventions_made
+      type: List[str]
+    - description: List of current statuses for each trade, e.g., open, closed, pending.
+      key: trade_status
+      type: List[str]
+    prompt: Monitor trades for performance, risk, and market movements to trigger
+      automatic adjustments, stops, or closures.
+  user_registration:
+    agent: false
+    description: Verify user identity and registration details.
+    name: user_registration
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    output_structure:
+    - description: Validated user email address
+      key: user_email
+      type: str
+    - description: Validated user password
+      key: user_password
+      type: str
+    - description: Validated user trading experience level
+      key: user_experience_level
+      type: int
+    - description: Whether the user information has been validated
+      key: validation_status
+      type: bool
+    prompt: Create a user account with email, password, and trading experience level.
+      Validate email and password as per industry standards.

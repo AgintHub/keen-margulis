@@ -1,0 +1,546 @@
+dag_type: typed
+description: Comprehensive trading system workflow that establishes objectives, develops
+  strategies, implements risk controls, and creates operational procedures for systematic
+  trading.
+name: build_trading_workflow
+nodes:
+  build_contingency_protocols:
+    agent: false
+    description: Define emergency and unusual situation handling
+    name: build_contingency_protocols
+    nodes_depended_on:
+    - set_risk_parameters
+    - design_trade_monitoring_system
+    nodes_dependent_on: []
+    output_structure:
+    - description: Emergency scenarios to handle
+      key: contingency_scenarios
+      type: List[str]
+    - description: Conditions that trigger each protocol
+      key: trigger_conditions
+      type: List[str]
+    - description: Actions to take for each scenario
+      key: response_actions
+      type: List[str]
+    - description: Escalation level 1-5 for each scenario
+      key: escalation_levels
+      type: List[int]
+    prompt: 'Create protocols for: connection failures, extreme volatility, position
+      limit breaches, black swan events. Present as if-then action items.'
+  build_portfolio_tracking_dashboard:
+    agent: false
+    description: Create portfolio monitoring framework
+    name: build_portfolio_tracking_dashboard
+    nodes_depended_on:
+    - set_risk_parameters
+    nodes_dependent_on: []
+    output_structure:
+    - description: Metrics to display on dashboard
+      key: dashboard_metrics
+      type: List[str]
+    - description: Update frequency in seconds for each metric
+      key: update_frequencies_seconds
+      type: List[int]
+    - description: Conditions that trigger alerts
+      key: alert_conditions
+      type: List[str]
+    - description: Type of visualization for each metric
+      key: visualization_types
+      type: List[str]
+    prompt: 'Design portfolio dashboard metrics: total exposure, sector allocation,
+      correlation matrix, VaR, drawdown tracking. Specify update frequency.'
+  choose_trading_style:
+    agent: false
+    description: Determine the trading approach and timeframe
+    name: choose_trading_style
+    nodes_depended_on:
+    - define_trading_objectives
+    nodes_dependent_on: []
+    output_structure:
+    - description: Primary trading style selected
+      key: selected_style
+      type: str
+    - description: Average holding period in days for the selected style
+      key: holding_period_days
+      type: int
+    - description: Expected number of trades per month
+      key: trade_frequency
+      type: int
+    - description: Explanation of why this style aligns with objectives
+      key: style_rationale
+      type: str
+    prompt: Select the trading style (day trading, swing trading, position trading,
+      algorithmic) that best aligns with the objectives. Provide timeframe specifications
+      and rationale for selection.
+  compile_trading_system_documentation:
+    agent: false
+    description: Consolidate all components into operational manual
+    name: compile_trading_system_documentation
+    nodes_depended_on:
+    - create_trade_entry_checklist
+    - design_trade_monitoring_system
+    - establish_trade_journal_template
+    - build_contingency_protocols
+    - establish_review_schedule
+    nodes_dependent_on: []
+    output_structure:
+    - description: Sections of the trading manual
+      key: manual_sections
+      type: List[str]
+    - description: Quick reference guides included
+      key: quick_references
+      type: List[str]
+    - description: Operational checklists included
+      key: operational_checklists
+      type: List[str]
+    - description: Procedures for updating the manual
+      key: update_procedures
+      type: List[str]
+    prompt: Synthesize all workflow components into a comprehensive trading system
+      manual. Include quick reference guides and operational checklists.
+  create_backtesting_framework:
+    agent: false
+    description: Design historical testing methodology
+    name: create_backtesting_framework
+    nodes_depended_on:
+    - develop_signal_generation_rules
+    - establish_position_sizing_model
+    - create_stop_loss_methodology
+    - design_profit_target_system
+    nodes_dependent_on: []
+    output_structure:
+    - description: Required data for backtesting
+      key: data_requirements
+      type: List[str]
+    - description: Number of years to backtest
+      key: test_period_years
+      type: int
+    - description: Commission rates to assume
+      key: commission_rates
+      type: List[float]
+    - description: Slippage estimates for each asset class
+      key: slippage_estimates
+      type: List[float]
+    - description: Metrics to evaluate in backtesting
+      key: evaluation_metrics
+      type: List[str]
+    prompt: 'Outline backtesting approach: data requirements, test periods, transaction
+      cost assumptions, performance evaluation criteria. Present as testing protocol.'
+  create_fundamental_criteria:
+    agent: false
+    description: Establish fundamental analysis criteria
+    name: create_fundamental_criteria
+    nodes_depended_on:
+    - select_asset_classes
+    nodes_dependent_on: []
+    output_structure:
+    - description: Names of fundamental criteria
+      key: criteria_names
+      type: List[str]
+    - description: Threshold values for each criterion
+      key: threshold_values
+      type: List[float]
+    - description: Comparison operators (>, <, =) for each criterion
+      key: comparison_operators
+      type: List[str]
+    - description: Data sources for each criterion
+      key: data_sources
+      type: List[str]
+    prompt: 'Define fundamental analysis criteria relevant to selected assets: financial
+      ratios, economic data points, industry metrics. Format as evaluation checklist
+      with thresholds.'
+  create_stop_loss_methodology:
+    agent: false
+    description: Design stop loss placement rules
+    name: create_stop_loss_methodology
+    nodes_depended_on:
+    - choose_trading_style
+    - set_risk_parameters
+    nodes_dependent_on: []
+    output_structure:
+    - description: Stop loss methods to use
+      key: stop_methods
+      type: List[str]
+    - description: Calculation formulas for each method
+      key: method_formulas
+      type: List[str]
+    - description: Default stop percentages for each method
+      key: default_percentages
+      type: List[float]
+    - description: Whether trailing stops are enabled for each method
+      key: trailing_enabled
+      type: List[bool]
+    prompt: 'Define stop loss placement methods: fixed percentage, ATR-based, support/resistance,
+      or trailing stops. Include specific calculation formulas.'
+  create_trade_entry_checklist:
+    agent: false
+    description: Build pre-trade validation checklist
+    name: create_trade_entry_checklist
+    nodes_depended_on:
+    - develop_signal_generation_rules
+    - establish_position_sizing_model
+    - set_risk_parameters
+    nodes_dependent_on: []
+    output_structure:
+    - description: Pre-trade checklist items
+      key: checklist_items
+      type: List[str]
+    - description: Validation rules for each item
+      key: validation_rules
+      type: List[str]
+    - description: Whether each item is mandatory
+      key: is_mandatory
+      type: List[bool]
+    - description: Order in which to perform checks
+      key: check_order
+      type: List[int]
+    prompt: 'Create a pre-trade checklist: signal confirmation, position size calculation,
+      risk check, correlation check. Format as actionable steps.'
+  define_order_types:
+    agent: false
+    description: Specify order types and execution tactics
+    name: define_order_types
+    nodes_depended_on:
+    - choose_trading_style
+    - select_execution_venues
+    nodes_dependent_on: []
+    output_structure:
+    - description: Types of orders to use
+      key: order_types
+      type: List[str]
+    - description: Conditions for using each order type
+      key: use_conditions
+      type: List[str]
+    - description: Maximum allowed slippage for each order type
+      key: slippage_limits
+      type: List[float]
+    - description: Tactics for minimizing slippage
+      key: execution_tactics
+      type: List[str]
+    prompt: List order types to use (market, limit, stop, iceberg) and when to use
+      each. Include execution tactics for minimizing slippage.
+  define_performance_metrics:
+    agent: false
+    description: Specify performance measurement criteria
+    name: define_performance_metrics
+    nodes_depended_on:
+    - define_trading_objectives
+    nodes_dependent_on: []
+    output_structure:
+    - description: Performance metrics to track
+      key: metric_names
+      type: List[str]
+    - description: Formulas for calculating each metric
+      key: calculation_formulas
+      type: List[str]
+    - description: Target values for each metric
+      key: target_values
+      type: List[float]
+    - description: Time periods for measuring each metric
+      key: measurement_periods
+      type: List[str]
+    prompt: 'List key performance metrics to track: Sharpe ratio, win rate, profit
+      factor, maximum drawdown, average win/loss. Include calculation methods.'
+  define_technical_indicators:
+    agent: false
+    description: Specify technical analysis tools to use
+    name: define_technical_indicators
+    nodes_depended_on:
+    - choose_trading_style
+    - select_asset_classes
+    nodes_dependent_on: []
+    output_structure:
+    - description: Names of technical indicators to use
+      key: indicator_names
+      type: List[str]
+    - description: Parameter settings for each indicator (same order)
+      key: indicator_parameters
+      type: List[str]
+    - description: Chart patterns to monitor
+      key: chart_patterns
+      type: List[str]
+    - description: Timeframes for each indicator (same order)
+      key: timeframes
+      type: List[str]
+    prompt: List specific technical indicators and chart patterns to monitor for the
+      chosen assets and trading style. Include parameters for each indicator.
+  define_trading_objectives:
+    agent: false
+    description: Establish the core objectives and goals for the trading system
+    name: define_trading_objectives
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    output_structure:
+    - description: Names of each trading objective
+      key: objective_names
+      type: List[str]
+    - description: Numerical targets for each objective (e.g., 15.0 for 15% annual
+        return)
+      key: target_values
+      type: List[float]
+    - description: Time horizon in days for each objective
+      key: time_horizons_days
+      type: List[int]
+    - description: Percentage of capital allocated to this trading system
+      key: capital_allocation_pct
+      type: float
+    prompt: Define the primary trading objectives including target returns, risk tolerance,
+      time horizon, and capital allocation. Produce specific measurable goals with
+      numerical targets where applicable.
+  design_market_analysis_framework:
+    agent: false
+    description: Create framework for analyzing market conditions
+    name: design_market_analysis_framework
+    nodes_depended_on:
+    - select_asset_classes
+    nodes_dependent_on: []
+    output_structure:
+    - description: Economic indicators to monitor
+      key: economic_indicators
+      type: List[str]
+    - description: Market sentiment indicators
+      key: sentiment_measures
+      type: List[str]
+    - description: Sector-specific metrics to track
+      key: sector_metrics
+      type: List[str]
+    - description: How often to update each category
+      key: update_frequencies
+      type: List[str]
+    prompt: 'Outline the market analysis components: economic indicators to track,
+      market sentiment measures, and sector/asset specific metrics. Present as categorized
+      checklist.'
+  design_optimization_process:
+    agent: false
+    description: Create strategy optimization methodology
+    name: design_optimization_process
+    nodes_depended_on:
+    - create_backtesting_framework
+    - define_performance_metrics
+    nodes_dependent_on: []
+    output_structure:
+    - description: Parameters to optimize
+      key: parameters_to_optimize
+      type: List[str]
+    - description: Range of values for each parameter
+      key: parameter_ranges
+      type: List[str]
+    - description: Optimization techniques to use
+      key: optimization_methods
+      type: List[str]
+    - description: Robustness tests to perform
+      key: robustness_tests
+      type: List[str]
+    - description: Number of walk-forward periods
+      key: walk_forward_periods
+      type: int
+    prompt: 'Define optimization process: parameter ranges to test, overfitting prevention,
+      walk-forward analysis, robustness checks. Include specific procedures.'
+  design_profit_target_system:
+    agent: false
+    description: Establish profit taking rules
+    name: design_profit_target_system
+    nodes_depended_on:
+    - choose_trading_style
+    - develop_signal_generation_rules
+    nodes_dependent_on: []
+    output_structure:
+    - description: Profit target methods
+      key: target_methods
+      type: List[str]
+    - description: Risk-reward ratios for each method
+      key: risk_reward_ratios
+      type: List[float]
+    - description: Percentage to scale out at each level
+      key: scale_out_levels
+      type: List[float]
+    - description: Specific exit conditions for each method
+      key: exit_conditions
+      type: List[str]
+    prompt: 'Create profit target methodology: risk-reward ratios, technical targets,
+      scaling out rules. Provide specific exit criteria.'
+  design_trade_monitoring_system:
+    agent: false
+    description: Establish real-time trade monitoring
+    name: design_trade_monitoring_system
+    nodes_depended_on:
+    - create_stop_loss_methodology
+    - design_profit_target_system
+    nodes_dependent_on: []
+    output_structure:
+    - description: Metrics to monitor during trades
+      key: monitoring_metrics
+      type: List[str]
+    - description: Thresholds for triggering alerts
+      key: alert_thresholds
+      type: List[float]
+    - description: Update frequency in seconds for each metric
+      key: update_frequencies
+      type: List[int]
+    - description: Priority level 1-5 for each alert type
+      key: alert_priorities
+      type: List[int]
+    prompt: 'Define monitoring requirements: price alerts, stop/target tracking, news
+      monitoring, position P&L updates. List specific metrics to track.'
+  develop_signal_generation_rules:
+    agent: false
+    description: Create rules for generating trading signals
+    name: develop_signal_generation_rules
+    nodes_depended_on:
+    - define_technical_indicators
+    - create_fundamental_criteria
+    - design_market_analysis_framework
+    nodes_dependent_on: []
+    output_structure:
+    - description: Names of trading signals
+      key: signal_names
+      type: List[str]
+    - description: Boolean conditions for each signal
+      key: signal_conditions
+      type: List[str]
+    - description: Strength rating 1-5 for each signal
+      key: signal_strengths
+      type: List[int]
+    - description: Number of confirmations needed for each signal
+      key: required_confirmations
+      type: List[int]
+    prompt: Synthesize technical, fundamental, and market analysis into specific signal
+      generation rules. Define entry triggers with clear boolean conditions.
+  establish_position_sizing_model:
+    agent: false
+    description: Define how to size individual positions
+    name: establish_position_sizing_model
+    nodes_depended_on:
+    - define_trading_objectives
+    nodes_dependent_on: []
+    output_structure:
+    - description: Primary position sizing methodology
+      key: sizing_method
+      type: str
+    - description: Base position size as percentage of account
+      key: base_position_pct
+      type: float
+    - description: Whether to adjust for volatility
+      key: volatility_adjustment
+      type: bool
+    - description: Kelly criterion fraction to use (0.25 for quarter Kelly)
+      key: kelly_fraction
+      type: float
+    - description: Mathematical formula for position sizing
+      key: sizing_formula
+      type: str
+    prompt: Create position sizing formulas based on account size, volatility, and
+      risk tolerance. Include fixed fractional, Kelly criterion, or volatility-based
+      approaches with specific calculations.
+  establish_review_schedule:
+    agent: false
+    description: Set performance review timeline
+    name: establish_review_schedule
+    nodes_depended_on:
+    - define_performance_metrics
+    nodes_dependent_on: []
+    output_structure:
+    - description: Types of reviews to conduct
+      key: review_types
+      type: List[str]
+    - description: Frequency of each review type
+      key: review_frequencies
+      type: List[str]
+    - description: Activities for each review type
+      key: review_activities
+      type: List[str]
+    - description: Who should attend each review
+      key: required_attendees
+      type: List[str]
+    prompt: 'Create review schedule: daily P&L review, weekly performance analysis,
+      monthly strategy assessment, quarterly deep dive. List review activities.'
+  establish_trade_journal_template:
+    agent: false
+    description: Create trade documentation structure
+    name: establish_trade_journal_template
+    nodes_depended_on:
+    - develop_signal_generation_rules
+    - create_trade_entry_checklist
+    nodes_dependent_on: []
+    output_structure:
+    - description: Fields to include in trade journal
+      key: journal_fields
+      type: List[str]
+    - description: Data type for each field (text, number, date)
+      key: field_types
+      type: List[str]
+    - description: Whether each field is required
+      key: is_required
+      type: List[bool]
+    - description: Categories for trade review and analysis
+      key: review_categories
+      type: List[str]
+    prompt: 'Build trade journal template: entry/exit details, rationale, market conditions,
+      outcome, lessons learned. Include required fields list.'
+  select_asset_classes:
+    agent: false
+    description: Identify which asset classes to trade
+    name: select_asset_classes
+    nodes_depended_on:
+    - define_trading_objectives
+    nodes_dependent_on: []
+    output_structure:
+    - description: Names of asset classes selected for trading
+      key: asset_classes
+      type: List[str]
+    - description: Rationale for each asset class selection (same order)
+      key: selection_rationales
+      type: List[str]
+    - description: Percentage allocation to each asset class (same order)
+      key: allocation_percentages
+      type: List[float]
+    prompt: Based on the trading objectives, list the specific asset classes to trade
+      (e.g., equities, futures, forex, crypto). Include rationale for each selection
+      and any constraints.
+  select_execution_venues:
+    agent: false
+    description: Choose brokers and execution platforms
+    name: select_execution_venues
+    nodes_depended_on:
+    - select_asset_classes
+    nodes_dependent_on: []
+    output_structure:
+    - description: Names of execution venues/brokers
+      key: venue_names
+      type: List[str]
+    - description: Asset classes supported by each venue (same order)
+      key: supported_assets
+      type: List[str]
+    - description: Commission rates for each venue (same order)
+      key: commission_rates
+      type: List[float]
+    - description: Whether venue offers API access (same order)
+      key: has_api_access
+      type: List[bool]
+    prompt: Identify appropriate brokers, exchanges, and execution venues for selected
+      assets. Compare fees, liquidity, and technical capabilities.
+  set_risk_parameters:
+    agent: false
+    description: Define risk management parameters
+    name: set_risk_parameters
+    nodes_depended_on:
+    - define_trading_objectives
+    nodes_dependent_on: []
+    output_structure:
+    - description: Maximum position size as percentage of portfolio
+      key: max_position_pct
+      type: float
+    - description: Maximum daily loss as percentage of portfolio
+      key: daily_loss_limit_pct
+      type: float
+    - description: Maximum allowable drawdown percentage
+      key: max_drawdown_pct
+      type: float
+    - description: Maximum correlation allowed between positions
+      key: max_correlation
+      type: float
+    - description: Maximum risk per individual trade as percentage
+      key: risk_per_trade_pct
+      type: float
+    prompt: Specify maximum position size, daily loss limits, drawdown thresholds,
+      and correlation limits. Present as numerical risk parameters with clear units.

@@ -1,0 +1,44 @@
+{
+  "connect_nodes": {
+    "output": {
+      "output": "Node 'IdentifyObjective' -> Node 'DetermineComponents'\nNode 'DetermineComponents' -> Node 'DefineRequirements'\nNode 'DefineRequirements' -> Node 'IdentifyConstraints'\nNode 'IdentifyConstraints' -> Node 'VerifyAchievability'\n"
+    },
+    "description": "Connect the nodes to form a Directed Acyclic Graph (DAG)."
+  },
+  "create_nodes": {
+    "output": {
+      "output": "Node 'IdentifyObjective': Identify the specific objective or task description to be achieved.\nNode 'DetermineComponents': Determine the key components of the objective.\nNode 'DefineRequirements': Define the requirements for the objective.\nNode 'IdentifyConstraints': Identify the constraints for the objective.\nNode 'VerifyAchievability': Verify that the objective and task description are achievable."
+    },
+    "description": "Create nodes for each fundamental step in the workflow."
+  },
+  "decompose_objective": {
+    "output": {
+      "output": "The fundamental steps are:\n1. Identify the specific objective or task description to be achieved.\n2. Determine the key components of the objective.\n3. Define the requirements for the objective.\n4. Identify the constraints for the objective.\n5. Verify that the objective and task description are achievable."
+    },
+    "description": "Decompose the objective into fundamental operations/tasks/actions/steps."
+  },
+  "define_objective": {
+    "output": {
+      "output": "Identify the specific objective or task description to be achieved."
+    },
+    "description": "Identify the specific objective or task description to be achieved."
+  },
+  "finalize_workflow": {
+    "output": {
+      "output": "The workflow has been finalized. All steps are correctly defined, connected, and executable."
+    },
+    "description": "Finalize the workflow by ensuring all steps are correctly defined and connected."
+  },
+  "parse_objective": {
+    "output": {
+      "output": "The objective is to 'Identify the specific objective or task description to be achieved.' The key components, requirements, and constraints are:\n      - Key Components: \n        - Identify the objective\n        - Describe the task\n      - Requirements: \n        - The objective must be specific\n        - The task description must be clear\n      - Constraints: \n        - The objective and task description must be achievable"
+    },
+    "description": "Break down the objective into its key components and requirements."
+  },
+  "validate_dag": {
+    "output": {
+      "output": "The DAG is acyclic and connected. All nodes are properly linked."
+    },
+    "description": "Validate the DAG to ensure it is acyclic and connected."
+  }
+}

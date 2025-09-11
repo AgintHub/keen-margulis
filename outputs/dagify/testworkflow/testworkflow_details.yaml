@@ -1,0 +1,82 @@
+dag_type: spec
+description: A test workflow to check the TypedDAGModel execution plan.
+name: testworkflow
+nodes:
+  step1:_testprompt:
+    agent: false
+    description: Print a test message.
+    name: step1:_testprompt
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    output_structure:
+    - description: Test output from this step.
+      key: test_output
+      type: str
+    prd:
+      bullets: []
+    prompt: Test prompt to check the model execution.
+  step2:_calculatesum:
+    agent: false
+    description: Calculate the sum of two numbers.
+    name: step2:_calculatesum
+    nodes_depended_on:
+    - step1:_testprompt
+    nodes_dependent_on: []
+    output_structure:
+    - description: The sum of two numbers.
+      key: sum
+      type: int
+    prd:
+      bullets: []
+    prompt: Calculate the sum of two numbers $a and $b.
+  step3:_checkcondition:
+    agent: false
+    description: Check if the sum is greater than a threshold.
+    name: step3:_checkcondition
+    nodes_depended_on:
+    - step2:_calculatesum
+    nodes_dependent_on: []
+    output_structure:
+    - description: The result of the comparison.
+      key: result
+      type: bool
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use a simple field mapping to rename the sum field to $sum.
+        reason: This mapping is necessary because the prompt requires the sum to be
+          accessed using a variable.
+        text: Transform the output structure from step2:_calculatesum by mapping the
+          sum field to the $sum variable.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use if-then-else or a similar conditional logic statement to evaluate
+          the expression.
+        reason: This expression is the core of the condition being checked and should
+          be evaluated using conditional logic.
+        text: Implement a conditional logic statement to evaluate the expression $sum
+          > 5.
+      - complexity: LOW
+        impact: LOW
+        method: Use the conditional logic statement to produce the result as a boolean
+          output field.
+        reason: This output field represents the final result of the condition being
+          checked.
+        text: Produce the result of the evaluation as a boolean output field named
+          result.
+    prompt: Check if the sum $sum is greater than the threshold 5.
+  step4:_printresult:
+    agent: false
+    description: Print the result of the comparison.
+    name: step4:_printresult
+    nodes_depended_on:
+    - step3:_checkcondition
+    nodes_dependent_on: []
+    output_structure:
+    - description: The result of the comparison.
+      key: result
+      type: bool
+    prd:
+      bullets: []
+    prompt: Print the result of the comparison.
