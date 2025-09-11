@@ -1,11 +1,41 @@
-dag_type: spec
+dag_type: stub
 description: Generated workflow from UI.
 name: create_trading_workflow
 nodes:
   calculate_position_sizing:
     agent: false
+    code_node_type: stub
     description: Calculate the position sizing for each trading instrument based on
       the trading rules and strategy.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DetermineTradingRulesOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for determine_trading_rules node outputs.\"\"\"\n    entry_points: List[float]\
+      \ = Field(..., description=\"List of entry points for each trading instrument\"\
+      )\n    exit_points: List[float] = Field(..., description=\"List of exit points\
+      \ for each trading instrument\")\n    stop_loss_levels: List[float] = Field(...,\
+      \ description=\"List of stop-loss levels for each trading instrument\")\n  \
+      \  position_sizing_strategy: str = Field(..., description=\"Description of the\
+      \ position sizing strategy\")\n    trading_rules_summary: str = Field(..., description=\"\
+      Summary of the determined trading rules\")\n\n\nclass CalculatePositionSizingOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for calculate_position_sizing node outputs.\"\"\"\n\
+      \    instrument_position_sizes: List[float] = Field(..., description=\"List\
+      \ of position sizes for each trading instrument\")\n    position_size_explanations:\
+      \ List[str] = Field(..., description=\"List of explanations for the factors\
+      \ that influence position sizing for each trading instrument\")\n    total_portfolio_value:\
+      \ float = Field(..., description=\"Total portfolio value after calculating position\
+      \ sizes\")\n    is_position_sizing_valid: bool = Field(..., description=\"Whether\
+      \ the calculated position sizes are valid and within allowed limits\")\n\n\n\
+      def calculate_position_sizing(determine_trading_rules_input: DetermineTradingRulesOutput,\
+      \ **kwargs) -> CalculatePositionSizingOutput:\n    \"\"\"Calculate the position\
+      \ sizing for each trading instrument based on the trading rules and strategy.\n\
+      \n    Args:\n        determine_trading_rules_input: Input from the 'determine_trading_rules'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       CalculatePositionSizingOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return CalculatePositionSizingOutput(\n     \
+      \   instrument_position_sizes=[],\n        position_size_explanations=[],\n\
+      \        total_portfolio_value=0.0,\n        is_position_sizing_valid=False,\n\
+      \    )"
     name: calculate_position_sizing
     nodes_depended_on:
     - determine_trading_rules
@@ -65,10 +95,39 @@ nodes:
     prompt: Calculate the position sizing for each trading instrument based on the
       trading rules and strategy, including an explanation of the factors that influence
       position sizing.
+    shims: []
   configure_trading_system:
     agent: false
+    code_node_type: stub
     description: Configure the trading system to connect to the market environment
       and implement the trading rules and strategy.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass SetMarketEnvironmentOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ set_market_environment node outputs.\"\"\"\n    trading_accounts_setup_status:\
+      \ bool = Field(..., description=\"Whether the trading accounts have been successfully\
+      \ set up\")\n    api_configuration_status: bool = Field(..., description=\"\
+      Whether the APIs have been successfully configured\")\n    exchange_links_configuration_status:\
+      \ bool = Field(..., description=\"Whether the exchange links have been successfully\
+      \ configured\")\n    configured_exchanges: List[str] = Field(..., description=\"\
+      List of exchanges that have been configured\")\n\n\nclass ConfigureTradingSystemOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for configure_trading_system node outputs.\"\"\"\n\
+      \    trading_system_status: bool = Field(..., description=\"Whether the trading\
+      \ system has been successfully configured\")\n    configuration_parameters:\
+      \ str = Field(..., description=\"List of configuration parameters used in the\
+      \ trading system\")\n    market_environment_details: str = Field(..., description=\"\
+      Details of the market environment, including trading accounts, APIs, and exchange\
+      \ links\")\n    trading_rules_implemented: str = Field(..., description=\"List\
+      \ of trading rules implemented in the trading system\")\n\n\ndef configure_trading_system(set_market_environment_input:\
+      \ SetMarketEnvironmentOutput, **kwargs) -> ConfigureTradingSystemOutput:\n \
+      \   \"\"\"Configure the trading system to connect to the market environment\
+      \ and implement the trading rules and strategy.\n\n    Args:\n        set_market_environment_input:\
+      \ Input from the 'set_market_environment' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        ConfigureTradingSystemOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ ConfigureTradingSystemOutput(\n        trading_system_status=False,\n    \
+      \    configuration_parameters=\"\",\n        market_environment_details=\"\"\
+      ,\n        trading_rules_implemented=\"\",\n    )"
     name: configure_trading_system
     nodes_depended_on:
     - set_market_environment
@@ -144,10 +203,39 @@ nodes:
     prompt: Configure the trading system to connect to the market environment and
       implement the trading rules and strategy, including an explanation of the configuration
       parameters used.
+    shims: []
   determine_trading_rules:
     agent: false
+    code_node_type: stub
     description: Determine the trading rules that will be used in the trading workflow,
       including entry and exit points, stop-loss levels, and position sizing.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass SelectTradingStrategyOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for select_trading_strategy node outputs.\"\"\"\n    selected_strategy_name:\
+      \ str = Field(..., description=\"The name of the selected trading strategy.\"\
+      )\n    strategy_principles: List[str] = Field(..., description=\"A list of key\
+      \ principles associated with the selected trading strategy.\")\n    strategy_metrics:\
+      \ List[str] = Field(..., description=\"A list of metrics used in the selected\
+      \ trading strategy.\")\n\n\nclass DetermineTradingRulesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for determine_trading_rules node outputs.\"\"\"\n\
+      \    entry_points: List[float] = Field(..., description=\"List of entry points\
+      \ for each trading instrument\")\n    exit_points: List[float] = Field(...,\
+      \ description=\"List of exit points for each trading instrument\")\n    stop_loss_levels:\
+      \ List[float] = Field(..., description=\"List of stop-loss levels for each trading\
+      \ instrument\")\n    position_sizing_strategy: str = Field(..., description=\"\
+      Description of the position sizing strategy\")\n    trading_rules_summary: str\
+      \ = Field(..., description=\"Summary of the determined trading rules\")\n\n\n\
+      def determine_trading_rules(select_trading_strategy_input: SelectTradingStrategyOutput,\
+      \ **kwargs) -> DetermineTradingRulesOutput:\n    \"\"\"Determine the trading\
+      \ rules that will be used in the trading workflow, including entry and exit\
+      \ points, stop-loss levels, and position sizing.\n\n    Args:\n        select_trading_strategy_input:\
+      \ Input from the 'select_trading_strategy' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        DetermineTradingRulesOutput: Object\
+      \ containing outputs for this node.\n    \"\"\"\n    # TODO: Implement this\
+      \ function\n\n    # Return stub output with placeholder values\n    return DetermineTradingRulesOutput(\n\
+      \        entry_points=[],\n        exit_points=[],\n        stop_loss_levels=[],\n\
+      \        position_sizing_strategy=\"\",\n        trading_rules_summary=\"\"\
+      ,\n    )"
     name: determine_trading_rules
     nodes_depended_on:
     - select_trading_strategy
@@ -198,10 +286,42 @@ nodes:
           levels, and position sizing based on a selected trading strategy.
     prompt: Determine the trading rules that will be used in the trading workflow,
       including entry and exit points, stop-loss levels, and position sizing.
+    shims: []
   develop_trading_dashboard:
     agent: false
+    code_node_type: stub
     description: Develop a trading dashboard to monitor the performance of the trading
       workflow, including real-time data feeds, analytics, and alerts.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass ConfigureTradingSystemOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for configure_trading_system node outputs.\"\"\"\n    trading_system_status:\
+      \ bool = Field(..., description=\"Whether the trading system has been successfully\
+      \ configured\")\n    configuration_parameters: str = Field(..., description=\"\
+      List of configuration parameters used in the trading system\")\n    market_environment_details:\
+      \ str = Field(..., description=\"Details of the market environment, including\
+      \ trading accounts, APIs, and exchange links\")\n    trading_rules_implemented:\
+      \ str = Field(..., description=\"List of trading rules implemented in the trading\
+      \ system\")\n\n\nclass DevelopTradingDashboardOutput(BaseModel):\n    \"\"\"\
+      Pydantic model for develop_trading_dashboard node outputs.\"\"\"\n    dashboard_name:\
+      \ str = Field(..., description=\"The name of the trading dashboard\")\n    metrics_used:\
+      \ List[str] = Field(..., description=\"A list of metrics used in the trading\
+      \ dashboard\")\n    data_feeds: List[str] = Field(..., description=\"A list\
+      \ of real-time data feeds used in the trading dashboard\")\n    analytics_tools:\
+      \ List[str] = Field(..., description=\"A list of analytics tools used in the\
+      \ trading dashboard\")\n    alert_system: bool = Field(..., description=\"Whether\
+      \ the trading dashboard has an alert system\")\n    dashboard_url: str = Field(...,\
+      \ description=\"The URL of the trading dashboard\")\n\n\ndef develop_trading_dashboard(configure_trading_system_input:\
+      \ ConfigureTradingSystemOutput, **kwargs) -> DevelopTradingDashboardOutput:\n\
+      \    \"\"\"Develop a trading dashboard to monitor the performance of the trading\
+      \ workflow, including real-time data feeds, analytics, and alerts.\n\n    Args:\n\
+      \        configure_trading_system_input: Input from the 'configure_trading_system'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       DevelopTradingDashboardOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return DevelopTradingDashboardOutput(\n     \
+      \   dashboard_name=\"\",\n        metrics_used=[],\n        data_feeds=[],\n\
+      \        analytics_tools=[],\n        alert_system=False,\n        dashboard_url=\"\
+      \",\n    )"
     name: develop_trading_dashboard
     nodes_depended_on:
     - configure_trading_system
@@ -265,10 +385,43 @@ nodes:
     prompt: Develop a trading dashboard to monitor the performance of the trading
       workflow, including real-time data feeds, analytics, and alerts, along with
       an explanation of the metrics used.
+    shims: []
   evaluate_trading_performance:
     agent: false
+    code_node_type: stub
     description: Evaluate the trading performance of the trading workflow, including
       analyzing profit and loss, drawdowns, and other trading metrics.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass ImplementTradingRiskManagementOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for implement_trading_risk_management node outputs.\"\"\"\n    value_at_risk:\
+      \ float = Field(..., description=\"The calculated Value at Risk (VaR) for the\
+      \ trading workflow.\")\n    expected_shortfall: float = Field(..., description=\"\
+      The calculated Expected Shortfall (ES) for the trading workflow.\")\n    potential_future_exposure:\
+      \ float = Field(..., description=\"The calculated Potential Future Exposure\
+      \ (PFE) for the trading workflow.\")\n    risk_metrics_explanation: str = Field(...,\
+      \ description=\"An explanation of the risk metrics used in the implementation\
+      \ of trading risk management.\")\n\n\nclass EvaluateTradingPerformanceOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for evaluate_trading_performance node outputs.\"\"\
+      \"\n    total_profit_loss: float = Field(..., description=\"The total profit\
+      \ or loss from the trading workflow\")\n    max_drawdown: float = Field(...,\
+      \ description=\"The maximum drawdown experienced during the trading period\"\
+      )\n    trading_metrics: List[str] = Field(..., description=\"List of other relevant\
+      \ trading metrics (e.g., Sharpe ratio, Sortino ratio)\")\n    performance_evaluation:\
+      \ str = Field(..., description=\"An explanation of the evaluation methods used\
+      \ and overall performance assessment\")\n    is_performance_satisfactory: bool\
+      \ = Field(..., description=\"Whether the trading performance is satisfactory\
+      \ based on predefined criteria\")\n\n\ndef evaluate_trading_performance(implement_trading_risk_management_input:\
+      \ ImplementTradingRiskManagementOutput, **kwargs) -> EvaluateTradingPerformanceOutput:\n\
+      \    \"\"\"Evaluate the trading performance of the trading workflow, including\
+      \ analyzing profit and loss, drawdowns, and other trading metrics.\n\n    Args:\n\
+      \        implement_trading_risk_management_input: Input from the 'implement_trading_risk_management'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       EvaluateTradingPerformanceOutput: Object containing outputs for this\
+      \ node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub\
+      \ output with placeholder values\n    return EvaluateTradingPerformanceOutput(\n\
+      \        total_profit_loss=0.0,\n        max_drawdown=0.0,\n        trading_metrics=[],\n\
+      \        performance_evaluation=\"\",\n        is_performance_satisfactory=False,\n\
+      \    )"
     name: evaluate_trading_performance
     nodes_depended_on:
     - implement_trading_risk_management
@@ -327,10 +480,30 @@ nodes:
     prompt: Evaluate the trading performance of the trading workflow, including analyzing
       profit and loss, drawdowns, and other trading metrics, along with an explanation
       of the evaluation methods used.
+    shims: []
   identify_trading_instruments:
     agent: false
+    code_node_type: stub
     description: Identify the trading instruments to be included in the trading workflow,
       such as stocks, options, futures, and forex.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass IdentifyTradingInstrumentsOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for identify_trading_instruments node outputs.\"\"\"\n    trading_instruments:\
+      \ List[str] = Field(..., description=\"List of trading instruments identified\
+      \ for inclusion in the workflow.\")\n    exchanges: List[str] = Field(..., description=\"\
+      List of exchanges where the trading instruments are listed.\")\n    listings:\
+      \ List[str] = Field(..., description=\"List of listings or symbols for each\
+      \ trading instrument.\")\n    market_capitalizations: List[float] = Field(...,\
+      \ description=\"List of market capitalizations for each trading instrument.\"\
+      )\n\n\ndef identify_trading_instruments(general_input: str, **kwargs) -> IdentifyTradingInstrumentsOutput:\n\
+      \    \"\"\"Identify the trading instruments to be included in the trading workflow,\
+      \ such as stocks, options, futures, and forex.\n\n    Args:\n        general_input:\
+      \ General input string for the root node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        IdentifyTradingInstrumentsOutput: Object\
+      \ containing outputs for this node.\n    \"\"\"\n    # TODO: Implement this\
+      \ function\n\n    # Return stub output with placeholder values\n    return IdentifyTradingInstrumentsOutput(\n\
+      \        trading_instruments=[],\n        exchanges=[],\n        listings=[],\n\
+      \        market_capitalizations=[],\n    )"
     name: identify_trading_instruments
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -373,10 +546,41 @@ nodes:
         summary: Identify trading instruments for the trading workflow.
     prompt: List the trading instruments to be included in the trading workflow, along
       with their relevant details such as exchange, listing, and market capitalization.
+    shims: []
   implement_order_execution:
     agent: false
+    code_node_type: stub
     description: This node implements the order execution logic for each trading instrument,
       including entry orders, stop-loss orders, and profit targets.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass CalculatePositionSizingOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for calculate_position_sizing node outputs.\"\"\"\n    instrument_position_sizes:\
+      \ List[float] = Field(..., description=\"List of position sizes for each trading\
+      \ instrument\")\n    position_size_explanations: List[str] = Field(..., description=\"\
+      List of explanations for the factors that influence position sizing for each\
+      \ trading instrument\")\n    total_portfolio_value: float = Field(..., description=\"\
+      Total portfolio value after calculating position sizes\")\n    is_position_sizing_valid:\
+      \ bool = Field(..., description=\"Whether the calculated position sizes are\
+      \ valid and within allowed limits\")\n\n\nclass ImplementOrderExecutionOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for implement_order_execution node outputs.\"\"\"\n\
+      \    order_execution_status: bool = Field(..., description=\"Whether the order\
+      \ execution was successful\")\n    executed_orders: List[str] = Field(..., description=\"\
+      List of executed orders, including order IDs and instrument symbols\")\n   \
+      \ entry_order_prices: List[float] = Field(..., description=\"List of entry order\
+      \ prices for each trading instrument\")\n    stop_loss_order_prices: List[float]\
+      \ = Field(..., description=\"List of stop-loss order prices for each trading\
+      \ instrument\")\n    profit_target_prices: List[float] = Field(..., description=\"\
+      List of profit target prices for each trading instrument\")\n\n\ndef implement_order_execution(calculate_position_sizing_input:\
+      \ CalculatePositionSizingOutput, **kwargs) -> ImplementOrderExecutionOutput:\n\
+      \    \"\"\"This node implements the order execution logic for each trading instrument,\
+      \ including entry orders, stop-loss orders, and profit targets.\n\n    Args:\n\
+      \        calculate_position_sizing_input: Input from the 'calculate_position_sizing'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       ImplementOrderExecutionOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return ImplementOrderExecutionOutput(\n     \
+      \   order_execution_status=False,\n        executed_orders=[],\n        entry_order_prices=[],\n\
+      \        stop_loss_order_prices=[],\n        profit_target_prices=[],\n    )"
     name: implement_order_execution
     nodes_depended_on:
     - calculate_position_sizing
@@ -440,10 +644,42 @@ nodes:
     prompt: Implement the order execution logic for each trading instrument, including
       entry orders, stop-loss orders, and profit targets, along with an explanation
       of the execution algorithms used.
+    shims: []
   implement_trading_risk_management:
     agent: false
+    code_node_type: stub
     description: Implement trading risk management to monitor and control trading
       risks, including value at risk, expected shortfall, and potential future exposure.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DevelopTradingDashboardOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for develop_trading_dashboard node outputs.\"\"\"\n    dashboard_name: str\
+      \ = Field(..., description=\"The name of the trading dashboard\")\n    metrics_used:\
+      \ List[str] = Field(..., description=\"A list of metrics used in the trading\
+      \ dashboard\")\n    data_feeds: List[str] = Field(..., description=\"A list\
+      \ of real-time data feeds used in the trading dashboard\")\n    analytics_tools:\
+      \ List[str] = Field(..., description=\"A list of analytics tools used in the\
+      \ trading dashboard\")\n    alert_system: bool = Field(..., description=\"Whether\
+      \ the trading dashboard has an alert system\")\n    dashboard_url: str = Field(...,\
+      \ description=\"The URL of the trading dashboard\")\n\n\nclass ImplementTradingRiskManagementOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for implement_trading_risk_management node outputs.\"\
+      \"\"\n    value_at_risk: float = Field(..., description=\"The calculated Value\
+      \ at Risk (VaR) for the trading workflow.\")\n    expected_shortfall: float\
+      \ = Field(..., description=\"The calculated Expected Shortfall (ES) for the\
+      \ trading workflow.\")\n    potential_future_exposure: float = Field(..., description=\"\
+      The calculated Potential Future Exposure (PFE) for the trading workflow.\")\n\
+      \    risk_metrics_explanation: str = Field(..., description=\"An explanation\
+      \ of the risk metrics used in the implementation of trading risk management.\"\
+      )\n\n\ndef implement_trading_risk_management(develop_trading_dashboard_input:\
+      \ DevelopTradingDashboardOutput, **kwargs) -> ImplementTradingRiskManagementOutput:\n\
+      \    \"\"\"Implement trading risk management to monitor and control trading\
+      \ risks, including value at risk, expected shortfall, and potential future exposure.\n\
+      \n    Args:\n        develop_trading_dashboard_input: Input from the 'develop_trading_dashboard'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       ImplementTradingRiskManagementOutput: Object containing outputs for\
+      \ this node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return\
+      \ stub output with placeholder values\n    return ImplementTradingRiskManagementOutput(\n\
+      \        value_at_risk=0.0,\n        expected_shortfall=0.0,\n        potential_future_exposure=0.0,\n\
+      \        risk_metrics_explanation=\"\",\n    )"
     name: implement_trading_risk_management
     nodes_depended_on:
     - develop_trading_dashboard
@@ -492,10 +728,37 @@ nodes:
     prompt: Implement trading risk management to monitor and control trading risks,
       including value at risk, expected shortfall, and potential future exposure,
       along with an explanation of the risk metrics used.
+    shims: []
   select_trading_strategy:
     agent: false
+    code_node_type: stub
     description: Choose the trading strategy to be implemented in the trading workflow,
       including technical and fundamental analysis.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass IdentifyTradingInstrumentsOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for identify_trading_instruments node outputs.\"\"\"\n    trading_instruments:\
+      \ List[str] = Field(..., description=\"List of trading instruments identified\
+      \ for inclusion in the workflow.\")\n    exchanges: List[str] = Field(..., description=\"\
+      List of exchanges where the trading instruments are listed.\")\n    listings:\
+      \ List[str] = Field(..., description=\"List of listings or symbols for each\
+      \ trading instrument.\")\n    market_capitalizations: List[float] = Field(...,\
+      \ description=\"List of market capitalizations for each trading instrument.\"\
+      )\n\n\nclass SelectTradingStrategyOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for select_trading_strategy node outputs.\"\"\"\n    selected_strategy_name:\
+      \ str = Field(..., description=\"The name of the selected trading strategy.\"\
+      )\n    strategy_principles: List[str] = Field(..., description=\"A list of key\
+      \ principles associated with the selected trading strategy.\")\n    strategy_metrics:\
+      \ List[str] = Field(..., description=\"A list of metrics used in the selected\
+      \ trading strategy.\")\n\n\ndef select_trading_strategy(identify_trading_instruments_input:\
+      \ IdentifyTradingInstrumentsOutput, **kwargs) -> SelectTradingStrategyOutput:\n\
+      \    \"\"\"Choose the trading strategy to be implemented in the trading workflow,\
+      \ including technical and fundamental analysis.\n\n    Args:\n        identify_trading_instruments_input:\
+      \ Input from the 'identify_trading_instruments' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        SelectTradingStrategyOutput: Object\
+      \ containing outputs for this node.\n    \"\"\"\n    # TODO: Implement this\
+      \ function\n\n    # Return stub output with placeholder values\n    return SelectTradingStrategyOutput(\n\
+      \        selected_strategy_name=\"\",\n        strategy_principles=[],\n   \
+      \     strategy_metrics=[],\n    )"
     name: select_trading_strategy
     nodes_depended_on:
     - identify_trading_instruments
@@ -547,10 +810,31 @@ nodes:
         summary: Selects a trading strategy for the trading workflow.
     prompt: Choose a trading strategy to be implemented in the trading workflow, including
       an explanation of its key principles and metrics.
+    shims: []
   set_market_environment:
     agent: false
+    code_node_type: stub
     description: Set up the market environment for the trading workflow, including
       setting up trading accounts, setting up APIs, and configuring exchange links.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass SetMarketEnvironmentOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ set_market_environment node outputs.\"\"\"\n    trading_accounts_setup_status:\
+      \ bool = Field(..., description=\"Whether the trading accounts have been successfully\
+      \ set up\")\n    api_configuration_status: bool = Field(..., description=\"\
+      Whether the APIs have been successfully configured\")\n    exchange_links_configuration_status:\
+      \ bool = Field(..., description=\"Whether the exchange links have been successfully\
+      \ configured\")\n    configured_exchanges: List[str] = Field(..., description=\"\
+      List of exchanges that have been configured\")\n\n\ndef set_market_environment(general_input:\
+      \ str, **kwargs) -> SetMarketEnvironmentOutput:\n    \"\"\"Set up the market\
+      \ environment for the trading workflow, including setting up trading accounts,\
+      \ setting up APIs, and configuring exchange links.\n\n    Args:\n        general_input:\
+      \ General input string for the root node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        SetMarketEnvironmentOutput: Object containing\
+      \ outputs for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n\
+      \    # Return stub output with placeholder values\n    return SetMarketEnvironmentOutput(\n\
+      \        trading_accounts_setup_status=False,\n        api_configuration_status=False,\n\
+      \        exchange_links_configuration_status=False,\n        configured_exchanges=[],\n\
+      \    )"
     name: set_market_environment
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -600,3 +884,4 @@ nodes:
         summary: Sets up the market environment for the trading workflow.
     prompt: Set up the market environment for the trading workflow, including setting
       up trading accounts, setting up APIs, and configuring exchange links.
+    shims: []
