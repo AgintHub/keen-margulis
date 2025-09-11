@@ -1,6 +1,5 @@
-dag_type: plain_text
-description: A workflow to create a trading workflow, which includes identifying trading
-  instruments, selecting a trading strategy, and determining trading rules.
+dag_type: typed
+description: Generated workflow from UI.
 name: create_trading_workflow
 nodes:
   calculate_position_sizing:
@@ -11,6 +10,21 @@ nodes:
     nodes_depended_on:
     - determine_trading_rules
     nodes_dependent_on: []
+    output_structure:
+    - description: List of position sizes for each trading instrument
+      key: instrument_position_sizes
+      type: List[float]
+    - description: List of explanations for the factors that influence position sizing
+        for each trading instrument
+      key: position_size_explanations
+      type: List[str]
+    - description: Total portfolio value after calculating position sizes
+      key: total_portfolio_value
+      type: float
+    - description: Whether the calculated position sizes are valid and within allowed
+        limits
+      key: is_position_sizing_valid
+      type: bool
     prompt: Calculate the position sizing for each trading instrument based on the
       trading rules and strategy, including an explanation of the factors that influence
       position sizing.
@@ -22,6 +36,20 @@ nodes:
     nodes_depended_on:
     - set_market_environment
     nodes_dependent_on: []
+    output_structure:
+    - description: Whether the trading system has been successfully configured
+      key: trading_system_status
+      type: bool
+    - description: List of configuration parameters used in the trading system
+      key: configuration_parameters
+      type: str
+    - description: Details of the market environment, including trading accounts,
+        APIs, and exchange links
+      key: market_environment_details
+      type: str
+    - description: List of trading rules implemented in the trading system
+      key: trading_rules_implemented
+      type: List[str]
     prompt: Configure the trading system to connect to the market environment and
       implement the trading rules and strategy, including an explanation of the configuration
       parameters used.
@@ -33,6 +61,22 @@ nodes:
     nodes_depended_on:
     - select_trading_strategy
     nodes_dependent_on: []
+    output_structure:
+    - description: List of entry points for each trading instrument
+      key: entry_points
+      type: List[float]
+    - description: List of exit points for each trading instrument
+      key: exit_points
+      type: List[float]
+    - description: List of stop-loss levels for each trading instrument
+      key: stop_loss_levels
+      type: List[float]
+    - description: Description of the position sizing strategy
+      key: position_sizing_strategy
+      type: str
+    - description: Summary of the determined trading rules
+      key: trading_rules_summary
+      type: str
     prompt: Determine the trading rules that will be used in the trading workflow,
       including entry and exit points, stop-loss levels, and position sizing.
   develop_trading_dashboard:
@@ -43,6 +87,25 @@ nodes:
     nodes_depended_on:
     - configure_trading_system
     nodes_dependent_on: []
+    output_structure:
+    - description: The name of the trading dashboard
+      key: dashboard_name
+      type: str
+    - description: A list of metrics used in the trading dashboard
+      key: metrics_used
+      type: List[str]
+    - description: A list of real-time data feeds used in the trading dashboard
+      key: data_feeds
+      type: List[str]
+    - description: A list of analytics tools used in the trading dashboard
+      key: analytics_tools
+      type: List[str]
+    - description: Whether the trading dashboard has an alert system
+      key: alert_system
+      type: bool
+    - description: The URL of the trading dashboard
+      key: dashboard_url
+      type: str
     prompt: Develop a trading dashboard to monitor the performance of the trading
       workflow, including real-time data feeds, analytics, and alerts, along with
       an explanation of the metrics used.
@@ -54,6 +117,25 @@ nodes:
     nodes_depended_on:
     - implement_trading_risk_management
     nodes_dependent_on: []
+    output_structure:
+    - description: The total profit or loss from the trading workflow
+      key: total_profit_loss
+      type: float
+    - description: The maximum drawdown experienced during the trading period
+      key: max_drawdown
+      type: float
+    - description: List of other relevant trading metrics (e.g., Sharpe ratio, Sortino
+        ratio)
+      key: trading_metrics
+      type: List[str]
+    - description: An explanation of the evaluation methods used and overall performance
+        assessment
+      key: performance_evaluation
+      type: str
+    - description: Whether the trading performance is satisfactory based on predefined
+        criteria
+      key: is_performance_satisfactory
+      type: bool
     prompt: Evaluate the trading performance of the trading workflow, including analyzing
       profit and loss, drawdowns, and other trading metrics, along with an explanation
       of the evaluation methods used.
@@ -64,6 +146,19 @@ nodes:
     name: identify_trading_instruments
     nodes_depended_on: []
     nodes_dependent_on: []
+    output_structure:
+    - description: List of trading instruments identified for inclusion in the workflow.
+      key: trading_instruments
+      type: List[str]
+    - description: List of exchanges where the trading instruments are listed.
+      key: exchanges
+      type: List[str]
+    - description: List of listings or symbols for each trading instrument.
+      key: listings
+      type: List[str]
+    - description: List of market capitalizations for each trading instrument.
+      key: market_capitalizations
+      type: List[float]
     prompt: List the trading instruments to be included in the trading workflow, along
       with their relevant details such as exchange, listing, and market capitalization.
   implement_order_execution:
@@ -74,6 +169,22 @@ nodes:
     nodes_depended_on:
     - calculate_position_sizing
     nodes_dependent_on: []
+    output_structure:
+    - description: Whether the order execution was successful
+      key: order_execution_status
+      type: bool
+    - description: List of executed orders, including order IDs and instrument symbols
+      key: executed_orders
+      type: List[str]
+    - description: List of entry order prices for each trading instrument
+      key: entry_order_prices
+      type: List[float]
+    - description: List of stop-loss order prices for each trading instrument
+      key: stop_loss_order_prices
+      type: List[float]
+    - description: List of profit target prices for each trading instrument
+      key: profit_target_prices
+      type: List[float]
     prompt: Implement the order execution logic for each trading instrument, including
       entry orders, stop-loss orders, and profit targets, along with an explanation
       of the execution algorithms used.
@@ -85,6 +196,21 @@ nodes:
     nodes_depended_on:
     - develop_trading_dashboard
     nodes_dependent_on: []
+    output_structure:
+    - description: The calculated Value at Risk (VaR) for the trading workflow.
+      key: value_at_risk
+      type: float
+    - description: The calculated Expected Shortfall (ES) for the trading workflow.
+      key: expected_shortfall
+      type: float
+    - description: The calculated Potential Future Exposure (PFE) for the trading
+        workflow.
+      key: potential_future_exposure
+      type: float
+    - description: An explanation of the risk metrics used in the implementation of
+        trading risk management.
+      key: risk_metrics_explanation
+      type: str
     prompt: Implement trading risk management to monitor and control trading risks,
       including value at risk, expected shortfall, and potential future exposure,
       along with an explanation of the risk metrics used.
@@ -96,6 +222,16 @@ nodes:
     nodes_depended_on:
     - identify_trading_instruments
     nodes_dependent_on: []
+    output_structure:
+    - description: The name of the selected trading strategy.
+      key: selected_strategy_name
+      type: str
+    - description: A list of key principles associated with the selected trading strategy.
+      key: strategy_principles
+      type: List[str]
+    - description: A list of metrics used in the selected trading strategy.
+      key: strategy_metrics
+      type: List[str]
     prompt: Choose a trading strategy to be implemented in the trading workflow, including
       an explanation of its key principles and metrics.
   set_market_environment:
@@ -105,5 +241,18 @@ nodes:
     name: set_market_environment
     nodes_depended_on: []
     nodes_dependent_on: []
+    output_structure:
+    - description: Whether the trading accounts have been successfully set up
+      key: trading_accounts_setup_status
+      type: bool
+    - description: Whether the APIs have been successfully configured
+      key: api_configuration_status
+      type: bool
+    - description: Whether the exchange links have been successfully configured
+      key: exchange_links_configuration_status
+      type: bool
+    - description: List of exchanges that have been configured
+      key: configured_exchanges
+      type: List[str]
     prompt: Set up the market environment for the trading workflow, including setting
       up trading accounts, setting up APIs, and configuring exchange links.
