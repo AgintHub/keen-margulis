@@ -1,4 +1,4 @@
-dag_type: typed
+dag_type: spec
 description: Generated workflow from UI.
 name: create_trading_workflow
 nodes:
@@ -25,6 +25,43 @@ nodes:
         limits
       key: is_position_sizing_valid
       type: bool
+    prd:
+      conceptual_info: This node calculates the position sizing for each trading instrument
+        based on the trading rules and strategy.
+      docstring:
+        examples:
+        - lines:
+          - trading_rules = {
+          - '    ''entry_points'': [10.0, 20.0],'
+          - '    ''exit_points'': [15.0, 25.0],'
+          - '    ''stop_loss_levels'': [9.0, 19.0],'
+          - '    ''position_sizing_strategy'': ''fixed'','
+          - '    ''trading_rules_summary'': ''Example trading rules'''
+          - '}'
+          - trading_instruments = ['Instrument1', 'Instrument2']
+          - calculate_position_sizing(trading_rules, trading_instruments)
+          output: '{''instrument_position_sizes'': [100.0, 200.0], ''position_size_explanations'':
+            [''Fixed position size of 100.0'', ''Fixed position size of 200.0''],
+            ''total_portfolio_value'': 300.0, ''is_position_sizing_valid'': True}'
+        parameters:
+        - description: Trading rules determined by the determine_trading_rules node,
+            including entry_points, exit_points, stop_loss_levels, position_sizing_strategy,
+            and trading_rules_summary.
+          name: trading_rules
+          type: dict
+        - description: List of trading instruments identified for inclusion in the
+            workflow.
+          name: trading_instruments
+          type: List[str]
+        raises:
+        - description: If the trading rules or instruments are invalid.
+          type: ValueError
+        returns:
+          description: A dictionary containing instrument_position_sizes, position_size_explanations,
+            total_portfolio_value, and is_position_sizing_valid.
+          type: dict
+        summary: Calculates the position sizing for each trading instrument based
+          on the trading rules and strategy.
     prompt: Calculate the position sizing for each trading instrument based on the
       trading rules and strategy, including an explanation of the factors that influence
       position sizing.
@@ -49,7 +86,61 @@ nodes:
       type: str
     - description: List of trading rules implemented in the trading system
       key: trading_rules_implemented
-      type: List[str]
+      type: str
+    prd:
+      conceptual_info: This node configures the trading system to connect to the market
+        environment and implements the trading rules and strategy. It takes the output
+        from the 'set_market_environment' node and uses it to set up the trading system
+        with the necessary parameters and rules.
+      docstring:
+        examples:
+        - lines:
+          - trading_accounts_setup_status = True
+          - api_configuration_status = True
+          - exchange_links_configuration_status = True
+          - configured_exchanges = ['Binance', 'Kraken']
+          - result = configure_trading_system(trading_accounts_setup_status, api_configuration_status,
+            exchange_links_configuration_status, configured_exchanges)
+          output: "{\n  'trading_system_status': True,\n  'configuration_parameters':\
+            \ 'API keys, account credentials, exchange links',\n  'market_environment_details':\
+            \ 'Trading accounts: [True], APIs: [True], Exchange links: [True]',\n\
+            \  'trading_rules_implemented': ['Entry point rule', 'Exit point rule',\
+            \ 'Stop-loss rule']\n}"
+        - lines:
+          - trading_accounts_setup_status = False
+          - api_configuration_status = True
+          - exchange_links_configuration_status = True
+          - configured_exchanges = ['Binance', 'Kraken']
+          - result = configure_trading_system(trading_accounts_setup_status, api_configuration_status,
+            exchange_links_configuration_status, configured_exchanges)
+          output: "{\n  'trading_system_status': False,\n  'configuration_parameters':\
+            \ '',\n  'market_environment_details': 'Trading accounts: [False], APIs:\
+            \ [True], Exchange links: [True]',\n  'trading_rules_implemented': []\n\
+            }"
+        parameters:
+        - description: Whether the trading accounts have been successfully set up.
+          name: trading_accounts_setup_status
+          type: bool
+        - description: Whether the APIs have been successfully configured.
+          name: api_configuration_status
+          type: bool
+        - description: Whether the exchange links have been successfully configured.
+          name: exchange_links_configuration_status
+          type: bool
+        - description: List of exchanges that have been configured.
+          name: configured_exchanges
+          type: List[str]
+        raises:
+        - description: If any of the required parent node outputs are not provided
+            or are invalid.
+          type: ValueError
+        returns:
+          description: A dictionary containing the status of the trading system configuration,
+            the list of configuration parameters, details of the market environment,
+            and the list of trading rules implemented.
+          type: dict
+        summary: Configures the trading system to connect to the market environment
+          and implement the trading rules and strategy.
     prompt: Configure the trading system to connect to the market environment and
       implement the trading rules and strategy, including an explanation of the configuration
       parameters used.
@@ -77,6 +168,34 @@ nodes:
     - description: Summary of the determined trading rules
       key: trading_rules_summary
       type: str
+    prd:
+      conceptual_info: This node determines the trading rules for a trading workflow
+        based on a selected trading strategy.
+      docstring:
+        examples:
+        - lines:
+          - 'determine_trading_rules({''selected_strategy_name'': ''Moving Average
+            Crossover'', ''strategy_principles'': [''MA_50'', ''MA_200''], ''strategy_metrics'':
+            ['' Sharpe Ratio'']})'
+          output: '{''entry_points'': [1.0, 2.0], ''exit_points'': [3.0, 4.0], ''stop_loss_levels'':
+            [0.9, 1.9], ''position_sizing_strategy'': ''Fixed Fractional'', ''trading_rules_summary'':
+            ''Based on Moving Average Crossover strategy''}'
+        parameters:
+        - description: A dictionary containing the selected trading strategy details,
+            including 'selected_strategy_name', 'strategy_principles', and 'strategy_metrics'.
+          name: selected_strategy
+          type: dict
+        raises:
+        - description: If the selected trading strategy is invalid or does not contain
+            required details.
+          type: ValueError
+        returns:
+          description: A dictionary containing the determined trading rules, including
+            'entry_points', 'exit_points', 'stop_loss_levels', 'position_sizing_strategy',
+            and 'trading_rules_summary'.
+          type: dict
+        summary: Determine trading rules including entry and exit points, stop-loss
+          levels, and position sizing based on a selected trading strategy.
     prompt: Determine the trading rules that will be used in the trading workflow,
       including entry and exit points, stop-loss levels, and position sizing.
   develop_trading_dashboard:
@@ -106,6 +225,43 @@ nodes:
     - description: The URL of the trading dashboard
       key: dashboard_url
       type: str
+    prd:
+      conceptual_info: The develop_trading_dashboard node is responsible for creating
+        a trading dashboard to monitor the performance of the trading workflow. It
+        takes the output from the configure_trading_system node and uses it to develop
+        a comprehensive dashboard.
+      docstring:
+        examples:
+        - lines:
+          - develop_trading_dashboard(trading_system_status=True, configuration_parameters='param1,param2',
+            market_environment_details='market_env', trading_rules_implemented=['rule1','rule2'])
+          output: '{''dashboard_name'': ''Trading Dashboard'', ''metrics_used'': [''metric1'',''metric2''],
+            ''data_feeds'': [''feed1'',''feed2''], ''analytics_tools'': [''tool1'',''tool2''],
+            ''alert_system'': True, ''dashboard_url'': ''https://dashboard.com''}'
+        parameters:
+        - description: Whether the trading system has been successfully configured
+          name: trading_system_status
+          type: bool
+        - description: List of configuration parameters used in the trading system
+          name: configuration_parameters
+          type: str
+        - description: Details of the market environment, including trading accounts,
+            APIs, and exchange links
+          name: market_environment_details
+          type: str
+        - description: List of trading rules implemented in the trading system
+          name: trading_rules_implemented
+          type: List[str]
+        raises:
+        - description: If the trading system status is False or if the configuration
+            parameters are invalid
+          type: ValueError
+        returns:
+          description: A dictionary containing the dashboard_name, metrics_used, data_feeds,
+            analytics_tools, alert_system, and dashboard_url
+          type: dict
+        summary: Develop a trading dashboard to monitor the performance of the trading
+          workflow.
     prompt: Develop a trading dashboard to monitor the performance of the trading
       workflow, including real-time data feeds, analytics, and alerts, along with
       an explanation of the metrics used.
@@ -136,6 +292,38 @@ nodes:
         criteria
       key: is_performance_satisfactory
       type: bool
+    prd:
+      conceptual_info: This node evaluates the trading performance of a trading workflow
+        by analyzing profit and loss, drawdowns, and other trading metrics.
+      docstring:
+        examples:
+        - lines:
+          - 'evaluate_trading_performance(trading_workflow_data={''profit_loss'':
+            1000.0, ''drawdowns'': [0.1, 0.2]}, risk_management_data={''value_at_risk'':
+            0.05, ''expected_shortfall'': 0.03})'
+          output: '{''total_profit_loss'': 1000.0, ''max_drawdown'': 0.2, ''trading_metrics'':
+            [''Sharpe ratio: 1.2'', ''Sortino ratio: 1.1''], ''performance_evaluation'':
+            ''The trading performance is satisfactory.'', ''is_performance_satisfactory'':
+            True}'
+        parameters:
+        - description: Trading workflow data, including profit and loss, drawdowns,
+            and other trading metrics.
+          name: trading_workflow_data
+          type: dict
+        - description: Risk management data from the implement_trading_risk_management
+            node.
+          name: risk_management_data
+          type: dict
+        raises:
+        - description: If the input trading workflow data or risk management data
+            is invalid or incomplete.
+          type: ValueError
+        returns:
+          description: A dictionary containing the total profit or loss, maximum drawdown,
+            trading metrics, performance evaluation, and whether the performance is
+            satisfactory.
+          type: dict
+        summary: Evaluates the trading performance of a trading workflow.
     prompt: Evaluate the trading performance of the trading workflow, including analyzing
       profit and loss, drawdowns, and other trading metrics, along with an explanation
       of the evaluation methods used.
@@ -159,11 +347,35 @@ nodes:
     - description: List of market capitalizations for each trading instrument.
       key: market_capitalizations
       type: List[float]
+    prd:
+      conceptual_info: This node identifies the trading instruments to be included
+        in the trading workflow.
+      docstring:
+        examples:
+        - lines:
+          - 'identify_trading_instruments({''instruments'': [''AAPL'', ''GOOG''],
+            ''exchanges'': [''NASDAQ''], ''listings'': [''AAPL'', ''GOOG''], ''market_capitalizations'':
+            [1000.0, 2000.0]})'
+          output: '{''trading_instruments'': [''AAPL'', ''GOOG''], ''exchanges'':
+            [''NASDAQ''], ''listings'': [''AAPL'', ''GOOG''], ''market_capitalizations'':
+            [1000.0, 2000.0]}'
+        parameters:
+        - description: Dictionary containing information about trading instruments.
+          name: instruments_info
+          type: dict
+        raises:
+        - description: If instruments_info is empty or None.
+          type: ValueError
+        returns:
+          description: Dictionary containing identified trading instruments, exchanges,
+            listings, and market capitalizations.
+          type: dict
+        summary: Identify trading instruments for the trading workflow.
     prompt: List the trading instruments to be included in the trading workflow, along
       with their relevant details such as exchange, listing, and market capitalization.
   implement_order_execution:
     agent: false
-    description: Implement the order execution logic for each trading instrument,
+    description: This node implements the order execution logic for each trading instrument,
       including entry orders, stop-loss orders, and profit targets.
     name: implement_order_execution
     nodes_depended_on:
@@ -185,6 +397,46 @@ nodes:
     - description: List of profit target prices for each trading instrument
       key: profit_target_prices
       type: List[float]
+    prd:
+      conceptual_info: This node is responsible for executing orders for each trading
+        instrument, taking into account entry orders, stop-loss orders, and profit
+        targets.
+      docstring:
+        examples:
+        - lines:
+          - instrument_position_sizes = [100.0, 200.0, 300.0]
+          - entry_points = [10.0, 20.0, 30.0]
+          - stop_loss_levels = [9.0, 19.0, 29.0]
+          - profit_targets = [11.0, 21.0, 31.0]
+          - implement_order_execution(instrument_position_sizes, entry_points, stop_loss_levels,
+            profit_targets)
+          output: '{''order_execution_status'': True, ''executed_orders'': [''order1'',
+            ''order2'', ''order3''], ''entry_order_prices'': [10.0, 20.0, 30.0], ''stop_loss_order_prices'':
+            [9.0, 19.0, 29.0], ''profit_target_prices'': [11.0, 21.0, 31.0]}'
+        parameters:
+        - description: List of position sizes for each trading instrument
+          name: instrument_position_sizes
+          type: List[float]
+        - description: List of entry points for each trading instrument
+          name: entry_points
+          type: List[float]
+        - description: List of stop-loss levels for each trading instrument
+          name: stop_loss_levels
+          type: List[float]
+        - description: List of profit targets for each trading instrument
+          name: profit_targets
+          type: List[float]
+        raises:
+        - description: If the input lists are not of the same length.
+          type: ValueError
+        - description: If an error occurs during order execution.
+          type: RuntimeError
+        returns:
+          description: A dictionary containing the order execution status, executed
+            orders, entry order prices, stop-loss order prices, and profit target
+            prices.
+          type: dict
+        summary: Implement the order execution logic for each trading instrument.
     prompt: Implement the order execution logic for each trading instrument, including
       entry orders, stop-loss orders, and profit targets, along with an explanation
       of the execution algorithms used.
@@ -211,6 +463,32 @@ nodes:
         trading risk management.
       key: risk_metrics_explanation
       type: str
+    prd:
+      conceptual_info: This node implements trading risk management to monitor and
+        control trading risks.
+      docstring:
+        examples:
+        - lines:
+          - 'trading_dashboard = {''dashboard_name'': ''My Dashboard'', ''metrics_used'':
+            [''VaR'', ''ES'']}'
+          - risk_management = implement_trading_risk_management(trading_dashboard)
+          - print(risk_management)
+          output: '{''value_at_risk'': 0.05, ''expected_shortfall'': 0.03, ''potential_future_exposure'':
+            0.10, ''risk_metrics_explanation'': ''VaR: 5%, ES: 3%, PFE: 10%''}'
+        parameters:
+        - description: The trading dashboard output from the develop_trading_dashboard
+            node.
+          name: trading_dashboard
+          type: dict
+        raises:
+        - description: If the trading dashboard output is invalid or missing.
+          type: ValueError
+        returns:
+          description: A dictionary containing the calculated risk metrics and their
+            explanation.
+          type: dict
+        summary: Implement trading risk management to monitor and control trading
+          risks.
     prompt: Implement trading risk management to monitor and control trading risks,
       including value at risk, expected shortfall, and potential future exposure,
       along with an explanation of the risk metrics used.
@@ -232,6 +510,41 @@ nodes:
     - description: A list of metrics used in the selected trading strategy.
       key: strategy_metrics
       type: List[str]
+    prd:
+      conceptual_info: This node selects a trading strategy for the trading workflow
+        based on the identified trading instruments.
+      docstring:
+        examples:
+        - lines:
+          - select_trading_strategy(trading_instruments=['AAPL', 'GOOG'], exchanges=['NASDAQ'],
+            listings=['AAPL', 'GOOG'], market_capitalizations=[1000.0, 500.0])
+          output: '{''selected_strategy_name'': ''Mean Reversion'', ''strategy_principles'':
+            [''Buy undervalued stocks'', ''Sell overvalued stocks''], ''strategy_metrics'':
+            [''Moving Averages'', ''Bollinger Bands'']}'
+        parameters:
+        - description: List of trading instruments identified for inclusion in the
+            workflow.
+          name: trading_instruments
+          type: List[str]
+        - description: List of exchanges where the trading instruments are listed.
+          name: exchanges
+          type: List[str]
+        - description: List of listings or symbols for each trading instrument.
+          name: listings
+          type: List[str]
+        - description: List of market capitalizations for each trading instrument.
+          name: market_capitalizations
+          type: List[float]
+        raises:
+        - description: If no suitable trading strategy can be found for the given
+            instruments.
+          type: ValueError
+        returns:
+          description: A dictionary containing the selected strategy name, its key
+            principles, and metrics.
+          type: '{selected_strategy_name: str, strategy_principles: List[str], strategy_metrics:
+            List[str]}'
+        summary: Selects a trading strategy for the trading workflow.
     prompt: Choose a trading strategy to be implemented in the trading workflow, including
       an explanation of its key principles and metrics.
   set_market_environment:
@@ -254,5 +567,36 @@ nodes:
     - description: List of exchanges that have been configured
       key: configured_exchanges
       type: List[str]
+    prd:
+      conceptual_info: The set_market_environment node is responsible for setting
+        up the market environment for the trading workflow. This includes configuring
+        trading accounts, APIs, and exchange links.
+      docstring:
+        examples:
+        - lines:
+          - 'set_market_environment(trading_accounts=[''account1'', ''account2''],
+            api_credentials={''api_key'': ''key'', ''api_secret'': ''secret''}, exchanges=[''exchange1'',
+            ''exchange2''])'
+          output: '{''trading_accounts_setup_status'': True, ''api_configuration_status'':
+            True, ''exchange_links_configuration_status'': True, ''configured_exchanges'':
+            [''exchange1'', ''exchange2'']}'
+        parameters:
+        - description: List of trading accounts to set up
+          name: trading_accounts
+          type: List[str]
+        - description: API credentials for configuration
+          name: api_credentials
+          type: dict
+        - description: List of exchanges to configure
+          name: exchanges
+          type: List[str]
+        raises:
+        - description: If there is an error setting up the market environment
+          type: Exception
+        returns:
+          description: A dictionary containing the setup status of trading accounts,
+            APIs, and exchange links
+          type: dict
+        summary: Sets up the market environment for the trading workflow.
     prompt: Set up the market environment for the trading workflow, including setting
       up trading accounts, setting up APIs, and configuring exchange links.
