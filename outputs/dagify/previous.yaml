@@ -1,499 +1,454 @@
 dag_type: stub
-description: A workflow that creates a comprehensive trading strategy based on market
-  data analysis, risk assessment, and trading rules.
-name: trading_workflow
+description: A typed workflow that fetches Taylor Swift songs, analyzes their lyrics,
+  extracts key themes, computes sentiment trends over time, and produces a concise
+  summary.
+name: taylor_swift_analysis_workflow
 nodes:
-  analyze_market_trends:
+  analyze_lyrics:
     agent: false
     code_node_type: stub
-    description: Analyze market trends using historical and current market data.
+    description: Generate word frequency statistics from all lyrics.
     implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass FetchMarketDataOutput(BaseModel):\n    \"\"\"Pydantic model for fetch_market_data\
-      \ node outputs.\"\"\"\n    current_prices: List[float] = Field(..., description=\"\
-      List of current stock prices.\")\n    historical_data: List[float] = Field(...,\
-      \ description=\"2D list of historical stock prices and volumes.\")\n\n\nclass\
-      \ AnalyzeMarketTrendsOutput(BaseModel):\n    \"\"\"Pydantic model for analyze_market_trends\
-      \ node outputs.\"\"\"\n    trend_indicators: List[float] = Field(..., description=\"\
-      List of trend indicators, such as moving averages.\")\n    pattern_recognition:\
-      \ List[str] = Field(..., description=\"List of identified patterns, such as\
-      \ 'bullish' or 'bearish'.\")\n\n\ndef analyze_market_trends(fetch_market_data_input:\
-      \ FetchMarketDataOutput, **kwargs) -> AnalyzeMarketTrendsOutput:\n    \"\"\"\
-      Analyze market trends using historical and current market data.\n\n    Args:\n\
-      \        fetch_market_data_input: Input from the 'fetch_market_data' node.\n\
-      \        **kwargs: Additional keyword arguments.\n\n    Returns:\n        AnalyzeMarketTrendsOutput:\
-      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
-      \ this function\n\n    # Return stub output with placeholder values\n    return\
-      \ AnalyzeMarketTrendsOutput(\n        trend_indicators=[],\n        pattern_recognition=[],\n\
-      \    )"
-    name: analyze_market_trends
-    nodes_depended_on:
-    - fetch_market_data
-    nodes_dependent_on:
-    - define_trading_rules
-    output_structure:
-    - description: List of trend indicators, such as moving averages.
-      key: trend_indicators
-      type: List[float]
-    - description: List of identified patterns, such as 'bullish' or 'bearish'.
-      key: pattern_recognition
-      type: List[str]
-    prd:
-      conceptual_info: Analyzes historical and current market data to identify trends
-        and patterns, providing insights for trading decisions.
-      docstring:
-        examples:
-        - lines:
-          - current_prices = [100.0, 120.0, 110.0]
-          - historical_data = [[90.0, 1000], [95.0, 1200], [100.0, 1500]]
-          - result = analyze_market_trends(current_prices, historical_data)
-          output: ([105.0, 115.0], ['bullish', 'volatile'])
-        - lines:
-          - current_prices = [80.0, 70.0, 60.0]
-          - historical_data = [[85.0, 800], [80.0, 700], [75.0, 600]]
-          - result = analyze_market_trends(current_prices, historical_data)
-          output: ([75.0, 65.0], ['bearish', 'declining'])
-        parameters:
-        - description: List of current stock prices fetched from the market data.
-          name: current_prices
-          type: List[float]
-        - description: 2D list of historical stock prices and volumes fetched from
-            the market data.
-          name: historical_data
-          type: List[List[float]]
-        raises:
-        - description: If the input lists are empty or malformed.
-          type: ValueError
-        returns:
-          description: A tuple containing a list of trend indicators and a list of
-            identified patterns.
-          type: Tuple[List[float], List[str]]
-        summary: Analyzes market trends using historical and current market data to
-          identify trend indicators and patterns.
-    prompt: Analyze the historical and current market data to identify trends and
-      patterns.
-    shims: []
-  assess_risk:
-    agent: false
-    code_node_type: stub
-    description: Assess the risk associated with potential trades based on market
-      data.
-    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass FetchMarketDataOutput(BaseModel):\n    \"\"\"Pydantic model for fetch_market_data\
-      \ node outputs.\"\"\"\n    current_prices: List[float] = Field(..., description=\"\
-      List of current stock prices.\")\n    historical_data: List[float] = Field(...,\
-      \ description=\"2D list of historical stock prices and volumes.\")\n\n\nclass\
-      \ AssessRiskOutput(BaseModel):\n    \"\"\"Pydantic model for assess_risk node\
-      \ outputs.\"\"\"\n    risk_levels: List[float] = Field(..., description=\"List\
-      \ of risk levels associated with potential trades.\")\n    risk_factors: List[str]\
-      \ = Field(..., description=\"List of factors contributing to the risk assessment.\"\
-      )\n\n\ndef assess_risk(fetch_market_data_input: FetchMarketDataOutput, **kwargs)\
-      \ -> AssessRiskOutput:\n    \"\"\"Assess the risk associated with potential\
-      \ trades based on market data.\n\n    Args:\n        fetch_market_data_input:\
-      \ Input from the 'fetch_market_data' node.\n        **kwargs: Additional keyword\
-      \ arguments.\n\n    Returns:\n        AssessRiskOutput: Object containing outputs\
-      \ for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return\
-      \ stub output with placeholder values\n    return AssessRiskOutput(\n      \
-      \  risk_levels=[],\n        risk_factors=[],\n    )"
-    name: assess_risk
-    nodes_depended_on:
-    - fetch_market_data
-    nodes_dependent_on:
-    - define_risk_management
-    output_structure:
-    - description: List of risk levels associated with potential trades.
-      key: risk_levels
-      type: List[float]
-    - description: List of factors contributing to the risk assessment.
-      key: risk_factors
-      type: List[str]
-    prd:
-      conceptual_info: This node assesses the risk associated with potential trades
-        based on current and historical market data fetched by its parent node, fetch_market_data.
-      docstring:
-        examples:
-        - lines:
-          - 'market_data = {''current_prices'': [100.0, 200.0], ''historical_data'':
-            [[90.0, 100.0], [190.0, 200.0]]}'
-          - risk_levels, risk_factors = assess_risk(market_data)
-          output: ([0.5, 0.3], ['volatility', 'liquidity'])
-        - lines:
-          - 'market_data = {''current_prices'': [150.0, 250.0], ''historical_data'':
-            [[140.0, 150.0], [240.0, 250.0]]}'
-          - risk_levels, risk_factors = assess_risk(market_data)
-          output: ([0.4, 0.2], ['market_trend', 'economic_indicators'])
-        parameters:
-        - description: Dictionary containing current prices and historical data fetched
-            from fetch_market_data.
-          name: market_data
-          type: Dict[str, List[float]]
-        raises:
-        - description: If market_data is empty or does not contain the required keys.
-          type: ValueError
-        returns:
-          description: A tuple containing a list of risk levels and a list of risk
-            factors.
-          type: Tuple[List[float], List[str]]
-        summary: Assess the risk associated with potential trades based on current
-          market conditions.
-    prompt: Evaluate the potential risks of trades based on current market conditions.
-    shims: []
-  define_risk_management:
-    agent: false
-    code_node_type: stub
-    description: Define risk management strategies based on the risk assessment.
-    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass AssessRiskOutput(BaseModel):\n    \"\"\"Pydantic model for assess_risk\
-      \ node outputs.\"\"\"\n    risk_levels: List[float] = Field(..., description=\"\
-      List of risk levels associated with potential trades.\")\n    risk_factors:\
-      \ List[str] = Field(..., description=\"List of factors contributing to the risk\
-      \ assessment.\")\n\n\nclass DefineRiskManagementOutput(BaseModel):\n    \"\"\
-      \"Pydantic model for define_risk_management node outputs.\"\"\"\n    stop_loss_levels:\
-      \ List[float] = Field(..., description=\"List of stop-loss levels for trades.\"\
-      )\n    position_sizing: List[float] = Field(..., description=\"List of position\
-      \ sizes for trades.\")\n\n\ndef define_risk_management(assess_risk_input: AssessRiskOutput,\
-      \ **kwargs) -> DefineRiskManagementOutput:\n    \"\"\"Define risk management\
-      \ strategies based on the risk assessment.\n\n    Args:\n        assess_risk_input:\
-      \ Input from the 'assess_risk' node.\n        **kwargs: Additional keyword arguments.\n\
-      \n    Returns:\n        DefineRiskManagementOutput: Object containing outputs\
-      \ for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return\
-      \ stub output with placeholder values\n    return DefineRiskManagementOutput(\n\
-      \        stop_loss_levels=[],\n        position_sizing=[],\n    )"
-    name: define_risk_management
-    nodes_depended_on:
-    - assess_risk
-    nodes_dependent_on:
-    - simulate_trades
-    output_structure:
-    - description: List of stop-loss levels for trades.
-      key: stop_loss_levels
-      type: List[float]
-    - description: List of position sizes for trades.
-      key: position_sizing
-      type: List[float]
-    prd:
-      conceptual_info: This node defines risk management strategies based on the risk
-        assessment provided by the 'assess_risk' node. It generates stop-loss levels
-        and position sizes for trades.
-      docstring:
-        examples:
-        - lines:
-          - risk_levels = [0.5, 0.7, 0.3]
-          - risk_factors = ['market_volatility', 'economic_indicators']
-          - result = define_risk_management(risk_levels, risk_factors)
-          output: '{''stop_loss_levels'': [0.4, 0.6, 0.2], ''position_sizing'': [0.1,
-            0.2, 0.3]}'
-        - lines:
-          - risk_levels = [0.2, 0.9]
-          - risk_factors = ['geopolitical_events']
-          - result = define_risk_management(risk_levels, risk_factors)
-          output: '{''stop_loss_levels'': [0.1, 0.8], ''position_sizing'': [0.05,
-            0.15]}'
-        parameters:
-        - description: List of risk levels associated with potential trades from the
-            'assess_risk' node.
-          name: risk_levels
-          type: List[float]
-        - description: List of factors contributing to the risk assessment from the
-            'assess_risk' node.
-          name: risk_factors
-          type: List[str]
-        raises:
-        - description: If risk_levels or risk_factors are empty or not of the correct
-            type.
-          type: ValueError
-        returns:
-          description: A dictionary containing lists of stop-loss levels and position
-            sizes for trades.
-          type: '{''stop_loss_levels'': List[float], ''position_sizing'': List[float]}'
-        summary: Defines risk management strategies based on risk assessment.
-    prompt: Develop strategies to mitigate potential risks based on the risk assessment.
-    shims: []
-  define_trading_rules:
-    agent: false
-    code_node_type: stub
-    description: Define trading rules based on the analysis of market trends.
-    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass AnalyzeMarketTrendsOutput(BaseModel):\n    \"\"\"Pydantic model for\
-      \ analyze_market_trends node outputs.\"\"\"\n    trend_indicators: List[float]\
-      \ = Field(..., description=\"List of trend indicators, such as moving averages.\"\
-      )\n    pattern_recognition: List[str] = Field(..., description=\"List of identified\
-      \ patterns, such as 'bullish' or 'bearish'.\")\n\n\nclass DefineTradingRulesOutput(BaseModel):\n\
-      \    \"\"\"Pydantic model for define_trading_rules node outputs.\"\"\"\n   \
-      \ buy_rules: List[str] = Field(..., description=\"List of conditions for buying\
-      \ stocks.\")\n    sell_rules: List[str] = Field(..., description=\"List of conditions\
-      \ for selling stocks.\")\n\n\ndef define_trading_rules(analyze_market_trends_input:\
-      \ AnalyzeMarketTrendsOutput, **kwargs) -> DefineTradingRulesOutput:\n    \"\"\
-      \"Define trading rules based on the analysis of market trends.\n\n    Args:\n\
-      \        analyze_market_trends_input: Input from the 'analyze_market_trends'\
+      \n\nclass FetchSongDataOutput(BaseModel):\n    \"\"\"Pydantic model for fetch_song_data\
+      \ node outputs.\"\"\"\n    song_titles: List[str] = Field(..., description=\"\
+      List of song titles in the same order as the other lists.\")\n    song_lyrics:\
+      \ List[str] = Field(..., description=\"List of full lyrics corresponding to\
+      \ each song title.\")\n    release_years: List[int] = Field(..., description=\"\
+      List of release years corresponding to each song title.\")\n\n\nclass AnalyzeLyricsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for analyze_lyrics node outputs.\"\"\"\n    unique_words:\
+      \ List[str] = Field(..., description=\"All distinct words found in the lyrics,\
+      \ ordered by descending frequency.\")\n    word_counts: List[int] = Field(...,\
+      \ description=\"Number of occurrences for each word, aligned with unique_words.\"\
+      )\n\n\ndef analyze_lyrics(fetch_song_data_input: FetchSongDataOutput, **kwargs)\
+      \ -> AnalyzeLyricsOutput:\n    \"\"\"Generate word frequency statistics from\
+      \ all lyrics.\n\n    Args:\n        fetch_song_data_input: Input from the 'fetch_song_data'\
       \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
-      \       DefineTradingRulesOutput: Object containing outputs for this node.\n\
-      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
-      \ with placeholder values\n    return DefineTradingRulesOutput(\n        buy_rules=[],\n\
-      \        sell_rules=[],\n    )"
-    name: define_trading_rules
+      \       AnalyzeLyricsOutput: Object containing outputs for this node.\n    \"\
+      \"\"\n    # TODO: Implement this function\n\n    # Return stub output with placeholder\
+      \ values\n    return AnalyzeLyricsOutput(\n        unique_words=[],\n      \
+      \  word_counts=[],\n    )"
+    name: analyze_lyrics
     nodes_depended_on:
-    - analyze_market_trends
-    nodes_dependent_on:
-    - simulate_trades
-    output_structure:
-    - description: List of conditions for buying stocks.
-      key: buy_rules
-      type: List[str]
-    - description: List of conditions for selling stocks.
-      key: sell_rules
-      type: List[str]
-    prd:
-      conceptual_info: This node defines trading rules based on the analysis of market
-        trends, using trend indicators and pattern recognition to establish conditions
-        for buying and selling stocks.
-      docstring:
-        examples:
-        - lines:
-          - trend_indicators = [50.0, 200.0]
-          - pattern_recognition = ['bullish', 'bearish']
-          - result = define_trading_rules(trend_indicators, pattern_recognition)
-          output: '{''buy_rules'': [''price > 50'', ''macd > signal''], ''sell_rules'':
-            [''price < 200'', ''rsi > 70'']}'
-        - lines:
-          - trend_indicators = [100.0, 50.0]
-          - pattern_recognition = ['bearish', 'bullish']
-          - result = define_trading_rules(trend_indicators, pattern_recognition)
-          output: '{''buy_rules'': [''price > 100'', ''stochastic < 20''], ''sell_rules'':
-            [''price < 50'', ''macd < signal'']}'
-        parameters:
-        - description: List of trend indicators, such as moving averages, from the
-            market trend analysis.
-          name: trend_indicators
-          type: List[float]
-        - description: List of identified patterns, such as 'bullish' or 'bearish',
-            from the market trend analysis.
-          name: pattern_recognition
-          type: List[str]
-        raises:
-        - description: If trend indicators or pattern recognition results are invalid
-            or inconsistent.
-          type: ValueError
-        returns:
-          description: Dictionary containing lists of conditions for buying and selling
-            stocks based on the trend analysis.
-          type: '{''buy_rules'': List[str], ''sell_rules'': List[str]}'
-        summary: Define trading rules based on market trend analysis.
-    prompt: Establish trading rules based on the identified trends and patterns.
-    shims: []
-  evaluate_trading_strategy:
-    agent: false
-    code_node_type: stub
-    description: Evaluate the trading strategy based on the simulation results.
-    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass SimulateTradesOutput(BaseModel):\n    \"\"\"Pydantic model for simulate_trades\
-      \ node outputs.\"\"\"\n    simulated_trades: List[float] = Field(..., description=\"\
-      2D list of simulated trade outcomes.\")\n    performance_metrics: List[float]\
-      \ = Field(..., description=\"List of performance metrics for the simulated trades.\"\
-      )\n\n\nclass EvaluateTradingStrategyOutput(BaseModel):\n    \"\"\"Pydantic model\
-      \ for evaluate_trading_strategy node outputs.\"\"\"\n    strategy_effectiveness:\
-      \ float = Field(..., description=\"Overall effectiveness of the trading strategy.\"\
-      )\n    areas_for_improvement: str = Field(..., description=\"List of areas where\
-      \ the trading strategy can be improved.\")\n\n\ndef evaluate_trading_strategy(simulate_trades_input:\
-      \ SimulateTradesOutput, **kwargs) -> EvaluateTradingStrategyOutput:\n    \"\"\
-      \"Evaluate the trading strategy based on the simulation results.\n\n    Args:\n\
-      \        simulate_trades_input: Input from the 'simulate_trades' node.\n   \
-      \     **kwargs: Additional keyword arguments.\n\n    Returns:\n        EvaluateTradingStrategyOutput:\
-      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
-      \ this function\n\n    # Return stub output with placeholder values\n    return\
-      \ EvaluateTradingStrategyOutput(\n        strategy_effectiveness=0.0,\n    \
-      \    areas_for_improvement=\"\",\n    )"
-    name: evaluate_trading_strategy
-    nodes_depended_on:
-    - simulate_trades
+    - fetch_song_data
     nodes_dependent_on: []
     output_structure:
-    - description: Overall effectiveness of the trading strategy.
-      key: strategy_effectiveness
-      type: float
-    - description: List of areas where the trading strategy can be improved.
-      key: areas_for_improvement
-      type: str
+    - description: All distinct words found in the lyrics, ordered by descending frequency.
+      key: unique_words
+      type: List[str]
+    - description: Number of occurrences for each word, aligned with unique_words.
+      key: word_counts
+      type: List[int]
     prd:
-      conceptual_info: The node evaluates the trading strategy's effectiveness based
-        on simulated trade outcomes and performance metrics.
+      conceptual_info: This node aggregates raw lyrical text into a concise frequency
+        table, enabling downstream theme extraction and sentiment analysis.
       docstring:
         examples:
         - lines:
-          - simulated_trades = [[100.0, 105.0, 110.0], [120.0, 115.0, 110.0]]
-          - performance_metrics = [0.05, 0.02, -0.03]
-          - evaluate_trading_strategy(simulated_trades, performance_metrics)
-          output: (0.75, ['Risk Management', 'Trading Rules'])
+          - song_titles = ['A', 'B']
+          - song_lyrics = ['Hello world hello', 'World of code']
+          - unique, counts = analyze_lyrics(song_titles, song_lyrics)
+          - print(unique)
+          - print(counts)
+          output: '[''hello'', ''world'', ''of'', ''code'']
+
+            [3, 2, 1, 1]'
         - lines:
-          - simulated_trades = [[100.0, 95.0, 90.0], [85.0, 80.0, 75.0]]
-          - performance_metrics = [-0.05, -0.02, -0.03]
-          - evaluate_trading_strategy(simulated_trades, performance_metrics)
-          output: (0.25, ['Market Analysis', 'Position Sizing'])
+          - song_titles = ['Song']
+          - song_lyrics = ['I love coding', 'I love coding', 'Coding is fun']
+          - unique, counts = analyze_lyrics(song_titles, song_lyrics)
+          - print(dict(zip(unique, counts)))
+          output: '{''i'': 3, ''love'': 2, ''coding'': 3, ''is'': 1, ''fun'': 1}'
         parameters:
-        - description: 2D list of simulated trade outcomes from the 'simulate_trades'
-            node.
-          name: simulated_trades
-          type: List[float]
-        - description: List of performance metrics for the simulated trades from the
-            'simulate_trades' node.
-          name: performance_metrics
-          type: List[float]
-        raises:
-        - description: If the simulated trades or performance metrics are empty or
-            invalid.
-          type: ValueError
-        returns:
-          description: A tuple containing the overall effectiveness of the trading
-            strategy as a float and a list of areas for improvement as strings.
-          type: Tuple[float, List[str]]
-        summary: Evaluates the trading strategy based on simulated trades and performance
-          metrics.
-    prompt: Assess the effectiveness of the trading strategy based on the simulated
-      trade outcomes and performance metrics.
-    shims: []
-  fetch_market_data:
-    agent: false
-    code_node_type: stub
-    description: Fetch current and historical market data for analysis.
-    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass FetchMarketDataOutput(BaseModel):\n    \"\"\"Pydantic model for fetch_market_data\
-      \ node outputs.\"\"\"\n    current_prices: List[float] = Field(..., description=\"\
-      List of current stock prices.\")\n    historical_data: List[float] = Field(...,\
-      \ description=\"2D list of historical stock prices and volumes.\")\n\n\ndef\
-      \ fetch_market_data(general_input: str, **kwargs) -> FetchMarketDataOutput:\n\
-      \    \"\"\"Fetch current and historical market data for analysis.\n\n    Args:\n\
-      \        general_input: General input string for the root node.\n        **kwargs:\
-      \ Additional keyword arguments.\n\n    Returns:\n        FetchMarketDataOutput:\
-      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
-      \ this function\n\n    # Return stub output with placeholder values\n    return\
-      \ FetchMarketDataOutput(\n        current_prices=[],\n        historical_data=[],\n\
-      \    )"
-    name: fetch_market_data
-    nodes_depended_on: []
-    nodes_dependent_on:
-    - analyze_market_trends
-    - assess_risk
-    output_structure:
-    - description: List of current stock prices.
-      key: current_prices
-      type: List[float]
-    - description: 2D list of historical stock prices and volumes.
-      key: historical_data
-      type: List[float]
-    prd:
-      conceptual_info: Fetches current and historical market data for analysis, providing
-        the foundation for market trend analysis and risk assessment.
-      docstring:
-        examples:
-        - lines:
-          - fetch_market_data()
-          output: '{''current_prices'': [100.5, 200.2], ''historical_data'': [[100,
-            1000], [101, 1200]]}'
-        parameters: []
-        raises:
-        - description: If there's a failure in connecting to the market data source.
-          type: ConnectionError
-        - description: If the fetched data is malformed or incomplete.
-          type: DataError
-        returns:
-          description: A dictionary containing the list of current stock prices and
-            a 2D list of historical stock prices and volumes.
-          type: '{''current_prices'': List[float], ''historical_data'': List[List[float]]}'
-        summary: Fetches current and historical market data, returning current stock
-          prices and historical data.
-    prompt: Fetch the latest market data, including stock prices, volumes, and other
-      relevant indicators.
-    shims: []
-  simulate_trades:
-    agent: false
-    code_node_type: stub
-    description: Simulate trades using the defined trading rules and risk management
-      strategies.
-    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass DefineTradingRulesOutput(BaseModel):\n    \"\"\"Pydantic model for\
-      \ define_trading_rules node outputs.\"\"\"\n    buy_rules: List[str] = Field(...,\
-      \ description=\"List of conditions for buying stocks.\")\n    sell_rules: List[str]\
-      \ = Field(..., description=\"List of conditions for selling stocks.\")\n\n\n\
-      class DefineRiskManagementOutput(BaseModel):\n    \"\"\"Pydantic model for define_risk_management\
-      \ node outputs.\"\"\"\n    stop_loss_levels: List[float] = Field(..., description=\"\
-      List of stop-loss levels for trades.\")\n    position_sizing: List[float] =\
-      \ Field(..., description=\"List of position sizes for trades.\")\n\n\nclass\
-      \ SimulateTradesOutput(BaseModel):\n    \"\"\"Pydantic model for simulate_trades\
-      \ node outputs.\"\"\"\n    simulated_trades: List[float] = Field(..., description=\"\
-      2D list of simulated trade outcomes.\")\n    performance_metrics: List[float]\
-      \ = Field(..., description=\"List of performance metrics for the simulated trades.\"\
-      )\n\n\ndef simulate_trades(define_trading_rules_input: DefineTradingRulesOutput,\
-      \ define_risk_management_input: DefineRiskManagementOutput, **kwargs) -> SimulateTradesOutput:\n\
-      \    \"\"\"Simulate trades using the defined trading rules and risk management\
-      \ strategies.\n\n    Args:\n        define_trading_rules_input: Input from the\
-      \ 'define_trading_rules' node.\n        define_risk_management_input: Input\
-      \ from the 'define_risk_management' node.\n        **kwargs: Additional keyword\
-      \ arguments.\n\n    Returns:\n        SimulateTradesOutput: Object containing\
-      \ outputs for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n\
-      \    # Return stub output with placeholder values\n    return SimulateTradesOutput(\n\
-      \        simulated_trades=[],\n        performance_metrics=[],\n    )"
-    name: simulate_trades
-    nodes_depended_on:
-    - define_trading_rules
-    - define_risk_management
-    nodes_dependent_on:
-    - evaluate_trading_strategy
-    output_structure:
-    - description: 2D list of simulated trade outcomes.
-      key: simulated_trades
-      type: List[float]
-    - description: List of performance metrics for the simulated trades.
-      key: performance_metrics
-      type: List[float]
-    prd:
-      conceptual_info: Simulates trades based on predefined trading rules and risk
-        management strategies, generating simulated trade outcomes and performance
-        metrics.
-      docstring:
-        examples:
-        - lines:
-          - buy_rules = ['price > 50', 'volume > 1000']
-          - sell_rules = ['price < 30', 'rsi > 70']
-          - stop_loss_levels = [0.9, 0.8]
-          - position_sizing = [0.5, 0.3]
-          - simulated_trades, performance_metrics = simulate_trades(buy_rules, sell_rules,
-            stop_loss_levels, position_sizing)
-          output: ([[0.95, 0.92], [0.88, 0.85]], [0.1, 0.2])
-        - lines:
-          - buy_rules = ['macd > 0', 'bollinger_band > 0']
-          - sell_rules = ['macd < 0', 'bollinger_band < 0']
-          - stop_loss_levels = [0.95, 0.9]
-          - position_sizing = [0.4, 0.6]
-          - simulated_trades, performance_metrics = simulate_trades(buy_rules, sell_rules,
-            stop_loss_levels, position_sizing)
-          output: ([[0.98, 0.96], [0.92, 0.9]], [0.15, 0.25])
-        parameters:
-        - description: List of conditions for buying stocks derived from market trend
-            analysis.
-          name: buy_rules
+        - description: Parallel list of song titles; provided for context but not
+            used in frequency computation.
+          name: song_titles
           type: List[str]
-        - description: List of conditions for selling stocks based on market trend
-            analysis.
-          name: sell_rules
+        - description: Parallel list of full lyrics corresponding to each song title.
+          name: song_lyrics
           type: List[str]
-        - description: List of stop-loss levels for trades determined by risk assessment.
-          name: stop_loss_levels
-          type: List[float]
-        - description: List of position sizes for trades based on risk management
-            strategies.
-          name: position_sizing
-          type: List[float]
         raises:
-        - description: If any of the input lists are empty or contain invalid values.
+        - description: Raised if `song_lyrics` is empty or all entries are blank.
           type: ValueError
-        - description: If the input types do not match the expected types.
+        - description: Raised if inputs are not lists of strings.
           type: TypeError
         returns:
-          description: A tuple containing a 2D list of simulated trade outcomes and
-            a list of performance metrics for the simulated trades.
-          type: '[List[float], List[float]]'
-        summary: Simulates trade executions using the established trading rules and
-          risk management strategies, producing simulated trade results and evaluating
-          their performance.
-    prompt: Simulate the execution of trades based on the established rules and risk
-      management strategies.
+          description: A tuple containing the list of unique words sorted by descending
+            frequency and a parallel list of their counts.
+          type: Tuple[List[str], List[int]]
+        summary: Computes the frequency of every unique word across all song lyrics
+          and returns the words sorted by decreasing count.
+    prompt: Using the parallel lists of titles and lyrics from fetch_song_data, compute
+      the set of unique words across all songs and count how many times each appears.
+      Return the list of unique words and a parallel list of their counts.
+    shims: []
+  extract_themes:
+    agent: false
+    code_node_type: stub
+    description: Identify the dominant lyrical themes.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass AnalyzeLyricsOutput(BaseModel):\n    \"\"\"Pydantic model for analyze_lyrics\
+      \ node outputs.\"\"\"\n    unique_words: List[str] = Field(..., description=\"\
+      All distinct words found in the lyrics, ordered by descending frequency.\")\n\
+      \    word_counts: List[int] = Field(..., description=\"Number of occurrences\
+      \ for each word, aligned with unique_words.\")\n\n\nclass ExtractThemesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for extract_themes node outputs.\"\"\"\n    themes:\
+      \ List[str] = Field(..., description=\"Top 5 thematic words in descending order\
+      \ of frequency.\")\n    theme_scores: List[float] = Field(..., description=\"\
+      Normalized frequency score for each theme (count / total word count).\")\n\n\
+      \ndef extract_themes(analyze_lyrics_input: AnalyzeLyricsOutput, **kwargs) ->\
+      \ ExtractThemesOutput:\n    \"\"\"Identify the dominant lyrical themes.\n\n\
+      \    Args:\n        analyze_lyrics_input: Input from the 'analyze_lyrics' node.\n\
+      \        **kwargs: Additional keyword arguments.\n\n    Returns:\n        ExtractThemesOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ ExtractThemesOutput(\n        themes=[],\n        theme_scores=[],\n    )"
+    name: extract_themes
+    nodes_depended_on:
+    - analyze_lyrics
+    nodes_dependent_on: []
+    output_structure:
+    - description: Top 5 thematic words in descending order of frequency.
+      key: themes
+      type: List[str]
+    - description: Normalized frequency score for each theme (count / total word count).
+      key: theme_scores
+      type: List[float]
+    prd:
+      conceptual_info: Extracts the five most frequent words from all song lyrics
+        and calculates each word’s relative frequency as a normalized score.
+      docstring:
+        examples:
+        - lines:
+          - unique_words = ['love', 'heart', 'night', 'dream', 'sky']
+          - word_counts = [10, 8, 5, 2, 1]
+          - themes, scores = extract_themes(unique_words, word_counts)
+          - print(themes)
+          - print(scores)
+          output: '[''love'', ''heart'', ''night'', ''dream'', ''sky'']\n[0.38461538461538464,
+            0.3076923076923077, 0.19230769230769232, 0.07692307692307693, 0.038461538461538464]'
+        - lines:
+          - unique_words = ['sun', 'rain']
+          - word_counts = [10, 5]
+          - themes, scores = extract_themes(unique_words, word_counts)
+          - print(themes)
+          - print(scores)
+          output: '[''sun'', ''rain'']\n[0.6666666666666666, 0.3333333333333333]'
+        parameters:
+        - description: List of unique words sorted by descending frequency.
+          name: unique_words
+          type: List[str]
+        - description: Parallel list of counts corresponding to each word in `unique_words`.
+          name: word_counts
+          type: List[int]
+        raises:
+        - description: If `unique_words` and `word_counts` are empty or have mismatched
+            lengths.
+          type: ValueError
+        - description: If the total word count is zero (cannot compute normalized
+            scores).
+          type: ValueError
+        returns:
+          description: A tuple containing the top 5 thematic words and a list of their
+            normalized scores.
+          type: Tuple[List[str], List[float]]
+        summary: Selects the top five words by occurrence from lyric word statistics
+          and returns them with their normalized frequency scores.
+    prompt: From the word frequency data, select the top 5 words by count as main
+      themes and compute a normalized score for each (count divided by total word
+      count). Return the themes and their scores.
+    shims: []
+  fetch_song_data:
+    agent: false
+    code_node_type: stub
+    description: Collect basic metadata and lyrics for all Taylor Swift songs.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass FetchSongDataOutput(BaseModel):\n    \"\"\"Pydantic model for fetch_song_data\
+      \ node outputs.\"\"\"\n    song_titles: List[str] = Field(..., description=\"\
+      List of song titles in the same order as the other lists.\")\n    song_lyrics:\
+      \ List[str] = Field(..., description=\"List of full lyrics corresponding to\
+      \ each song title.\")\n    release_years: List[int] = Field(..., description=\"\
+      List of release years corresponding to each song title.\")\n\n\ndef fetch_song_data(general_input:\
+      \ str, **kwargs) -> FetchSongDataOutput:\n    \"\"\"Collect basic metadata and\
+      \ lyrics for all Taylor Swift songs.\n\n    Args:\n        general_input: General\
+      \ input string for the root node.\n        **kwargs: Additional keyword arguments.\n\
+      \n    Returns:\n        FetchSongDataOutput: Object containing outputs for this\
+      \ node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub\
+      \ output with placeholder values\n    return FetchSongDataOutput(\n        song_titles=[],\n\
+      \        song_lyrics=[],\n        release_years=[],\n    )"
+    name: fetch_song_data
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of song titles in the same order as the other lists.
+      key: song_titles
+      type: List[str]
+    - description: List of full lyrics corresponding to each song title.
+      key: song_lyrics
+      type: List[str]
+    - description: List of release years corresponding to each song title.
+      key: release_years
+      type: List[int]
+    prd:
+      conceptual_info: Collect basic metadata and lyrics for all Taylor Swift songs.
+      docstring:
+        examples:
+        - lines:
+          - result = fetch_song_data()
+          - print(result['song_titles'][0])
+          output: '"Love Story"'
+        - lines:
+          - result = fetch_song_data(artist="Taylor Swift")
+          - print(len(result['song_titles']))
+          output: '"<total number of Taylor Swift songs>"'
+        parameters:
+        - description: Name of the artist to query. Defaults to "Taylor Swift".
+          name: artist
+          type: str
+        raises:
+        - description: If the API request fails or returns an unexpected status code.
+          type: ValueError
+        - description: If the API response is missing required fields (e.g., title,
+            lyrics, or year).
+          type: KeyError
+        returns:
+          description: 'Dictionary containing three keys: `song_titles` (List[str]),
+            `song_lyrics` (List[str]), and `release_years` (List[int]). The lists
+            are aligned by index.'
+          type: dict
+        summary: Fetches a list of all Taylor Swift songs along with their full lyrics
+          and release years from a public API.
+    prompt: Given the artist name "Taylor Swift", retrieve a list of song titles,
+      their full lyrics, and release years from a public music or lyrics API. Return
+      parallel lists of titles, lyrics, and years.
+    shims: []
+  generate_summary:
+    agent: false
+    code_node_type: stub
+    description: Produce a human‑readable summary of the findings.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass ExtractThemesOutput(BaseModel):\n    \"\"\"Pydantic model for extract_themes\
+      \ node outputs.\"\"\"\n    themes: List[str] = Field(..., description=\"Top\
+      \ 5 thematic words in descending order of frequency.\")\n    theme_scores: List[float]\
+      \ = Field(..., description=\"Normalized frequency score for each theme (count\
+      \ / total word count).\")\n\n\nclass TrendOverTimeOutput(BaseModel):\n    \"\
+      \"\"Pydantic model for trend_over_time node outputs.\"\"\"\n    years: List[int]\
+      \ = Field(..., description=\"Chronological list of years with songs.\")\n  \
+      \  avg_sentiment: List[float] = Field(..., description=\"Average sentiment for\
+      \ each year.\")\n\n\nclass GenerateSummaryOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for generate_summary node outputs.\"\"\"\n    summary_text: str = Field(...,\
+      \ description=\"Plain\\u2011text summary of the analysis.\")\n\n\ndef generate_summary(extract_themes_input:\
+      \ ExtractThemesOutput, trend_over_time_input: TrendOverTimeOutput, **kwargs)\
+      \ -> GenerateSummaryOutput:\n    \"\"\"Produce a human‑readable summary of the\
+      \ findings.\n\n    Args:\n        extract_themes_input: Input from the 'extract_themes'\
+      \ node.\n        trend_over_time_input: Input from the 'trend_over_time' node.\n\
+      \        **kwargs: Additional keyword arguments.\n\n    Returns:\n        GenerateSummaryOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ GenerateSummaryOutput(\n        summary_text=\"\",\n    )"
+    name: generate_summary
+    nodes_depended_on:
+    - extract_themes
+    - trend_over_time
+    nodes_dependent_on: []
+    output_structure:
+    - description: Plain‑text summary of the analysis.
+      key: summary_text
+      type: str
+    prd:
+      conceptual_info: Generates a short narrative that encapsulates the dominant
+        lyrical themes and the sentiment trajectory over the artist's career, highlighting
+        any key shifts or anomalies.
+      docstring:
+        examples:
+        - lines:
+          - generate_summary(
+          - '    themes=["love", "heartbreak", "growth", "rebellion", "dreams"],'
+          - '    theme_scores=[0.28, 0.22, 0.18, 0.12, 0.10],'
+          - '    years=[2013, 2014, 2015, 2016, 2017],'
+          - '    avg_sentiment=[0.15, 0.08, 0.02, -0.04, -0.10]'
+          - )
+          output: '"The analysis highlights love and heartbreak as the dominant lyrical
+            themes, followed by growth, rebellion, and dreams. Sentiment shifts from
+            mildly positive in 2013 to increasingly negative by 2017, indicating a
+            noticeable downturn in overall lyrical mood during the latter years."
+
+            '
+        - lines:
+          - generate_summary(
+          - '    themes=["hope", "rain", "silence", "journey", "home"],'
+          - '    theme_scores=[0.30, 0.20, 0.15, 0.12, 0.10],'
+          - '    years=[2012, 2013, 2014],'
+          - "    avg_sentiment=[0.05, 0.10, 0.15]\"\n                \")"
+          output: '"The prevailing themes are hope, rain, silence, journey, and home.
+            The sentiment trend shows a steady improvement from 2012 to 2014, suggesting
+            an increasingly optimistic tone over time."
+
+            '
+        parameters:
+        - description: Top 5 thematic words in descending frequency order.
+          name: themes
+          type: List[str]
+        - description: Normalized frequency score for each corresponding theme (sum
+            of all scores should equal 1).
+          name: theme_scores
+          type: List[float]
+        - description: Chronological list of release years for which sentiment averages
+            have been computed.
+          name: years
+          type: List[int]
+        - description: Average sentiment score for each year, aligned with the `years`
+            list. Scores range from -1 (very negative) to +1 (very positive).
+          name: avg_sentiment
+          type: List[float]
+        raises:
+        - description: If `themes` and `theme_scores` lists are of unequal length,
+            or if any of the input lists are empty.
+          type: ValueError
+        - description: If any of the parameters is not of the expected type.
+          type: TypeError
+        returns:
+          description: A single paragraph that lists the top themes, summarizes the
+            sentiment trend over time, and notes any significant pattern shifts.
+          type: str
+        summary: Create a concise paragraph summarizing key lyrical themes and sentiment
+          trends.
+    prompt: 'Write a concise paragraph summarizing the analysis: list the top themes,
+      describe the overall sentiment trend, and note any notable patterns or shifts.'
+    shims: []
+  sentiment_analysis:
+    agent: false
+    code_node_type: stub
+    description: Compute sentiment for each song.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass FetchSongDataOutput(BaseModel):\n    \"\"\"Pydantic model for fetch_song_data\
+      \ node outputs.\"\"\"\n    song_titles: List[str] = Field(..., description=\"\
+      List of song titles in the same order as the other lists.\")\n    song_lyrics:\
+      \ List[str] = Field(..., description=\"List of full lyrics corresponding to\
+      \ each song title.\")\n    release_years: List[int] = Field(..., description=\"\
+      List of release years corresponding to each song title.\")\n\n\nclass SentimentAnalysisOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for sentiment_analysis node outputs.\"\"\"\n    sentiment_scores:\
+      \ List[float] = Field(..., description=\"Sentiment score for each song.\")\n\
+      \n\ndef sentiment_analysis(fetch_song_data_input: FetchSongDataOutput, **kwargs)\
+      \ -> SentimentAnalysisOutput:\n    \"\"\"Compute sentiment for each song.\n\n\
+      \    Args:\n        fetch_song_data_input: Input from the 'fetch_song_data'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       SentimentAnalysisOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return SentimentAnalysisOutput(\n        sentiment_scores=[],\n\
+      \    )"
+    name: sentiment_analysis
+    nodes_depended_on:
+    - fetch_song_data
+    nodes_dependent_on: []
+    output_structure:
+    - description: Sentiment score for each song.
+      key: sentiment_scores
+      type: List[float]
+    prd:
+      conceptual_info: Performs sentiment analysis on song lyrics, producing a sentiment
+        score for each track.
+      docstring:
+        examples:
+        - lines:
+          - scores = sentiment_analysis(["Love Story", "Bad Blood"], ["I knew you
+            were trouble, so I stayed away", "I used to love you, now I hate you"])
+          output: '[0.76, -0.62]'
+        - lines:
+          - scores = sentiment_analysis(["Blank Space"], ["So nice I can't decide
+            if I'm a love or a lie"])
+          output: '[0.48]'
+        parameters:
+        - description: List of song titles corresponding to the lyrics.
+          name: song_titles
+          type: List[str]
+        - description: List of full lyrics for each song.
+          name: song_lyrics
+          type: List[str]
+        raises:
+        - description: If input lists are not the same length or are empty.
+          type: ValueError
+        returns:
+          description: Sentiment score for each song.
+          type: List[float]
+        summary: Computes overall sentiment scores for a list of song lyrics, returning
+          a list of floats between -1 and 1 aligned with song titles.
+    prompt: Calculate an overall sentiment score between -1 (very negative) and 1
+      (very positive) for each song's lyrics. Return a list of scores aligned with
+      song titles.
+    shims: []
+  trend_over_time:
+    agent: false
+    code_node_type: stub
+    description: Summarize sentiment trend across release years.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass FetchSongDataOutput(BaseModel):\n    \"\"\"Pydantic model for fetch_song_data\
+      \ node outputs.\"\"\"\n    song_titles: List[str] = Field(..., description=\"\
+      List of song titles in the same order as the other lists.\")\n    song_lyrics:\
+      \ List[str] = Field(..., description=\"List of full lyrics corresponding to\
+      \ each song title.\")\n    release_years: List[int] = Field(..., description=\"\
+      List of release years corresponding to each song title.\")\n\n\nclass SentimentAnalysisOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for sentiment_analysis node outputs.\"\"\"\n    sentiment_scores:\
+      \ List[float] = Field(..., description=\"Sentiment score for each song.\")\n\
+      \n\nclass TrendOverTimeOutput(BaseModel):\n    \"\"\"Pydantic model for trend_over_time\
+      \ node outputs.\"\"\"\n    years: List[int] = Field(..., description=\"Chronological\
+      \ list of years with songs.\")\n    avg_sentiment: List[float] = Field(...,\
+      \ description=\"Average sentiment for each year.\")\n\n\ndef trend_over_time(fetch_song_data_input:\
+      \ FetchSongDataOutput, sentiment_analysis_input: SentimentAnalysisOutput, **kwargs)\
+      \ -> TrendOverTimeOutput:\n    \"\"\"Summarize sentiment trend across release\
+      \ years.\n\n    Args:\n        fetch_song_data_input: Input from the 'fetch_song_data'\
+      \ node.\n        sentiment_analysis_input: Input from the 'sentiment_analysis'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       TrendOverTimeOutput: Object containing outputs for this node.\n    \"\
+      \"\"\n    # TODO: Implement this function\n\n    # Return stub output with placeholder\
+      \ values\n    return TrendOverTimeOutput(\n        years=[],\n        avg_sentiment=[],\n\
+      \    )"
+    name: trend_over_time
+    nodes_depended_on:
+    - fetch_song_data
+    - sentiment_analysis
+    nodes_dependent_on: []
+    output_structure:
+    - description: Chronological list of years with songs.
+      key: years
+      type: List[int]
+    - description: Average sentiment for each year.
+      key: avg_sentiment
+      type: List[float]
+    prd:
+      conceptual_info: This node aggregates song-level sentiment scores into year-level
+        averages, providing a temporal view of lyrical sentiment across Taylor Swift's
+        discography.
+      docstring:
+        examples:
+        - lines:
+          - years, avg = trend_over_time([2015, 2015, 2016], [0.2, 0.5, -0.1])
+          output: ([2015, 2016], [0.35, -0.1])
+        - lines:
+          - trend_over_time([2015, 2016], [0.3])
+          output: "Traceback (most recent call last):\n  ...\nValueError: release_years\
+            \ and sentiment_scores must have the same length."
+        parameters:
+        - description: List of release years for each song, aligned with sentiment_scores.
+          name: release_years
+          type: List[int]
+        - description: Sentiment score for each song, ranging from -1 (very negative)
+            to 1 (very positive).
+          name: sentiment_scores
+          type: List[float]
+        raises:
+        - description: If release_years and sentiment_scores are of different lengths.
+          type: ValueError
+        - description: If either input list is empty.
+          type: ValueError
+        returns:
+          description: 'A tuple containing two parallel lists:
+
+            - years: Chronological list of years with songs.
+
+            - avg_sentiment: Average sentiment for each corresponding year.'
+          type: Tuple[List[int], List[float]]
+        summary: Compute average sentiment per release year from parallel lists of
+          years and sentiment scores.
+    prompt: Using release years and sentiment scores, compute the average sentiment
+      for each year. Return sorted years and their corresponding average sentiments.
     shims: []

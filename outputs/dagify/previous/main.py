@@ -6,13 +6,12 @@ import json
 import sys
 from typing import Dict, Any, List, Callable, Coroutine, Union, Optional
 
-from code.fetch_market_data import fetch_market_data
-from code.analyze_market_trends import analyze_market_trends
-from code.assess_risk import assess_risk
-from code.define_trading_rules import define_trading_rules
-from code.define_risk_management import define_risk_management
-from code.simulate_trades import simulate_trades
-from code.evaluate_trading_strategy import evaluate_trading_strategy
+from code.fetch_song_data import fetch_song_data
+from code.analyze_lyrics import analyze_lyrics
+from code.extract_themes import extract_themes
+from code.sentiment_analysis import sentiment_analysis
+from code.trend_over_time import trend_over_time
+from code.generate_summary import generate_summary
 
 # Get async mode from environment variable or default to False
 ASYNC_MODE = os.environ.get('ASYNC_MODE', '').lower() in ('true', '1', 'yes', 'y')
@@ -34,13 +33,12 @@ def make_async(func):
 
     return async_wrapper
 
-fetch_market_data_async = make_async(fetch_market_data)
-analyze_market_trends_async = make_async(analyze_market_trends)
-assess_risk_async = make_async(assess_risk)
-define_trading_rules_async = make_async(define_trading_rules)
-define_risk_management_async = make_async(define_risk_management)
-simulate_trades_async = make_async(simulate_trades)
-evaluate_trading_strategy_async = make_async(evaluate_trading_strategy)
+fetch_song_data_async = make_async(fetch_song_data)
+analyze_lyrics_async = make_async(analyze_lyrics)
+extract_themes_async = make_async(extract_themes)
+sentiment_analysis_async = make_async(sentiment_analysis)
+trend_over_time_async = make_async(trend_over_time)
+generate_summary_async = make_async(generate_summary)
 
 async def run_workflow(user_input: str) -> Dict[str, Any]:
     """Execute the workflow by running each level in the topological sort.
@@ -54,57 +52,49 @@ async def run_workflow(user_input: str) -> Dict[str, Any]:
     # Store results for each node
     results = {}
 
-    # Level 0: fetch_market_data
-    async def run_fetch_market_data():
-        # Call the async version of fetch_market_data with results from dependencies
-        return await fetch_market_data_async(user_input)
+    # Level 0: fetch_song_data
+    async def run_fetch_song_data():
+        # Call the async version of fetch_song_data with results from dependencies
+        return await fetch_song_data_async(user_input)
 
     # Run level 0 nodes in parallel
-    results['fetch_market_data'] = await run_fetch_market_data()
+    results['fetch_song_data'] = await run_fetch_song_data()
 
-    # Level 1: analyze_market_trends, assess_risk
-    async def run_analyze_market_trends():
-        # Call the async version of analyze_market_trends with results from dependencies
-        return await analyze_market_trends_async(results['fetch_market_data'])
+    # Level 1: sentiment_analysis, analyze_lyrics
+    async def run_sentiment_analysis():
+        # Call the async version of sentiment_analysis with results from dependencies
+        return await sentiment_analysis_async(results['fetch_song_data'])
 
-    async def run_assess_risk():
-        # Call the async version of assess_risk with results from dependencies
-        return await assess_risk_async(results['fetch_market_data'])
+    async def run_analyze_lyrics():
+        # Call the async version of analyze_lyrics with results from dependencies
+        return await analyze_lyrics_async(results['fetch_song_data'])
 
     # Run level 1 nodes in parallel
-    level_1_results = await asyncio.gather(run_analyze_market_trends(), run_assess_risk())
-    results['analyze_market_trends'] = level_1_results[0]
-    results['assess_risk'] = level_1_results[1]
+    level_1_results = await asyncio.gather(run_sentiment_analysis(), run_analyze_lyrics())
+    results['sentiment_analysis'] = level_1_results[0]
+    results['analyze_lyrics'] = level_1_results[1]
 
-    # Level 2: define_trading_rules, define_risk_management
-    async def run_define_trading_rules():
-        # Call the async version of define_trading_rules with results from dependencies
-        return await define_trading_rules_async(results['analyze_market_trends'])
+    # Level 2: extract_themes, trend_over_time
+    async def run_extract_themes():
+        # Call the async version of extract_themes with results from dependencies
+        return await extract_themes_async(results['analyze_lyrics'])
 
-    async def run_define_risk_management():
-        # Call the async version of define_risk_management with results from dependencies
-        return await define_risk_management_async(results['assess_risk'])
+    async def run_trend_over_time():
+        # Call the async version of trend_over_time with results from dependencies
+        return await trend_over_time_async(results['fetch_song_data'], results['sentiment_analysis'])
 
     # Run level 2 nodes in parallel
-    level_2_results = await asyncio.gather(run_define_trading_rules(), run_define_risk_management())
-    results['define_trading_rules'] = level_2_results[0]
-    results['define_risk_management'] = level_2_results[1]
+    level_2_results = await asyncio.gather(run_extract_themes(), run_trend_over_time())
+    results['extract_themes'] = level_2_results[0]
+    results['trend_over_time'] = level_2_results[1]
 
-    # Level 3: simulate_trades
-    async def run_simulate_trades():
-        # Call the async version of simulate_trades with results from dependencies
-        return await simulate_trades_async(results['define_trading_rules'], results['define_risk_management'])
+    # Level 3: generate_summary
+    async def run_generate_summary():
+        # Call the async version of generate_summary with results from dependencies
+        return await generate_summary_async(results['extract_themes'], results['trend_over_time'])
 
     # Run level 3 nodes in parallel
-    results['simulate_trades'] = await run_simulate_trades()
-
-    # Level 4: evaluate_trading_strategy
-    async def run_evaluate_trading_strategy():
-        # Call the async version of evaluate_trading_strategy with results from dependencies
-        return await evaluate_trading_strategy_async(results['simulate_trades'])
-
-    # Run level 4 nodes in parallel
-    results['evaluate_trading_strategy'] = await run_evaluate_trading_strategy()
+    results['generate_summary'] = await run_generate_summary()
 
     # Return all results
     return results

@@ -1,307 +1,285 @@
-# trading_workflow - Complete PRD Documentation
+# taylor_swift_analysis_workflow - Complete PRD Documentation
 
 ## Overview
-PRDs for nodes in the 'trading_workflow' module.
+PRDs for nodes in the 'taylor_swift_analysis_workflow' module.
 
 ## Table of Contents
 
-- [fetch_market_data](#fetch_market_data)
+- [fetch_song_data](#fetch_song_data)
 
-- [analyze_market_trends](#analyze_market_trends)
+- [analyze_lyrics](#analyze_lyrics)
 
-- [assess_risk](#assess_risk)
+- [extract_themes](#extract_themes)
 
-- [define_trading_rules](#define_trading_rules)
+- [sentiment_analysis](#sentiment_analysis)
 
-- [define_risk_management](#define_risk_management)
+- [trend_over_time](#trend_over_time)
 
-- [simulate_trades](#simulate_trades)
-
-- [evaluate_trading_strategy](#evaluate_trading_strategy)
+- [generate_summary](#generate_summary)
 
 
 
 ---
 
-## fetch_market_data
+## fetch_song_data
 
 ### Description
-Fetch current and historical market data for analysis.
+Collect basic metadata and lyrics for all Taylor Swift songs.
 
 ### Conceptual Info
 
-Fetches current and historical market data for analysis, providing the foundation for market trend analysis and risk assessment.
+Collect basic metadata and lyrics for all Taylor Swift songs.
 
 ### Docstring
 
-**Summary:** Fetches current and historical market data, returning current stock prices and historical data.
-
-**Returns:** {'current_prices': List[float], 'historical_data': List[List[float]]} - A dictionary containing the list of current stock prices and a 2D list of historical stock prices and volumes.
-
-**Raises:**
-
-- ConnectionError: If there's a failure in connecting to the market data source.
-- DataError: If the fetched data is malformed or incomplete.
-**Examples:**
-
-```python
->>> fetch_market_data()
-{'current_prices': [100.5, 200.2], 'historical_data': [[100, 1000], [101, 1200]]}
-```
-
-
-
----
-
-## analyze_market_trends
-
-### Description
-Analyze market trends using historical and current market data.
-
-### Conceptual Info
-
-Analyzes historical and current market data to identify trends and patterns, providing insights for trading decisions.
-
-### Docstring
-
-**Summary:** Analyzes market trends using historical and current market data to identify trend indicators and patterns.
+**Summary:** Fetches a list of all Taylor Swift songs along with their full lyrics and release years from a public API.
 
 **Parameters:**
 
-- current_prices (List[float]): List of current stock prices fetched from the market data.
-- historical_data (List[List[float]]): 2D list of historical stock prices and volumes fetched from the market data.
-**Returns:** Tuple[List[float], List[str]] - A tuple containing a list of trend indicators and a list of identified patterns.
+- artist (str): Name of the artist to query. Defaults to "Taylor Swift".
+**Returns:** dict - Dictionary containing three keys: `song_titles` (List[str]), `song_lyrics` (List[str]), and `release_years` (List[int]). The lists are aligned by index.
 
 **Raises:**
 
-- ValueError: If the input lists are empty or malformed.
+- ValueError: If the API request fails or returns an unexpected status code.
+- KeyError: If the API response is missing required fields (e.g., title, lyrics, or year).
 **Examples:**
 
 ```python
->>> current_prices = [100.0, 120.0, 110.0]
->>> historical_data = [[90.0, 1000], [95.0, 1200], [100.0, 1500]]
->>> result = analyze_market_trends(current_prices, historical_data)
-([105.0, 115.0], ['bullish', 'volatile'])
+>>> result = fetch_song_data()
+>>> print(result['song_titles'][0])
+"Love Story"
 ```
 
 ```python
->>> current_prices = [80.0, 70.0, 60.0]
->>> historical_data = [[85.0, 800], [80.0, 700], [75.0, 600]]
->>> result = analyze_market_trends(current_prices, historical_data)
-([75.0, 65.0], ['bearish', 'declining'])
+>>> result = fetch_song_data(artist="Taylor Swift")
+>>> print(len(result['song_titles']))
+"<total number of Taylor Swift songs>"
 ```
 
 
 
 ---
 
-## assess_risk
+## analyze_lyrics
 
 ### Description
-Assess the risk associated with potential trades based on market data.
+Generate word frequency statistics from all lyrics.
 
 ### Conceptual Info
 
-This node assesses the risk associated with potential trades based on current and historical market data fetched by its parent node, fetch_market_data.
+This node aggregates raw lyrical text into a concise frequency table, enabling downstream theme extraction and sentiment analysis.
 
 ### Docstring
 
-**Summary:** Assess the risk associated with potential trades based on current market conditions.
+**Summary:** Computes the frequency of every unique word across all song lyrics and returns the words sorted by decreasing count.
 
 **Parameters:**
 
-- market_data (Dict[str, List[float]]): Dictionary containing current prices and historical data fetched from fetch_market_data.
-**Returns:** Tuple[List[float], List[str]] - A tuple containing a list of risk levels and a list of risk factors.
+- song_titles (List[str]): Parallel list of song titles; provided for context but not used in frequency computation.
+- song_lyrics (List[str]): Parallel list of full lyrics corresponding to each song title.
+**Returns:** Tuple[List[str], List[int]] - A tuple containing the list of unique words sorted by descending frequency and a parallel list of their counts.
 
 **Raises:**
 
-- ValueError: If market_data is empty or does not contain the required keys.
+- ValueError: Raised if `song_lyrics` is empty or all entries are blank.
+- TypeError: Raised if inputs are not lists of strings.
 **Examples:**
 
 ```python
->>> market_data = {'current_prices': [100.0, 200.0], 'historical_data': [[90.0, 100.0], [190.0, 200.0]]}
->>> risk_levels, risk_factors = assess_risk(market_data)
-([0.5, 0.3], ['volatility', 'liquidity'])
+>>> song_titles = ['A', 'B']
+>>> song_lyrics = ['Hello world hello', 'World of code']
+>>> unique, counts = analyze_lyrics(song_titles, song_lyrics)
+>>> print(unique)
+>>> print(counts)
+['hello', 'world', 'of', 'code']
+[3, 2, 1, 1]
 ```
 
 ```python
->>> market_data = {'current_prices': [150.0, 250.0], 'historical_data': [[140.0, 150.0], [240.0, 250.0]]}
->>> risk_levels, risk_factors = assess_risk(market_data)
-([0.4, 0.2], ['market_trend', 'economic_indicators'])
+>>> song_titles = ['Song']
+>>> song_lyrics = ['I love coding', 'I love coding', 'Coding is fun']
+>>> unique, counts = analyze_lyrics(song_titles, song_lyrics)
+>>> print(dict(zip(unique, counts)))
+{'i': 3, 'love': 2, 'coding': 3, 'is': 1, 'fun': 1}
 ```
 
 
 
 ---
 
-## define_trading_rules
+## extract_themes
 
 ### Description
-Define trading rules based on the analysis of market trends.
+Identify the dominant lyrical themes.
 
 ### Conceptual Info
 
-This node defines trading rules based on the analysis of market trends, using trend indicators and pattern recognition to establish conditions for buying and selling stocks.
+Extracts the five most frequent words from all song lyrics and calculates each word’s relative frequency as a normalized score.
 
 ### Docstring
 
-**Summary:** Define trading rules based on market trend analysis.
+**Summary:** Selects the top five words by occurrence from lyric word statistics and returns them with their normalized frequency scores.
 
 **Parameters:**
 
-- trend_indicators (List[float]): List of trend indicators, such as moving averages, from the market trend analysis.
-- pattern_recognition (List[str]): List of identified patterns, such as 'bullish' or 'bearish', from the market trend analysis.
-**Returns:** {'buy_rules': List[str], 'sell_rules': List[str]} - Dictionary containing lists of conditions for buying and selling stocks based on the trend analysis.
+- unique_words (List[str]): List of unique words sorted by descending frequency.
+- word_counts (List[int]): Parallel list of counts corresponding to each word in `unique_words`.
+**Returns:** Tuple[List[str], List[float]] - A tuple containing the top 5 thematic words and a list of their normalized scores.
 
 **Raises:**
 
-- ValueError: If trend indicators or pattern recognition results are invalid or inconsistent.
+- ValueError: If `unique_words` and `word_counts` are empty or have mismatched lengths.
+- ValueError: If the total word count is zero (cannot compute normalized scores).
 **Examples:**
 
 ```python
->>> trend_indicators = [50.0, 200.0]
->>> pattern_recognition = ['bullish', 'bearish']
->>> result = define_trading_rules(trend_indicators, pattern_recognition)
-{'buy_rules': ['price > 50', 'macd > signal'], 'sell_rules': ['price < 200', 'rsi > 70']}
+>>> unique_words = ['love', 'heart', 'night', 'dream', 'sky']
+>>> word_counts = [10, 8, 5, 2, 1]
+>>> themes, scores = extract_themes(unique_words, word_counts)
+>>> print(themes)
+>>> print(scores)
+['love', 'heart', 'night', 'dream', 'sky']\n[0.38461538461538464, 0.3076923076923077, 0.19230769230769232, 0.07692307692307693, 0.038461538461538464]
 ```
 
 ```python
->>> trend_indicators = [100.0, 50.0]
->>> pattern_recognition = ['bearish', 'bullish']
->>> result = define_trading_rules(trend_indicators, pattern_recognition)
-{'buy_rules': ['price > 100', 'stochastic < 20'], 'sell_rules': ['price < 50', 'macd < signal']}
+>>> unique_words = ['sun', 'rain']
+>>> word_counts = [10, 5]
+>>> themes, scores = extract_themes(unique_words, word_counts)
+>>> print(themes)
+>>> print(scores)
+['sun', 'rain']\n[0.6666666666666666, 0.3333333333333333]
 ```
 
 
 
 ---
 
-## define_risk_management
+## sentiment_analysis
 
 ### Description
-Define risk management strategies based on the risk assessment.
+Compute sentiment for each song.
 
 ### Conceptual Info
 
-This node defines risk management strategies based on the risk assessment provided by the 'assess_risk' node. It generates stop-loss levels and position sizes for trades.
+Performs sentiment analysis on song lyrics, producing a sentiment score for each track.
 
 ### Docstring
 
-**Summary:** Defines risk management strategies based on risk assessment.
+**Summary:** Computes overall sentiment scores for a list of song lyrics, returning a list of floats between -1 and 1 aligned with song titles.
 
 **Parameters:**
 
-- risk_levels (List[float]): List of risk levels associated with potential trades from the 'assess_risk' node.
-- risk_factors (List[str]): List of factors contributing to the risk assessment from the 'assess_risk' node.
-**Returns:** {'stop_loss_levels': List[float], 'position_sizing': List[float]} - A dictionary containing lists of stop-loss levels and position sizes for trades.
+- song_titles (List[str]): List of song titles corresponding to the lyrics.
+- song_lyrics (List[str]): List of full lyrics for each song.
+**Returns:** List[float] - Sentiment score for each song.
 
 **Raises:**
 
-- ValueError: If risk_levels or risk_factors are empty or not of the correct type.
+- ValueError: If input lists are not the same length or are empty.
 **Examples:**
 
 ```python
->>> risk_levels = [0.5, 0.7, 0.3]
->>> risk_factors = ['market_volatility', 'economic_indicators']
->>> result = define_risk_management(risk_levels, risk_factors)
-{'stop_loss_levels': [0.4, 0.6, 0.2], 'position_sizing': [0.1, 0.2, 0.3]}
+>>> scores = sentiment_analysis(["Love Story", "Bad Blood"], ["I knew you were trouble, so I stayed away", "I used to love you, now I hate you"])
+[0.76, -0.62]
 ```
 
 ```python
->>> risk_levels = [0.2, 0.9]
->>> risk_factors = ['geopolitical_events']
->>> result = define_risk_management(risk_levels, risk_factors)
-{'stop_loss_levels': [0.1, 0.8], 'position_sizing': [0.05, 0.15]}
+>>> scores = sentiment_analysis(["Blank Space"], ["So nice I can't decide if I'm a love or a lie"])
+[0.48]
 ```
 
 
 
 ---
 
-## simulate_trades
+## trend_over_time
 
 ### Description
-Simulate trades using the defined trading rules and risk management strategies.
+Summarize sentiment trend across release years.
 
 ### Conceptual Info
 
-Simulates trades based on predefined trading rules and risk management strategies, generating simulated trade outcomes and performance metrics.
+This node aggregates song-level sentiment scores into year-level averages, providing a temporal view of lyrical sentiment across Taylor Swift's discography.
 
 ### Docstring
 
-**Summary:** Simulates trade executions using the established trading rules and risk management strategies, producing simulated trade results and evaluating their performance.
+**Summary:** Compute average sentiment per release year from parallel lists of years and sentiment scores.
 
 **Parameters:**
 
-- buy_rules (List[str]): List of conditions for buying stocks derived from market trend analysis.
-- sell_rules (List[str]): List of conditions for selling stocks based on market trend analysis.
-- stop_loss_levels (List[float]): List of stop-loss levels for trades determined by risk assessment.
-- position_sizing (List[float]): List of position sizes for trades based on risk management strategies.
-**Returns:** [List[float], List[float]] - A tuple containing a 2D list of simulated trade outcomes and a list of performance metrics for the simulated trades.
+- release_years (List[int]): List of release years for each song, aligned with sentiment_scores.
+- sentiment_scores (List[float]): Sentiment score for each song, ranging from -1 (very negative) to 1 (very positive).
+**Returns:** Tuple[List[int], List[float]] - A tuple containing two parallel lists:
+- years: Chronological list of years with songs.
+- avg_sentiment: Average sentiment for each corresponding year.
 
 **Raises:**
 
-- ValueError: If any of the input lists are empty or contain invalid values.
-- TypeError: If the input types do not match the expected types.
+- ValueError: If release_years and sentiment_scores are of different lengths.
+- ValueError: If either input list is empty.
 **Examples:**
 
 ```python
->>> buy_rules = ['price > 50', 'volume > 1000']
->>> sell_rules = ['price < 30', 'rsi > 70']
->>> stop_loss_levels = [0.9, 0.8]
->>> position_sizing = [0.5, 0.3]
->>> simulated_trades, performance_metrics = simulate_trades(buy_rules, sell_rules, stop_loss_levels, position_sizing)
-([[0.95, 0.92], [0.88, 0.85]], [0.1, 0.2])
+>>> years, avg = trend_over_time([2015, 2015, 2016], [0.2, 0.5, -0.1])
+([2015, 2016], [0.35, -0.1])
 ```
 
 ```python
->>> buy_rules = ['macd > 0', 'bollinger_band > 0']
->>> sell_rules = ['macd < 0', 'bollinger_band < 0']
->>> stop_loss_levels = [0.95, 0.9]
->>> position_sizing = [0.4, 0.6]
->>> simulated_trades, performance_metrics = simulate_trades(buy_rules, sell_rules, stop_loss_levels, position_sizing)
-([[0.98, 0.96], [0.92, 0.9]], [0.15, 0.25])
+>>> trend_over_time([2015, 2016], [0.3])
+Traceback (most recent call last):
+  ...
+ValueError: release_years and sentiment_scores must have the same length.
 ```
 
 
 
 ---
 
-## evaluate_trading_strategy
+## generate_summary
 
 ### Description
-Evaluate the trading strategy based on the simulation results.
+Produce a human‑readable summary of the findings.
 
 ### Conceptual Info
 
-The node evaluates the trading strategy's effectiveness based on simulated trade outcomes and performance metrics.
+Generates a short narrative that encapsulates the dominant lyrical themes and the sentiment trajectory over the artist's career, highlighting any key shifts or anomalies.
 
 ### Docstring
 
-**Summary:** Evaluates the trading strategy based on simulated trades and performance metrics.
+**Summary:** Create a concise paragraph summarizing key lyrical themes and sentiment trends.
 
 **Parameters:**
 
-- simulated_trades (List[float]): 2D list of simulated trade outcomes from the 'simulate_trades' node.
-- performance_metrics (List[float]): List of performance metrics for the simulated trades from the 'simulate_trades' node.
-**Returns:** Tuple[float, List[str]] - A tuple containing the overall effectiveness of the trading strategy as a float and a list of areas for improvement as strings.
+- themes (List[str]): Top 5 thematic words in descending frequency order.
+- theme_scores (List[float]): Normalized frequency score for each corresponding theme (sum of all scores should equal 1).
+- years (List[int]): Chronological list of release years for which sentiment averages have been computed.
+- avg_sentiment (List[float]): Average sentiment score for each year, aligned with the `years` list. Scores range from -1 (very negative) to +1 (very positive).
+**Returns:** str - A single paragraph that lists the top themes, summarizes the sentiment trend over time, and notes any significant pattern shifts.
 
 **Raises:**
 
-- ValueError: If the simulated trades or performance metrics are empty or invalid.
+- ValueError: If `themes` and `theme_scores` lists are of unequal length, or if any of the input lists are empty.
+- TypeError: If any of the parameters is not of the expected type.
 **Examples:**
 
 ```python
->>> simulated_trades = [[100.0, 105.0, 110.0], [120.0, 115.0, 110.0]]
->>> performance_metrics = [0.05, 0.02, -0.03]
->>> evaluate_trading_strategy(simulated_trades, performance_metrics)
-(0.75, ['Risk Management', 'Trading Rules'])
+>>> generate_summary(
+...     themes=["love", "heartbreak", "growth", "rebellion", "dreams"],
+...     theme_scores=[0.28, 0.22, 0.18, 0.12, 0.10],
+...     years=[2013, 2014, 2015, 2016, 2017],
+...     avg_sentiment=[0.15, 0.08, 0.02, -0.04, -0.10]
+>>> )
+"The analysis highlights love and heartbreak as the dominant lyrical themes, followed by growth, rebellion, and dreams. Sentiment shifts from mildly positive in 2013 to increasingly negative by 2017, indicating a noticeable downturn in overall lyrical mood during the latter years."
 ```
 
 ```python
->>> simulated_trades = [[100.0, 95.0, 90.0], [85.0, 80.0, 75.0]]
->>> performance_metrics = [-0.05, -0.02, -0.03]
->>> evaluate_trading_strategy(simulated_trades, performance_metrics)
-(0.25, ['Market Analysis', 'Position Sizing'])
+>>> generate_summary(
+...     themes=["hope", "rain", "silence", "journey", "home"],
+...     theme_scores=[0.30, 0.20, 0.15, 0.12, 0.10],
+...     years=[2012, 2013, 2014],
+...     avg_sentiment=[0.05, 0.10, 0.15]"
+                ")
+"The prevailing themes are hope, rain, silence, journey, and home. The sentiment trend shows a steady improvement from 2012 to 2014, suggesting an increasingly optimistic tone over time."
 ```
 
