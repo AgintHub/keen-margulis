@@ -6,16 +6,13 @@ import json
 import sys
 from typing import Dict, Any, List, Callable, Coroutine, Union, Optional
 
-from code.calculate_position_sizing import calculate_position_sizing
-from code.configure_trading_system import configure_trading_system
-from code.determine_trading_rules import determine_trading_rules
-from code.develop_trading_dashboard import develop_trading_dashboard
-from code.evaluate_trading_performance import evaluate_trading_performance
-from code.identify_trading_instruments import identify_trading_instruments
-from code.implement_order_execution import implement_order_execution
-from code.implement_trading_risk_management import implement_trading_risk_management
-from code.select_trading_strategy import select_trading_strategy
-from code.set_market_environment import set_market_environment
+from code.fetch_market_data import fetch_market_data
+from code.analyze_market_trends import analyze_market_trends
+from code.assess_risk import assess_risk
+from code.define_trading_rules import define_trading_rules
+from code.define_risk_management import define_risk_management
+from code.simulate_trades import simulate_trades
+from code.evaluate_trading_strategy import evaluate_trading_strategy
 
 # Get async mode from environment variable or default to False
 ASYNC_MODE = os.environ.get('ASYNC_MODE', '').lower() in ('true', '1', 'yes', 'y')
@@ -37,16 +34,13 @@ def make_async(func):
 
     return async_wrapper
 
-calculate_position_sizing_async = make_async(calculate_position_sizing)
-configure_trading_system_async = make_async(configure_trading_system)
-determine_trading_rules_async = make_async(determine_trading_rules)
-develop_trading_dashboard_async = make_async(develop_trading_dashboard)
-evaluate_trading_performance_async = make_async(evaluate_trading_performance)
-identify_trading_instruments_async = make_async(identify_trading_instruments)
-implement_order_execution_async = make_async(implement_order_execution)
-implement_trading_risk_management_async = make_async(implement_trading_risk_management)
-select_trading_strategy_async = make_async(select_trading_strategy)
-set_market_environment_async = make_async(set_market_environment)
+fetch_market_data_async = make_async(fetch_market_data)
+analyze_market_trends_async = make_async(analyze_market_trends)
+assess_risk_async = make_async(assess_risk)
+define_trading_rules_async = make_async(define_trading_rules)
+define_risk_management_async = make_async(define_risk_management)
+simulate_trades_async = make_async(simulate_trades)
+evaluate_trading_strategy_async = make_async(evaluate_trading_strategy)
 
 async def run_workflow(user_input: str) -> Dict[str, Any]:
     """Execute the workflow by running each level in the topological sort.
@@ -60,75 +54,57 @@ async def run_workflow(user_input: str) -> Dict[str, Any]:
     # Store results for each node
     results = {}
 
-    # Level 0: identify_trading_instruments, set_market_environment
-    async def run_identify_trading_instruments():
-        # Call the async version of identify_trading_instruments with results from dependencies
-        return await identify_trading_instruments_async(user_input)
-
-    async def run_set_market_environment():
-        # Call the async version of set_market_environment with results from dependencies
-        return await set_market_environment_async(user_input)
+    # Level 0: fetch_market_data
+    async def run_fetch_market_data():
+        # Call the async version of fetch_market_data with results from dependencies
+        return await fetch_market_data_async(user_input)
 
     # Run level 0 nodes in parallel
-    level_0_results = await asyncio.gather(run_identify_trading_instruments(), run_set_market_environment())
-    results['identify_trading_instruments'] = level_0_results[0]
-    results['set_market_environment'] = level_0_results[1]
+    results['fetch_market_data'] = await run_fetch_market_data()
 
-    # Level 1: configure_trading_system, select_trading_strategy
-    async def run_configure_trading_system():
-        # Call the async version of configure_trading_system with results from dependencies
-        return await configure_trading_system_async(results['set_market_environment'])
+    # Level 1: analyze_market_trends, assess_risk
+    async def run_analyze_market_trends():
+        # Call the async version of analyze_market_trends with results from dependencies
+        return await analyze_market_trends_async(results['fetch_market_data'])
 
-    async def run_select_trading_strategy():
-        # Call the async version of select_trading_strategy with results from dependencies
-        return await select_trading_strategy_async(results['identify_trading_instruments'])
+    async def run_assess_risk():
+        # Call the async version of assess_risk with results from dependencies
+        return await assess_risk_async(results['fetch_market_data'])
 
     # Run level 1 nodes in parallel
-    level_1_results = await asyncio.gather(run_configure_trading_system(), run_select_trading_strategy())
-    results['configure_trading_system'] = level_1_results[0]
-    results['select_trading_strategy'] = level_1_results[1]
+    level_1_results = await asyncio.gather(run_analyze_market_trends(), run_assess_risk())
+    results['analyze_market_trends'] = level_1_results[0]
+    results['assess_risk'] = level_1_results[1]
 
-    # Level 2: develop_trading_dashboard, determine_trading_rules
-    async def run_develop_trading_dashboard():
-        # Call the async version of develop_trading_dashboard with results from dependencies
-        return await develop_trading_dashboard_async(results['configure_trading_system'])
+    # Level 2: define_trading_rules, define_risk_management
+    async def run_define_trading_rules():
+        # Call the async version of define_trading_rules with results from dependencies
+        return await define_trading_rules_async(results['analyze_market_trends'])
 
-    async def run_determine_trading_rules():
-        # Call the async version of determine_trading_rules with results from dependencies
-        return await determine_trading_rules_async(results['select_trading_strategy'])
+    async def run_define_risk_management():
+        # Call the async version of define_risk_management with results from dependencies
+        return await define_risk_management_async(results['assess_risk'])
 
     # Run level 2 nodes in parallel
-    level_2_results = await asyncio.gather(run_develop_trading_dashboard(), run_determine_trading_rules())
-    results['develop_trading_dashboard'] = level_2_results[0]
-    results['determine_trading_rules'] = level_2_results[1]
+    level_2_results = await asyncio.gather(run_define_trading_rules(), run_define_risk_management())
+    results['define_trading_rules'] = level_2_results[0]
+    results['define_risk_management'] = level_2_results[1]
 
-    # Level 3: implement_trading_risk_management, calculate_position_sizing
-    async def run_implement_trading_risk_management():
-        # Call the async version of implement_trading_risk_management with results from dependencies
-        return await implement_trading_risk_management_async(results['develop_trading_dashboard'])
-
-    async def run_calculate_position_sizing():
-        # Call the async version of calculate_position_sizing with results from dependencies
-        return await calculate_position_sizing_async(results['determine_trading_rules'])
+    # Level 3: simulate_trades
+    async def run_simulate_trades():
+        # Call the async version of simulate_trades with results from dependencies
+        return await simulate_trades_async(results['define_trading_rules'], results['define_risk_management'])
 
     # Run level 3 nodes in parallel
-    level_3_results = await asyncio.gather(run_implement_trading_risk_management(), run_calculate_position_sizing())
-    results['implement_trading_risk_management'] = level_3_results[0]
-    results['calculate_position_sizing'] = level_3_results[1]
+    results['simulate_trades'] = await run_simulate_trades()
 
-    # Level 4: implement_order_execution, evaluate_trading_performance
-    async def run_implement_order_execution():
-        # Call the async version of implement_order_execution with results from dependencies
-        return await implement_order_execution_async(results['calculate_position_sizing'])
-
-    async def run_evaluate_trading_performance():
-        # Call the async version of evaluate_trading_performance with results from dependencies
-        return await evaluate_trading_performance_async(results['implement_trading_risk_management'])
+    # Level 4: evaluate_trading_strategy
+    async def run_evaluate_trading_strategy():
+        # Call the async version of evaluate_trading_strategy with results from dependencies
+        return await evaluate_trading_strategy_async(results['simulate_trades'])
 
     # Run level 4 nodes in parallel
-    level_4_results = await asyncio.gather(run_implement_order_execution(), run_evaluate_trading_performance())
-    results['implement_order_execution'] = level_4_results[0]
-    results['evaluate_trading_performance'] = level_4_results[1]
+    results['evaluate_trading_strategy'] = await run_evaluate_trading_strategy()
 
     # Return all results
     return results

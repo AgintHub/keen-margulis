@@ -1,401 +1,307 @@
-# create_trading_workflow - Complete PRD Documentation
+# trading_workflow - Complete PRD Documentation
 
 ## Overview
-PRDs for nodes in the 'create_trading_workflow' module.
+PRDs for nodes in the 'trading_workflow' module.
 
 ## Table of Contents
 
-- [calculate_position_sizing](#calculate_position_sizing)
+- [fetch_market_data](#fetch_market_data)
 
-- [configure_trading_system](#configure_trading_system)
+- [analyze_market_trends](#analyze_market_trends)
 
-- [determine_trading_rules](#determine_trading_rules)
+- [assess_risk](#assess_risk)
 
-- [develop_trading_dashboard](#develop_trading_dashboard)
+- [define_trading_rules](#define_trading_rules)
 
-- [evaluate_trading_performance](#evaluate_trading_performance)
+- [define_risk_management](#define_risk_management)
 
-- [identify_trading_instruments](#identify_trading_instruments)
+- [simulate_trades](#simulate_trades)
 
-- [implement_order_execution](#implement_order_execution)
-
-- [implement_trading_risk_management](#implement_trading_risk_management)
-
-- [select_trading_strategy](#select_trading_strategy)
-
-- [set_market_environment](#set_market_environment)
+- [evaluate_trading_strategy](#evaluate_trading_strategy)
 
 
 
 ---
 
-## calculate_position_sizing
+## fetch_market_data
 
 ### Description
-Calculate the position sizing for each trading instrument based on the trading rules and strategy.
+Fetch current and historical market data for analysis.
 
 ### Conceptual Info
 
-This node calculates the position sizing for each trading instrument based on the trading rules and strategy.
+Fetches current and historical market data for analysis, providing the foundation for market trend analysis and risk assessment.
 
 ### Docstring
 
-**Summary:** Calculates the position sizing for each trading instrument based on the trading rules and strategy.
+**Summary:** Fetches current and historical market data, returning current stock prices and historical data.
 
-**Parameters:**
-
-- trading_rules (dict): Trading rules determined by the determine_trading_rules node, including entry_points, exit_points, stop_loss_levels, position_sizing_strategy, and trading_rules_summary.
-- trading_instruments (List[str]): List of trading instruments identified for inclusion in the workflow.
-**Returns:** dict - A dictionary containing instrument_position_sizes, position_size_explanations, total_portfolio_value, and is_position_sizing_valid.
+**Returns:** {'current_prices': List[float], 'historical_data': List[List[float]]} - A dictionary containing the list of current stock prices and a 2D list of historical stock prices and volumes.
 
 **Raises:**
 
-- ValueError: If the trading rules or instruments are invalid.
+- ConnectionError: If there's a failure in connecting to the market data source.
+- DataError: If the fetched data is malformed or incomplete.
 **Examples:**
 
 ```python
->>> trading_rules = {
-...     'entry_points': [10.0, 20.0],
-...     'exit_points': [15.0, 25.0],
-...     'stop_loss_levels': [9.0, 19.0],
-...     'position_sizing_strategy': 'fixed',
-...     'trading_rules_summary': 'Example trading rules'
->>> }
->>> trading_instruments = ['Instrument1', 'Instrument2']
->>> calculate_position_sizing(trading_rules, trading_instruments)
-{'instrument_position_sizes': [100.0, 200.0], 'position_size_explanations': ['Fixed position size of 100.0', 'Fixed position size of 200.0'], 'total_portfolio_value': 300.0, 'is_position_sizing_valid': True}
+>>> fetch_market_data()
+{'current_prices': [100.5, 200.2], 'historical_data': [[100, 1000], [101, 1200]]}
 ```
 
 
 
 ---
 
-## configure_trading_system
+## analyze_market_trends
 
 ### Description
-Configure the trading system to connect to the market environment and implement the trading rules and strategy.
+Analyze market trends using historical and current market data.
 
 ### Conceptual Info
 
-This node configures the trading system to connect to the market environment and implements the trading rules and strategy. It takes the output from the 'set_market_environment' node and uses it to set up the trading system with the necessary parameters and rules.
+Analyzes historical and current market data to identify trends and patterns, providing insights for trading decisions.
 
 ### Docstring
 
-**Summary:** Configures the trading system to connect to the market environment and implement the trading rules and strategy.
+**Summary:** Analyzes market trends using historical and current market data to identify trend indicators and patterns.
 
 **Parameters:**
 
-- trading_accounts_setup_status (bool): Whether the trading accounts have been successfully set up.
-- api_configuration_status (bool): Whether the APIs have been successfully configured.
-- exchange_links_configuration_status (bool): Whether the exchange links have been successfully configured.
-- configured_exchanges (List[str]): List of exchanges that have been configured.
-**Returns:** dict - A dictionary containing the status of the trading system configuration, the list of configuration parameters, details of the market environment, and the list of trading rules implemented.
+- current_prices (List[float]): List of current stock prices fetched from the market data.
+- historical_data (List[List[float]]): 2D list of historical stock prices and volumes fetched from the market data.
+**Returns:** Tuple[List[float], List[str]] - A tuple containing a list of trend indicators and a list of identified patterns.
 
 **Raises:**
 
-- ValueError: If any of the required parent node outputs are not provided or are invalid.
+- ValueError: If the input lists are empty or malformed.
 **Examples:**
 
 ```python
->>> trading_accounts_setup_status = True
->>> api_configuration_status = True
->>> exchange_links_configuration_status = True
->>> configured_exchanges = ['Binance', 'Kraken']
->>> result = configure_trading_system(trading_accounts_setup_status, api_configuration_status, exchange_links_configuration_status, configured_exchanges)
-{
-  'trading_system_status': True,
-  'configuration_parameters': 'API keys, account credentials, exchange links',
-  'market_environment_details': 'Trading accounts: [True], APIs: [True], Exchange links: [True]',
-  'trading_rules_implemented': ['Entry point rule', 'Exit point rule', 'Stop-loss rule']
-}
+>>> current_prices = [100.0, 120.0, 110.0]
+>>> historical_data = [[90.0, 1000], [95.0, 1200], [100.0, 1500]]
+>>> result = analyze_market_trends(current_prices, historical_data)
+([105.0, 115.0], ['bullish', 'volatile'])
 ```
 
 ```python
->>> trading_accounts_setup_status = False
->>> api_configuration_status = True
->>> exchange_links_configuration_status = True
->>> configured_exchanges = ['Binance', 'Kraken']
->>> result = configure_trading_system(trading_accounts_setup_status, api_configuration_status, exchange_links_configuration_status, configured_exchanges)
-{
-  'trading_system_status': False,
-  'configuration_parameters': '',
-  'market_environment_details': 'Trading accounts: [False], APIs: [True], Exchange links: [True]',
-  'trading_rules_implemented': []
-}
+>>> current_prices = [80.0, 70.0, 60.0]
+>>> historical_data = [[85.0, 800], [80.0, 700], [75.0, 600]]
+>>> result = analyze_market_trends(current_prices, historical_data)
+([75.0, 65.0], ['bearish', 'declining'])
 ```
 
 
 
 ---
 
-## determine_trading_rules
+## assess_risk
 
 ### Description
-Determine the trading rules that will be used in the trading workflow, including entry and exit points, stop-loss levels, and position sizing.
+Assess the risk associated with potential trades based on market data.
 
 ### Conceptual Info
 
-This node determines the trading rules for a trading workflow based on a selected trading strategy.
+This node assesses the risk associated with potential trades based on current and historical market data fetched by its parent node, fetch_market_data.
 
 ### Docstring
 
-**Summary:** Determine trading rules including entry and exit points, stop-loss levels, and position sizing based on a selected trading strategy.
+**Summary:** Assess the risk associated with potential trades based on current market conditions.
 
 **Parameters:**
 
-- selected_strategy (dict): A dictionary containing the selected trading strategy details, including 'selected_strategy_name', 'strategy_principles', and 'strategy_metrics'.
-**Returns:** dict - A dictionary containing the determined trading rules, including 'entry_points', 'exit_points', 'stop_loss_levels', 'position_sizing_strategy', and 'trading_rules_summary'.
+- market_data (Dict[str, List[float]]): Dictionary containing current prices and historical data fetched from fetch_market_data.
+**Returns:** Tuple[List[float], List[str]] - A tuple containing a list of risk levels and a list of risk factors.
 
 **Raises:**
 
-- ValueError: If the selected trading strategy is invalid or does not contain required details.
+- ValueError: If market_data is empty or does not contain the required keys.
 **Examples:**
 
 ```python
->>> determine_trading_rules({'selected_strategy_name': 'Moving Average Crossover', 'strategy_principles': ['MA_50', 'MA_200'], 'strategy_metrics': [' Sharpe Ratio']})
-{'entry_points': [1.0, 2.0], 'exit_points': [3.0, 4.0], 'stop_loss_levels': [0.9, 1.9], 'position_sizing_strategy': 'Fixed Fractional', 'trading_rules_summary': 'Based on Moving Average Crossover strategy'}
+>>> market_data = {'current_prices': [100.0, 200.0], 'historical_data': [[90.0, 100.0], [190.0, 200.0]]}
+>>> risk_levels, risk_factors = assess_risk(market_data)
+([0.5, 0.3], ['volatility', 'liquidity'])
+```
+
+```python
+>>> market_data = {'current_prices': [150.0, 250.0], 'historical_data': [[140.0, 150.0], [240.0, 250.0]]}
+>>> risk_levels, risk_factors = assess_risk(market_data)
+([0.4, 0.2], ['market_trend', 'economic_indicators'])
 ```
 
 
 
 ---
 
-## develop_trading_dashboard
+## define_trading_rules
 
 ### Description
-Develop a trading dashboard to monitor the performance of the trading workflow, including real-time data feeds, analytics, and alerts.
+Define trading rules based on the analysis of market trends.
 
 ### Conceptual Info
 
-The develop_trading_dashboard node is responsible for creating a trading dashboard to monitor the performance of the trading workflow. It takes the output from the configure_trading_system node and uses it to develop a comprehensive dashboard.
+This node defines trading rules based on the analysis of market trends, using trend indicators and pattern recognition to establish conditions for buying and selling stocks.
 
 ### Docstring
 
-**Summary:** Develop a trading dashboard to monitor the performance of the trading workflow.
+**Summary:** Define trading rules based on market trend analysis.
 
 **Parameters:**
 
-- trading_system_status (bool): Whether the trading system has been successfully configured
-- configuration_parameters (str): List of configuration parameters used in the trading system
-- market_environment_details (str): Details of the market environment, including trading accounts, APIs, and exchange links
-- trading_rules_implemented (List[str]): List of trading rules implemented in the trading system
-**Returns:** dict - A dictionary containing the dashboard_name, metrics_used, data_feeds, analytics_tools, alert_system, and dashboard_url
+- trend_indicators (List[float]): List of trend indicators, such as moving averages, from the market trend analysis.
+- pattern_recognition (List[str]): List of identified patterns, such as 'bullish' or 'bearish', from the market trend analysis.
+**Returns:** {'buy_rules': List[str], 'sell_rules': List[str]} - Dictionary containing lists of conditions for buying and selling stocks based on the trend analysis.
 
 **Raises:**
 
-- ValueError: If the trading system status is False or if the configuration parameters are invalid
+- ValueError: If trend indicators or pattern recognition results are invalid or inconsistent.
 **Examples:**
 
 ```python
->>> develop_trading_dashboard(trading_system_status=True, configuration_parameters='param1,param2', market_environment_details='market_env', trading_rules_implemented=['rule1','rule2'])
-{'dashboard_name': 'Trading Dashboard', 'metrics_used': ['metric1','metric2'], 'data_feeds': ['feed1','feed2'], 'analytics_tools': ['tool1','tool2'], 'alert_system': True, 'dashboard_url': 'https://dashboard.com'}
+>>> trend_indicators = [50.0, 200.0]
+>>> pattern_recognition = ['bullish', 'bearish']
+>>> result = define_trading_rules(trend_indicators, pattern_recognition)
+{'buy_rules': ['price > 50', 'macd > signal'], 'sell_rules': ['price < 200', 'rsi > 70']}
+```
+
+```python
+>>> trend_indicators = [100.0, 50.0]
+>>> pattern_recognition = ['bearish', 'bullish']
+>>> result = define_trading_rules(trend_indicators, pattern_recognition)
+{'buy_rules': ['price > 100', 'stochastic < 20'], 'sell_rules': ['price < 50', 'macd < signal']}
 ```
 
 
 
 ---
 
-## evaluate_trading_performance
+## define_risk_management
 
 ### Description
-Evaluate the trading performance of the trading workflow, including analyzing profit and loss, drawdowns, and other trading metrics.
+Define risk management strategies based on the risk assessment.
 
 ### Conceptual Info
 
-This node evaluates the trading performance of a trading workflow by analyzing profit and loss, drawdowns, and other trading metrics.
+This node defines risk management strategies based on the risk assessment provided by the 'assess_risk' node. It generates stop-loss levels and position sizes for trades.
 
 ### Docstring
 
-**Summary:** Evaluates the trading performance of a trading workflow.
+**Summary:** Defines risk management strategies based on risk assessment.
 
 **Parameters:**
 
-- trading_workflow_data (dict): Trading workflow data, including profit and loss, drawdowns, and other trading metrics.
-- risk_management_data (dict): Risk management data from the implement_trading_risk_management node.
-**Returns:** dict - A dictionary containing the total profit or loss, maximum drawdown, trading metrics, performance evaluation, and whether the performance is satisfactory.
+- risk_levels (List[float]): List of risk levels associated with potential trades from the 'assess_risk' node.
+- risk_factors (List[str]): List of factors contributing to the risk assessment from the 'assess_risk' node.
+**Returns:** {'stop_loss_levels': List[float], 'position_sizing': List[float]} - A dictionary containing lists of stop-loss levels and position sizes for trades.
 
 **Raises:**
 
-- ValueError: If the input trading workflow data or risk management data is invalid or incomplete.
+- ValueError: If risk_levels or risk_factors are empty or not of the correct type.
 **Examples:**
 
 ```python
->>> evaluate_trading_performance(trading_workflow_data={'profit_loss': 1000.0, 'drawdowns': [0.1, 0.2]}, risk_management_data={'value_at_risk': 0.05, 'expected_shortfall': 0.03})
-{'total_profit_loss': 1000.0, 'max_drawdown': 0.2, 'trading_metrics': ['Sharpe ratio: 1.2', 'Sortino ratio: 1.1'], 'performance_evaluation': 'The trading performance is satisfactory.', 'is_performance_satisfactory': True}
+>>> risk_levels = [0.5, 0.7, 0.3]
+>>> risk_factors = ['market_volatility', 'economic_indicators']
+>>> result = define_risk_management(risk_levels, risk_factors)
+{'stop_loss_levels': [0.4, 0.6, 0.2], 'position_sizing': [0.1, 0.2, 0.3]}
+```
+
+```python
+>>> risk_levels = [0.2, 0.9]
+>>> risk_factors = ['geopolitical_events']
+>>> result = define_risk_management(risk_levels, risk_factors)
+{'stop_loss_levels': [0.1, 0.8], 'position_sizing': [0.05, 0.15]}
 ```
 
 
 
 ---
 
-## identify_trading_instruments
+## simulate_trades
 
 ### Description
-Identify the trading instruments to be included in the trading workflow, such as stocks, options, futures, and forex.
+Simulate trades using the defined trading rules and risk management strategies.
 
 ### Conceptual Info
 
-This node identifies the trading instruments to be included in the trading workflow.
+Simulates trades based on predefined trading rules and risk management strategies, generating simulated trade outcomes and performance metrics.
 
 ### Docstring
 
-**Summary:** Identify trading instruments for the trading workflow.
+**Summary:** Simulates trade executions using the established trading rules and risk management strategies, producing simulated trade results and evaluating their performance.
 
 **Parameters:**
 
-- instruments_info (dict): Dictionary containing information about trading instruments.
-**Returns:** dict - Dictionary containing identified trading instruments, exchanges, listings, and market capitalizations.
+- buy_rules (List[str]): List of conditions for buying stocks derived from market trend analysis.
+- sell_rules (List[str]): List of conditions for selling stocks based on market trend analysis.
+- stop_loss_levels (List[float]): List of stop-loss levels for trades determined by risk assessment.
+- position_sizing (List[float]): List of position sizes for trades based on risk management strategies.
+**Returns:** [List[float], List[float]] - A tuple containing a 2D list of simulated trade outcomes and a list of performance metrics for the simulated trades.
 
 **Raises:**
 
-- ValueError: If instruments_info is empty or None.
+- ValueError: If any of the input lists are empty or contain invalid values.
+- TypeError: If the input types do not match the expected types.
 **Examples:**
 
 ```python
->>> identify_trading_instruments({'instruments': ['AAPL', 'GOOG'], 'exchanges': ['NASDAQ'], 'listings': ['AAPL', 'GOOG'], 'market_capitalizations': [1000.0, 2000.0]})
-{'trading_instruments': ['AAPL', 'GOOG'], 'exchanges': ['NASDAQ'], 'listings': ['AAPL', 'GOOG'], 'market_capitalizations': [1000.0, 2000.0]}
+>>> buy_rules = ['price > 50', 'volume > 1000']
+>>> sell_rules = ['price < 30', 'rsi > 70']
+>>> stop_loss_levels = [0.9, 0.8]
+>>> position_sizing = [0.5, 0.3]
+>>> simulated_trades, performance_metrics = simulate_trades(buy_rules, sell_rules, stop_loss_levels, position_sizing)
+([[0.95, 0.92], [0.88, 0.85]], [0.1, 0.2])
+```
+
+```python
+>>> buy_rules = ['macd > 0', 'bollinger_band > 0']
+>>> sell_rules = ['macd < 0', 'bollinger_band < 0']
+>>> stop_loss_levels = [0.95, 0.9]
+>>> position_sizing = [0.4, 0.6]
+>>> simulated_trades, performance_metrics = simulate_trades(buy_rules, sell_rules, stop_loss_levels, position_sizing)
+([[0.98, 0.96], [0.92, 0.9]], [0.15, 0.25])
 ```
 
 
 
 ---
 
-## implement_order_execution
+## evaluate_trading_strategy
 
 ### Description
-This node implements the order execution logic for each trading instrument, including entry orders, stop-loss orders, and profit targets.
+Evaluate the trading strategy based on the simulation results.
 
 ### Conceptual Info
 
-This node is responsible for executing orders for each trading instrument, taking into account entry orders, stop-loss orders, and profit targets.
+The node evaluates the trading strategy's effectiveness based on simulated trade outcomes and performance metrics.
 
 ### Docstring
 
-**Summary:** Implement the order execution logic for each trading instrument.
+**Summary:** Evaluates the trading strategy based on simulated trades and performance metrics.
 
 **Parameters:**
 
-- instrument_position_sizes (List[float]): List of position sizes for each trading instrument
-- entry_points (List[float]): List of entry points for each trading instrument
-- stop_loss_levels (List[float]): List of stop-loss levels for each trading instrument
-- profit_targets (List[float]): List of profit targets for each trading instrument
-**Returns:** dict - A dictionary containing the order execution status, executed orders, entry order prices, stop-loss order prices, and profit target prices.
+- simulated_trades (List[float]): 2D list of simulated trade outcomes from the 'simulate_trades' node.
+- performance_metrics (List[float]): List of performance metrics for the simulated trades from the 'simulate_trades' node.
+**Returns:** Tuple[float, List[str]] - A tuple containing the overall effectiveness of the trading strategy as a float and a list of areas for improvement as strings.
 
 **Raises:**
 
-- ValueError: If the input lists are not of the same length.
-- RuntimeError: If an error occurs during order execution.
+- ValueError: If the simulated trades or performance metrics are empty or invalid.
 **Examples:**
 
 ```python
->>> instrument_position_sizes = [100.0, 200.0, 300.0]
->>> entry_points = [10.0, 20.0, 30.0]
->>> stop_loss_levels = [9.0, 19.0, 29.0]
->>> profit_targets = [11.0, 21.0, 31.0]
->>> implement_order_execution(instrument_position_sizes, entry_points, stop_loss_levels, profit_targets)
-{'order_execution_status': True, 'executed_orders': ['order1', 'order2', 'order3'], 'entry_order_prices': [10.0, 20.0, 30.0], 'stop_loss_order_prices': [9.0, 19.0, 29.0], 'profit_target_prices': [11.0, 21.0, 31.0]}
+>>> simulated_trades = [[100.0, 105.0, 110.0], [120.0, 115.0, 110.0]]
+>>> performance_metrics = [0.05, 0.02, -0.03]
+>>> evaluate_trading_strategy(simulated_trades, performance_metrics)
+(0.75, ['Risk Management', 'Trading Rules'])
 ```
 
-
-
----
-
-## implement_trading_risk_management
-
-### Description
-Implement trading risk management to monitor and control trading risks, including value at risk, expected shortfall, and potential future exposure.
-
-### Conceptual Info
-
-This node implements trading risk management to monitor and control trading risks.
-
-### Docstring
-
-**Summary:** Implement trading risk management to monitor and control trading risks.
-
-**Parameters:**
-
-- trading_dashboard (dict): The trading dashboard output from the develop_trading_dashboard node.
-**Returns:** dict - A dictionary containing the calculated risk metrics and their explanation.
-
-**Raises:**
-
-- ValueError: If the trading dashboard output is invalid or missing.
-**Examples:**
-
 ```python
->>> trading_dashboard = {'dashboard_name': 'My Dashboard', 'metrics_used': ['VaR', 'ES']}
->>> risk_management = implement_trading_risk_management(trading_dashboard)
->>> print(risk_management)
-{'value_at_risk': 0.05, 'expected_shortfall': 0.03, 'potential_future_exposure': 0.10, 'risk_metrics_explanation': 'VaR: 5%, ES: 3%, PFE: 10%'}
-```
-
-
-
----
-
-## select_trading_strategy
-
-### Description
-Choose the trading strategy to be implemented in the trading workflow, including technical and fundamental analysis.
-
-### Conceptual Info
-
-This node selects a trading strategy for the trading workflow based on the identified trading instruments.
-
-### Docstring
-
-**Summary:** Selects a trading strategy for the trading workflow.
-
-**Parameters:**
-
-- trading_instruments (List[str]): List of trading instruments identified for inclusion in the workflow.
-- exchanges (List[str]): List of exchanges where the trading instruments are listed.
-- listings (List[str]): List of listings or symbols for each trading instrument.
-- market_capitalizations (List[float]): List of market capitalizations for each trading instrument.
-**Returns:** {selected_strategy_name: str, strategy_principles: List[str], strategy_metrics: List[str]} - A dictionary containing the selected strategy name, its key principles, and metrics.
-
-**Raises:**
-
-- ValueError: If no suitable trading strategy can be found for the given instruments.
-**Examples:**
-
-```python
->>> select_trading_strategy(trading_instruments=['AAPL', 'GOOG'], exchanges=['NASDAQ'], listings=['AAPL', 'GOOG'], market_capitalizations=[1000.0, 500.0])
-{'selected_strategy_name': 'Mean Reversion', 'strategy_principles': ['Buy undervalued stocks', 'Sell overvalued stocks'], 'strategy_metrics': ['Moving Averages', 'Bollinger Bands']}
-```
-
-
-
----
-
-## set_market_environment
-
-### Description
-Set up the market environment for the trading workflow, including setting up trading accounts, setting up APIs, and configuring exchange links.
-
-### Conceptual Info
-
-The set_market_environment node is responsible for setting up the market environment for the trading workflow. This includes configuring trading accounts, APIs, and exchange links.
-
-### Docstring
-
-**Summary:** Sets up the market environment for the trading workflow.
-
-**Parameters:**
-
-- trading_accounts (List[str]): List of trading accounts to set up
-- api_credentials (dict): API credentials for configuration
-- exchanges (List[str]): List of exchanges to configure
-**Returns:** dict - A dictionary containing the setup status of trading accounts, APIs, and exchange links
-
-**Raises:**
-
-- Exception: If there is an error setting up the market environment
-**Examples:**
-
-```python
->>> set_market_environment(trading_accounts=['account1', 'account2'], api_credentials={'api_key': 'key', 'api_secret': 'secret'}, exchanges=['exchange1', 'exchange2'])
-{'trading_accounts_setup_status': True, 'api_configuration_status': True, 'exchange_links_configuration_status': True, 'configured_exchanges': ['exchange1', 'exchange2']}
+>>> simulated_trades = [[100.0, 95.0, 90.0], [85.0, 80.0, 75.0]]
+>>> performance_metrics = [-0.05, -0.02, -0.03]
+>>> evaluate_trading_strategy(simulated_trades, performance_metrics)
+(0.25, ['Market Analysis', 'Position Sizing'])
 ```
 
