@@ -1,44 +1,47 @@
 # execute_trades PRD
 
 ## Description
-Execute trades
+Execute trades according to the formulated strategy
 
 
 ## Conceptual Info
 
-This node executes trades based on the trading decisions made by its parent node, 'make_trading_decisions'.
+This node executes trades based on the formulated trading strategy while ensuring compliance with trading regulations and risk management policies.
 
 ## Docstring
 
 ### Summary
-Executes trades based on the provided trading decisions and returns the status and outcomes of these trades.
+Execute trades according to the formulated strategy, ensuring compliance with trading regulations and risk management policies.
 
 ### Parameters
 
-- **trading_decisions** (List[str]): Made trading decisions, output from 'make_trading_decisions' node.
-- **decision_rationale** (List[str]): Rationale behind the trading decisions, output from 'make_trading_decisions' node.
+- **trading_strategy** (str): Description of the formulated trading strategy
+- **trade_recommendations** (List[str]): List of recommended trades based on the strategy
+- **expected_returns** (List[float]): Expected returns for the recommended trades
 
 ### Returns
 
-{'trade_execution_status': List[str], 'trade_outcomes': List[str]}: A dictionary containing two lists: 'trade_execution_status' for the status of trade executions and 'trade_outcomes' for the outcomes of the executed trades.
+Tuple[List[str], List[str], List[str]]: A tuple containing the status of trade executions, timestamps of executions, and details of the trades
 
 ### Raises
 
-- ValueError: If the input lists ('trading_decisions' and 'decision_rationale') are not of the same length.
-- RuntimeError: If there is an issue during the execution of trades.
+- ValueError: If the input trading strategy is invalid or if trade recommendations are empty
+- RuntimeError: If there's a failure in executing trades due to external factors like network issues
 
 ### Examples
 
 ```python
->>> trading_decisions = ['buy', 'sell', 'hold']
->>> decision_rationale = ['good opportunity', 'bad market', 'wait for more info']
->>> result = execute_trades(trading_decisions, decision_rationale)
-{'trade_execution_status': ['success', 'success', 'pending'], 'trade_outcomes': ['profit', 'loss', 'awaiting']}
+>>> trading_strategy = 'Buy 100 shares of XYZ'
+>>> trade_recommendations = ['Buy 100 XYZ', 'Sell 50 ABC']
+>>> expected_returns = [0.05, -0.02]
+>>> execute_trades(trading_strategy, trade_recommendations, expected_returns)
+(['success', 'success'], ['2023-04-01 10:00:00', '2023-04-01 10:05:00'], ['Bought 100 XYZ at $100', 'Sold 50 ABC at $50'])
 ```
 
 ```python
->>> trading_decisions = ['buy']
->>> decision_rationale = ['confident in market']
->>> result = execute_trades(trading_decisions, decision_rationale)
-{'trade_execution_status': ['success'], 'trade_outcomes': ['profit']}
+>>> trading_strategy = 'Sell 50 shares of ABC'
+>>> trade_recommendations = ['Sell 50 ABC']
+>>> expected_returns = [-0.02]
+>>> execute_trades(trading_strategy, trade_recommendations, expected_returns)
+(['success'], ['2023-04-01 11:00:00'], ['Sold 50 ABC at $50'])
 ```

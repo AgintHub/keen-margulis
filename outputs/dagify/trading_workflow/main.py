@@ -8,9 +8,8 @@ from typing import Dict, Any, List, Callable, Coroutine, Union, Optional
 
 from code.gather_market_data import gather_market_data
 from code.analyze_market_trends import analyze_market_trends
-from code.evaluate_trading_strategies import evaluate_trading_strategies
+from code.identify_trading_opportunities import identify_trading_opportunities
 from code.generate_trading_signals import generate_trading_signals
-from code.make_trading_decisions import make_trading_decisions
 from code.execute_trades import execute_trades
 
 # Get async mode from environment variable or default to False
@@ -35,9 +34,8 @@ def make_async(func):
 
 gather_market_data_async = make_async(gather_market_data)
 analyze_market_trends_async = make_async(analyze_market_trends)
-evaluate_trading_strategies_async = make_async(evaluate_trading_strategies)
+identify_trading_opportunities_async = make_async(identify_trading_opportunities)
 generate_trading_signals_async = make_async(generate_trading_signals)
-make_trading_decisions_async = make_async(make_trading_decisions)
 execute_trades_async = make_async(execute_trades)
 
 async def run_workflow(user_input: str) -> Dict[str, Any]:
@@ -60,44 +58,34 @@ async def run_workflow(user_input: str) -> Dict[str, Any]:
     # Run level 0 nodes in parallel
     results['gather_market_data'] = await run_gather_market_data()
 
-    # Level 1: analyze_market_trends
+    # Level 1: analyze_market_trends, identify_trading_opportunities
     async def run_analyze_market_trends():
         # Call the async version of analyze_market_trends with results from dependencies
         return await analyze_market_trends_async(results['gather_market_data'])
 
+    async def run_identify_trading_opportunities():
+        # Call the async version of identify_trading_opportunities with results from dependencies
+        return await identify_trading_opportunities_async(results['gather_market_data'])
+
     # Run level 1 nodes in parallel
-    results['analyze_market_trends'] = await run_analyze_market_trends()
+    level_1_results = await asyncio.gather(run_analyze_market_trends(), run_identify_trading_opportunities())
+    results['analyze_market_trends'] = level_1_results[0]
+    results['identify_trading_opportunities'] = level_1_results[1]
 
-    # Level 2: evaluate_trading_strategies
-    async def run_evaluate_trading_strategies():
-        # Call the async version of evaluate_trading_strategies with results from dependencies
-        return await evaluate_trading_strategies_async(results['analyze_market_trends'])
-
-    # Run level 2 nodes in parallel
-    results['evaluate_trading_strategies'] = await run_evaluate_trading_strategies()
-
-    # Level 3: generate_trading_signals
+    # Level 2: generate_trading_signals
     async def run_generate_trading_signals():
         # Call the async version of generate_trading_signals with results from dependencies
-        return await generate_trading_signals_async(results['evaluate_trading_strategies'])
+        return await generate_trading_signals_async(results['analyze_market_trends'], results['identify_trading_opportunities'])
 
-    # Run level 3 nodes in parallel
+    # Run level 2 nodes in parallel
     results['generate_trading_signals'] = await run_generate_trading_signals()
 
-    # Level 4: make_trading_decisions
-    async def run_make_trading_decisions():
-        # Call the async version of make_trading_decisions with results from dependencies
-        return await make_trading_decisions_async(results['generate_trading_signals'])
-
-    # Run level 4 nodes in parallel
-    results['make_trading_decisions'] = await run_make_trading_decisions()
-
-    # Level 5: execute_trades
+    # Level 3: execute_trades
     async def run_execute_trades():
         # Call the async version of execute_trades with results from dependencies
-        return await execute_trades_async(results['make_trading_decisions'])
+        return await execute_trades_async(results['generate_trading_signals'])
 
-    # Run level 5 nodes in parallel
+    # Run level 3 nodes in parallel
     results['execute_trades'] = await run_execute_trades()
 
     # Return all results

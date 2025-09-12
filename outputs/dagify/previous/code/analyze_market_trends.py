@@ -2,64 +2,61 @@ from pydantic import BaseModel, Field
 from typing import List
 
 
-class GatherMarketDataOutput(BaseModel):
-    """Pydantic model for gather_market_data node outputs."""
-    stock_prices: List[float] = Field(..., description="Current prices of relevant stocks")
-    trading_volumes: List[int] = Field(..., description="Current trading volumes of relevant stocks")
-    market_metrics: List[str] = Field(..., description="Other relevant market metrics")
+class FetchMarketDataOutput(BaseModel):
+    """Pydantic model for fetch_market_data node outputs."""
+    market_prices: List[float] = Field(..., description="List of current market prices for various assets")
+    market_volumes: List[int] = Field(..., description="List of current market volumes for various assets")
+    market_timestamps: List[str] = Field(..., description="Timestamps for when the market data was last updated")
 
 
 class AnalyzeMarketTrendsOutput(BaseModel):
     """Pydantic model for analyze_market_trends node outputs."""
-    trend_identification: str = Field(..., description="Identified market trends")
-    pattern_analysis: str = Field(..., description="Detailed analysis of market patterns")
+    trend_indicators: List[float] = Field(..., description="Indicators showing the strength and direction of market trends")
+    pattern_alerts: List[str] = Field(..., description="Alerts for detected patterns that could affect trading decisions")
+    trading_opportunities: List[str] = Field(..., description="List of potential trading opportunities based on trend analysis")
 
 
-def analyze_market_trends(gather_market_data_input: GatherMarketDataOutput, **kwargs) -> AnalyzeMarketTrendsOutput:
+def analyze_market_trends(fetch_market_data_input: FetchMarketDataOutput, **kwargs) -> AnalyzeMarketTrendsOutput:
     """
-    Analyze gathered market data to identify trends and patterns.
+    Analyze market data to identify trends, patterns, and potential trading
+    opportunities.
 
     Parameters
     ----------
-    stock_prices : List[float]
-        Current prices of relevant stocks gathered from the market.
-    trading_volumes : List[int]
-        Current trading volumes of relevant stocks.
-    market_metrics : List[str]
-        Other relevant market metrics.
+    market_prices : List[float]
+        List of current market prices for various assets fetched from
+        reliable sources.
+    market_volumes : List[int]
+        List of current market volumes for various assets fetched from
+        reliable sources.
+    market_timestamps : List[str]
+        Timestamps for when the market data was last updated.
 
     Returns
     -------
-    {trend_identification: str, pattern_analysis: List[str]}
-        A dictionary containing the identified market trends as a string and
-        a detailed analysis of market patterns as a list of strings.
+    dict
+        A dictionary containing trend indicators, pattern alerts, and
+        trading opportunities.
 
     Raises
     ------
     ValueError
-        If any of the input lists (stock_prices, trading_volumes,
-        market_metrics) are empty or not provided.
+        If any of the input lists (market_prices, market_volumes,
+        market_timestamps) are empty or of different lengths.
 
     Examples
     --------
-    >>> stock_prices = [100.5, 102.1, 101.8]
-    >>> trading_volumes = [1000, 1200, 1100]
-    >>> market_metrics = ['metric1', 'metric2', 'metric3']
-    >>> result = analyze_market_trends(stock_prices, trading_volumes,
-    market_metrics)
-    {'trend_identification': 'Bullish trend', 'pattern_analysis': ['Increasing
-    prices', 'Stable trading volume']}
-
-    >>> stock_prices = [90.2, 88.5, 89.1]
-    >>> trading_volumes = [800, 700, 750]
-    >>> market_metrics = ['metric4', 'metric5', 'metric6']
-    >>> result = analyze_market_trends(stock_prices, trading_volumes,
-    market_metrics)
-    {'trend_identification': 'Bearish trend', 'pattern_analysis': ['Decreasing
-    prices', 'Decreasing trading volume']}
+    >>> market_prices = [100.0, 120.0, 110.0]
+    >>> market_volumes = [1000, 1200, 1100]
+    >>> market_timestamps = ['2023-01-01', '2023-01-02', '2023-01-03']
+    >>> result = analyze_market_trends(market_prices, market_volumes,
+    market_timestamps)
+    {'trend_indicators': [0.5, 0.2], 'pattern_alerts': ['Bullish'],
+    'trading_opportunities': ['Buy']}
 
     """
     return AnalyzeMarketTrendsOutput(
-        trend_identification="",
-        pattern_analysis="",
+        trend_indicators=[],
+        pattern_alerts=[],
+        trading_opportunities=[],
     )

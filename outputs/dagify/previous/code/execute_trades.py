@@ -2,62 +2,69 @@ from pydantic import BaseModel, Field
 from typing import List
 
 
-class MakeTradingDecisionsOutput(BaseModel):
-    """Pydantic model for make_trading_decisions node outputs."""
-    trading_decisions: List[str] = Field(..., description="Made trading decisions")
-    decision_rationale: List[str] = Field(..., description="Rationale behind the trading decisions")
+class FormulateTradingStrategyOutput(BaseModel):
+    """Pydantic model for formulate_trading_strategy node outputs."""
+    trading_strategy: str = Field(..., description="Description of the formulated trading strategy")
+    trade_recommendations: str = Field(..., description="List of recommended trades based on the strategy")
+    expected_returns: float = Field(..., description="Expected returns for the recommended trades")
 
 
 class ExecuteTradesOutput(BaseModel):
     """Pydantic model for execute_trades node outputs."""
-    trade_execution_status: List[str] = Field(..., description="Status of trade executions")
-    trade_outcomes: List[str] = Field(..., description="Outcomes of the executed trades")
+    trade_execution_status: List[str] = Field(..., description="Status of each trade execution (e.g., success, failed, pending)")
+    trade_execution_timestamps: List[str] = Field(..., description="Timestamps for when each trade was executed")
+    trade_details: List[str] = Field(..., description="Details of the executed trades, including assets, quantities, and prices")
 
 
-def execute_trades(make_trading_decisions_input: MakeTradingDecisionsOutput, **kwargs) -> ExecuteTradesOutput:
+def execute_trades(formulate_trading_strategy_input: FormulateTradingStrategyOutput, **kwargs) -> ExecuteTradesOutput:
     """
-    Executes trades based on the provided trading decisions and returns the
-    status and outcomes of these trades.
+    Execute trades according to the formulated strategy, ensuring compliance
+    with trading regulations and risk management policies.
 
     Parameters
     ----------
-    trading_decisions : List[str]
-        Made trading decisions, output from 'make_trading_decisions' node.
-    decision_rationale : List[str]
-        Rationale behind the trading decisions, output from
-        'make_trading_decisions' node.
+    trading_strategy : str
+        Description of the formulated trading strategy
+    trade_recommendations : List[str]
+        List of recommended trades based on the strategy
+    expected_returns : List[float]
+        Expected returns for the recommended trades
 
     Returns
     -------
-    {'trade_execution_status': List[str], 'trade_outcomes': List[str]}
-        A dictionary containing two lists: 'trade_execution_status' for the
-        status of trade executions and 'trade_outcomes' for the outcomes of
-        the executed trades.
+    Tuple[List[str], List[str], List[str]]
+        A tuple containing the status of trade executions, timestamps of
+        executions, and details of the trades
 
     Raises
     ------
     ValueError
-        If the input lists ('trading_decisions' and 'decision_rationale')
-        are not of the same length.
+        If the input trading strategy is invalid or if trade recommendations
+        are empty
     RuntimeError
-        If there is an issue during the execution of trades.
+        If there's a failure in executing trades due to external factors
+        like network issues
 
     Examples
     --------
-    >>> trading_decisions = ['buy', 'sell', 'hold']
-    >>> decision_rationale = ['good opportunity', 'bad market', 'wait for more
-    info']
-    >>> result = execute_trades(trading_decisions, decision_rationale)
-    {'trade_execution_status': ['success', 'success', 'pending'],
-    'trade_outcomes': ['profit', 'loss', 'awaiting']}
+    >>> trading_strategy = 'Buy 100 shares of XYZ'
+    >>> trade_recommendations = ['Buy 100 XYZ', 'Sell 50 ABC']
+    >>> expected_returns = [0.05, -0.02]
+    >>> execute_trades(trading_strategy, trade_recommendations,
+    expected_returns)
+    (['success', 'success'], ['2023-04-01 10:00:00', '2023-04-01 10:05:00'],
+    ['Bought 100 XYZ at $100', 'Sold 50 ABC at $50'])
 
-    >>> trading_decisions = ['buy']
-    >>> decision_rationale = ['confident in market']
-    >>> result = execute_trades(trading_decisions, decision_rationale)
-    {'trade_execution_status': ['success'], 'trade_outcomes': ['profit']}
+    >>> trading_strategy = 'Sell 50 shares of ABC'
+    >>> trade_recommendations = ['Sell 50 ABC']
+    >>> expected_returns = [-0.02]
+    >>> execute_trades(trading_strategy, trade_recommendations,
+    expected_returns)
+    (['success'], ['2023-04-01 11:00:00'], ['Sold 50 ABC at $50'])
 
     """
     return ExecuteTradesOutput(
         trade_execution_status=[],
-        trade_outcomes=[],
+        trade_execution_timestamps=[],
+        trade_details=[],
     )

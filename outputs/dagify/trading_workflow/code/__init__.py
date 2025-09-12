@@ -10,6 +10,7 @@ from .fetch_market_data import fetch_market_data
 from .make_trading_decisions import make_trading_decisions
 from .analyze_market_trends import analyze_market_trends
 from .simulate_trades import simulate_trades
+from .identify_trading_opportunities import identify_trading_opportunities
 
 
 __all__ = [
@@ -24,5 +25,6 @@ __all__ = [
     'fetch_market_data',
     'make_trading_decisions',
     'analyze_market_trends',
-    'simulate_trades'
+    'simulate_trades',
+    'identify_trading_opportunities'
 ]
