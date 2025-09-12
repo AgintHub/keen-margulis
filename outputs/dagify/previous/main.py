@@ -6,12 +6,11 @@ import json
 import sys
 from typing import Dict, Any, List, Callable, Coroutine, Union, Optional
 
-from code.fetch_song_data import fetch_song_data
-from code.analyze_lyrics import analyze_lyrics
-from code.extract_themes import extract_themes
-from code.sentiment_analysis import sentiment_analysis
-from code.trend_over_time import trend_over_time
-from code.generate_summary import generate_summary
+from code.analyze_chart_performance import analyze_chart_performance
+from code.analyze_lyrics_sentiment import analyze_lyrics_sentiment
+from code.gather_taylor_swift_data import gather_taylor_swift_data
+from code.identify_common_themes import identify_common_themes
+from code.synthesize_analysis_results import synthesize_analysis_results
 
 # Get async mode from environment variable or default to False
 ASYNC_MODE = os.environ.get('ASYNC_MODE', '').lower() in ('true', '1', 'yes', 'y')
@@ -33,12 +32,11 @@ def make_async(func):
 
     return async_wrapper
 
-fetch_song_data_async = make_async(fetch_song_data)
-analyze_lyrics_async = make_async(analyze_lyrics)
-extract_themes_async = make_async(extract_themes)
-sentiment_analysis_async = make_async(sentiment_analysis)
-trend_over_time_async = make_async(trend_over_time)
-generate_summary_async = make_async(generate_summary)
+analyze_chart_performance_async = make_async(analyze_chart_performance)
+analyze_lyrics_sentiment_async = make_async(analyze_lyrics_sentiment)
+gather_taylor_swift_data_async = make_async(gather_taylor_swift_data)
+identify_common_themes_async = make_async(identify_common_themes)
+synthesize_analysis_results_async = make_async(synthesize_analysis_results)
 
 async def run_workflow(user_input: str) -> Dict[str, Any]:
     """Execute the workflow by running each level in the topological sort.
@@ -52,49 +50,40 @@ async def run_workflow(user_input: str) -> Dict[str, Any]:
     # Store results for each node
     results = {}
 
-    # Level 0: fetch_song_data
-    async def run_fetch_song_data():
-        # Call the async version of fetch_song_data with results from dependencies
-        return await fetch_song_data_async(user_input)
+    # Level 0: gather_taylor_swift_data
+    async def run_gather_taylor_swift_data():
+        # Call the async version of gather_taylor_swift_data with results from dependencies
+        return await gather_taylor_swift_data_async(user_input)
 
     # Run level 0 nodes in parallel
-    results['fetch_song_data'] = await run_fetch_song_data()
+    results['gather_taylor_swift_data'] = await run_gather_taylor_swift_data()
 
-    # Level 1: sentiment_analysis, analyze_lyrics
-    async def run_sentiment_analysis():
-        # Call the async version of sentiment_analysis with results from dependencies
-        return await sentiment_analysis_async(results['fetch_song_data'])
+    # Level 1: analyze_lyrics_sentiment, analyze_chart_performance, identify_common_themes
+    async def run_analyze_lyrics_sentiment():
+        # Call the async version of analyze_lyrics_sentiment with results from dependencies
+        return await analyze_lyrics_sentiment_async(results['gather_taylor_swift_data'])
 
-    async def run_analyze_lyrics():
-        # Call the async version of analyze_lyrics with results from dependencies
-        return await analyze_lyrics_async(results['fetch_song_data'])
+    async def run_analyze_chart_performance():
+        # Call the async version of analyze_chart_performance with results from dependencies
+        return await analyze_chart_performance_async(results['gather_taylor_swift_data'])
+
+    async def run_identify_common_themes():
+        # Call the async version of identify_common_themes with results from dependencies
+        return await identify_common_themes_async(results['gather_taylor_swift_data'])
 
     # Run level 1 nodes in parallel
-    level_1_results = await asyncio.gather(run_sentiment_analysis(), run_analyze_lyrics())
-    results['sentiment_analysis'] = level_1_results[0]
-    results['analyze_lyrics'] = level_1_results[1]
+    level_1_results = await asyncio.gather(run_analyze_lyrics_sentiment(), run_analyze_chart_performance(), run_identify_common_themes())
+    results['analyze_lyrics_sentiment'] = level_1_results[0]
+    results['analyze_chart_performance'] = level_1_results[1]
+    results['identify_common_themes'] = level_1_results[2]
 
-    # Level 2: extract_themes, trend_over_time
-    async def run_extract_themes():
-        # Call the async version of extract_themes with results from dependencies
-        return await extract_themes_async(results['analyze_lyrics'])
-
-    async def run_trend_over_time():
-        # Call the async version of trend_over_time with results from dependencies
-        return await trend_over_time_async(results['fetch_song_data'], results['sentiment_analysis'])
+    # Level 2: synthesize_analysis_results
+    async def run_synthesize_analysis_results():
+        # Call the async version of synthesize_analysis_results with results from dependencies
+        return await synthesize_analysis_results_async(results['analyze_lyrics_sentiment'], results['identify_common_themes'], results['analyze_chart_performance'])
 
     # Run level 2 nodes in parallel
-    level_2_results = await asyncio.gather(run_extract_themes(), run_trend_over_time())
-    results['extract_themes'] = level_2_results[0]
-    results['trend_over_time'] = level_2_results[1]
-
-    # Level 3: generate_summary
-    async def run_generate_summary():
-        # Call the async version of generate_summary with results from dependencies
-        return await generate_summary_async(results['extract_themes'], results['trend_over_time'])
-
-    # Run level 3 nodes in parallel
-    results['generate_summary'] = await run_generate_summary()
+    results['synthesize_analysis_results'] = await run_synthesize_analysis_results()
 
     # Return all results
     return results

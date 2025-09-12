@@ -1,209 +1,263 @@
-# taylorswiftanalysisworkflow - Complete PRD Documentation
+# trading_workflow - Complete PRD Documentation
 
 ## Overview
-PRDs for nodes in the 'taylorswiftanalysisworkflow' module.
+PRDs for nodes in the 'trading_workflow' module.
 
 ## Table of Contents
 
-- [gather_taylor_swift_data](#gather_taylor_swift_data)
+- [gather_market_data](#gather_market_data)
 
-- [analyze_lyrics_sentiment](#analyze_lyrics_sentiment)
+- [analyze_market_trends](#analyze_market_trends)
 
-- [identify_common_themes](#identify_common_themes)
+- [evaluate_trading_strategies](#evaluate_trading_strategies)
 
-- [analyze_chart_performance](#analyze_chart_performance)
+- [generate_trading_signals](#generate_trading_signals)
 
-- [synthesize_analysis_results](#synthesize_analysis_results)
+- [make_trading_decisions](#make_trading_decisions)
+
+- [execute_trades](#execute_trades)
 
 
 
 ---
 
-## gather_taylor_swift_data
+## gather_market_data
 
 ### Description
-Collect data on Taylor Swift's discography, lyrics, and chart performance.
+Gather market data from various sources
 
 ### Conceptual Info
 
-This node collects comprehensive data on Taylor Swift's music, including album names, release dates, song lyrics, and chart performance metrics.
+This node gathers current market data, including stock prices, trading volumes, and other relevant metrics, from various sources.
 
 ### Docstring
 
-**Summary:** Gathers data on Taylor Swift's discography, lyrics, and chart performance.
+**Summary:** Gathers current market data from multiple sources and returns stock prices, trading volumes, and other market metrics.
 
-**Returns:** dict - A dictionary containing lists of album names, release dates, song lyrics, and chart performance metrics.
+**Returns:** dict - A dictionary containing lists of stock prices, trading volumes, and market metrics.
 
 **Raises:**
 
-- DataCollectionError: If there's an issue collecting data from the sources.
-- DataFormatError: If the collected data is not in the expected format.
+- ConnectionError: If there's a failure connecting to data sources.
+- DataParsingError: If there's an issue parsing the gathered data.
 **Examples:**
 
 ```python
->>> data = gather_taylor_swift_data()
->>> print(data['album_names'])
->>> print(data['release_dates'])
->>> print(data['song_lyrics'])
->>> print(data['chart_performance'])
-['Taylor Swift', 'Fearless', ...]
-['2006-10-24', '2008-11-11', ...]
-[' lyrics1 ', ' lyrics2 ', ...]
-[10, 20, ...]
+>>> gather_market_data()
+{'stock_prices': [100.5, 200.2], 'trading_volumes': [1000, 2000], 'market_metrics': ['metric1', 'metric2']}
 ```
 
 
 
 ---
 
-## analyze_lyrics_sentiment
+## analyze_market_trends
 
 ### Description
-Analyze the sentiment of Taylor Swift's song lyrics.
+Analyze market trends using the gathered data
 
 ### Conceptual Info
 
-This node analyzes the sentiment of Taylor Swift's song lyrics to determine the overall emotional tone.
+This node analyzes market trends using data gathered from various sources, identifying trends and patterns.
 
 ### Docstring
 
-**Summary:** Analyzes the sentiment of Taylor Swift's song lyrics.
+**Summary:** Analyze gathered market data to identify trends and patterns.
 
 **Parameters:**
 
-- song_lyrics (List[str]): List of song lyrics from Taylor Swift's discography, obtained from the 'gather_taylor_swift_data' node.
-**Returns:** {'sentiment_scores': List[float], 'average_sentiment': float} - A dictionary containing a list of sentiment scores for each song and the average sentiment score across all songs.
+- stock_prices (List[float]): Current prices of relevant stocks gathered from the market.
+- trading_volumes (List[int]): Current trading volumes of relevant stocks.
+- market_metrics (List[str]): Other relevant market metrics.
+**Returns:** {trend_identification: str, pattern_analysis: List[str]} - A dictionary containing the identified market trends as a string and a detailed analysis of market patterns as a list of strings.
 
 **Raises:**
 
-- ValueError: If the input 'song_lyrics' is empty or not a list of strings.
+- ValueError: If any of the input lists (stock_prices, trading_volumes, market_metrics) are empty or not provided.
 **Examples:**
 
 ```python
->>> song_lyrics = ['I stay out too late, got nothing in my brain', 'I think I got a broken heart']
->>> result = analyze_lyrics_sentiment(song_lyrics)
->>> print(result)
-{'sentiment_scores': [0.2, -0.5], 'average_sentiment': -0.15}
+>>> stock_prices = [100.5, 102.1, 101.8]
+>>> trading_volumes = [1000, 1200, 1100]
+>>> market_metrics = ['metric1', 'metric2', 'metric3']
+>>> result = analyze_market_trends(stock_prices, trading_volumes, market_metrics)
+{'trend_identification': 'Bullish trend', 'pattern_analysis': ['Increasing prices', 'Stable trading volume']}
 ```
 
 ```python
->>> song_lyrics = ['You took the time to memorize me, my fears, my hopes, and dreams']
->>> result = analyze_lyrics_sentiment(song_lyrics)
->>> print(result)
-{'sentiment_scores': [0.8], 'average_sentiment': 0.8}
+>>> stock_prices = [90.2, 88.5, 89.1]
+>>> trading_volumes = [800, 700, 750]
+>>> market_metrics = ['metric4', 'metric5', 'metric6']
+>>> result = analyze_market_trends(stock_prices, trading_volumes, market_metrics)
+{'trend_identification': 'Bearish trend', 'pattern_analysis': ['Decreasing prices', 'Decreasing trading volume']}
 ```
 
 
 
 ---
 
-## identify_common_themes
+## evaluate_trading_strategies
 
 ### Description
-Identify common themes in Taylor Swift's lyrics.
+Evaluate trading strategies
 
 ### Conceptual Info
 
-This node analyzes the collected song lyrics to identify recurring themes or topics, providing insights into Taylor Swift's common lyrical motifs.
+This node evaluates various trading strategies based on the analyzed market trends and patterns provided by its parent node, analyze_market_trends.
 
 ### Docstring
 
-**Summary:** Identify common themes in Taylor Swift's lyrics by analyzing the collected song lyrics.
+**Summary:** Evaluates trading strategies based on market trend analysis and pattern identification.
 
 **Parameters:**
 
-- song_lyrics (List[str]): List of song lyrics from Taylor Swift's discography, provided by the 'gather_taylor_swift_data' node.
-**Returns:** {'themes': List[str], 'theme_frequencies': List[int]} - A dictionary containing a list of common themes and their corresponding frequencies.
+- trend_identification (str): Identified market trends from the analyze_market_trends node.
+- pattern_analysis (List[str]): Detailed analysis of market patterns from the analyze_market_trends node.
+**Returns:** Tuple[List[str], List[str]] - A tuple containing the evaluations of different trading strategies and the recommended strategies.
 
 **Raises:**
 
-- ValueError: If the input 'song_lyrics' is empty or not a list of strings.
+- ValueError: If trend_identification is empty or pattern_analysis is not provided.
 **Examples:**
 
 ```python
->>> song_lyrics = ['Love is in the air', 'Heartbreak is hard', 'Love is sweet']
->>> themes, theme_frequencies = identify_common_themes(song_lyrics)
->>> print(themes)
->>> print(theme_frequencies)
-['love', 'heartbreak']
-[2, 1]
+>>> trend_identification = 'Bullish'
+>>> pattern_analysis = ['Increasing Volume', 'Breaking Resistance']
+>>> evaluate_trading_strategies(trend_identification, pattern_analysis)
+(['Strategy 1: Buy and Hold - High Confidence', 'Strategy 2: Mean Reversion - Moderate Confidence'], ['Strategy 1: Buy and Hold'])
+```
+
+```python
+>>> trend_identification = 'Bearish'
+>>> pattern_analysis = ['Decreasing Volume', 'Breaking Support']
+>>> evaluate_trading_strategies(trend_identification, pattern_analysis)
+(['Strategy 1: Short Sell - High Confidence', 'Strategy 2: Stop Loss - High Confidence'], ['Strategy 1: Short Sell'])
 ```
 
 
 
 ---
 
-## analyze_chart_performance
+## generate_trading_signals
 
 ### Description
-Analyze the chart performance of Taylor Swift's songs.
+Generate trading signals
 
 ### Conceptual Info
 
-This node analyzes the chart performance data of Taylor Swift's songs to identify trends and patterns.
+This node generates trading signals based on the recommended trading strategies evaluated by its parent node.
 
 ### Docstring
 
-**Summary:** Analyze chart performance data to identify trends and peak positions.
+**Summary:** Generates trading signals and their confidence levels based on recommended trading strategies.
 
 **Parameters:**
 
-- chart_performance_data (List[int]): List of chart performance metrics for Taylor Swift's songs, obtained from the 'gather_taylor_swift_data' node.
-**Returns:** {'chart_trends': List[str], 'peak_positions': List[int]} - A dictionary containing a list of trends observed in chart performance and a list of peak chart positions for each song.
+- recommended_strategies (List[str]): Recommended trading strategies from the parent node 'evaluate_trading_strategies'.
+- strategy_evaluations (List[str]): Evaluations of different trading strategies from the parent node 'evaluate_trading_strategies'.
+**Returns:** Tuple[List[str], List[float]] - A tuple containing the generated trading signals and their corresponding confidence levels.
 
 **Raises:**
 
-- ValueError: If the input chart performance data is empty or malformed.
+- ValueError: If the input recommended strategies or strategy evaluations are empty or malformed.
 **Examples:**
 
 ```python
->>> chart_performance_data = [10, 5, 1, 8, 3]
->>> result = analyze_chart_performance(chart_performance_data)
->>> print(result)
-{'chart_trends': ['Increasing trend', 'Decreasing trend'], 'peak_positions': [1, 3, 5, 8, 10]}
+>>> recommended_strategies = ['mean_reversion', 'trend_following']
+>>> strategy_evaluations = ['mean_reversion:0.8', 'trend_following:0.7']
+>>> trading_signals, signal_confidence = generate_trading_signals(recommended_strategies, strategy_evaluations)
+(['buy', 'sell'], [0.85, 0.75])
 ```
 
 ```python
->>> chart_performance_data = [20, 15, 10, 5]
->>> result = analyze_chart_performance(chart_performance_data)
->>> print(result)
-{'chart_trends': ['Decreasing trend'], 'peak_positions': [5, 10, 15, 20]}
+>>> recommended_strategies = ['momentum']
+>>> strategy_evaluations = ['momentum:0.9']
+>>> trading_signals, signal_confidence = generate_trading_signals(recommended_strategies, strategy_evaluations)
+(['buy'], [0.92])
 ```
 
 
 
 ---
 
-## synthesize_analysis_results
+## make_trading_decisions
 
 ### Description
-Combine the results of the sentiment analysis, theme identification, and chart performance analysis.
+Make trading decisions
 
 ### Conceptual Info
 
-This node synthesizes the results of sentiment analysis, theme identification, and chart performance analysis to provide a comprehensive understanding of Taylor Swift's music and its impact.
+This node generates trading decisions based on the trading signals and their confidence levels produced by the 'generate_trading_signals' node.
 
 ### Docstring
 
-**Summary:** Synthesizes analysis results to draw conclusions about Taylor Swift's music and impact.
+**Summary:** Makes trading decisions based on generated trading signals and their confidence levels.
 
 **Parameters:**
 
-- sentiment_analysis_results (dict): Results from sentiment analysis, including sentiment scores and average sentiment.
-- theme_identification_results (dict): Results from theme identification, including common themes and their frequencies.
-- chart_performance_analysis_results (dict): Results from chart performance analysis, including chart trends and peak positions.
-**Returns:** dict - A dictionary containing overall insights and recommendations based on the analysis.
+- trading_signals (List[str]): Generated trading signals from the 'generate_trading_signals' node.
+- signal_confidence (List[float]): Confidence levels of the generated trading signals from the 'generate_trading_signals' node.
+**Returns:** {'trading_decisions': List[str], 'decision_rationale': List[str]} - A dictionary containing the made trading decisions and the rationale behind them.
 
 **Raises:**
 
-- ValueError: If any of the input analysis results are missing or malformed.
+- ValueError: If the lengths of 'trading_signals' and 'signal_confidence' do not match.
 **Examples:**
 
 ```python
->>> sentiment_analysis_results = {'sentiment_scores': [0.8, 0.7], 'average_sentiment': 0.75}
->>> theme_identification_results = {'themes': ['love', 'heartbreak'], 'theme_frequencies': [10, 5]}
->>> chart_performance_analysis_results = {'chart_trends': ['increasing popularity'], 'peak_positions': [1, 2]}
->>> result = synthesize_analysis_results(sentiment_analysis_results, theme_identification_results, chart_performance_analysis_results)
-{'overall_insights': 'Taylor Swift\'s music is generally positive with themes of love and heartbreak, and has shown increasing popularity on charts.', 'recommendations': ['Continue producing music with positive themes.', 'Explore more themes beyond love and heartbreak.']}
+>>> trading_signals = ['Buy', 'Sell', 'Hold']
+>>> signal_confidence = [0.8, 0.7, 0.9]
+>>> result = make_trading_decisions(trading_signals, signal_confidence)
+{'trading_decisions': ['Buy', 'Hold', 'Hold'], 'decision_rationale': ['High confidence buy signal', 'Low confidence sell signal', 'High confidence hold signal']}
+```
+
+```python
+>>> trading_signals = ['Buy', 'Sell']
+>>> signal_confidence = [0.6, 0.4]
+>>> result = make_trading_decisions(trading_signals, signal_confidence)
+{'trading_decisions': ['Buy', 'Sell'], 'decision_rationale': ['Moderate confidence buy signal', 'Low confidence sell signal']}
+```
+
+
+
+---
+
+## execute_trades
+
+### Description
+Execute trades
+
+### Conceptual Info
+
+This node executes trades based on the trading decisions made by its parent node, 'make_trading_decisions'.
+
+### Docstring
+
+**Summary:** Executes trades based on the provided trading decisions and returns the status and outcomes of these trades.
+
+**Parameters:**
+
+- trading_decisions (List[str]): Made trading decisions, output from 'make_trading_decisions' node.
+- decision_rationale (List[str]): Rationale behind the trading decisions, output from 'make_trading_decisions' node.
+**Returns:** {'trade_execution_status': List[str], 'trade_outcomes': List[str]} - A dictionary containing two lists: 'trade_execution_status' for the status of trade executions and 'trade_outcomes' for the outcomes of the executed trades.
+
+**Raises:**
+
+- ValueError: If the input lists ('trading_decisions' and 'decision_rationale') are not of the same length.
+- RuntimeError: If there is an issue during the execution of trades.
+**Examples:**
+
+```python
+>>> trading_decisions = ['buy', 'sell', 'hold']
+>>> decision_rationale = ['good opportunity', 'bad market', 'wait for more info']
+>>> result = execute_trades(trading_decisions, decision_rationale)
+{'trade_execution_status': ['success', 'success', 'pending'], 'trade_outcomes': ['profit', 'loss', 'awaiting']}
+```
+
+```python
+>>> trading_decisions = ['buy']
+>>> decision_rationale = ['confident in market']
+>>> result = execute_trades(trading_decisions, decision_rationale)
+{'trade_execution_status': ['success'], 'trade_outcomes': ['profit']}
 ```
 

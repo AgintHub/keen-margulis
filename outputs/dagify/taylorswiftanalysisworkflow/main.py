@@ -6,10 +6,10 @@ import json
 import sys
 from typing import Dict, Any, List, Callable, Coroutine, Union, Optional
 
-from code.gather_taylor_swift_data import gather_taylor_swift_data
-from code.analyze_lyrics_sentiment import analyze_lyrics_sentiment
-from code.identify_common_themes import identify_common_themes
 from code.analyze_chart_performance import analyze_chart_performance
+from code.analyze_lyrics_sentiment import analyze_lyrics_sentiment
+from code.gather_taylor_swift_data import gather_taylor_swift_data
+from code.identify_common_themes import identify_common_themes
 from code.synthesize_analysis_results import synthesize_analysis_results
 
 # Get async mode from environment variable or default to False
@@ -32,10 +32,10 @@ def make_async(func):
 
     return async_wrapper
 
-gather_taylor_swift_data_async = make_async(gather_taylor_swift_data)
-analyze_lyrics_sentiment_async = make_async(analyze_lyrics_sentiment)
-identify_common_themes_async = make_async(identify_common_themes)
 analyze_chart_performance_async = make_async(analyze_chart_performance)
+analyze_lyrics_sentiment_async = make_async(analyze_lyrics_sentiment)
+gather_taylor_swift_data_async = make_async(gather_taylor_swift_data)
+identify_common_themes_async = make_async(identify_common_themes)
 synthesize_analysis_results_async = make_async(synthesize_analysis_results)
 
 async def run_workflow(user_input: str) -> Dict[str, Any]:

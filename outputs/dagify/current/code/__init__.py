@@ -1,14 +1,28 @@
-from .identify_common_themes import identify_common_themes
-from .analyze_lyrics_sentiment import analyze_lyrics_sentiment
-from .gather_taylor_swift_data import gather_taylor_swift_data
-from .synthesize_analysis_results import synthesize_analysis_results
-from .analyze_chart_performance import analyze_chart_performance
+from .evaluate_trading_strategies import evaluate_trading_strategies
+from .evaluate_trading_strategy import evaluate_trading_strategy
+from .define_trading_rules import define_trading_rules
+from .execute_trades import execute_trades
+from .generate_trading_signals import generate_trading_signals
+from .define_risk_management import define_risk_management
+from .gather_market_data import gather_market_data
+from .assess_risk import assess_risk
+from .fetch_market_data import fetch_market_data
+from .make_trading_decisions import make_trading_decisions
+from .analyze_market_trends import analyze_market_trends
+from .simulate_trades import simulate_trades
 
 
 __all__ = [
-    'identify_common_themes',
-    'analyze_lyrics_sentiment',
-    'gather_taylor_swift_data',
-    'synthesize_analysis_results',
-    'analyze_chart_performance'
+    'evaluate_trading_strategies',
+    'evaluate_trading_strategy',
+    'define_trading_rules',
+    'execute_trades',
+    'generate_trading_signals',
+    'define_risk_management',
+    'gather_market_data',
+    'assess_risk',
+    'fetch_market_data',
+    'make_trading_decisions',
+    'analyze_market_trends',
+    'simulate_trades'
 ]

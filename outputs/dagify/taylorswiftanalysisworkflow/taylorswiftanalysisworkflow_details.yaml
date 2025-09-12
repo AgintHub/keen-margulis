@@ -1,11 +1,10 @@
-dag_type: stub
-description: A workflow to analyze Taylor Swift's music, lyrics, and impact using
-  various data science techniques.
+dag_type: shim
+description: Generated workflow from UI.
 name: taylorswiftanalysisworkflow
 nodes:
   analyze_chart_performance:
     agent: false
-    code_node_type: stub
+    code_node_type: shim
     description: Analyze the chart performance of Taylor Swift's songs.
     implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
       \n\nclass GatherTaylorSwiftDataOutput(BaseModel):\n    \"\"\"Pydantic model\
@@ -21,13 +20,12 @@ nodes:
       \ in chart performance\")\n    peak_positions: List[int] = Field(..., description=\"\
       List of peak chart positions for each song\")\n\n\ndef analyze_chart_performance(gather_taylor_swift_data_input:\
       \ GatherTaylorSwiftDataOutput, **kwargs) -> AnalyzeChartPerformanceOutput:\n\
-      \    \"\"\"Analyze the chart performance of Taylor Swift's songs.\n\n    Args:\n\
-      \        gather_taylor_swift_data_input: Input from the 'gather_taylor_swift_data'\
-      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
-      \       AnalyzeChartPerformanceOutput: Object containing outputs for this node.\n\
-      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
-      \ with placeholder values\n    return AnalyzeChartPerformanceOutput(\n     \
-      \   chart_trends=[],\n        peak_positions=[],\n    )"
+      \    chart_data: List[int] = gather_taylor_swift_data_input.chart_performance\n\
+      \    \n    validated_data: List[int] = validate_chart_data(data=chart_data)\n\
+      \    \n    trend_analysis: List[str] = analyze_performance_trends(chart_positions=validated_data)\n\
+      \    \n    peak_positions: List[int] = extract_peak_positions(chart_positions=validated_data)\n\
+      \    \n    return AnalyzeChartPerformanceOutput(\n        chart_trends=trend_analysis,\n\
+      \        peak_positions=peak_positions\n    )"
     name: analyze_chart_performance
     nodes_depended_on:
     - gather_taylor_swift_data
@@ -70,10 +68,153 @@ nodes:
           type: '{''chart_trends'': List[str], ''peak_positions'': List[int]}'
         summary: Analyze chart performance data to identify trends and peak positions.
     prompt: Examine the chart performance data to identify trends or patterns.
-    shims: []
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates a string input by parsing it into a clean List[int] of
+        chart positions suitable for downstream chart analysis.
+      implementation: "def validate_chart_data(data: str) -> List[int]:\n    \"\"\"\
+        \n    Validates a string input by parsing it into a clean List[int] of chart\
+        \ positions suitable for downstream chart analysis.\n\n    Args:\n       \
+        \ data: Input parameter of type str\n\n    Returns:\n        List[int]: Output\
+        \ of type List[int]\n    \"\"\"\n    raise NotImplementedError(\"This is a\
+        \ virtual stub node that needs to be implemented\")\n"
+      name: validate_chart_data
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[int]
+        key: output
+        type: List[int]
+      - description: Input parameter of type str
+        key: data
+        type: str
+      prd:
+        conceptual_info: Data validation shim to sanitize and convert string input
+          into numeric chart positions
+        docstring:
+          examples:
+          - lines:
+            - result = validate_chart_data(data='1, 2, 3, 5')
+            - print(result)
+            output: '[1, 2, 3, 5]'
+          - lines:
+            - result = validate_chart_data(data='[7 4 10]')
+            - print(result)
+            output: '[7, 4, 10]'
+          parameters:
+          - description: String encoding of chart positions to validate and parse
+              into integers
+            name: data
+            type: str
+          raises:
+          - description: If input data is not a string
+            type: TypeError
+          - description: If the string cannot be parsed into integers or contains
+              invalid values
+            type: ValueError
+          returns:
+            description: Validated list of chart positions parsed from the input string
+            type: List[int]
+          summary: Validate and coerce a string representation of chart data into
+            a List[int] for downstream chart analysis
+      prompt: 'Description: Typed node for shim validate_chart_data'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: This shim analyzes a list of chart positions and outputs descriptive
+        trend strings.
+      implementation: "def analyze_performance_trends(chart_positions: str) -> List[str]:\n\
+        \    \"\"\"\n    This shim analyzes a list of chart positions and outputs\
+        \ descriptive trend strings.\n\n    Args:\n        chart_positions: Input\
+        \ parameter of type str\n\n    Returns:\n        List[str]: Output of type\
+        \ List[str]\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")\n"
+      name: analyze_performance_trends
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: chart_positions
+        type: str
+      prd:
+        conceptual_info: Provides trend extraction functionality for the AnalyzeChartPerformance
+          node.
+        docstring:
+          examples:
+          - lines:
+            - trends = analyze_performance_trends(chart_positions=[5, 3, 7, 2])
+            - print(trends)
+            output: '[''Improving trend'', ''Declining trend'']'
+          parameters:
+          - description: A list of integer chart positions representing song performance
+              over time.
+            name: chart_positions
+            type: LIST_INT
+          raises:
+          - description: Raised if the input list is empty or contains non-integer
+              values.
+            type: ValueError
+          returns:
+            description: A list of strings, each describing an observed trend in the
+              chart data.
+            type: LIST_STR
+          summary: Analyzes chart positions to generate descriptive trend insights.
+      prompt: Analyze the provided list of chart positions and return a list of descriptive
+        trend strings that summarize the performance dynamics of each song.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Extracts the highest chart positions from a list of chart performance
+        metrics.
+      implementation: "def extract_peak_positions(chart_positions: str) -> List[int]:\n\
+        \    \"\"\"\n    Extracts the highest chart positions from a list of chart\
+        \ performance metrics.\n\n    Args:\n        chart_positions: Input parameter\
+        \ of type str\n\n    Returns:\n        List[int]: Output of type List[int]\n\
+        \    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node that\
+        \ needs to be implemented\")\n"
+      name: extract_peak_positions
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[int]
+        key: output
+        type: List[int]
+      - description: Input parameter of type str
+        key: chart_positions
+        type: str
+      prd:
+        conceptual_info: This shim identifies the best chart performance for each
+          song by scanning the performance history.
+        docstring:
+          examples:
+          - lines:
+            - extract_peak_positions([10, 5, 2, 3, 4])
+            - '# returns [10, 5, 4, 4, 4]'
+            output: '[10, 5, 4, 4, 4]'
+          parameters:
+          - description: A list of integer chart positions recorded over time.
+            name: chart_positions
+            type: List[int]
+          raises:
+          - description: Raised when the input list is empty or contains non-integer
+              values.
+            type: ValueError
+          returns:
+            description: A list containing the maximum (best) chart position for each
+              song.
+            type: List[int]
+          summary: Extracts peak chart positions from a list of chart performance
+            metrics.
+      prompt: Given a list of chart performance metrics, extract and return the peak
+        chart positions for each song.
+      shims: []
   analyze_lyrics_sentiment:
     agent: false
-    code_node_type: stub
+    code_node_type: shim
     description: Analyze the sentiment of Taylor Swift's song lyrics.
     implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
       \n\nclass GatherTaylorSwiftDataOutput(BaseModel):\n    \"\"\"Pydantic model\
@@ -89,13 +230,13 @@ nodes:
       \ scores for each song\")\n    average_sentiment: float = Field(..., description=\"\
       Average sentiment score across all songs\")\n\n\ndef analyze_lyrics_sentiment(gather_taylor_swift_data_input:\
       \ GatherTaylorSwiftDataOutput, **kwargs) -> AnalyzeLyricsSentimentOutput:\n\
-      \    \"\"\"Analyze the sentiment of Taylor Swift's song lyrics.\n\n    Args:\n\
-      \        gather_taylor_swift_data_input: Input from the 'gather_taylor_swift_data'\
-      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
-      \       AnalyzeLyricsSentimentOutput: Object containing outputs for this node.\n\
-      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
-      \ with placeholder values\n    return AnalyzeLyricsSentimentOutput(\n      \
-      \  sentiment_scores=[],\n        average_sentiment=0.0,\n    )"
+      \    song_lyrics: List[str] = gather_taylor_swift_data_input.song_lyrics\n \
+      \   \n    validated_lyrics: List[str] = validate_lyrics_input(lyrics=song_lyrics)\n\
+      \    \n    preprocessed_lyrics: List[str] = preprocess_lyrics_text(lyrics=validated_lyrics)\n\
+      \    \n    sentiment_scores: List[float] = analyze_individual_song_sentiments(lyrics=preprocessed_lyrics)\n\
+      \    \n    average_sentiment: float = calculate_average_sentiment(scores=sentiment_scores)\n\
+      \    \n    return AnalyzeLyricsSentimentOutput(\n        sentiment_scores=sentiment_scores,\n\
+      \        average_sentiment=average_sentiment\n    )"
     name: analyze_lyrics_sentiment
     nodes_depended_on:
     - gather_taylor_swift_data
@@ -139,10 +280,210 @@ nodes:
         summary: Analyzes the sentiment of Taylor Swift's song lyrics.
     prompt: Using the collected song lyrics, analyze the sentiment to determine the
       overall emotional tone.
-    shims: []
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates and sanitizes the input lyrics to ensure they are in
+        the correct format and free of unsuitable content.
+      implementation: "def validate_lyrics_input(lyrics: str) -> List[str]:\n    \"\
+        \"\"\n    Validates and sanitizes the input lyrics to ensure they are in the\
+        \ correct format and free of unsuitable content.\n\n    Args:\n        lyrics:\
+        \ Input parameter of type str\n\n    Returns:\n        List[str]: Output of\
+        \ type List[str]\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")\n"
+      name: validate_lyrics_input
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: lyrics
+        type: str
+      prd:
+        conceptual_info: This function performs input validation and sanitization
+          to ensure lyrics are properly formatted for further analysis.
+        docstring:
+          examples:
+          - lines:
+            - lyrics = '....'
+            - validated_lyrics = validate_lyrics_input(lyrics)
+            output: '[''Valid lyric line 1'', ''Valid lyric line 2'']'
+          parameters:
+          - description: Raw song lyrics, potentially containing invalid or unsafe
+              content.
+            name: lyrics
+            type: str
+          raises:
+          - description: Raised when the input lyrics are in an invalid or unsupported
+              format.
+            type: ValueError
+          returns:
+            description: A validated, sanitized list of song lyrics ready for further
+              processing.
+            type: List[str]
+          summary: Validates and sanitizes input song lyrics.
+      prompt: the right prompt for the shim
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: This shim takes a list of raw song lyrics and returns a list of
+        cleaned, lowercased, punctuation‑removed, and whitespace‑normalized lyrics
+        ready for sentiment analysis.
+      implementation: "def preprocess_lyrics_text(lyrics: str) -> List[str]:\n   \
+        \ \"\"\"\n    This shim takes a list of raw song lyrics and returns a list\
+        \ of cleaned, lowercased, punctuation‑removed, and whitespace‑normalized lyrics\
+        \ ready for sentiment analysis.\n\n    Args:\n        lyrics: Input parameter\
+        \ of type str\n\n    Returns:\n        List[str]: Output of type List[str]\n\
+        \    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node that\
+        \ needs to be implemented\")\n"
+      name: preprocess_lyrics_text
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: lyrics
+        type: str
+      prd:
+        conceptual_info: Transforms raw lyric text into a standardized format for
+          downstream natural language processing tasks such as sentiment analysis.
+        docstring:
+          examples:
+          - lines:
+            - cleaned = preprocess_lyrics_text(lyrics=["Hey!  ", "Good morning."])
+            - print(cleaned)
+            output: '[''hey'', ''good morning'']'
+          parameters:
+          - description: A list of raw lyric strings.
+            name: lyrics
+            type: LIST_STR
+          raises:
+          - description: If `lyrics` is not a list of strings.
+            type: ValueError
+          returns:
+            description: A list of cleaned lyric strings.
+            type: LIST_STR
+          summary: Preprocess a list of song lyrics for sentiment analysis.
+      prompt: '## Preprocess Lyrics
+
+
+        **Input**: `lyrics` – a list of raw lyric strings.
+
+
+        **Output**: `output` – a list of cleaned lyric strings suitable for sentiment
+        analysis.
+
+
+        Process each lyric by normalizing whitespace, removing punctuation and non‑ASCII
+        characters, converting to lowercase, and trimming leading/trailing spaces.
+
+
+        Example:
+
+        ```python
+
+        cleaned = preprocess_lyrics_text(lyrics=["Hello, World!  ", "Good  morning!"])
+
+        print(cleaned)  # [''hello world'', ''good morning'']
+
+        ```'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Computes a sentiment score for each song lyric in a list and returns
+        a list of float scores.
+      implementation: "def analyze_individual_song_sentiments(lyrics: str) -> List[float]:\n\
+        \    \"\"\"\n    Computes a sentiment score for each song lyric in a list\
+        \ and returns a list of float scores.\n\n    Args:\n        lyrics: Input\
+        \ parameter of type str\n\n    Returns:\n        List[float]: Output of type\
+        \ List[float]\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")\n"
+      name: analyze_individual_song_sentiments
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[float]
+        key: output
+        type: List[float]
+      - description: Input parameter of type str
+        key: lyrics
+        type: str
+      prd:
+        conceptual_info: Provides a per-song sentiment analysis, enabling downstream
+          aggregation and visualization of emotional tone across a collection of lyrics.
+        docstring:
+          examples:
+          - lines:
+            - '>>> from shim import analyze_individual_song_sentiments'
+            - '>>> lyrics = ["Love story, you got me like...", "I can''t get no sleep..."],'
+            - '>>> scores = analyze_individual_song_sentiments(lyrics=lyrics)'
+            - '>>> print(scores)'
+            output: '[0.45, -0.12]'
+          parameters:
+          - description: List of preprocessed song lyrics to analyze.
+            name: lyrics
+            type: List[str]
+          raises:
+          - description: Raised when the input list is empty or contains invalid items.
+            type: ValueError
+          returns:
+            description: Sentiment scores for each input lyric.
+            type: List[float]
+          summary: Analyzes the sentiment of each song lyric in the input list and
+            returns a corresponding list of sentiment scores.
+      prompt: Given a list of song lyrics, compute a sentiment score for each lyric
+        and return a list of float scores ranging from -1 (very negative) to 1 (very
+        positive).
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Computes the average sentiment score from a list of sentiment scores.
+      implementation: "def calculate_average_sentiment(scores: str) -> float:\n  \
+        \  \"\"\"\n    Computes the average sentiment score from a list of sentiment\
+        \ scores.\n\n    Args:\n        scores: Input parameter of type str\n\n  \
+        \  Returns:\n        float: Output of type float\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")\n"
+      name: calculate_average_sentiment
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type float
+        key: output
+        type: float
+      - description: Input parameter of type str
+        key: scores
+        type: str
+      prd:
+        conceptual_info: Calculates the mean sentiment value from individual song
+          sentiment scores.
+        docstring:
+          examples:
+          - lines:
+            - sentiment_scores = [0.5, 0.7, 0.9]
+            - average = calculate_average_sentiment(sentiment_scores)
+            - print(average)
+            output: '0.7'
+          parameters:
+          - description: A list of sentiment scores for each song.
+            name: scores
+            type: List[float]
+          raises:
+          - description: If the scores list is empty.
+            type: ValueError
+          returns:
+            description: The average sentiment score across all songs.
+            type: float
+          summary: Calculates the average sentiment score from a list of sentiment
+            values.
+      prompt: Given a list of sentiment scores, compute the average sentiment value.
+      shims: []
   gather_taylor_swift_data:
     agent: false
-    code_node_type: stub
+    code_node_type: shim
     description: Collect data on Taylor Swift's discography, lyrics, and chart performance.
     implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
       \n\nclass GatherTaylorSwiftDataOutput(BaseModel):\n    \"\"\"Pydantic model\
@@ -153,14 +494,18 @@ nodes:
       \ of song lyrics from Taylor Swift's discography\")\n    chart_performance:\
       \ List[int] = Field(..., description=\"List of chart performance metrics for\
       \ Taylor Swift's songs\")\n\n\ndef gather_taylor_swift_data(general_input: str,\
-      \ **kwargs) -> GatherTaylorSwiftDataOutput:\n    \"\"\"Collect data on Taylor\
-      \ Swift's discography, lyrics, and chart performance.\n\n    Args:\n       \
-      \ general_input: General input string for the root node.\n        **kwargs:\
-      \ Additional keyword arguments.\n\n    Returns:\n        GatherTaylorSwiftDataOutput:\
-      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
-      \ this function\n\n    # Return stub output with placeholder values\n    return\
-      \ GatherTaylorSwiftDataOutput(\n        album_names=[],\n        release_dates=[],\n\
-      \        song_lyrics=[],\n        chart_performance=[],\n    )"
+      \ **kwargs) -> GatherTaylorSwiftDataOutput:\n    discography_data: dict = fetch_discography_metadata(artist=\"\
+      Taylor Swift\")\n    album_names: List[str] = extract_album_names(discography_data=discography_data)\n\
+      \    release_dates: List[str] = extract_release_dates(discography_data=discography_data)\n\
+      \    \n    song_list: List[str] = get_song_titles_from_albums(albums=album_names)\n\
+      \    song_lyrics: List[str] = fetch_lyrics_batch(song_titles=song_list, artist=\"\
+      Taylor Swift\")\n    \n    chart_data: dict = fetch_chart_performance_data(artist=\"\
+      Taylor Swift\", songs=song_list)\n    chart_performance: List[int] = extract_chart_positions(chart_data=chart_data)\n\
+      \    \n    validate_data_completeness(albums=album_names, dates=release_dates,\
+      \ lyrics=song_lyrics, charts=chart_performance)\n    \n    return GatherTaylorSwiftDataOutput(\n\
+      \        album_names=album_names,\n        release_dates=release_dates,\n  \
+      \      song_lyrics=song_lyrics,\n        chart_performance=chart_performance\n\
+      \    )"
     name: gather_taylor_swift_data
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -208,10 +553,476 @@ nodes:
         summary: Gathers data on Taylor Swift's discography, lyrics, and chart performance.
     prompt: Gather relevant data on Taylor Swift's music, including album names, release
       dates, song lyrics, and chart performance metrics.
-    shims: []
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Retrieves a JSON dictionary of discography metadata for the specified
+        artist from an external API or database.
+      implementation: "def fetch_discography_metadata(artist: str) -> str:\n    \"\
+        \"\"\n    Retrieves a JSON dictionary of discography metadata for the specified\
+        \ artist from an external API or database.\n\n    Args:\n        artist: Input\
+        \ parameter of type str\n\n    Returns:\n        str: Output of type dict\n\
+        \    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node that\
+        \ needs to be implemented\")\n"
+      name: fetch_discography_metadata
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type dict
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: artist
+        type: str
+      prd:
+        conceptual_info: Shim to abstract external data fetching
+        docstring:
+          examples:
+          - lines:
+            - metadata = fetch_discography_metadata(artist='Taylor Swift')
+            output: '{''albums'': [...], ''release_dates'': [...], ...}'
+          parameters:
+          - description: Name of the artist to fetch metadata for.
+            name: artist
+            type: str
+          raises:
+          - description: Raised if artist name is empty or None.
+            type: ValueError
+          - description: Raised if external API fails.
+            type: RuntimeError
+          returns:
+            description: JSON string representation of discography metadata.
+            type: str
+          summary: Fetches discography metadata for a given artist.
+      prompt: Fetch discography metadata for a given artist name.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Extracts a list of album names from the JSON-formatted discography
+        data.
+      implementation: "def extract_album_names(discography_data: str) -> List[str]:\n\
+        \    \"\"\"\n    Extracts a list of album names from the JSON-formatted discography\
+        \ data.\n\n    Args:\n        discography_data: Input parameter of type str\n\
+        \n    Returns:\n        List[str]: Output of type List[str]\n    \"\"\"\n\
+        \    raise NotImplementedError(\"This is a virtual stub node that needs to\
+        \ be implemented\")\n"
+      name: extract_album_names
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: discography_data
+        type: str
+      prd:
+        conceptual_info: This shim parses raw discography metadata and extracts the
+          album titles to support downstream data gathering steps.
+        docstring:
+          examples:
+          - lines:
+            - 'discography_data_json = ''{"albums": ["Fearless", "1989", "Red"]}'''
+            - album_names = extract_album_names(discography_data_json)
+            - print(album_names)
+            output: '[''Fearless'', ''1989'', ''Red'']'
+          parameters:
+          - description: JSON-formatted string containing the discography data.
+            name: discography_data
+            type: str
+          raises:
+          - description: Raised when the input is not valid JSON or the expected 'albums'
+              key is missing.
+            type: ValueError
+          returns:
+            description: A list of album names in the order they appear in the input.
+            type: List[str]
+          summary: Extract album names from a discography JSON string.
+      prompt: Extract the list of album names from the provided discography JSON string
+        and return them as a JSON array of strings.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Extracts a list of release dates for each album from the provided
+        discography metadata.
+      implementation: "def extract_release_dates(discography_data: str) -> List[str]:\n\
+        \    \"\"\"\n    Extracts a list of release dates for each album from the\
+        \ provided discography metadata.\n\n    Args:\n        discography_data: Input\
+        \ parameter of type str\n\n    Returns:\n        List[str]: Output of type\
+        \ List[str]\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")\n"
+      name: extract_release_dates
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: discography_data
+        type: str
+      prd:
+        conceptual_info: This shim parses discography metadata to produce a chronological
+          list of album release dates.
+        docstring:
+          examples:
+          - lines:
+            - import json
+            - '# Sample discography data'
+            - sample_json = json.dumps({
+            - '    "albums": ['
+            - '        {"name": "Album1", "release_date": "2020-01-01"},'
+            - '        {"name": "Album2", "release_date": "2021-01-01"}'
+            - '    ]'
+            - '})'
+            - release_dates = extract_release_dates(sample_json)
+            - print(release_dates)
+            output: '["2020-01-01", "2021-01-01"]'
+          parameters:
+          - description: JSON string representing the discography metadata containing
+              album names and release dates.
+            name: discography_data
+            type: str
+          raises:
+          - description: Raised when the input JSON is invalid or missing required
+              fields.
+            type: ValueError
+          returns:
+            description: A list of album release dates extracted from the input data.
+            type: List[str]
+          summary: Extracts release dates for each album from the provided discography
+            metadata JSON.
+      prompt: '**extract_release_dates Prompt**
+
+
+        Given a JSON string of discography metadata, extract and return a list of
+        album release dates.
+
+
+        **Input**
+
+        - `discography_data` (str) – JSON string containing albums with their release
+        dates.
+
+
+        **Output**
+
+        - `output` (List[str]) – List of release dates corresponding to each album.'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Retrieves all song titles for the provided list of Taylor Swift
+        album names.
+      implementation: "def get_song_titles_from_albums(albums: str) -> List[str]:\n\
+        \    \"\"\"\n    Retrieves all song titles for the provided list of Taylor\
+        \ Swift album names.\n\n    Args:\n        albums: Input parameter of type\
+        \ str\n\n    Returns:\n        List[str]: Output of type List[str]\n    \"\
+        \"\"\n    raise NotImplementedError(\"This is a virtual stub node that needs\
+        \ to be implemented\")\n"
+      name: get_song_titles_from_albums
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: albums
+        type: str
+      prd:
+        conceptual_info: This shim encapsulates the logic needed to fetch song titles
+          from a list of album names, delegating the heavy lifting to a reliable music
+          metadata service. It isolates network calls, parsing, and error handling,
+          enabling the rest of the pipeline to treat the operation as a pure function
+          that returns a simple list of strings.
+        docstring:
+          examples:
+          - lines:
+            - song_titles = get_song_titles_from_albums(albums='Red, 1989, Lover')
+            - print(song_titles)
+            output: '[''State of Grace'', ''Red'', ''I Knew You Were Trouble'', ...,
+              ''Lover'', ...]'
+          parameters:
+          - description: A comma-separated string containing the names of the albums
+              to query.
+            name: albums
+            type: str
+          raises:
+          - description: Raised when the `albums` string is empty or contains only
+              whitespace.
+            type: ValueError
+          - description: Raised when the external metadata service fails or returns
+              incomplete data.
+            type: RuntimeError
+          returns:
+            description: A list of all song titles found in the specified albums.
+            type: list[str]
+          summary: Retrieve a list of song titles for the given Taylor Swift album
+            names.
+      prompt: Given a comma-separated string of album names, return a list of all
+        song titles from those albums.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Fetches lyrics for a batch of songs by a specified artist, returning
+        a list of lyric strings.
+      implementation: "def fetch_lyrics_batch(song_titles: str, artist: str) -> List[str]:\n\
+        \    \"\"\"\n    Fetches lyrics for a batch of songs by a specified artist,\
+        \ returning a list of lyric strings.\n\n    Args:\n        song_titles: Input\
+        \ parameter of type str\nartist: Input parameter of type str\n\n    Returns:\n\
+        \        List[str]: Output of type List[str]\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")\n"
+      name: fetch_lyrics_batch
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: song_titles
+        type: str
+      - description: Input parameter of type str
+        key: artist
+        type: str
+      prd:
+        conceptual_info: Provides a batched lyrics retrieval service that abstracts
+          the complexity of querying external lyric databases or APIs.
+        docstring:
+          examples:
+          - lines:
+            - song_list = ["Love Story", "Blank Space", "Shake It Off"]
+            - artist = "Taylor Swift"
+            - lyrics = fetch_lyrics_batch(song_titles=song_list, artist=artist)
+            - print(lyrics[0])
+            output: '"We were both young when I first saw you..."'
+          parameters:
+          - description: A list of song titles whose lyrics need to be fetched.
+            name: song_titles
+            type: List[str]
+          - description: The name of the artist associated with the song titles.
+            name: artist
+            type: str
+          raises:
+          - description: Raised if the lyrics cannot be fetched due to network issues,
+              API rate limiting, or missing data for a requested title.
+            type: Exception
+          returns:
+            description: A list containing the lyrics for each requested song title,
+              in the same order as the input list.
+            type: List[str]
+          summary: Shim function to retrieve lyrics for multiple songs by a given
+            artist.
+      prompt: Fetch lyrics for the following song titles by the specified artist.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Retrieve chart performance data for a specified artist and list
+        of songs from an external chart service and return the data as a JSON string.
+      implementation: "def fetch_chart_performance_data(artist: str, songs: str) ->\
+        \ str:\n    \"\"\"\n    Retrieve chart performance data for a specified artist\
+        \ and list of songs from an external chart service and return the data as\
+        \ a JSON string.\n\n    Args:\n        artist: Input parameter of type str\n\
+        songs: Input parameter of type str\n\n    Returns:\n        str: Output of\
+        \ type dict\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")\n"
+      name: fetch_chart_performance_data
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type dict
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: artist
+        type: str
+      - description: Input parameter of type str
+        key: songs
+        type: str
+      prd:
+        conceptual_info: "- **Purpose**: Collect accurate, up‑to‑date chart rankings\
+          \ for a given artist’s songs.\n- **Key Implementation Points**:\n  1. **API\
+          \ Integration**: Use a RESTful chart API (e.g., Billboard, Spotify Charts)\
+          \ with proper authentication.\n  2. **Data Normalization**: Parse and map\
+          \ raw API responses to a consistent JSON schema.\n  3. **Error Handling\
+          \ & Retries**: Gracefully handle HTTP errors, missing data, and implement\
+          \ exponential back‑off for transient failures."
+        docstring:
+          examples:
+          - lines:
+            - output = fetch_chart_performance_data(artist="Taylor Swift", songs="Love
+              Story, Blank Space")
+            - print(output)
+            output: '{"Love Story": 1, "Blank Space": 2}'
+          parameters:
+          - description: Name of the artist whose chart data is requested.
+            name: artist
+            type: str
+          - description: Comma‑separated list of song titles.
+            name: songs
+            type: str
+          raises:
+          - description: Raised if the API request fails or returns an unexpected
+              format.
+            type: ValueError
+          returns:
+            description: JSON string mapping each song title to its current chart
+              position.
+            type: str
+          summary: Retrieve chart performance data for a list of songs by a specific
+            artist.
+      prompt: '### fetch_chart_performance_data
+
+        **Inputs**
+
+        - **artist**: Name of the artist (string).
+
+        - **songs**: Comma‑separated list of song titles (string).
+
+
+        **Task**
+
+        Retrieve the current chart positions for each song of the specified artist
+        from a trusted chart provider and return the data as a JSON string.
+
+
+        **Output**
+
+        - **output**: JSON string mapping each song title to its chart position.
+
+        - **artist**: Echo of the input artist.
+
+        - **songs**: Echo of the input songs.'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Extracts an ordered list of integer chart positions from the provided
+        chart_data string, preserving the original data order.
+      implementation: "def extract_chart_positions(chart_data: str) -> List[int]:\n\
+        \    \"\"\"\n    Extracts an ordered list of integer chart positions from\
+        \ the provided chart_data string, preserving the original data order.\n\n\
+        \    Args:\n        chart_data: Input parameter of type str\n\n    Returns:\n\
+        \        List[int]: Output of type List[int]\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")\n"
+      name: extract_chart_positions
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[int]
+        key: output
+        type: List[int]
+      - description: Input parameter of type str
+        key: chart_data
+        type: str
+      prd:
+        conceptual_info: Shim to convert raw chart metadata into a concrete sequence
+          of numeric chart positions for downstream validation and analytics.
+        docstring:
+          examples:
+          - lines:
+            - chart_data = '1, 4, 7, 9'
+            - positions = extract_chart_positions(chart_data=chart_data)
+            output: '[1, 4, 7, 9]'
+          - lines:
+            - chart_data = '2 5; 8'
+            - positions = extract_chart_positions(chart_data=chart_data)
+            output: '[2, 5, 8]'
+          parameters:
+          - description: Raw chart data string containing numeric tokens separated
+              by delimiters
+            name: chart_data
+            type: STR
+          raises:
+          - description: Raised when a token cannot be parsed as an integer, or when
+              input is not a string
+            type: ValueError
+          returns:
+            description: List of parsed integer chart positions in the same order
+              as tokens found in chart_data
+            type: LIST_INT
+          summary: Parse a chart_data string to produce an ordered List[int] of chart
+            positions.
+      prompt: Parse the provided chart_data string and return an ordered list of integers
+        representing chart positions for the corresponding songs. Tokens should be
+        interpreted as integers; separators (commas, spaces, semicolons) may be present.
+        If any token cannot be parsed as an integer, raise a clear ValueError specifying
+        the invalid token and its position. If chart_data is empty or contains only
+        separators, return an empty list.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates the completeness and consistency of album, date, lyric,
+        and chart data lists.
+      implementation: "def validate_data_completeness(albums: str, dates: str, lyrics:\
+        \ str, charts: str) -> str:\n    \"\"\"\n    Validates the completeness and\
+        \ consistency of album, date, lyric, and chart data lists.\n\n    Args:\n\
+        \        albums: Input parameter of type str\ndates: Input parameter of type\
+        \ str\nlyrics: Input parameter of type str\ncharts: Input parameter of type\
+        \ str\n\n    Returns:\n        str: Output of type Any\n    \"\"\"\n    raise\
+        \ NotImplementedError(\"This is a virtual stub node that needs to be implemented\"\
+        )\n"
+      name: validate_data_completeness
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: albums
+        type: str
+      - description: Input parameter of type str
+        key: dates
+        type: str
+      - description: Input parameter of type str
+        key: lyrics
+        type: str
+      - description: Input parameter of type str
+        key: charts
+        type: str
+      prd:
+        conceptual_info: Ensures that all data extracted for Taylor Swift's discography
+          is complete before downstream processing.
+        docstring:
+          examples:
+          - lines:
+            - albums = ['Folklore', 'Evermore']
+            - dates = ['2020-07-24', '2021-12-10']
+            - lyrics = ['...', '...']
+            - charts = [5, 3]
+            - result = validate_data_completeness(albums=albums, dates=dates, lyrics=lyrics,
+              charts=charts)
+            - print(result)
+            output: '"Validation successful"'
+          parameters:
+          - description: List of album names.
+            name: albums
+            type: List[str]
+          - description: List of release dates corresponding to the albums.
+            name: dates
+            type: List[str]
+          - description: List of song lyrics.
+            name: lyrics
+            type: List[str]
+          - description: List of chart performance metrics.
+            name: charts
+            type: List[int]
+          raises:
+          - description: If any input list is empty or the lists are of differing
+              lengths.
+            type: ValueError
+          returns:
+            description: A message indicating successful validation.
+            type: str
+          summary: Validates that all provided data lists are non-empty and of matching
+            length.
+      prompt: Validate that the provided lists `albums`, `dates`, `lyrics`, and `charts`
+        are non‑empty and of equal length. If validation passes, return "Validation
+        successful"; otherwise raise a ValueError indicating the mismatch details.
+      shims: []
   identify_common_themes:
     agent: false
-    code_node_type: stub
+    code_node_type: shim
     description: Identify common themes in Taylor Swift's lyrics.
     implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
       \n\nclass GatherTaylorSwiftDataOutput(BaseModel):\n    \"\"\"Pydantic model\
@@ -227,13 +1038,15 @@ nodes:
       \ in the lyrics\")\n    theme_frequencies: List[int] = Field(..., description=\"\
       Frequency of occurrence for each theme\")\n\n\ndef identify_common_themes(gather_taylor_swift_data_input:\
       \ GatherTaylorSwiftDataOutput, **kwargs) -> IdentifyCommonThemesOutput:\n  \
-      \  \"\"\"Identify common themes in Taylor Swift's lyrics.\n\n    Args:\n   \
-      \     gather_taylor_swift_data_input: Input from the 'gather_taylor_swift_data'\
-      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
-      \       IdentifyCommonThemesOutput: Object containing outputs for this node.\n\
-      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
-      \ with placeholder values\n    return IdentifyCommonThemesOutput(\n        themes=[],\n\
-      \        theme_frequencies=[],\n    )"
+      \  song_lyrics = gather_taylor_swift_data_input.song_lyrics\n    \n    validated_lyrics:\
+      \ List[str] = validate_lyrics_input(lyrics=song_lyrics)\n    preprocessed_lyrics:\
+      \ List[str] = preprocess_lyrics_text(lyrics=validated_lyrics)\n    theme_keywords:\
+      \ List[str] = extract_theme_keywords(lyrics=preprocessed_lyrics)\n    theme_counts:\
+      \ dict = count_theme_occurrences(keywords=theme_keywords, lyrics=preprocessed_lyrics)\n\
+      \    sorted_themes: List[str] = sort_themes_by_frequency(theme_counts=theme_counts)\n\
+      \    frequencies: List[int] = extract_frequencies_for_themes(themes=sorted_themes,\
+      \ theme_counts=theme_counts)\n    \n    return IdentifyCommonThemesOutput(\n\
+      \        themes=sorted_themes,\n        theme_frequencies=frequencies\n    )"
     name: identify_common_themes
     nodes_depended_on:
     - gather_taylor_swift_data
@@ -273,10 +1086,336 @@ nodes:
         summary: Identify common themes in Taylor Swift's lyrics by analyzing the
           collected song lyrics.
     prompt: Analyze the lyrics to identify recurring themes or topics.
-    shims: []
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates and normalizes raw song lyric strings into a clean list
+        of lines.
+      implementation: "def validate_lyrics_input(lyrics: str) -> List[str]:\n    \"\
+        \"\"\n    Validates and normalizes raw song lyric strings into a clean list\
+        \ of lines.\n\n    Args:\n        lyrics: Input parameter of type str\n\n\
+        \    Returns:\n        List[str]: Output of type List[str]\n    \"\"\"\n \
+        \   raise NotImplementedError(\"This is a virtual stub node that needs to\
+        \ be implemented\")\n"
+      name: validate_lyrics_input
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: lyrics
+        type: str
+      prd:
+        conceptual_info: The shim performs basic text sanitation and validation for
+          lyrics data before further analysis.
+        docstring:
+          examples:
+          - lines:
+            - lyrics = "  Verse one\n\n Chorus   "
+            - cleaned = validate_lyrics_input(lyrics)
+            output: '[''Verse one'', ''Chorus'']'
+          parameters:
+          - description: Raw lyric string that may contain newlines, extraneous whitespace,
+              or non‑ASCII characters.
+            name: lyrics
+            type: str
+          raises:
+          - description: Raised when the input string is empty or contains only whitespace.
+            type: ValueError
+          returns:
+            description: A list of cleaned lyric lines ready for downstream processing.
+            type: List[str]
+          summary: Validate and clean raw song lyrics.
+      prompt: 'Validate the provided song lyrics and return a clean list of lyric
+        lines.
+
+
+        Input lyrics:
+
+        {{lyrics}}'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Preprocesses a list of raw song lyric strings into clean, tokenized,
+        and lowercased text suitable for keyword extraction.
+      implementation: "def preprocess_lyrics_text(lyrics: str) -> List[str]:\n   \
+        \ \"\"\"\n    Preprocesses a list of raw song lyric strings into clean, tokenized,\
+        \ and lowercased text suitable for keyword extraction.\n\n    Args:\n    \
+        \    lyrics: Input parameter of type str\n\n    Returns:\n        List[str]:\
+        \ Output of type List[str]\n    \"\"\"\n    raise NotImplementedError(\"This\
+        \ is a virtual stub node that needs to be implemented\")\n"
+      name: preprocess_lyrics_text
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: lyrics
+        type: str
+      prd:
+        conceptual_info: Node responsible for preparing lyric texts for downstream
+          analysis by standardizing format and removing noise.
+        docstring:
+          examples:
+          - lines:
+            - 'lyrics = [''Hello! This is a test.'', ''Another line: with punctuation.'']'
+            - preprocessed = preprocess_lyrics_text(lyrics=lyrics)
+            - print(preprocessed)
+            output: '[''hello this is a test'', ''another line with punctuation'']'
+          parameters:
+          - description: A list of raw lyric strings to be cleaned.
+            name: lyrics
+            type: List[str]
+          raises:
+          - description: Raised when the input list is empty or contains non-string
+              elements.
+            type: ValueError
+          returns:
+            description: List of cleaned, tokenized lyric strings.
+            type: List[str]
+          summary: Preprocesses raw song lyrics.
+      prompt: 'Preprocess the following raw song lyrics by removing punctuation, normalizing
+        whitespace, converting to lowercase, and tokenizing. Input:
+
+
+        {{lyrics}}
+
+
+        Output:'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Extracts a list of theme keywords from the provided song lyrics.
+      implementation: "def extract_theme_keywords(lyrics: str) -> List[str]:\n   \
+        \ \"\"\"\n    Extracts a list of theme keywords from the provided song lyrics.\n\
+        \n    Args:\n        lyrics: Input parameter of type str\n\n    Returns:\n\
+        \        List[str]: Output of type List[str]\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")\n"
+      name: extract_theme_keywords
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: lyrics
+        type: str
+      prd:
+        conceptual_info: The node performs keyword extraction on song lyrics to identify
+          recurring themes, enabling downstream analytics such as theme frequency
+          calculation.
+        docstring:
+          examples:
+          - lines:
+            - lyrics = "Love, heartbreak, and resilience in a quiet town."
+            - keywords = extract_theme_keywords(lyrics)
+            - print(keywords)
+            output: '[''love'', ''heartbreak'', ''resilience'', ''quiet'', ''town'']'
+          parameters:
+          - description: Raw song lyrics to process.
+            name: lyrics
+            type: str
+          raises:
+          - description: If the input lyrics string is empty or not a string.
+            type: ValueError
+          returns:
+            description: A list of extracted theme keywords.
+            type: List[str]
+          summary: Extract theme keywords from song lyrics.
+      prompt: '### Extract Theme Keywords
+
+
+        Please provide the list of theme keywords from the following song lyrics:
+
+
+        ```text
+
+        {lyrics}
+
+        ```
+
+
+        Return a JSON array of strings containing the extracted keywords.'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Counts the occurrences of each theme keyword in the provided lyrics.
+      implementation: "def count_theme_occurrences(keywords: str, lyrics: str) ->\
+        \ str:\n    \"\"\"\n    Counts the occurrences of each theme keyword in the\
+        \ provided lyrics.\n\n    Args:\n        keywords: Input parameter of type\
+        \ str\nlyrics: Input parameter of type str\n\n    Returns:\n        str: Output\
+        \ of type dict\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")\n"
+      name: count_theme_occurrences
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type dict
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: keywords
+        type: str
+      - description: Input parameter of type str
+        key: lyrics
+        type: str
+      prd:
+        conceptual_info: The node normalizes text and performs token‑based frequency
+          counting to support downstream theme analysis.
+        docstring:
+          examples:
+          - lines:
+            - result = count_theme_occurrences(keywords="love, heartbreak, hope",
+              lyrics="I love you, I love you so much, but heartbreak will come")
+            - print(result)
+            output: '{"love": 3, "heartbreak": 1, "hope": 0}'
+          parameters:
+          - description: Comma‑separated string of theme keywords to search for.
+            name: keywords
+            type: str
+          - description: Text containing the song lyrics.
+            name: lyrics
+            type: str
+          raises:
+          - description: Raised if either `keywords` or `lyrics` is empty or None.
+            type: ValueError
+          returns:
+            description: A JSON string mapping each keyword to its frequency count
+              in the lyrics.
+            type: str
+          summary: Count the occurrences of each theme keyword in the given lyrics.
+      prompt: '## Prompt
+
+        Given a comma‑separated string of theme keywords and a string containing song
+        lyrics, return a JSON mapping each keyword to the number of times it appears
+        in the lyrics. The match should be case‑insensitive and ignore punctuation.
+
+
+        ### Parameters
+
+        - **keywords** (str): Comma‑separated theme keywords.
+
+        - **lyrics** (str): Song lyrics text.
+
+
+        ### Output
+
+        - **output** (str): String representation of a dictionary mapping each keyword
+        to its occurrence count.'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Sorts a dictionary of theme counts into a list of theme names ordered
+        from most to least frequent.
+      implementation: "def sort_themes_by_frequency(theme_counts: str) -> List[str]:\n\
+        \    \"\"\"\n    Sorts a dictionary of theme counts into a list of theme names\
+        \ ordered from most to least frequent.\n\n    Args:\n        theme_counts:\
+        \ Input parameter of type str\n\n    Returns:\n        List[str]: Output of\
+        \ type List[str]\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")\n"
+      name: sort_themes_by_frequency
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: theme_counts
+        type: str
+      prd:
+        conceptual_info: Transforms raw theme-frequency mappings into a sorted list
+          for downstream analysis.
+        docstring:
+          examples:
+          - lines:
+            - 'input_json = ''{"love": 15, "heartbreak": 8, "growth": 12}'''
+            - sorted_themes = sort_themes_by_frequency(theme_counts=input_json)
+            - print(sorted_themes)
+            output: '["love", "growth", "heartbreak"]'
+          parameters:
+          - description: A JSON-encoded string representing a dictionary where keys
+              are theme strings and values are integer counts.
+            name: theme_counts
+            type: str
+          raises:
+          - description: If the input JSON is invalid or not a dictionary of string–int
+              pairs.
+            type: ValueError
+          returns:
+            description: A list of theme names sorted by decreasing frequency.
+            type: list[str]
+          summary: Sort a theme frequency dictionary into a descending order list.
+      prompt: Given a dictionary mapping theme keywords to their occurrence counts,
+        return a list of themes sorted by descending frequency.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: A shim that converts a thematic frequency mapping into a list of
+        integer frequencies aligned to the provided themes.
+      implementation: "def extract_frequencies_for_themes(themes: str, theme_counts:\
+        \ str) -> List[int]:\n    \"\"\"\n    A shim that converts a thematic frequency\
+        \ mapping into a list of integer frequencies aligned to the provided themes.\n\
+        \n    Args:\n        themes: Input parameter of type str\ntheme_counts: Input\
+        \ parameter of type str\n\n    Returns:\n        List[int]: Output of type\
+        \ List[int]\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")\n"
+      name: extract_frequencies_for_themes
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[int]
+        key: output
+        type: List[int]
+      - description: Input parameter of type str
+        key: themes
+        type: str
+      - description: Input parameter of type str
+        key: theme_counts
+        type: str
+      prd:
+        conceptual_info: Extracts an ordered list of frequencies for the provided
+          themes by consulting a serialized theme_counts mapping and returns the frequencies
+          as a List[int].
+        docstring:
+          examples:
+          - lines:
+            - themes = 'happy|sad|nostalgic'
+            - 'theme_counts = ''{"happy": 5, "sad": 2, "nostalgic": 3}'''
+            - result = extract_frequencies_for_themes(themes, theme_counts)
+            output: '[5, 2, 3]'
+          parameters:
+          - description: Serialized representation of the list of themes (e.g., a
+              delimited string or JSON string); in practice, this input provides the
+              order of themes for which frequencies are requested.
+            name: themes
+            type: STR
+          - description: Serialized mapping from theme to its frequency count; used
+              to look up counts for each theme in 'themes'.
+            name: theme_counts
+            type: STR
+          raises:
+          - description: Raised if themes cannot be parsed or if a theme is missing
+              from the theme_counts mapping.
+            type: ValueError
+          - description: Raised if inputs are not strings when expected.
+            type: TypeError
+          returns:
+            description: A list of integer frequencies corresponding to each theme
+              in 'themes' in the same order.
+            type: LIST_INT
+          summary: Compute frequencies for themes from a serialized theme-to-count
+            mapping and return them as a list aligned with the input themes.
+      prompt: 'Description: Typed node for shim extract_frequencies_for_themes'
+      shims: []
   synthesize_analysis_results:
     agent: false
-    code_node_type: stub
+    code_node_type: shim
     description: Combine the results of the sentiment analysis, theme identification,
       and chart performance analysis.
     implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
@@ -299,16 +1438,21 @@ nodes:
       List of recommendations based on the analysis findings\")\n\n\ndef synthesize_analysis_results(analyze_lyrics_sentiment_input:\
       \ AnalyzeLyricsSentimentOutput, identify_common_themes_input: IdentifyCommonThemesOutput,\
       \ analyze_chart_performance_input: AnalyzeChartPerformanceOutput, **kwargs)\
-      \ -> SynthesizeAnalysisResultsOutput:\n    \"\"\"Combine the results of the\
-      \ sentiment analysis, theme identification, and chart performance analysis.\n\
-      \n    Args:\n        analyze_lyrics_sentiment_input: Input from the 'analyze_lyrics_sentiment'\
-      \ node.\n        identify_common_themes_input: Input from the 'identify_common_themes'\
-      \ node.\n        analyze_chart_performance_input: Input from the 'analyze_chart_performance'\
-      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
-      \       SynthesizeAnalysisResultsOutput: Object containing outputs for this\
-      \ node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub\
-      \ output with placeholder values\n    return SynthesizeAnalysisResultsOutput(\n\
-      \        overall_insights=\"\",\n        recommendations=[],\n    )"
+      \ -> SynthesizeAnalysisResultsOutput:\n    validate_analysis_inputs(sentiment_input=analyze_lyrics_sentiment_input,\
+      \ themes_input=identify_common_themes_input, chart_input=analyze_chart_performance_input)\n\
+      \    \n    sentiment_insights: str = analyze_sentiment_patterns(sentiment_scores=analyze_lyrics_sentiment_input.sentiment_scores,\
+      \ average_sentiment=analyze_lyrics_sentiment_input.average_sentiment)\n    \n\
+      \    theme_insights: str = analyze_thematic_patterns(themes=identify_common_themes_input.themes,\
+      \ frequencies=identify_common_themes_input.theme_frequencies)\n    \n    chart_insights:\
+      \ str = analyze_performance_patterns(trends=analyze_chart_performance_input.chart_trends,\
+      \ peak_positions=analyze_chart_performance_input.peak_positions)\n    \n   \
+      \ combined_insights: str = synthesize_cross_analysis_insights(sentiment_insights=sentiment_insights,\
+      \ theme_insights=theme_insights, chart_insights=chart_insights)\n    \n    recommendations:\
+      \ List[str] = generate_recommendations(sentiment_data=analyze_lyrics_sentiment_input,\
+      \ theme_data=identify_common_themes_input, chart_data=analyze_chart_performance_input)\n\
+      \    \n    overall_insights: str = format_overall_insights(combined_insights=combined_insights)\n\
+      \    \n    return SynthesizeAnalysisResultsOutput(\n        overall_insights=overall_insights,\n\
+      \        recommendations=recommendations\n    )"
     name: synthesize_analysis_results
     nodes_depended_on:
     - analyze_lyrics_sentiment
@@ -365,4 +1509,417 @@ nodes:
           music and impact.
     prompt: Synthesize the findings from the previous analyses to draw conclusions
       about Taylor Swift's music and impact.
-    shims: []
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Ensures that the sentiment, theme, and chart input objects contain
+        all required fields and are internally consistent before synthesis.
+      implementation: "def validate_analysis_inputs(sentiment_input: str, themes_input:\
+        \ str, chart_input: str) -> str:\n    \"\"\"\n    Ensures that the sentiment,\
+        \ theme, and chart input objects contain all required fields and are internally\
+        \ consistent before synthesis.\n\n    Args:\n        sentiment_input: Input\
+        \ parameter of type str\nthemes_input: Input parameter of type str\nchart_input:\
+        \ Input parameter of type str\n\n    Returns:\n        str: Output of type\
+        \ Any\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub\
+        \ node that needs to be implemented\")\n"
+      name: validate_analysis_inputs
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: sentiment_input
+        type: str
+      - description: Input parameter of type str
+        key: themes_input
+        type: str
+      - description: Input parameter of type str
+        key: chart_input
+        type: str
+      prd:
+        conceptual_info: Validates the integrity and consistency of analysis inputs
+          before synthesis.
+        docstring:
+          examples:
+          - lines:
+            - result = validate_analysis_inputs(sentiment_input=sentiment_json, themes_input=themes_json,
+              chart_input=chart_json)
+            - print(result)
+            output: Success
+          parameters:
+          - description: Serialized sentiment analysis output (e.g., JSON).
+            name: sentiment_input
+            type: str
+          - description: Serialized theme analysis output.
+            name: themes_input
+            type: str
+          - description: Serialized chart analysis output.
+            name: chart_input
+            type: str
+          raises:
+          - description: If any input is missing required fields or is malformed.
+            type: ValueError
+          returns:
+            description: Success message or descriptive error.
+            type: str
+          summary: Validate analysis inputs.
+      prompt: Validate the sentiment, theme, and chart analysis inputs for completeness
+        and consistency.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Analyzes sentiment scores and an average sentiment value to generate
+        a textual insight about sentiment patterns across songs.
+      implementation: "def analyze_sentiment_patterns(sentiment_scores: str, average_sentiment:\
+        \ str) -> str:\n    \"\"\"\n    Analyzes sentiment scores and an average sentiment\
+        \ value to generate a textual insight about sentiment patterns across songs.\n\
+        \n    Args:\n        sentiment_scores: Input parameter of type str\naverage_sentiment:\
+        \ Input parameter of type str\n\n    Returns:\n        str: Output of type\
+        \ str\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub\
+        \ node that needs to be implemented\")\n"
+      name: analyze_sentiment_patterns
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: sentiment_scores
+        type: str
+      - description: Input parameter of type str
+        key: average_sentiment
+        type: str
+      prd:
+        conceptual_info: Provides sentiment‑based textual analysis for music lyric
+          datasets.
+        docstring:
+          examples:
+          - lines:
+            - sentiment_scores = [0.8, 0.6, 0.9, 0.4]
+            - average_sentiment = 0.675
+            - insight = analyze_sentiment_patterns(sentiment_scores, average_sentiment)
+            - print(insight)
+            output: '"The overall sentiment trend is positive, with a moderate spread
+              of scores, indicating consistent enthusiasm across the songs."'
+          parameters:
+          - description: List of sentiment scores for each song.
+            name: sentiment_scores
+            type: List[float]
+          - description: Average sentiment score across all songs.
+            name: average_sentiment
+            type: float
+          raises:
+          - description: Raised when input lists are empty or contain non‑numeric
+              values.
+            type: ValueError
+          returns:
+            description: Textual insight summarizing sentiment patterns.
+            type: str
+          summary: Generate insights from a list of sentiment scores and an average
+            sentiment.
+      prompt: '## Analyze Sentiment Patterns
+
+
+        Please provide the **sentiment_scores** (comma‑separated list of floats) and
+        the **average_sentiment** (float). The function will return a textual insight
+        summarizing sentiment patterns across the provided scores.'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Generates a concise textual summary of the most prominent themes
+        and their frequencies from a list of themes and corresponding frequency counts.
+      implementation: "def analyze_thematic_patterns(themes: str, frequencies: str)\
+        \ -> str:\n    \"\"\"\n    Generates a concise textual summary of the most\
+        \ prominent themes and their frequencies from a list of themes and corresponding\
+        \ frequency counts.\n\n    Args:\n        themes: Input parameter of type\
+        \ str\nfrequencies: Input parameter of type str\n\n    Returns:\n        str:\
+        \ Output of type str\n    \"\"\"\n    raise NotImplementedError(\"This is\
+        \ a virtual stub node that needs to be implemented\")\n"
+      name: analyze_thematic_patterns
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: themes
+        type: str
+      - description: Input parameter of type str
+        key: frequencies
+        type: str
+      prd:
+        conceptual_info: Analyzes theme and frequency data to produce human-readable
+          insights, enabling downstream recommendation and synthesis nodes to incorporate
+          thematic context.
+        docstring:
+          examples:
+          - lines:
+            - themes = '["Love", "Heartbreak", "Hope"]'
+            - frequencies = '[12, 8, 5]'
+            - summary = analyze_thematic_patterns(themes=themes, frequencies=frequencies)
+            - print(summary)
+            output: '"Top themes: Love (12), Heartbreak (8), Hope (5)."'
+          parameters:
+          - description: JSON-encoded list of theme strings.
+            name: themes
+            type: str
+          - description: JSON-encoded list of integers representing theme frequencies.
+            name: frequencies
+            type: str
+          raises:
+          - description: Raised when input lists are malformed or lengths do not match.
+            type: ValueError
+          returns:
+            description: A concise summary of the most frequent themes.
+            type: str
+          summary: Analyze thematic patterns and generate a summary.
+      prompt: 'Analyze thematic patterns from the provided themes and their frequencies.
+
+
+        **Input:**
+
+        - Themes: {{themes}}
+
+        - Frequencies: {{frequencies}}
+
+
+        **Output:**
+
+        - Summary:'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Analyzes chart performance trends and peak positions to generate
+        a textual insight summarizing performance patterns.
+      implementation: "def analyze_performance_patterns(trends: str, peak_positions:\
+        \ str) -> str:\n    \"\"\"\n    Analyzes chart performance trends and peak\
+        \ positions to generate a textual insight summarizing performance patterns.\n\
+        \n    Args:\n        trends: Input parameter of type str\npeak_positions:\
+        \ Input parameter of type str\n\n    Returns:\n        str: Output of type\
+        \ str\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub\
+        \ node that needs to be implemented\")\n"
+      name: analyze_performance_patterns
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: trends
+        type: str
+      - description: Input parameter of type str
+        key: peak_positions
+        type: str
+      prd:
+        conceptual_info: Provides insight generation from chart performance data.
+        docstring:
+          examples:
+          - lines:
+            - trends = ["steady rise", "sharp drop", "plateau"]
+            - peak_positions = [3, 15, 8]
+            - analysis = analyze_performance_patterns(trends=trends, peak_positions=peak_positions)
+            - print(analysis)
+            output: '"Song 1 shows a steady rise to position 3, Song 2 experiences
+              a sharp drop peaking at 15, and Song 3 stabilizes around position 8.
+              Overall, the chart performance indicates mixed volatility with a potential
+              for growth in similar tracks."'
+          parameters:
+          - description: List of observed chart trends for each song.
+            name: trends
+            type: List[str]
+          - description: List of peak chart positions for each song.
+            name: peak_positions
+            type: List[int]
+          raises:
+          - description: Raised when either `trends` or `peak_positions` is empty
+              or mismatched in length.
+            type: ValueError
+          returns:
+            description: Textual analysis summarizing performance patterns.
+            type: str
+          summary: Shim that analyzes chart performance trends and peak positions
+            to produce a textual insight.
+      prompt: Generate a concise analysis of chart performance trends and peak positions
+        for a set of songs, returning a descriptive summary.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Synthesize three separate insight strings into a single cohesive
+        cross-analysis insights string.
+      implementation: "def synthesize_cross_analysis_insights(sentiment_insights:\
+        \ str, theme_insights: str, chart_insights: str) -> str:\n    \"\"\"\n   \
+        \ Synthesize three separate insight strings into a single cohesive cross-analysis\
+        \ insights string.\n\n    Args:\n        sentiment_insights: Input parameter\
+        \ of type str\ntheme_insights: Input parameter of type str\nchart_insights:\
+        \ Input parameter of type str\n\n    Returns:\n        str: Output of type\
+        \ str\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub\
+        \ node that needs to be implemented\")\n"
+      name: synthesize_cross_analysis_insights
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: sentiment_insights
+        type: str
+      - description: Input parameter of type str
+        key: theme_insights
+        type: str
+      - description: Input parameter of type str
+        key: chart_insights
+        type: str
+      prd:
+        conceptual_info: Shim to produce a single readable cross-analysis narrative
+          by aggregating sentiment, theme, and chart insights for downstream consumption
+          and future enhancement.
+        docstring:
+          examples:
+          - lines:
+            - sentiment_insights = 'Overall positive sentiment'
+            - 'theme_insights = ''themes: hope, resilience'''
+            - chart_insights = 'rising chart positions'
+            output: Combined cross-analysis insights string outlining sentiment, themes,
+              and chart relationships in a readable format
+          parameters:
+          - description: Raw sentiment analysis insights string
+            name: sentiment_insights
+            type: STR
+          - description: Raw thematic pattern insights string
+            name: theme_insights
+            type: STR
+          - description: Raw chart performance insights string
+            name: chart_insights
+            type: STR
+          raises:
+          - description: Raised if any input is not a string
+            type: TypeError
+          returns:
+            description: A single combined cross-analysis insights string
+            type: STR
+          summary: Combine three insight strings into a structured, readable cross-analysis
+            string with a clear template and extensibility hooks for future model-based
+            synthesis.
+      prompt: 'Description: Typed node for shim synthesize_cross_analysis_insights'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Shim generate_recommendations produces a list of personalized recommendations
+        by analyzing sentiment, themes, and chart data inputs.
+      implementation: "def generate_recommendations(sentiment_data: str, theme_data:\
+        \ str, chart_data: str) -> List[str]:\n    \"\"\"\n    Shim generate_recommendations\
+        \ produces a list of personalized recommendations by analyzing sentiment,\
+        \ themes, and chart data inputs.\n\n    Args:\n        sentiment_data: Input\
+        \ parameter of type str\ntheme_data: Input parameter of type str\nchart_data:\
+        \ Input parameter of type str\n\n    Returns:\n        List[str]: Output of\
+        \ type List[str]\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")\n"
+      name: generate_recommendations
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: sentiment_data
+        type: str
+      - description: Input parameter of type str
+        key: theme_data
+        type: str
+      - description: Input parameter of type str
+        key: chart_data
+        type: str
+      prd:
+        conceptual_info: Shim responsible for transforming analytical inputs into
+          a curated set of actionable recommendations.
+        docstring:
+          examples:
+          - lines:
+            - 'generate_recommendations(sentiment_data=''Overall positive sentiment'',
+              theme_data=''themes: love, resilience'', chart_data=''rising chart positions'')'
+            output: '[''Highlight positive sentiment in promotional posts'', ''Create
+              theme-focused lyric video content'', ''Leverage upward chart momentum
+              with time-limited releases'']'
+          parameters:
+          - description: Input string describing sentiment analysis results
+            name: sentiment_data
+            type: STR
+          - description: Input string describing identified themes from lyrics
+            name: theme_data
+            type: STR
+          - description: Input string describing chart performance insights
+            name: chart_data
+            type: STR
+          raises:
+          - description: Raised when inputs are missing or malformed
+            type: ValueError
+          returns:
+            description: List of recommendations as strings
+            type: LIST_STR
+          summary: Generate a list of recommendations based on sentiment, themes,
+            and chart data inputs.
+      prompt: You are a shim that generates a list of actionable recommendations from
+        three string inputs. Given sentiment_data (string), theme_data (string), and
+        chart_data (string), produce and return a List[str] containing concise, actionable
+        recommendations. The output must be a deterministic, properly formatted list
+        of strings. If any input is missing or invalid, provide a sensible fallback
+        set of recommendations.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Formats the combined_insights into a concise, presentation-ready
+        overall_insights string by normalizing whitespace and ensuring safe, readable
+        output.
+      implementation: "def format_overall_insights(combined_insights: str) -> str:\n\
+        \    \"\"\"\n    Formats the combined_insights into a concise, presentation-ready\
+        \ overall_insights string by normalizing whitespace and ensuring safe, readable\
+        \ output.\n\n    Args:\n        combined_insights: Input parameter of type\
+        \ str\n\n    Returns:\n        str: Output of type str\n    \"\"\"\n    raise\
+        \ NotImplementedError(\"This is a virtual stub node that needs to be implemented\"\
+        )\n"
+      name: format_overall_insights
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: combined_insights
+        type: str
+      prd:
+        conceptual_info: Shim that formats and finalizes the overall insights for
+          presentation.
+        docstring:
+          examples:
+          - lines:
+            - 'combined_insights = ''High sentiment; themes: hope; chart: upward trend.'''
+            - output = format_overall_insights(combined_insights)
+            output: 'High sentiment; themes: hope; chart: upward trend.'
+          parameters:
+          - description: Aggregated insights string to be formatted into the final
+              output.
+            name: combined_insights
+            type: str
+          raises:
+          - description: If combined_insights is not a string or is None.
+            type: ValueError
+          returns:
+            description: The final, presentation-ready overall_insights string.
+            type: str
+          summary: Return a polished overall_insights string by formatting and validating
+            the combined_insights input.
+      prompt: 'Implement a shim named format_overall_insights that takes combined_insights:
+        str and returns output: str. The function should normalize whitespace, trim
+        edges, collapse multiple spaces, handle empty input by returning ''No insights
+        available.'', ensure consistent punctuation and capitalization, and produce
+        a final, presentation-ready string suitable for display in reports. Include
+        defensive checks for None or non-string inputs and raise ValueError when invalid.'
+      shims: []

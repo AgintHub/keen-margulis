@@ -5,13 +5,13 @@ PRDs for nodes in the 'taylorswiftanalysisworkflow' module.
 
 ## Table of Contents
 
-- [gather_taylor_swift_data](#gather_taylor_swift_data)
+- [analyze_chart_performance](#analyze_chart_performance)
 
 - [analyze_lyrics_sentiment](#analyze_lyrics_sentiment)
 
-- [identify_common_themes](#identify_common_themes)
+- [gather_taylor_swift_data](#gather_taylor_swift_data)
 
-- [analyze_chart_performance](#analyze_chart_performance)
+- [identify_common_themes](#identify_common_themes)
 
 - [synthesize_analysis_results](#synthesize_analysis_results)
 
@@ -19,37 +19,41 @@ PRDs for nodes in the 'taylorswiftanalysisworkflow' module.
 
 ---
 
-## gather_taylor_swift_data
+## analyze_chart_performance
 
 ### Description
-Collect data on Taylor Swift's discography, lyrics, and chart performance.
+Analyze the chart performance of Taylor Swift's songs.
 
 ### Conceptual Info
 
-This node collects comprehensive data on Taylor Swift's music, including album names, release dates, song lyrics, and chart performance metrics.
+This node analyzes the chart performance data of Taylor Swift's songs to identify trends and patterns.
 
 ### Docstring
 
-**Summary:** Gathers data on Taylor Swift's discography, lyrics, and chart performance.
+**Summary:** Analyze chart performance data to identify trends and peak positions.
 
-**Returns:** dict - A dictionary containing lists of album names, release dates, song lyrics, and chart performance metrics.
+**Parameters:**
+
+- chart_performance_data (List[int]): List of chart performance metrics for Taylor Swift's songs, obtained from the 'gather_taylor_swift_data' node.
+**Returns:** {'chart_trends': List[str], 'peak_positions': List[int]} - A dictionary containing a list of trends observed in chart performance and a list of peak chart positions for each song.
 
 **Raises:**
 
-- DataCollectionError: If there's an issue collecting data from the sources.
-- DataFormatError: If the collected data is not in the expected format.
+- ValueError: If the input chart performance data is empty or malformed.
 **Examples:**
 
 ```python
->>> data = gather_taylor_swift_data()
->>> print(data['album_names'])
->>> print(data['release_dates'])
->>> print(data['song_lyrics'])
->>> print(data['chart_performance'])
-['Taylor Swift', 'Fearless', ...]
-['2006-10-24', '2008-11-11', ...]
-[' lyrics1 ', ' lyrics2 ', ...]
-[10, 20, ...]
+>>> chart_performance_data = [10, 5, 1, 8, 3]
+>>> result = analyze_chart_performance(chart_performance_data)
+>>> print(result)
+{'chart_trends': ['Increasing trend', 'Decreasing trend'], 'peak_positions': [1, 3, 5, 8, 10]}
+```
+
+```python
+>>> chart_performance_data = [20, 15, 10, 5]
+>>> result = analyze_chart_performance(chart_performance_data)
+>>> print(result)
+{'chart_trends': ['Decreasing trend'], 'peak_positions': [5, 10, 15, 20]}
 ```
 
 
@@ -97,6 +101,43 @@ This node analyzes the sentiment of Taylor Swift's song lyrics to determine the 
 
 ---
 
+## gather_taylor_swift_data
+
+### Description
+Collect data on Taylor Swift's discography, lyrics, and chart performance.
+
+### Conceptual Info
+
+This node collects comprehensive data on Taylor Swift's music, including album names, release dates, song lyrics, and chart performance metrics.
+
+### Docstring
+
+**Summary:** Gathers data on Taylor Swift's discography, lyrics, and chart performance.
+
+**Returns:** dict - A dictionary containing lists of album names, release dates, song lyrics, and chart performance metrics.
+
+**Raises:**
+
+- DataCollectionError: If there's an issue collecting data from the sources.
+- DataFormatError: If the collected data is not in the expected format.
+**Examples:**
+
+```python
+>>> data = gather_taylor_swift_data()
+>>> print(data['album_names'])
+>>> print(data['release_dates'])
+>>> print(data['song_lyrics'])
+>>> print(data['chart_performance'])
+['Taylor Swift', 'Fearless', ...]
+['2006-10-24', '2008-11-11', ...]
+[' lyrics1 ', ' lyrics2 ', ...]
+[10, 20, ...]
+```
+
+
+
+---
+
 ## identify_common_themes
 
 ### Description
@@ -127,47 +168,6 @@ This node analyzes the collected song lyrics to identify recurring themes or top
 >>> print(theme_frequencies)
 ['love', 'heartbreak']
 [2, 1]
-```
-
-
-
----
-
-## analyze_chart_performance
-
-### Description
-Analyze the chart performance of Taylor Swift's songs.
-
-### Conceptual Info
-
-This node analyzes the chart performance data of Taylor Swift's songs to identify trends and patterns.
-
-### Docstring
-
-**Summary:** Analyze chart performance data to identify trends and peak positions.
-
-**Parameters:**
-
-- chart_performance_data (List[int]): List of chart performance metrics for Taylor Swift's songs, obtained from the 'gather_taylor_swift_data' node.
-**Returns:** {'chart_trends': List[str], 'peak_positions': List[int]} - A dictionary containing a list of trends observed in chart performance and a list of peak chart positions for each song.
-
-**Raises:**
-
-- ValueError: If the input chart performance data is empty or malformed.
-**Examples:**
-
-```python
->>> chart_performance_data = [10, 5, 1, 8, 3]
->>> result = analyze_chart_performance(chart_performance_data)
->>> print(result)
-{'chart_trends': ['Increasing trend', 'Decreasing trend'], 'peak_positions': [1, 3, 5, 8, 10]}
-```
-
-```python
->>> chart_performance_data = [20, 15, 10, 5]
->>> result = analyze_chart_performance(chart_performance_data)
->>> print(result)
-{'chart_trends': ['Decreasing trend'], 'peak_positions': [5, 10, 15, 20]}
 ```
 
 

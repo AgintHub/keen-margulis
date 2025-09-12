@@ -5,48 +5,46 @@ PRDs for nodes in the 'trading_workflow' module.
 
 ## Table of Contents
 
-- [fetch_market_data](#fetch_market_data)
+- [gather_market_data](#gather_market_data)
 
 - [analyze_market_trends](#analyze_market_trends)
 
-- [assess_risk](#assess_risk)
+- [evaluate_trading_strategies](#evaluate_trading_strategies)
 
-- [define_trading_rules](#define_trading_rules)
+- [generate_trading_signals](#generate_trading_signals)
 
-- [define_risk_management](#define_risk_management)
+- [make_trading_decisions](#make_trading_decisions)
 
-- [simulate_trades](#simulate_trades)
-
-- [evaluate_trading_strategy](#evaluate_trading_strategy)
+- [execute_trades](#execute_trades)
 
 
 
 ---
 
-## fetch_market_data
+## gather_market_data
 
 ### Description
-Fetch current and historical market data for analysis.
+Gather market data from various sources
 
 ### Conceptual Info
 
-Fetches current and historical market data for analysis, providing the foundation for market trend analysis and risk assessment.
+This node gathers current market data, including stock prices, trading volumes, and other relevant metrics, from various sources.
 
 ### Docstring
 
-**Summary:** Fetches current and historical market data, returning current stock prices and historical data.
+**Summary:** Gathers current market data from multiple sources and returns stock prices, trading volumes, and other market metrics.
 
-**Returns:** {'current_prices': List[float], 'historical_data': List[List[float]]} - A dictionary containing the list of current stock prices and a 2D list of historical stock prices and volumes.
+**Returns:** dict - A dictionary containing lists of stock prices, trading volumes, and market metrics.
 
 **Raises:**
 
-- ConnectionError: If there's a failure in connecting to the market data source.
-- DataError: If the fetched data is malformed or incomplete.
+- ConnectionError: If there's a failure connecting to data sources.
+- DataParsingError: If there's an issue parsing the gathered data.
 **Examples:**
 
 ```python
->>> fetch_market_data()
-{'current_prices': [100.5, 200.2], 'historical_data': [[100, 1000], [101, 1200]]}
+>>> gather_market_data()
+{'stock_prices': [100.5, 200.2], 'trading_volumes': [1000, 2000], 'market_metrics': ['metric1', 'metric2']}
 ```
 
 
@@ -56,252 +54,210 @@ Fetches current and historical market data for analysis, providing the foundatio
 ## analyze_market_trends
 
 ### Description
-Analyze market trends using historical and current market data.
+Analyze market trends using the gathered data
 
 ### Conceptual Info
 
-Analyzes historical and current market data to identify trends and patterns, providing insights for trading decisions.
+This node analyzes market trends using data gathered from various sources, identifying trends and patterns.
 
 ### Docstring
 
-**Summary:** Analyzes market trends using historical and current market data to identify trend indicators and patterns.
+**Summary:** Analyze gathered market data to identify trends and patterns.
 
 **Parameters:**
 
-- current_prices (List[float]): List of current stock prices fetched from the market data.
-- historical_data (List[List[float]]): 2D list of historical stock prices and volumes fetched from the market data.
-**Returns:** Tuple[List[float], List[str]] - A tuple containing a list of trend indicators and a list of identified patterns.
+- stock_prices (List[float]): Current prices of relevant stocks gathered from the market.
+- trading_volumes (List[int]): Current trading volumes of relevant stocks.
+- market_metrics (List[str]): Other relevant market metrics.
+**Returns:** {trend_identification: str, pattern_analysis: List[str]} - A dictionary containing the identified market trends as a string and a detailed analysis of market patterns as a list of strings.
 
 **Raises:**
 
-- ValueError: If the input lists are empty or malformed.
+- ValueError: If any of the input lists (stock_prices, trading_volumes, market_metrics) are empty or not provided.
 **Examples:**
 
 ```python
->>> current_prices = [100.0, 120.0, 110.0]
->>> historical_data = [[90.0, 1000], [95.0, 1200], [100.0, 1500]]
->>> result = analyze_market_trends(current_prices, historical_data)
-([105.0, 115.0], ['bullish', 'volatile'])
+>>> stock_prices = [100.5, 102.1, 101.8]
+>>> trading_volumes = [1000, 1200, 1100]
+>>> market_metrics = ['metric1', 'metric2', 'metric3']
+>>> result = analyze_market_trends(stock_prices, trading_volumes, market_metrics)
+{'trend_identification': 'Bullish trend', 'pattern_analysis': ['Increasing prices', 'Stable trading volume']}
 ```
 
 ```python
->>> current_prices = [80.0, 70.0, 60.0]
->>> historical_data = [[85.0, 800], [80.0, 700], [75.0, 600]]
->>> result = analyze_market_trends(current_prices, historical_data)
-([75.0, 65.0], ['bearish', 'declining'])
+>>> stock_prices = [90.2, 88.5, 89.1]
+>>> trading_volumes = [800, 700, 750]
+>>> market_metrics = ['metric4', 'metric5', 'metric6']
+>>> result = analyze_market_trends(stock_prices, trading_volumes, market_metrics)
+{'trend_identification': 'Bearish trend', 'pattern_analysis': ['Decreasing prices', 'Decreasing trading volume']}
 ```
 
 
 
 ---
 
-## assess_risk
+## evaluate_trading_strategies
 
 ### Description
-Assess the risk associated with potential trades based on market data.
+Evaluate trading strategies
 
 ### Conceptual Info
 
-This node assesses the risk associated with potential trades based on current and historical market data fetched by its parent node, fetch_market_data.
+This node evaluates various trading strategies based on the analyzed market trends and patterns provided by its parent node, analyze_market_trends.
 
 ### Docstring
 
-**Summary:** Assess the risk associated with potential trades based on current market conditions.
+**Summary:** Evaluates trading strategies based on market trend analysis and pattern identification.
 
 **Parameters:**
 
-- market_data (Dict[str, List[float]]): Dictionary containing current prices and historical data fetched from fetch_market_data.
-**Returns:** Tuple[List[float], List[str]] - A tuple containing a list of risk levels and a list of risk factors.
+- trend_identification (str): Identified market trends from the analyze_market_trends node.
+- pattern_analysis (List[str]): Detailed analysis of market patterns from the analyze_market_trends node.
+**Returns:** Tuple[List[str], List[str]] - A tuple containing the evaluations of different trading strategies and the recommended strategies.
 
 **Raises:**
 
-- ValueError: If market_data is empty or does not contain the required keys.
+- ValueError: If trend_identification is empty or pattern_analysis is not provided.
 **Examples:**
 
 ```python
->>> market_data = {'current_prices': [100.0, 200.0], 'historical_data': [[90.0, 100.0], [190.0, 200.0]]}
->>> risk_levels, risk_factors = assess_risk(market_data)
-([0.5, 0.3], ['volatility', 'liquidity'])
+>>> trend_identification = 'Bullish'
+>>> pattern_analysis = ['Increasing Volume', 'Breaking Resistance']
+>>> evaluate_trading_strategies(trend_identification, pattern_analysis)
+(['Strategy 1: Buy and Hold - High Confidence', 'Strategy 2: Mean Reversion - Moderate Confidence'], ['Strategy 1: Buy and Hold'])
 ```
 
 ```python
->>> market_data = {'current_prices': [150.0, 250.0], 'historical_data': [[140.0, 150.0], [240.0, 250.0]]}
->>> risk_levels, risk_factors = assess_risk(market_data)
-([0.4, 0.2], ['market_trend', 'economic_indicators'])
+>>> trend_identification = 'Bearish'
+>>> pattern_analysis = ['Decreasing Volume', 'Breaking Support']
+>>> evaluate_trading_strategies(trend_identification, pattern_analysis)
+(['Strategy 1: Short Sell - High Confidence', 'Strategy 2: Stop Loss - High Confidence'], ['Strategy 1: Short Sell'])
 ```
 
 
 
 ---
 
-## define_trading_rules
+## generate_trading_signals
 
 ### Description
-Define trading rules based on the analysis of market trends.
+Generate trading signals
 
 ### Conceptual Info
 
-This node defines trading rules based on the analysis of market trends, using trend indicators and pattern recognition to establish conditions for buying and selling stocks.
+This node generates trading signals based on the recommended trading strategies evaluated by its parent node.
 
 ### Docstring
 
-**Summary:** Define trading rules based on market trend analysis.
+**Summary:** Generates trading signals and their confidence levels based on recommended trading strategies.
 
 **Parameters:**
 
-- trend_indicators (List[float]): List of trend indicators, such as moving averages, from the market trend analysis.
-- pattern_recognition (List[str]): List of identified patterns, such as 'bullish' or 'bearish', from the market trend analysis.
-**Returns:** {'buy_rules': List[str], 'sell_rules': List[str]} - Dictionary containing lists of conditions for buying and selling stocks based on the trend analysis.
+- recommended_strategies (List[str]): Recommended trading strategies from the parent node 'evaluate_trading_strategies'.
+- strategy_evaluations (List[str]): Evaluations of different trading strategies from the parent node 'evaluate_trading_strategies'.
+**Returns:** Tuple[List[str], List[float]] - A tuple containing the generated trading signals and their corresponding confidence levels.
 
 **Raises:**
 
-- ValueError: If trend indicators or pattern recognition results are invalid or inconsistent.
+- ValueError: If the input recommended strategies or strategy evaluations are empty or malformed.
 **Examples:**
 
 ```python
->>> trend_indicators = [50.0, 200.0]
->>> pattern_recognition = ['bullish', 'bearish']
->>> result = define_trading_rules(trend_indicators, pattern_recognition)
-{'buy_rules': ['price > 50', 'macd > signal'], 'sell_rules': ['price < 200', 'rsi > 70']}
+>>> recommended_strategies = ['mean_reversion', 'trend_following']
+>>> strategy_evaluations = ['mean_reversion:0.8', 'trend_following:0.7']
+>>> trading_signals, signal_confidence = generate_trading_signals(recommended_strategies, strategy_evaluations)
+(['buy', 'sell'], [0.85, 0.75])
 ```
 
 ```python
->>> trend_indicators = [100.0, 50.0]
->>> pattern_recognition = ['bearish', 'bullish']
->>> result = define_trading_rules(trend_indicators, pattern_recognition)
-{'buy_rules': ['price > 100', 'stochastic < 20'], 'sell_rules': ['price < 50', 'macd < signal']}
+>>> recommended_strategies = ['momentum']
+>>> strategy_evaluations = ['momentum:0.9']
+>>> trading_signals, signal_confidence = generate_trading_signals(recommended_strategies, strategy_evaluations)
+(['buy'], [0.92])
 ```
 
 
 
 ---
 
-## define_risk_management
+## make_trading_decisions
 
 ### Description
-Define risk management strategies based on the risk assessment.
+Make trading decisions
 
 ### Conceptual Info
 
-This node defines risk management strategies based on the risk assessment provided by the 'assess_risk' node. It generates stop-loss levels and position sizes for trades.
+This node generates trading decisions based on the trading signals and their confidence levels produced by the 'generate_trading_signals' node.
 
 ### Docstring
 
-**Summary:** Defines risk management strategies based on risk assessment.
+**Summary:** Makes trading decisions based on generated trading signals and their confidence levels.
 
 **Parameters:**
 
-- risk_levels (List[float]): List of risk levels associated with potential trades from the 'assess_risk' node.
-- risk_factors (List[str]): List of factors contributing to the risk assessment from the 'assess_risk' node.
-**Returns:** {'stop_loss_levels': List[float], 'position_sizing': List[float]} - A dictionary containing lists of stop-loss levels and position sizes for trades.
+- trading_signals (List[str]): Generated trading signals from the 'generate_trading_signals' node.
+- signal_confidence (List[float]): Confidence levels of the generated trading signals from the 'generate_trading_signals' node.
+**Returns:** {'trading_decisions': List[str], 'decision_rationale': List[str]} - A dictionary containing the made trading decisions and the rationale behind them.
 
 **Raises:**
 
-- ValueError: If risk_levels or risk_factors are empty or not of the correct type.
+- ValueError: If the lengths of 'trading_signals' and 'signal_confidence' do not match.
 **Examples:**
 
 ```python
->>> risk_levels = [0.5, 0.7, 0.3]
->>> risk_factors = ['market_volatility', 'economic_indicators']
->>> result = define_risk_management(risk_levels, risk_factors)
-{'stop_loss_levels': [0.4, 0.6, 0.2], 'position_sizing': [0.1, 0.2, 0.3]}
+>>> trading_signals = ['Buy', 'Sell', 'Hold']
+>>> signal_confidence = [0.8, 0.7, 0.9]
+>>> result = make_trading_decisions(trading_signals, signal_confidence)
+{'trading_decisions': ['Buy', 'Hold', 'Hold'], 'decision_rationale': ['High confidence buy signal', 'Low confidence sell signal', 'High confidence hold signal']}
 ```
 
 ```python
->>> risk_levels = [0.2, 0.9]
->>> risk_factors = ['geopolitical_events']
->>> result = define_risk_management(risk_levels, risk_factors)
-{'stop_loss_levels': [0.1, 0.8], 'position_sizing': [0.05, 0.15]}
+>>> trading_signals = ['Buy', 'Sell']
+>>> signal_confidence = [0.6, 0.4]
+>>> result = make_trading_decisions(trading_signals, signal_confidence)
+{'trading_decisions': ['Buy', 'Sell'], 'decision_rationale': ['Moderate confidence buy signal', 'Low confidence sell signal']}
 ```
 
 
 
 ---
 
-## simulate_trades
+## execute_trades
 
 ### Description
-Simulate trades using the defined trading rules and risk management strategies.
+Execute trades
 
 ### Conceptual Info
 
-Simulates trades based on predefined trading rules and risk management strategies, generating simulated trade outcomes and performance metrics.
+This node executes trades based on the trading decisions made by its parent node, 'make_trading_decisions'.
 
 ### Docstring
 
-**Summary:** Simulates trade executions using the established trading rules and risk management strategies, producing simulated trade results and evaluating their performance.
+**Summary:** Executes trades based on the provided trading decisions and returns the status and outcomes of these trades.
 
 **Parameters:**
 
-- buy_rules (List[str]): List of conditions for buying stocks derived from market trend analysis.
-- sell_rules (List[str]): List of conditions for selling stocks based on market trend analysis.
-- stop_loss_levels (List[float]): List of stop-loss levels for trades determined by risk assessment.
-- position_sizing (List[float]): List of position sizes for trades based on risk management strategies.
-**Returns:** [List[float], List[float]] - A tuple containing a 2D list of simulated trade outcomes and a list of performance metrics for the simulated trades.
+- trading_decisions (List[str]): Made trading decisions, output from 'make_trading_decisions' node.
+- decision_rationale (List[str]): Rationale behind the trading decisions, output from 'make_trading_decisions' node.
+**Returns:** {'trade_execution_status': List[str], 'trade_outcomes': List[str]} - A dictionary containing two lists: 'trade_execution_status' for the status of trade executions and 'trade_outcomes' for the outcomes of the executed trades.
 
 **Raises:**
 
-- ValueError: If any of the input lists are empty or contain invalid values.
-- TypeError: If the input types do not match the expected types.
+- ValueError: If the input lists ('trading_decisions' and 'decision_rationale') are not of the same length.
+- RuntimeError: If there is an issue during the execution of trades.
 **Examples:**
 
 ```python
->>> buy_rules = ['price > 50', 'volume > 1000']
->>> sell_rules = ['price < 30', 'rsi > 70']
->>> stop_loss_levels = [0.9, 0.8]
->>> position_sizing = [0.5, 0.3]
->>> simulated_trades, performance_metrics = simulate_trades(buy_rules, sell_rules, stop_loss_levels, position_sizing)
-([[0.95, 0.92], [0.88, 0.85]], [0.1, 0.2])
+>>> trading_decisions = ['buy', 'sell', 'hold']
+>>> decision_rationale = ['good opportunity', 'bad market', 'wait for more info']
+>>> result = execute_trades(trading_decisions, decision_rationale)
+{'trade_execution_status': ['success', 'success', 'pending'], 'trade_outcomes': ['profit', 'loss', 'awaiting']}
 ```
 
 ```python
->>> buy_rules = ['macd > 0', 'bollinger_band > 0']
->>> sell_rules = ['macd < 0', 'bollinger_band < 0']
->>> stop_loss_levels = [0.95, 0.9]
->>> position_sizing = [0.4, 0.6]
->>> simulated_trades, performance_metrics = simulate_trades(buy_rules, sell_rules, stop_loss_levels, position_sizing)
-([[0.98, 0.96], [0.92, 0.9]], [0.15, 0.25])
-```
-
-
-
----
-
-## evaluate_trading_strategy
-
-### Description
-Evaluate the trading strategy based on the simulation results.
-
-### Conceptual Info
-
-The node evaluates the trading strategy's effectiveness based on simulated trade outcomes and performance metrics.
-
-### Docstring
-
-**Summary:** Evaluates the trading strategy based on simulated trades and performance metrics.
-
-**Parameters:**
-
-- simulated_trades (List[float]): 2D list of simulated trade outcomes from the 'simulate_trades' node.
-- performance_metrics (List[float]): List of performance metrics for the simulated trades from the 'simulate_trades' node.
-**Returns:** Tuple[float, List[str]] - A tuple containing the overall effectiveness of the trading strategy as a float and a list of areas for improvement as strings.
-
-**Raises:**
-
-- ValueError: If the simulated trades or performance metrics are empty or invalid.
-**Examples:**
-
-```python
->>> simulated_trades = [[100.0, 105.0, 110.0], [120.0, 115.0, 110.0]]
->>> performance_metrics = [0.05, 0.02, -0.03]
->>> evaluate_trading_strategy(simulated_trades, performance_metrics)
-(0.75, ['Risk Management', 'Trading Rules'])
-```
-
-```python
->>> simulated_trades = [[100.0, 95.0, 90.0], [85.0, 80.0, 75.0]]
->>> performance_metrics = [-0.05, -0.02, -0.03]
->>> evaluate_trading_strategy(simulated_trades, performance_metrics)
-(0.25, ['Market Analysis', 'Position Sizing'])
+>>> trading_decisions = ['buy']
+>>> decision_rationale = ['confident in market']
+>>> result = execute_trades(trading_decisions, decision_rationale)
+{'trade_execution_status': ['success'], 'trade_outcomes': ['profit']}
 ```
 

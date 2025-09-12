@@ -1,285 +1,209 @@
-# taylor_swift_analysis_workflow - Complete PRD Documentation
+# taylorswiftanalysisworkflow - Complete PRD Documentation
 
 ## Overview
-PRDs for nodes in the 'taylor_swift_analysis_workflow' module.
+PRDs for nodes in the 'taylorswiftanalysisworkflow' module.
 
 ## Table of Contents
 
-- [fetch_song_data](#fetch_song_data)
+- [analyze_chart_performance](#analyze_chart_performance)
 
-- [analyze_lyrics](#analyze_lyrics)
+- [analyze_lyrics_sentiment](#analyze_lyrics_sentiment)
 
-- [extract_themes](#extract_themes)
+- [gather_taylor_swift_data](#gather_taylor_swift_data)
 
-- [sentiment_analysis](#sentiment_analysis)
+- [identify_common_themes](#identify_common_themes)
 
-- [trend_over_time](#trend_over_time)
-
-- [generate_summary](#generate_summary)
+- [synthesize_analysis_results](#synthesize_analysis_results)
 
 
 
 ---
 
-## fetch_song_data
+## analyze_chart_performance
 
 ### Description
-Collect basic metadata and lyrics for all Taylor Swift songs.
+Analyze the chart performance of Taylor Swift's songs.
 
 ### Conceptual Info
 
-Collect basic metadata and lyrics for all Taylor Swift songs.
+This node analyzes the chart performance data of Taylor Swift's songs to identify trends and patterns.
 
 ### Docstring
 
-**Summary:** Fetches a list of all Taylor Swift songs along with their full lyrics and release years from a public API.
+**Summary:** Analyze chart performance data to identify trends and peak positions.
 
 **Parameters:**
 
-- artist (str): Name of the artist to query. Defaults to "Taylor Swift".
-**Returns:** dict - Dictionary containing three keys: `song_titles` (List[str]), `song_lyrics` (List[str]), and `release_years` (List[int]). The lists are aligned by index.
+- chart_performance_data (List[int]): List of chart performance metrics for Taylor Swift's songs, obtained from the 'gather_taylor_swift_data' node.
+**Returns:** {'chart_trends': List[str], 'peak_positions': List[int]} - A dictionary containing a list of trends observed in chart performance and a list of peak chart positions for each song.
 
 **Raises:**
 
-- ValueError: If the API request fails or returns an unexpected status code.
-- KeyError: If the API response is missing required fields (e.g., title, lyrics, or year).
+- ValueError: If the input chart performance data is empty or malformed.
 **Examples:**
 
 ```python
->>> result = fetch_song_data()
->>> print(result['song_titles'][0])
-"Love Story"
+>>> chart_performance_data = [10, 5, 1, 8, 3]
+>>> result = analyze_chart_performance(chart_performance_data)
+>>> print(result)
+{'chart_trends': ['Increasing trend', 'Decreasing trend'], 'peak_positions': [1, 3, 5, 8, 10]}
 ```
 
 ```python
->>> result = fetch_song_data(artist="Taylor Swift")
->>> print(len(result['song_titles']))
-"<total number of Taylor Swift songs>"
-```
-
-
-
----
-
-## analyze_lyrics
-
-### Description
-Generate word frequency statistics from all lyrics.
-
-### Conceptual Info
-
-This node aggregates raw lyrical text into a concise frequency table, enabling downstream theme extraction and sentiment analysis.
-
-### Docstring
-
-**Summary:** Computes the frequency of every unique word across all song lyrics and returns the words sorted by decreasing count.
-
-**Parameters:**
-
-- song_titles (List[str]): Parallel list of song titles; provided for context but not used in frequency computation.
-- song_lyrics (List[str]): Parallel list of full lyrics corresponding to each song title.
-**Returns:** Tuple[List[str], List[int]] - A tuple containing the list of unique words sorted by descending frequency and a parallel list of their counts.
-
-**Raises:**
-
-- ValueError: Raised if `song_lyrics` is empty or all entries are blank.
-- TypeError: Raised if inputs are not lists of strings.
-**Examples:**
-
-```python
->>> song_titles = ['A', 'B']
->>> song_lyrics = ['Hello world hello', 'World of code']
->>> unique, counts = analyze_lyrics(song_titles, song_lyrics)
->>> print(unique)
->>> print(counts)
-['hello', 'world', 'of', 'code']
-[3, 2, 1, 1]
-```
-
-```python
->>> song_titles = ['Song']
->>> song_lyrics = ['I love coding', 'I love coding', 'Coding is fun']
->>> unique, counts = analyze_lyrics(song_titles, song_lyrics)
->>> print(dict(zip(unique, counts)))
-{'i': 3, 'love': 2, 'coding': 3, 'is': 1, 'fun': 1}
+>>> chart_performance_data = [20, 15, 10, 5]
+>>> result = analyze_chart_performance(chart_performance_data)
+>>> print(result)
+{'chart_trends': ['Decreasing trend'], 'peak_positions': [5, 10, 15, 20]}
 ```
 
 
 
 ---
 
-## extract_themes
+## analyze_lyrics_sentiment
 
 ### Description
-Identify the dominant lyrical themes.
+Analyze the sentiment of Taylor Swift's song lyrics.
 
 ### Conceptual Info
 
-Extracts the five most frequent words from all song lyrics and calculates each word’s relative frequency as a normalized score.
+This node analyzes the sentiment of Taylor Swift's song lyrics to determine the overall emotional tone.
 
 ### Docstring
 
-**Summary:** Selects the top five words by occurrence from lyric word statistics and returns them with their normalized frequency scores.
+**Summary:** Analyzes the sentiment of Taylor Swift's song lyrics.
 
 **Parameters:**
 
-- unique_words (List[str]): List of unique words sorted by descending frequency.
-- word_counts (List[int]): Parallel list of counts corresponding to each word in `unique_words`.
-**Returns:** Tuple[List[str], List[float]] - A tuple containing the top 5 thematic words and a list of their normalized scores.
+- song_lyrics (List[str]): List of song lyrics from Taylor Swift's discography, obtained from the 'gather_taylor_swift_data' node.
+**Returns:** {'sentiment_scores': List[float], 'average_sentiment': float} - A dictionary containing a list of sentiment scores for each song and the average sentiment score across all songs.
 
 **Raises:**
 
-- ValueError: If `unique_words` and `word_counts` are empty or have mismatched lengths.
-- ValueError: If the total word count is zero (cannot compute normalized scores).
+- ValueError: If the input 'song_lyrics' is empty or not a list of strings.
 **Examples:**
 
 ```python
->>> unique_words = ['love', 'heart', 'night', 'dream', 'sky']
->>> word_counts = [10, 8, 5, 2, 1]
->>> themes, scores = extract_themes(unique_words, word_counts)
+>>> song_lyrics = ['I stay out too late, got nothing in my brain', 'I think I got a broken heart']
+>>> result = analyze_lyrics_sentiment(song_lyrics)
+>>> print(result)
+{'sentiment_scores': [0.2, -0.5], 'average_sentiment': -0.15}
+```
+
+```python
+>>> song_lyrics = ['You took the time to memorize me, my fears, my hopes, and dreams']
+>>> result = analyze_lyrics_sentiment(song_lyrics)
+>>> print(result)
+{'sentiment_scores': [0.8], 'average_sentiment': 0.8}
+```
+
+
+
+---
+
+## gather_taylor_swift_data
+
+### Description
+Collect data on Taylor Swift's discography, lyrics, and chart performance.
+
+### Conceptual Info
+
+This node collects comprehensive data on Taylor Swift's music, including album names, release dates, song lyrics, and chart performance metrics.
+
+### Docstring
+
+**Summary:** Gathers data on Taylor Swift's discography, lyrics, and chart performance.
+
+**Returns:** dict - A dictionary containing lists of album names, release dates, song lyrics, and chart performance metrics.
+
+**Raises:**
+
+- DataCollectionError: If there's an issue collecting data from the sources.
+- DataFormatError: If the collected data is not in the expected format.
+**Examples:**
+
+```python
+>>> data = gather_taylor_swift_data()
+>>> print(data['album_names'])
+>>> print(data['release_dates'])
+>>> print(data['song_lyrics'])
+>>> print(data['chart_performance'])
+['Taylor Swift', 'Fearless', ...]
+['2006-10-24', '2008-11-11', ...]
+[' lyrics1 ', ' lyrics2 ', ...]
+[10, 20, ...]
+```
+
+
+
+---
+
+## identify_common_themes
+
+### Description
+Identify common themes in Taylor Swift's lyrics.
+
+### Conceptual Info
+
+This node analyzes the collected song lyrics to identify recurring themes or topics, providing insights into Taylor Swift's common lyrical motifs.
+
+### Docstring
+
+**Summary:** Identify common themes in Taylor Swift's lyrics by analyzing the collected song lyrics.
+
+**Parameters:**
+
+- song_lyrics (List[str]): List of song lyrics from Taylor Swift's discography, provided by the 'gather_taylor_swift_data' node.
+**Returns:** {'themes': List[str], 'theme_frequencies': List[int]} - A dictionary containing a list of common themes and their corresponding frequencies.
+
+**Raises:**
+
+- ValueError: If the input 'song_lyrics' is empty or not a list of strings.
+**Examples:**
+
+```python
+>>> song_lyrics = ['Love is in the air', 'Heartbreak is hard', 'Love is sweet']
+>>> themes, theme_frequencies = identify_common_themes(song_lyrics)
 >>> print(themes)
->>> print(scores)
-['love', 'heart', 'night', 'dream', 'sky']\n[0.38461538461538464, 0.3076923076923077, 0.19230769230769232, 0.07692307692307693, 0.038461538461538464]
-```
-
-```python
->>> unique_words = ['sun', 'rain']
->>> word_counts = [10, 5]
->>> themes, scores = extract_themes(unique_words, word_counts)
->>> print(themes)
->>> print(scores)
-['sun', 'rain']\n[0.6666666666666666, 0.3333333333333333]
+>>> print(theme_frequencies)
+['love', 'heartbreak']
+[2, 1]
 ```
 
 
 
 ---
 
-## sentiment_analysis
+## synthesize_analysis_results
 
 ### Description
-Compute sentiment for each song.
+Combine the results of the sentiment analysis, theme identification, and chart performance analysis.
 
 ### Conceptual Info
 
-Performs sentiment analysis on song lyrics, producing a sentiment score for each track.
+This node synthesizes the results of sentiment analysis, theme identification, and chart performance analysis to provide a comprehensive understanding of Taylor Swift's music and its impact.
 
 ### Docstring
 
-**Summary:** Computes overall sentiment scores for a list of song lyrics, returning a list of floats between -1 and 1 aligned with song titles.
+**Summary:** Synthesizes analysis results to draw conclusions about Taylor Swift's music and impact.
 
 **Parameters:**
 
-- song_titles (List[str]): List of song titles corresponding to the lyrics.
-- song_lyrics (List[str]): List of full lyrics for each song.
-**Returns:** List[float] - Sentiment score for each song.
+- sentiment_analysis_results (dict): Results from sentiment analysis, including sentiment scores and average sentiment.
+- theme_identification_results (dict): Results from theme identification, including common themes and their frequencies.
+- chart_performance_analysis_results (dict): Results from chart performance analysis, including chart trends and peak positions.
+**Returns:** dict - A dictionary containing overall insights and recommendations based on the analysis.
 
 **Raises:**
 
-- ValueError: If input lists are not the same length or are empty.
+- ValueError: If any of the input analysis results are missing or malformed.
 **Examples:**
 
 ```python
->>> scores = sentiment_analysis(["Love Story", "Bad Blood"], ["I knew you were trouble, so I stayed away", "I used to love you, now I hate you"])
-[0.76, -0.62]
-```
-
-```python
->>> scores = sentiment_analysis(["Blank Space"], ["So nice I can't decide if I'm a love or a lie"])
-[0.48]
-```
-
-
-
----
-
-## trend_over_time
-
-### Description
-Summarize sentiment trend across release years.
-
-### Conceptual Info
-
-This node aggregates song-level sentiment scores into year-level averages, providing a temporal view of lyrical sentiment across Taylor Swift's discography.
-
-### Docstring
-
-**Summary:** Compute average sentiment per release year from parallel lists of years and sentiment scores.
-
-**Parameters:**
-
-- release_years (List[int]): List of release years for each song, aligned with sentiment_scores.
-- sentiment_scores (List[float]): Sentiment score for each song, ranging from -1 (very negative) to 1 (very positive).
-**Returns:** Tuple[List[int], List[float]] - A tuple containing two parallel lists:
-- years: Chronological list of years with songs.
-- avg_sentiment: Average sentiment for each corresponding year.
-
-**Raises:**
-
-- ValueError: If release_years and sentiment_scores are of different lengths.
-- ValueError: If either input list is empty.
-**Examples:**
-
-```python
->>> years, avg = trend_over_time([2015, 2015, 2016], [0.2, 0.5, -0.1])
-([2015, 2016], [0.35, -0.1])
-```
-
-```python
->>> trend_over_time([2015, 2016], [0.3])
-Traceback (most recent call last):
-  ...
-ValueError: release_years and sentiment_scores must have the same length.
-```
-
-
-
----
-
-## generate_summary
-
-### Description
-Produce a human‑readable summary of the findings.
-
-### Conceptual Info
-
-Generates a short narrative that encapsulates the dominant lyrical themes and the sentiment trajectory over the artist's career, highlighting any key shifts or anomalies.
-
-### Docstring
-
-**Summary:** Create a concise paragraph summarizing key lyrical themes and sentiment trends.
-
-**Parameters:**
-
-- themes (List[str]): Top 5 thematic words in descending frequency order.
-- theme_scores (List[float]): Normalized frequency score for each corresponding theme (sum of all scores should equal 1).
-- years (List[int]): Chronological list of release years for which sentiment averages have been computed.
-- avg_sentiment (List[float]): Average sentiment score for each year, aligned with the `years` list. Scores range from -1 (very negative) to +1 (very positive).
-**Returns:** str - A single paragraph that lists the top themes, summarizes the sentiment trend over time, and notes any significant pattern shifts.
-
-**Raises:**
-
-- ValueError: If `themes` and `theme_scores` lists are of unequal length, or if any of the input lists are empty.
-- TypeError: If any of the parameters is not of the expected type.
-**Examples:**
-
-```python
->>> generate_summary(
-...     themes=["love", "heartbreak", "growth", "rebellion", "dreams"],
-...     theme_scores=[0.28, 0.22, 0.18, 0.12, 0.10],
-...     years=[2013, 2014, 2015, 2016, 2017],
-...     avg_sentiment=[0.15, 0.08, 0.02, -0.04, -0.10]
->>> )
-"The analysis highlights love and heartbreak as the dominant lyrical themes, followed by growth, rebellion, and dreams. Sentiment shifts from mildly positive in 2013 to increasingly negative by 2017, indicating a noticeable downturn in overall lyrical mood during the latter years."
-```
-
-```python
->>> generate_summary(
-...     themes=["hope", "rain", "silence", "journey", "home"],
-...     theme_scores=[0.30, 0.20, 0.15, 0.12, 0.10],
-...     years=[2012, 2013, 2014],
-...     avg_sentiment=[0.05, 0.10, 0.15]"
-                ")
-"The prevailing themes are hope, rain, silence, journey, and home. The sentiment trend shows a steady improvement from 2012 to 2014, suggesting an increasingly optimistic tone over time."
+>>> sentiment_analysis_results = {'sentiment_scores': [0.8, 0.7], 'average_sentiment': 0.75}
+>>> theme_identification_results = {'themes': ['love', 'heartbreak'], 'theme_frequencies': [10, 5]}
+>>> chart_performance_analysis_results = {'chart_trends': ['increasing popularity'], 'peak_positions': [1, 2]}
+>>> result = synthesize_analysis_results(sentiment_analysis_results, theme_identification_results, chart_performance_analysis_results)
+{'overall_insights': 'Taylor Swift\'s music is generally positive with themes of love and heartbreak, and has shown increasing popularity on charts.', 'recommendations': ['Continue producing music with positive themes.', 'Explore more themes beyond love and heartbreak.']}
 ```
 
