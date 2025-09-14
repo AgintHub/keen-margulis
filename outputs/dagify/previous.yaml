@@ -1,483 +1,464 @@
 dag_type: stub
-description: A workflow for executing trades based on market data and analysis
-name: tradingworkflow
+description: A workflow that creates a trading strategy based on market data and executes
+  trades accordingly.
+name: trading_workflow
 nodes:
   analyze_market_trends:
     agent: false
     code_node_type: stub
-    description: Analyze market trends based on the fetched market data
+    description: Use technical indicators and machine learning algorithms to analyze
+      market trends.
     implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass FetchMarketDataOutput(BaseModel):\n    \"\"\"Pydantic model for fetch_market_data\
-      \ node outputs.\"\"\"\n    market_prices: List[float] = Field(..., description=\"\
-      List of current market prices for various assets\")\n    market_volumes: List[int]\
-      \ = Field(..., description=\"List of current market volumes for various assets\"\
-      )\n    market_timestamps: List[str] = Field(..., description=\"Timestamps for\
-      \ when the market data was last updated\")\n\n\nclass AnalyzeMarketTrendsOutput(BaseModel):\n\
-      \    \"\"\"Pydantic model for analyze_market_trends node outputs.\"\"\"\n  \
-      \  trend_indicators: List[float] = Field(..., description=\"Indicators showing\
-      \ the strength and direction of market trends\")\n    pattern_alerts: List[str]\
-      \ = Field(..., description=\"Alerts for detected patterns that could affect\
-      \ trading decisions\")\n    trading_opportunities: List[str] = Field(..., description=\"\
-      List of potential trading opportunities based on trend analysis\")\n\n\ndef\
-      \ analyze_market_trends(fetch_market_data_input: FetchMarketDataOutput, **kwargs)\
-      \ -> AnalyzeMarketTrendsOutput:\n    \"\"\"Analyze market trends based on the\
-      \ fetched market data\n\n    Args:\n        fetch_market_data_input: Input from\
-      \ the 'fetch_market_data' node.\n        **kwargs: Additional keyword arguments.\n\
-      \n    Returns:\n        AnalyzeMarketTrendsOutput: Object containing outputs\
-      \ for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return\
-      \ stub output with placeholder values\n    return AnalyzeMarketTrendsOutput(\n\
-      \        trend_indicators=[],\n        pattern_alerts=[],\n        trading_opportunities=[],\n\
-      \    )"
+      \n\nclass GatherMarketDataOutput(BaseModel):\n    \"\"\"Pydantic model for gather_market_data\
+      \ node outputs.\"\"\"\n    current_prices: List[float] = Field(..., description=\"\
+      Current prices of relevant assets\")\n    historical_prices: List[float] = Field(...,\
+      \ description=\"Historical price data for relevant assets\")\n    market_volumes:\
+      \ List[float] = Field(..., description=\"Current trading volumes of relevant\
+      \ assets\")\n\n\nclass AnalyzeMarketTrendsOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for analyze_market_trends node outputs.\"\"\"\n    trend_indicators:\
+      \ List[float] = Field(..., description=\"Indicators showing the direction and\
+      \ strength of market trends\")\n    pattern_recognition_results: List[str] =\
+      \ Field(..., description=\"Results of pattern recognition analysis\")\n\n\n\
+      def analyze_market_trends(gather_market_data_input: GatherMarketDataOutput,\
+      \ **kwargs) -> AnalyzeMarketTrendsOutput:\n    \"\"\"\n    Analyzes market data\
+      \ to identify trends and patterns.\n\n    Parameters\n    ----------\n    current_prices\
+      \ : List[float]\n        Current prices of relevant assets gathered from gather_market_data\n\
+      \        node.\n    historical_prices : List[float]\n        Historical price\
+      \ data for relevant assets gathered from\n        gather_market_data node.\n\
+      \    market_volumes : List[float]\n        Current trading volumes of relevant\
+      \ assets gathered from\n        gather_market_data node.\n\n    Returns\n  \
+      \  -------\n    Tuple[List[float], List[str]]\n        A tuple containing trend\
+      \ indicators and pattern recognition results.\n\n    Raises\n    ------\n  \
+      \  ValueError\n        If input data is inconsistent or missing.\n\n    Examples\n\
+      \    --------\n    >>> current_prices = [100.0, 120.0, 110.0]\n    >>> historical_prices\
+      \ = [90.0, 100.0, 110.0, 120.0, 130.0]\n    >>> market_volumes = [1000.0, 1200.0,\
+      \ 1100.0]\n    >>> result = analyze_market_trends(current_prices, historical_prices,\n\
+      \    market_volumes)\n    ([0.5, 0.7, 0.3], ['uptrend', 'reversal'])\n\n   \
+      \ \"\"\"\n    return AnalyzeMarketTrendsOutput(\n        trend_indicators=[],\n\
+      \        pattern_recognition_results=[],\n    )"
     name: analyze_market_trends
     nodes_depended_on:
-    - fetch_market_data
-    nodes_dependent_on: []
+    - gather_market_data
+    nodes_dependent_on:
+    - generate_trading_signals
     output_structure:
-    - description: Indicators showing the strength and direction of market trends
+    - description: Indicators showing the direction and strength of market trends
       key: trend_indicators
       type: List[float]
-    - description: Alerts for detected patterns that could affect trading decisions
-      key: pattern_alerts
-      type: List[str]
-    - description: List of potential trading opportunities based on trend analysis
-      key: trading_opportunities
+    - description: Results of pattern recognition analysis
+      key: pattern_recognition_results
       type: List[str]
     prd:
-      conceptual_info: This node analyzes market trends by processing fetched market
-        data to identify trends, patterns, and potential trading opportunities.
+      conceptual_info: This node analyzes market trends using technical indicators
+        and machine learning algorithms.
       docstring:
         examples:
         - lines:
-          - market_prices = [100.0, 120.0, 110.0]
-          - market_volumes = [1000, 1200, 1100]
-          - market_timestamps = ['2023-01-01', '2023-01-02', '2023-01-03']
-          - result = analyze_market_trends(market_prices, market_volumes, market_timestamps)
-          output: '{''trend_indicators'': [0.5, 0.2], ''pattern_alerts'': [''Bullish''],
-            ''trading_opportunities'': [''Buy'']}'
+          - current_prices = [100.0, 120.0, 110.0]
+          - historical_prices = [90.0, 100.0, 110.0, 120.0, 130.0]
+          - market_volumes = [1000.0, 1200.0, 1100.0]
+          - result = analyze_market_trends(current_prices, historical_prices, market_volumes)
+          output: ([0.5, 0.7, 0.3], ['uptrend', 'reversal'])
         parameters:
-        - description: List of current market prices for various assets fetched from
-            reliable sources.
-          name: market_prices
+        - description: Current prices of relevant assets gathered from gather_market_data
+            node.
+          name: current_prices
           type: List[float]
-        - description: List of current market volumes for various assets fetched from
-            reliable sources.
+        - description: Historical price data for relevant assets gathered from gather_market_data
+            node.
+          name: historical_prices
+          type: List[float]
+        - description: Current trading volumes of relevant assets gathered from gather_market_data
+            node.
           name: market_volumes
-          type: List[int]
-        - description: Timestamps for when the market data was last updated.
-          name: market_timestamps
-          type: List[str]
-        raises:
-        - description: If any of the input lists (market_prices, market_volumes, market_timestamps)
-            are empty or of different lengths.
-          type: ValueError
-        returns:
-          description: A dictionary containing trend indicators, pattern alerts, and
-            trading opportunities.
-          type: dict
-        summary: Analyze market data to identify trends, patterns, and potential trading
-          opportunities.
-    prompt: Analyze the market data to identify trends, patterns, and potential trading
-      opportunities.
-    shims: []
-  evaluate_risk_factors:
-    agent: false
-    code_node_type: stub
-    description: Evaluate risk factors associated with potential trades
-    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass AnalyzeMarketTrendsOutput(BaseModel):\n    \"\"\"Pydantic model for\
-      \ analyze_market_trends node outputs.\"\"\"\n    trend_indicators: List[float]\
-      \ = Field(..., description=\"Indicators showing the strength and direction of\
-      \ market trends\")\n    pattern_alerts: List[str] = Field(..., description=\"\
-      Alerts for detected patterns that could affect trading decisions\")\n    trading_opportunities:\
-      \ List[str] = Field(..., description=\"List of potential trading opportunities\
-      \ based on trend analysis\")\n\n\nclass EvaluateRiskFactorsOutput(BaseModel):\n\
-      \    \"\"\"Pydantic model for evaluate_risk_factors node outputs.\"\"\"\n  \
-      \  risk_scores: List[float] = Field(..., description=\"Risk scores for each\
-      \ potential trade\")\n    volatility_measures: List[float] = Field(..., description=\"\
-      Measures of volatility for the assets involved in potential trades\")\n    liquidity_assessments:\
-      \ List[str] = Field(..., description=\"Assessments of liquidity for the assets\
-      \ involved in potential trades\")\n\n\ndef evaluate_risk_factors(analyze_market_trends_input:\
-      \ AnalyzeMarketTrendsOutput, **kwargs) -> EvaluateRiskFactorsOutput:\n    \"\
-      \"\"Evaluate risk factors associated with potential trades\n\n    Args:\n  \
-      \      analyze_market_trends_input: Input from the 'analyze_market_trends' node.\n\
-      \        **kwargs: Additional keyword arguments.\n\n    Returns:\n        EvaluateRiskFactorsOutput:\
-      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
-      \ this function\n\n    # Return stub output with placeholder values\n    return\
-      \ EvaluateRiskFactorsOutput(\n        risk_scores=[],\n        volatility_measures=[],\n\
-      \        liquidity_assessments=[],\n    )"
-    name: evaluate_risk_factors
-    nodes_depended_on:
-    - analyze_market_trends
-    nodes_dependent_on: []
-    output_structure:
-    - description: Risk scores for each potential trade
-      key: risk_scores
-      type: List[float]
-    - description: Measures of volatility for the assets involved in potential trades
-      key: volatility_measures
-      type: List[float]
-    - description: Assessments of liquidity for the assets involved in potential trades
-      key: liquidity_assessments
-      type: List[str]
-    prd:
-      conceptual_info: This node assesses the risk factors associated with potential
-        trades identified by the analyze_market_trends node, focusing on volatility
-        and liquidity.
-      docstring:
-        examples:
-        - lines:
-          - trend_indicators = [0.5, 0.7]
-          - pattern_alerts = ['bullish', 'bearish']
-          - trading_opportunities = ['buy', 'sell']
-          - result = evaluate_risk_factors(trend_indicators, pattern_alerts, trading_opportunities)
-          output: '{''risk_scores'': [0.3, 0.8], ''volatility_measures'': [0.2, 0.4],
-            ''liquidity_assessments'': [''high'', ''low'']}'
-        parameters:
-        - description: Indicators showing the strength and direction of market trends
-            from analyze_market_trends node.
-          name: trend_indicators
           type: List[float]
-        - description: Alerts for detected patterns that could affect trading decisions
-            from analyze_market_trends node.
-          name: pattern_alerts
-          type: List[str]
-        - description: List of potential trading opportunities based on trend analysis
-            from analyze_market_trends node.
-          name: trading_opportunities
-          type: List[str]
         raises:
-        - description: If the input lists from analyze_market_trends node are empty
-            or inconsistent.
+        - description: If input data is inconsistent or missing.
           type: ValueError
         returns:
-          description: A dictionary containing risk_scores, volatility_measures, and
-            liquidity_assessments for the potential trades.
-          type: dict
-        summary: Evaluates risk factors for potential trades based on market trend
-          analysis.
-    prompt: Assess the risk factors for the identified trading opportunities, considering
-      factors like volatility and liquidity.
+          description: A tuple containing trend indicators and pattern recognition
+            results.
+          type: Tuple[List[float], List[str]]
+        summary: Analyzes market data to identify trends and patterns.
+    prompt: Analyze the gathered market data to identify trends and patterns.
     shims: []
   execute_trades:
     agent: false
     code_node_type: stub
-    description: Execute trades according to the formulated strategy
+    description: Use the trading signals to execute buy or sell orders on the relevant
+      assets.
     implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass FormulateTradingStrategyOutput(BaseModel):\n    \"\"\"Pydantic model\
-      \ for formulate_trading_strategy node outputs.\"\"\"\n    trading_strategy:\
-      \ str = Field(..., description=\"Description of the formulated trading strategy\"\
-      )\n    trade_recommendations: str = Field(..., description=\"List of recommended\
-      \ trades based on the strategy\")\n    expected_returns: float = Field(...,\
-      \ description=\"Expected returns for the recommended trades\")\n\n\nclass ExecuteTradesOutput(BaseModel):\n\
-      \    \"\"\"Pydantic model for execute_trades node outputs.\"\"\"\n    trade_execution_status:\
-      \ List[str] = Field(..., description=\"Status of each trade execution (e.g.,\
-      \ success, failed, pending)\")\n    trade_execution_timestamps: List[str] =\
-      \ Field(..., description=\"Timestamps for when each trade was executed\")\n\
-      \    trade_details: List[str] = Field(..., description=\"Details of the executed\
-      \ trades, including assets, quantities, and prices\")\n\n\ndef execute_trades(formulate_trading_strategy_input:\
-      \ FormulateTradingStrategyOutput, **kwargs) -> ExecuteTradesOutput:\n    \"\"\
-      \"Execute trades according to the formulated strategy\n\n    Args:\n       \
-      \ formulate_trading_strategy_input: Input from the 'formulate_trading_strategy'\
-      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
-      \       ExecuteTradesOutput: Object containing outputs for this node.\n    \"\
-      \"\"\n    # TODO: Implement this function\n\n    # Return stub output with placeholder\
-      \ values\n    return ExecuteTradesOutput(\n        trade_execution_status=[],\n\
-      \        trade_execution_timestamps=[],\n        trade_details=[],\n    )"
+      \n\nclass GenerateTradingSignalsOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for generate_trading_signals node outputs.\"\"\"\n    trading_signals: List[str]\
+      \ = Field(..., description=\"Final list of trading signals (buy or sell)\")\n\
+      \    signal_confidence: List[float] = Field(..., description=\"Confidence level\
+      \ for each trading signal\")\n\n\nclass ExecuteTradesOutput(BaseModel):\n  \
+      \  \"\"\"Pydantic model for execute_trades node outputs.\"\"\"\n    trade_results:\
+      \ List[str] = Field(..., description=\"Results of the executed trades\")\n \
+      \   trade_status: List[str] = Field(..., description=\"Status of each executed\
+      \ trade (success or failure)\")\n\n\ndef execute_trades(generate_trading_signals_input:\
+      \ GenerateTradingSignalsOutput, **kwargs) -> ExecuteTradesOutput:\n    \"\"\"\
+      \n    Executes trades according to the provided trading signals and returns\
+      \ the\n    results and status of these trades.\n\n    Parameters\n    ----------\n\
+      \    trading_signals : List[str]\n        List of trading signals (buy or sell)\
+      \ generated by the\n        generate_trading_signals node.\n    signal_confidence\
+      \ : List[float]\n        Confidence levels for each trading signal, indicating\
+      \ the\n        reliability of the signal.\n\n    Returns\n    -------\n    Tuple[List[str],\
+      \ List[str]]\n        A tuple containing two lists: trade_results and trade_status.\n\
+      \        trade_results contains the outcomes of the executed trades, while\n\
+      \        trade_status indicates whether each trade was successful or not.\n\n\
+      \    Raises\n    ------\n    ValueError\n        If the lengths of trading_signals\
+      \ and signal_confidence do not\n        match, indicating inconsistent input\
+      \ data.\n    RuntimeError\n        If an error occurs during the execution of\
+      \ trades, such as failure\n        to connect to the trading platform or insufficient\
+      \ funds.\n\n    Examples\n    --------\n    >>> trading_signals = ['buy', 'sell',\
+      \ 'buy']\n    >>> signal_confidence = [0.8, 0.7, 0.9]\n    >>> trade_results,\
+      \ trade_status = execute_trades(trading_signals,\n    signal_confidence)\n \
+      \   (['Trade executed: buy', 'Trade executed: sell', 'Trade executed: buy'],\n\
+      \    ['success', 'success', 'success'])\n\n    >>> trading_signals = ['buy',\
+      \ 'sell']\n    >>> signal_confidence = [0.6]\n    >>> try:\n    ...     trade_results,\
+      \ trade_status = execute_trades(trading_signals,\n    signal_confidence)\n \
+      \   >>> except ValueError as e:\n    ...     print(e)\n    \"Lengths of trading_signals\
+      \ and signal_confidence must match\"\n\n    \"\"\"\n    return ExecuteTradesOutput(\n\
+      \        trade_results=[],\n        trade_status=[],\n    )"
     name: execute_trades
     nodes_depended_on:
-    - formulate_trading_strategy
+    - generate_trading_signals
     nodes_dependent_on: []
     output_structure:
-    - description: Status of each trade execution (e.g., success, failed, pending)
-      key: trade_execution_status
+    - description: Results of the executed trades
+      key: trade_results
       type: List[str]
-    - description: Timestamps for when each trade was executed
-      key: trade_execution_timestamps
-      type: List[str]
-    - description: Details of the executed trades, including assets, quantities, and
-        prices
-      key: trade_details
+    - description: Status of each executed trade (success or failure)
+      key: trade_status
       type: List[str]
     prd:
-      conceptual_info: This node executes trades based on the formulated trading strategy
-        while ensuring compliance with trading regulations and risk management policies.
+      conceptual_info: This node executes trades based on the generated trading signals,
+        processing buy or sell orders for relevant assets.
       docstring:
         examples:
         - lines:
-          - trading_strategy = 'Buy 100 shares of XYZ'
-          - trade_recommendations = ['Buy 100 XYZ', 'Sell 50 ABC']
-          - expected_returns = [0.05, -0.02]
-          - execute_trades(trading_strategy, trade_recommendations, expected_returns)
-          output: (['success', 'success'], ['2023-04-01 10:00:00', '2023-04-01 10:05:00'],
-            ['Bought 100 XYZ at $100', 'Sold 50 ABC at $50'])
+          - trading_signals = ['buy', 'sell', 'buy']
+          - signal_confidence = [0.8, 0.7, 0.9]
+          - trade_results, trade_status = execute_trades(trading_signals, signal_confidence)
+          output: '([''Trade executed: buy'', ''Trade executed: sell'', ''Trade executed:
+            buy''], [''success'', ''success'', ''success''])'
         - lines:
-          - trading_strategy = 'Sell 50 shares of ABC'
-          - trade_recommendations = ['Sell 50 ABC']
-          - expected_returns = [-0.02]
-          - execute_trades(trading_strategy, trade_recommendations, expected_returns)
-          output: (['success'], ['2023-04-01 11:00:00'], ['Sold 50 ABC at $50'])
+          - trading_signals = ['buy', 'sell']
+          - signal_confidence = [0.6]
+          - 'try:'
+          - '    trade_results, trade_status = execute_trades(trading_signals, signal_confidence)'
+          - 'except ValueError as e:'
+          - '    print(e)'
+          output: '"Lengths of trading_signals and signal_confidence must match"'
         parameters:
-        - description: Description of the formulated trading strategy
-          name: trading_strategy
-          type: str
-        - description: List of recommended trades based on the strategy
-          name: trade_recommendations
+        - description: List of trading signals (buy or sell) generated by the generate_trading_signals
+            node.
+          name: trading_signals
           type: List[str]
-        - description: Expected returns for the recommended trades
-          name: expected_returns
+        - description: Confidence levels for each trading signal, indicating the reliability
+            of the signal.
+          name: signal_confidence
           type: List[float]
         raises:
-        - description: If the input trading strategy is invalid or if trade recommendations
-            are empty
+        - description: If the lengths of trading_signals and signal_confidence do
+            not match, indicating inconsistent input data.
           type: ValueError
-        - description: If there's a failure in executing trades due to external factors
-            like network issues
+        - description: If an error occurs during the execution of trades, such as
+            failure to connect to the trading platform or insufficient funds.
           type: RuntimeError
         returns:
-          description: A tuple containing the status of trade executions, timestamps
-            of executions, and details of the trades
-          type: Tuple[List[str], List[str], List[str]]
-        summary: Execute trades according to the formulated strategy, ensuring compliance
-          with trading regulations and risk management policies.
-    prompt: Carry out the trades as per the formulated strategy, ensuring compliance
-      with trading regulations and risk management policies.
+          description: 'A tuple containing two lists: trade_results and trade_status.
+            trade_results contains the outcomes of the executed trades, while trade_status
+            indicates whether each trade was successful or not.'
+          type: Tuple[List[str], List[str]]
+        summary: Executes trades according to the provided trading signals and returns
+          the results and status of these trades.
+    prompt: Execute trades based on the generated trading signals.
     shims: []
-  fetch_market_data:
+  gather_market_data:
     agent: false
     code_node_type: stub
-    description: Fetch current market data from reliable sources
+    description: Gather market data from various sources such as exchanges, APIs,
+      or financial databases.
     implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass FetchMarketDataOutput(BaseModel):\n    \"\"\"Pydantic model for fetch_market_data\
-      \ node outputs.\"\"\"\n    market_prices: List[float] = Field(..., description=\"\
-      List of current market prices for various assets\")\n    market_volumes: List[int]\
-      \ = Field(..., description=\"List of current market volumes for various assets\"\
-      )\n    market_timestamps: List[str] = Field(..., description=\"Timestamps for\
-      \ when the market data was last updated\")\n\n\ndef fetch_market_data(general_input:\
-      \ str, **kwargs) -> FetchMarketDataOutput:\n    \"\"\"Fetch current market data\
-      \ from reliable sources\n\n    Args:\n        general_input: General input string\
-      \ for the root node.\n        **kwargs: Additional keyword arguments.\n\n  \
-      \  Returns:\n        FetchMarketDataOutput: Object containing outputs for this\
-      \ node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub\
-      \ output with placeholder values\n    return FetchMarketDataOutput(\n      \
-      \  market_prices=[],\n        market_volumes=[],\n        market_timestamps=[],\n\
+      \n\nclass GatherMarketDataOutput(BaseModel):\n    \"\"\"Pydantic model for gather_market_data\
+      \ node outputs.\"\"\"\n    current_prices: List[float] = Field(..., description=\"\
+      Current prices of relevant assets\")\n    historical_prices: List[float] = Field(...,\
+      \ description=\"Historical price data for relevant assets\")\n    market_volumes:\
+      \ List[float] = Field(..., description=\"Current trading volumes of relevant\
+      \ assets\")\n\n\ndef gather_market_data(general_input: str, **kwargs) -> GatherMarketDataOutput:\n\
+      \    \"\"\"\n    Gathers market data including current prices, historical prices,\
+      \ and trading\n    volumes.\n\n    Parameters\n    ----------\n    data_sources\
+      \ : List[str]\n        List of financial data sources (e.g., exchanges, APIs,\
+      \ databases) to\n        gather data from.\n    assets : List[str]\n       \
+      \ List of assets (e.g., stocks, cryptocurrencies) for which to gather\n    \
+      \    market data.\n\n    Returns\n    -------\n    Dict[str, List[float]]\n\
+      \        A dictionary containing current prices, historical prices, and\n  \
+      \      market volumes for the specified assets.\n\n    Raises\n    ------\n\
+      \    ConnectionError\n        If there's an issue connecting to any of the specified\
+      \ data sources.\n    ValueError\n        If the list of assets or data sources\
+      \ is empty or invalid.\n\n    Examples\n    --------\n    >>> gather_market_data(data_sources=['exchange1',\
+      \ 'api2'], assets=['BTC',\n    'ETH'])\n    {'current_prices': [35000.0, 2500.0],\
+      \ 'historical_prices': [[34000.0,\n    34500.0, 35000.0], [2400.0, 2450.0, 2500.0]],\
+      \ 'market_volumes': [1000.0,\n    500.0]}\n\n    >>> gather_market_data(data_sources=['database3'],\
+      \ assets=['AAPL', 'GOOGL'])\n    {'current_prices': [150.0, 2800.0], 'historical_prices':\
+      \ [[145.0, 147.0,\n    150.0], [2750.0, 2780.0, 2800.0]], 'market_volumes':\
+      \ [2000.0, 300.0]}\n\n    \"\"\"\n    return GatherMarketDataOutput(\n     \
+      \   current_prices=[],\n        historical_prices=[],\n        market_volumes=[],\n\
       \    )"
-    name: fetch_market_data
+    name: gather_market_data
     nodes_depended_on: []
-    nodes_dependent_on: []
+    nodes_dependent_on:
+    - analyze_market_trends
+    - identify_trading_opportunities
     output_structure:
-    - description: List of current market prices for various assets
-      key: market_prices
+    - description: Current prices of relevant assets
+      key: current_prices
       type: List[float]
-    - description: List of current market volumes for various assets
+    - description: Historical price data for relevant assets
+      key: historical_prices
+      type: List[float]
+    - description: Current trading volumes of relevant assets
       key: market_volumes
-      type: List[int]
-    - description: Timestamps for when the market data was last updated
-      key: market_timestamps
-      type: List[str]
+      type: List[float]
     prd:
-      conceptual_info: Fetches current market data from reliable sources, providing
-        prices, volumes, and timestamps.
+      conceptual_info: This node is responsible for collecting current and historical
+        market data from various financial sources.
       docstring:
         examples:
         - lines:
-          - fetch_market_data()
-          output: '{''market_prices'': [123.45, 67.89], ''market_volumes'': [1000,
-            500], ''market_timestamps'': [''2023-04-01 12:00:00'', ''2023-04-01 12:00:00'']}'
-        parameters: []
+          - gather_market_data(data_sources=['exchange1', 'api2'], assets=['BTC',
+            'ETH'])
+          output: '{''current_prices'': [35000.0, 2500.0], ''historical_prices'':
+            [[34000.0, 34500.0, 35000.0], [2400.0, 2450.0, 2500.0]], ''market_volumes'':
+            [1000.0, 500.0]}'
+        - lines:
+          - gather_market_data(data_sources=['database3'], assets=['AAPL', 'GOOGL'])
+          output: '{''current_prices'': [150.0, 2800.0], ''historical_prices'': [[145.0,
+            147.0, 150.0], [2750.0, 2780.0, 2800.0]], ''market_volumes'': [2000.0,
+            300.0]}'
+        parameters:
+        - description: List of financial data sources (e.g., exchanges, APIs, databases)
+            to gather data from.
+          name: data_sources
+          type: List[str]
+        - description: List of assets (e.g., stocks, cryptocurrencies) for which to
+            gather market data.
+          name: assets
+          type: List[str]
         raises:
-        - description: If unable to connect to market data sources.
+        - description: If there's an issue connecting to any of the specified data
+            sources.
           type: ConnectionError
-        - description: If the fetched data is malformed or incomplete.
-          type: DataError
+        - description: If the list of assets or data sources is empty or invalid.
+          type: ValueError
         returns:
-          description: Dictionary containing market prices (List[float]), market volumes
-            (List[int]), and market timestamps (List[str]).
-          type: dict
-        summary: Fetches and returns current market data, including prices, volumes,
-          and update timestamps.
-    prompt: Retrieve the latest market data including prices, volumes, and other relevant
-      metrics.
+          description: A dictionary containing current prices, historical prices,
+            and market volumes for the specified assets.
+          type: Dict[str, List[float]]
+        summary: Gathers market data including current prices, historical prices,
+          and trading volumes.
+    prompt: Collect current and historical market data including prices, volumes,
+      and other relevant metrics.
     shims: []
-  formulate_trading_strategy:
+  generate_trading_signals:
     agent: false
     code_node_type: stub
-    description: Formulate a trading strategy based on market analysis and risk evaluation
+    description: Combine the results of trend analysis and opportunity identification
+      to generate final trading signals.
     implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass EvaluateRiskFactorsOutput(BaseModel):\n    \"\"\"Pydantic model for\
-      \ evaluate_risk_factors node outputs.\"\"\"\n    risk_scores: List[float] =\
-      \ Field(..., description=\"Risk scores for each potential trade\")\n    volatility_measures:\
-      \ List[float] = Field(..., description=\"Measures of volatility for the assets\
-      \ involved in potential trades\")\n    liquidity_assessments: List[str] = Field(...,\
-      \ description=\"Assessments of liquidity for the assets involved in potential\
-      \ trades\")\n\n\nclass AnalyzeMarketTrendsOutput(BaseModel):\n    \"\"\"Pydantic\
-      \ model for analyze_market_trends node outputs.\"\"\"\n    trend_indicators:\
-      \ List[float] = Field(..., description=\"Indicators showing the strength and\
-      \ direction of market trends\")\n    pattern_alerts: List[str] = Field(...,\
-      \ description=\"Alerts for detected patterns that could affect trading decisions\"\
-      )\n    trading_opportunities: List[str] = Field(..., description=\"List of potential\
-      \ trading opportunities based on trend analysis\")\n\n\nclass FormulateTradingStrategyOutput(BaseModel):\n\
-      \    \"\"\"Pydantic model for formulate_trading_strategy node outputs.\"\"\"\
-      \n    trading_strategy: str = Field(..., description=\"Description of the formulated\
-      \ trading strategy\")\n    trade_recommendations: str = Field(..., description=\"\
-      List of recommended trades based on the strategy\")\n    expected_returns: float\
-      \ = Field(..., description=\"Expected returns for the recommended trades\")\n\
-      \n\ndef formulate_trading_strategy(evaluate_risk_factors_input: EvaluateRiskFactorsOutput,\
-      \ analyze_market_trends_input: AnalyzeMarketTrendsOutput, **kwargs) -> FormulateTradingStrategyOutput:\n\
-      \    \"\"\"Formulate a trading strategy based on market analysis and risk evaluation\n\
-      \n    Args:\n        evaluate_risk_factors_input: Input from the 'evaluate_risk_factors'\
-      \ node.\n        analyze_market_trends_input: Input from the 'analyze_market_trends'\
-      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
-      \       FormulateTradingStrategyOutput: Object containing outputs for this node.\n\
-      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
-      \ with placeholder values\n    return FormulateTradingStrategyOutput(\n    \
-      \    trading_strategy=\"\",\n        trade_recommendations=\"\",\n        expected_returns=0.0,\n\
+      \n\nclass AnalyzeMarketTrendsOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ analyze_market_trends node outputs.\"\"\"\n    trend_indicators: List[float]\
+      \ = Field(..., description=\"Indicators showing the direction and strength of\
+      \ market trends\")\n    pattern_recognition_results: List[str] = Field(...,\
+      \ description=\"Results of pattern recognition analysis\")\n\n\nclass IdentifyTradingOpportunitiesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for identify_trading_opportunities node outputs.\"\
+      \"\"\n    buy_signals: List[str] = Field(..., description=\"List of assets to\
+      \ buy\")\n    sell_signals: List[str] = Field(..., description=\"List of assets\
+      \ to sell\")\n\n\nclass GenerateTradingSignalsOutput(BaseModel):\n    \"\"\"\
+      Pydantic model for generate_trading_signals node outputs.\"\"\"\n    trading_signals:\
+      \ List[str] = Field(..., description=\"Final list of trading signals (buy or\
+      \ sell)\")\n    signal_confidence: List[float] = Field(..., description=\"Confidence\
+      \ level for each trading signal\")\n\n\ndef generate_trading_signals(analyze_market_trends_input:\
+      \ AnalyzeMarketTrendsOutput, identify_trading_opportunities_input: IdentifyTradingOpportunitiesOutput,\
+      \ **kwargs) -> GenerateTradingSignalsOutput:\n    \"\"\"\n    Generates final\
+      \ trading signals by combining trend analysis and opportunity\n    identification\
+      \ results.\n\n    Parameters\n    ----------\n    trend_indicators : List[float]\n\
+      \        Indicators showing the direction and strength of market trends from\n\
+      \        analyze_market_trends.\n    pattern_recognition_results : List[str]\n\
+      \        Results of pattern recognition analysis from analyze_market_trends.\n\
+      \    buy_signals : List[str]\n        List of assets to buy from identify_trading_opportunities.\n\
+      \    sell_signals : List[str]\n        List of assets to sell from identify_trading_opportunities.\n\
+      \n    Returns\n    -------\n    Tuple[List[str], List[float]]\n        A tuple\
+      \ containing the final list of trading signals and their\n        corresponding\
+      \ confidence levels.\n\n    Raises\n    ------\n    ValueError\n        If the\
+      \ input lists are of different lengths or if there are\n        conflicting\
+      \ signals.\n\n    Examples\n    --------\n    >>> trend_indicators = [0.8, 0.2,\
+      \ 0.5]\n    >>> pattern_recognition_results = ['uptrend', 'downtrend', 'neutral']\n\
+      \    >>> buy_signals = ['asset1', 'asset3']\n    >>> sell_signals = ['asset2']\n\
+      \    >>> trading_signals, signal_confidence =\n    generate_trading_signals(trend_indicators,\
+      \ pattern_recognition_results,\n    buy_signals, sell_signals)\n    (['buy',\
+      \ 'sell', 'buy'], [0.9, 0.8, 0.6])\n\n    >>> trend_indicators = [0.4, 0.6]\n\
+      \    >>> pattern_recognition_results = ['neutral', 'uptrend']\n    >>> buy_signals\
+      \ = ['asset1']\n    >>> sell_signals = []\n    >>> trading_signals, signal_confidence\
+      \ =\n    generate_trading_signals(trend_indicators, pattern_recognition_results,\n\
+      \    buy_signals, sell_signals)\n    (['buy'], [0.7])\n\n    \"\"\"\n    return\
+      \ GenerateTradingSignalsOutput(\n        trading_signals=[],\n        signal_confidence=[],\n\
       \    )"
-    name: formulate_trading_strategy
+    name: generate_trading_signals
     nodes_depended_on:
-    - evaluate_risk_factors
     - analyze_market_trends
-    nodes_dependent_on: []
+    - identify_trading_opportunities
+    nodes_dependent_on:
+    - execute_trades
     output_structure:
-    - description: Description of the formulated trading strategy
-      key: trading_strategy
-      type: str
-    - description: List of recommended trades based on the strategy
-      key: trade_recommendations
-      type: str
-    - description: Expected returns for the recommended trades
-      key: expected_returns
-      type: float
+    - description: Final list of trading signals (buy or sell)
+      key: trading_signals
+      type: List[str]
+    - description: Confidence level for each trading signal
+      key: signal_confidence
+      type: List[float]
     prd:
-      conceptual_info: This node formulates a trading strategy based on the analysis
-        of market trends and evaluation of risk factors, aiming to optimize returns
-        while managing risk.
+      conceptual_info: This node integrates trend analysis and opportunity identification
+        to produce actionable trading signals.
       docstring:
         examples:
         - lines:
-          - trend_indicators = [0.5, 0.7]
-          - pattern_alerts = ['bullish', 'bearish']
-          - trading_opportunities = ['buy AAPL', 'sell GOOGL']
-          - risk_scores = [0.3, 0.6]
-          - volatility_measures = [0.2, 0.4]
-          - liquidity_assessments = ['high', 'low']
-          - formulate_trading_strategy(trend_indicators, pattern_alerts, trading_opportunities,
-            risk_scores, volatility_measures, liquidity_assessments)
-          output: '{''trading_strategy'': ''Optimize returns by diversifying portfolio.'',
-            ''trade_recommendations'': [''buy AAPL'', ''sell GOOGL''], ''expected_returns'':
-            [0.1, -0.05]}'
+          - trend_indicators = [0.8, 0.2, 0.5]
+          - pattern_recognition_results = ['uptrend', 'downtrend', 'neutral']
+          - buy_signals = ['asset1', 'asset3']
+          - sell_signals = ['asset2']
+          - trading_signals, signal_confidence = generate_trading_signals(trend_indicators,
+            pattern_recognition_results, buy_signals, sell_signals)
+          output: (['buy', 'sell', 'buy'], [0.9, 0.8, 0.6])
+        - lines:
+          - trend_indicators = [0.4, 0.6]
+          - pattern_recognition_results = ['neutral', 'uptrend']
+          - buy_signals = ['asset1']
+          - sell_signals = []
+          - trading_signals, signal_confidence = generate_trading_signals(trend_indicators,
+            pattern_recognition_results, buy_signals, sell_signals)
+          output: (['buy'], [0.7])
         parameters:
-        - description: Indicators showing the strength and direction of market trends
-            from 'analyze_market_trends' node.
+        - description: Indicators showing the direction and strength of market trends
+            from analyze_market_trends.
           name: trend_indicators
           type: List[float]
-        - description: Alerts for detected patterns that could affect trading decisions
-            from 'analyze_market_trends' node.
-          name: pattern_alerts
+        - description: Results of pattern recognition analysis from analyze_market_trends.
+          name: pattern_recognition_results
           type: List[str]
-        - description: List of potential trading opportunities based on trend analysis
-            from 'analyze_market_trends' node.
-          name: trading_opportunities
+        - description: List of assets to buy from identify_trading_opportunities.
+          name: buy_signals
           type: List[str]
-        - description: Risk scores for each potential trade from 'evaluate_risk_factors'
-            node.
-          name: risk_scores
-          type: List[float]
-        - description: Measures of volatility for the assets involved in potential
-            trades from 'evaluate_risk_factors' node.
-          name: volatility_measures
-          type: List[float]
-        - description: Assessments of liquidity for the assets involved in potential
-            trades from 'evaluate_risk_factors' node.
-          name: liquidity_assessments
+        - description: List of assets to sell from identify_trading_opportunities.
+          name: sell_signals
           type: List[str]
         raises:
-        - description: If any of the input lists are empty or inconsistent.
+        - description: If the input lists are of different lengths or if there are
+            conflicting signals.
           type: ValueError
         returns:
-          description: A dictionary containing the formulated trading strategy, list
-            of recommended trades, and their expected returns.
-          type: '{''trading_strategy'': str, ''trade_recommendations'': List[str],
-            ''expected_returns'': List[float]}'
-        summary: Formulate a trading strategy based on market analysis and risk evaluation.
-    prompt: Develop a trading strategy that optimizes returns while managing risk,
-      based on the analyzed trends and risk factors.
+          description: A tuple containing the final list of trading signals and their
+            corresponding confidence levels.
+          type: Tuple[List[str], List[float]]
+        summary: Generates final trading signals by combining trend analysis and opportunity
+          identification results.
+    prompt: Generate trading signals based on the analyzed trends and identified opportunities.
     shims: []
-  monitor_trade_performance:
+  identify_trading_opportunities:
     agent: false
     code_node_type: stub
-    description: Monitor the performance of executed trades
+    description: Use the gathered data to identify potential buy or sell signals.
     implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass ExecuteTradesOutput(BaseModel):\n    \"\"\"Pydantic model for execute_trades\
-      \ node outputs.\"\"\"\n    trade_execution_status: List[str] = Field(..., description=\"\
-      Status of each trade execution (e.g., success, failed, pending)\")\n    trade_execution_timestamps:\
-      \ List[str] = Field(..., description=\"Timestamps for when each trade was executed\"\
-      )\n    trade_details: List[str] = Field(..., description=\"Details of the executed\
-      \ trades, including assets, quantities, and prices\")\n\n\nclass MonitorTradePerformanceOutput(BaseModel):\n\
-      \    \"\"\"Pydantic model for monitor_trade_performance node outputs.\"\"\"\n\
-      \    trade_performance_metrics: List[float] = Field(..., description=\"Metrics\
-      \ evaluating the performance of the executed trades (e.g., returns, Sharpe ratio)\"\
-      )\n    portfolio_value: float = Field(..., description=\"Current value of the\
-      \ portfolio after executing trades\")\n    risk_exposure: float = Field(...,\
-      \ description=\"Current risk exposure of the portfolio\")\n\n\ndef monitor_trade_performance(execute_trades_input:\
-      \ ExecuteTradesOutput, **kwargs) -> MonitorTradePerformanceOutput:\n    \"\"\
-      \"Monitor the performance of executed trades\n\n    Args:\n        execute_trades_input:\
-      \ Input from the 'execute_trades' node.\n        **kwargs: Additional keyword\
-      \ arguments.\n\n    Returns:\n        MonitorTradePerformanceOutput: Object\
-      \ containing outputs for this node.\n    \"\"\"\n    # TODO: Implement this\
-      \ function\n\n    # Return stub output with placeholder values\n    return MonitorTradePerformanceOutput(\n\
-      \        trade_performance_metrics=[],\n        portfolio_value=0.0,\n     \
-      \   risk_exposure=0.0,\n    )"
-    name: monitor_trade_performance
+      \n\nclass GatherMarketDataOutput(BaseModel):\n    \"\"\"Pydantic model for gather_market_data\
+      \ node outputs.\"\"\"\n    current_prices: List[float] = Field(..., description=\"\
+      Current prices of relevant assets\")\n    historical_prices: List[float] = Field(...,\
+      \ description=\"Historical price data for relevant assets\")\n    market_volumes:\
+      \ List[float] = Field(..., description=\"Current trading volumes of relevant\
+      \ assets\")\n\n\nclass IdentifyTradingOpportunitiesOutput(BaseModel):\n    \"\
+      \"\"Pydantic model for identify_trading_opportunities node outputs.\"\"\"\n\
+      \    buy_signals: List[str] = Field(..., description=\"List of assets to buy\"\
+      )\n    sell_signals: List[str] = Field(..., description=\"List of assets to\
+      \ sell\")\n\n\ndef identify_trading_opportunities(gather_market_data_input:\
+      \ GatherMarketDataOutput, **kwargs) -> IdentifyTradingOpportunitiesOutput:\n\
+      \    \"\"\"\n    Identify potential trading opportunities based on the analyzed\
+      \ market data,\n    generating lists of assets to buy or sell.\n\n    Parameters\n\
+      \    ----------\n    current_prices : List[float]\n        Current prices of\
+      \ relevant assets gathered from various market\n        sources.\n    historical_prices\
+      \ : List[float]\n        Historical price data for relevant assets used to analyze\
+      \ trends and\n        patterns.\n    market_volumes : List[float]\n        Current\
+      \ trading volumes of relevant assets, indicating market\n        activity and\
+      \ liquidity.\n\n    Returns\n    -------\n    {'buy_signals': List[str], 'sell_signals':\
+      \ List[str]}\n        A dictionary containing two lists: 'buy_signals' for assets\
+      \ to buy\n        and 'sell_signals' for assets to sell.\n\n    Raises\n   \
+      \ ------\n    ValueError\n        If any of the input lists (current_prices,\
+      \ historical_prices,\n        market_volumes) are empty or inconsistent in length.\n\
+      \n    Examples\n    --------\n    >>> current_prices = [100.0, 200.0, 300.0]\n\
+      \    >>> historical_prices = [90.0, 210.0, 290.0]\n    >>> market_volumes =\
+      \ [1000.0, 2000.0, 3000.0]\n    >>> result = identify_trading_opportunities(current_prices,\n\
+      \    historical_prices, market_volumes)\n    {'buy_signals': ['Asset1', 'Asset3'],\
+      \ 'sell_signals': ['Asset2']}\n\n    >>> current_prices = [150.0, 250.0, 350.0]\n\
+      \    >>> historical_prices = [140.0, 260.0, 340.0]\n    >>> market_volumes =\
+      \ [1500.0, 2500.0, 3500.0]\n    >>> result = identify_trading_opportunities(current_prices,\n\
+      \    historical_prices, market_volumes)\n    {'buy_signals': ['Asset2'], 'sell_signals':\
+      \ ['Asset1', 'Asset3']}\n\n    \"\"\"\n    return IdentifyTradingOpportunitiesOutput(\n\
+      \        buy_signals=[],\n        sell_signals=[],\n    )"
+    name: identify_trading_opportunities
     nodes_depended_on:
-    - execute_trades
-    nodes_dependent_on: []
+    - gather_market_data
+    nodes_dependent_on:
+    - generate_trading_signals
     output_structure:
-    - description: Metrics evaluating the performance of the executed trades (e.g.,
-        returns, Sharpe ratio)
-      key: trade_performance_metrics
-      type: List[float]
-    - description: Current value of the portfolio after executing trades
-      key: portfolio_value
-      type: float
-    - description: Current risk exposure of the portfolio
-      key: risk_exposure
-      type: float
+    - description: List of assets to buy
+      key: buy_signals
+      type: List[str]
+    - description: List of assets to sell
+      key: sell_signals
+      type: List[str]
     prd:
-      conceptual_info: This node analyzes the performance of executed trades, assessing
-        their impact on the portfolio's value and risk exposure.
+      conceptual_info: This node analyzes the gathered market data to identify potential
+        trading opportunities, determining which assets to buy or sell.
       docstring:
         examples:
         - lines:
-          - trade_execution_status = ['success', 'success']
-          - trade_execution_timestamps = ['2023-01-01 12:00:00', '2023-01-02 12:00:00']
-          - trade_details = ['asset1,100,100.0', 'asset2,50,50.0']
-          - monitor_trade_performance(trade_execution_status, trade_execution_timestamps,
-            trade_details)
-          output: '{''trade_performance_metrics'': [0.05, 0.03], ''portfolio_value'':
-            10500.0, ''risk_exposure'': 0.02}'
+          - current_prices = [100.0, 200.0, 300.0]
+          - historical_prices = [90.0, 210.0, 290.0]
+          - market_volumes = [1000.0, 2000.0, 3000.0]
+          - result = identify_trading_opportunities(current_prices, historical_prices,
+            market_volumes)
+          output: '{''buy_signals'': [''Asset1'', ''Asset3''], ''sell_signals'': [''Asset2'']}'
+        - lines:
+          - current_prices = [150.0, 250.0, 350.0]
+          - historical_prices = [140.0, 260.0, 340.0]
+          - market_volumes = [1500.0, 2500.0, 3500.0]
+          - result = identify_trading_opportunities(current_prices, historical_prices,
+            market_volumes)
+          output: '{''buy_signals'': [''Asset2''], ''sell_signals'': [''Asset1'',
+            ''Asset3'']}'
         parameters:
-        - description: Status of each trade execution (e.g., success, failed, pending)
-            from the execute_trades node
-          name: trade_execution_status
-          type: List[str]
-        - description: Timestamps for when each trade was executed from the execute_trades
-            node
-          name: trade_execution_timestamps
-          type: List[str]
-        - description: Details of the executed trades, including assets, quantities,
-            and prices from the execute_trades node
-          name: trade_details
-          type: List[str]
+        - description: Current prices of relevant assets gathered from various market
+            sources.
+          name: current_prices
+          type: List[float]
+        - description: Historical price data for relevant assets used to analyze trends
+            and patterns.
+          name: historical_prices
+          type: List[float]
+        - description: Current trading volumes of relevant assets, indicating market
+            activity and liquidity.
+          name: market_volumes
+          type: List[float]
         raises:
-        - description: If trade execution status, timestamps, or details are inconsistent
-            or missing.
+        - description: If any of the input lists (current_prices, historical_prices,
+            market_volumes) are empty or inconsistent in length.
           type: ValueError
         returns:
-          description: A dictionary containing trade performance metrics, portfolio
-            value, and risk exposure.
-          type: dict
-        summary: Monitor the performance of executed trades, calculating key metrics
-          and assessing portfolio impact.
-    prompt: Track the performance of the executed trades, analyzing their impact on
-      portfolio value and risk exposure.
+          description: 'A dictionary containing two lists: ''buy_signals'' for assets
+            to buy and ''sell_signals'' for assets to sell.'
+          type: '{''buy_signals'': List[str], ''sell_signals'': List[str]}'
+        summary: Identify potential trading opportunities based on the analyzed market
+          data, generating lists of assets to buy or sell.
+    prompt: Identify potential trading opportunities based on the analyzed market
+      data.
     shims: []

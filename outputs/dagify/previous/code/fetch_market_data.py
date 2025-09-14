@@ -4,38 +4,36 @@ from typing import List
 
 class FetchMarketDataOutput(BaseModel):
     """Pydantic model for fetch_market_data node outputs."""
-    market_prices: List[float] = Field(..., description="List of current market prices for various assets")
-    market_volumes: List[int] = Field(..., description="List of current market volumes for various assets")
-    market_timestamps: List[str] = Field(..., description="Timestamps for when the market data was last updated")
+    current_prices: List[float] = Field(..., description="List of current stock prices.")
+    historical_data: List[float] = Field(..., description="2D list of historical stock prices and volumes.")
 
 
 def fetch_market_data(general_input: str, **kwargs) -> FetchMarketDataOutput:
     """
-    Fetches and returns current market data, including prices, volumes, and
-    update timestamps.
+    Fetches current and historical market data, returning current stock prices
+    and historical data.
 
     Returns
     -------
-    dict
-        Dictionary containing market prices (List[float]), market volumes
-        (List[int]), and market timestamps (List[str]).
+    {'current_prices': List[float], 'historical_data': List[List[float]]}
+        A dictionary containing the list of current stock prices and a 2D
+        list of historical stock prices and volumes.
 
     Raises
     ------
     ConnectionError
-        If unable to connect to market data sources.
+        If there's a failure in connecting to the market data source.
     DataError
         If the fetched data is malformed or incomplete.
 
     Examples
     --------
     >>> fetch_market_data()
-    {'market_prices': [123.45, 67.89], 'market_volumes': [1000, 500],
-    'market_timestamps': ['2023-04-01 12:00:00', '2023-04-01 12:00:00']}
+    {'current_prices': [100.5, 200.2], 'historical_data': [[100, 1000], [101,
+    1200]]}
 
     """
     return FetchMarketDataOutput(
-        market_prices=[],
-        market_volumes=[],
-        market_timestamps=[],
+        current_prices=[],
+        historical_data=[],
     )

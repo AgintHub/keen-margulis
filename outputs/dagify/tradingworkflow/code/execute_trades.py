@@ -4,16 +4,28 @@ from typing import List
 
 class FormulateTradingStrategyOutput(BaseModel):
     """Pydantic model for formulate_trading_strategy node outputs."""
-    trading_strategy: str = Field(..., description="Description of the formulated trading strategy")
-    trade_recommendations: str = Field(..., description="List of recommended trades based on the strategy")
-    expected_returns: float = Field(..., description="Expected returns for the recommended trades")
+    trading_strategy: str = (
+        Field(..., description="Description of the formulated trading strategy")
+    )
+    trade_recommendations: str = (
+        Field(..., description="List of recommended trades based on the strategy")
+    )
+    expected_returns: float = (
+        Field(..., description="Expected returns for the recommended trades")
+    )
 
 
 class ExecuteTradesOutput(BaseModel):
     """Pydantic model for execute_trades node outputs."""
-    trade_execution_status: List[str] = Field(..., description="Status of each trade execution (e.g., success, failed, pending)")
-    trade_execution_timestamps: List[str] = Field(..., description="Timestamps for when each trade was executed")
-    trade_details: List[str] = Field(..., description="Details of the executed trades, including assets, quantities, and prices")
+    trade_execution_status: List[str] = (
+        Field(..., description="Status of each trade execution (e.g., success, failed, pending)")
+    )
+    trade_execution_timestamps: List[str] = (
+        Field(..., description="Timestamps for when each trade was executed")
+    )
+    trade_details: List[str] = (
+        Field(..., description="Details of the executed trades, including assets, quantities, and prices")
+    )
 
 
 def execute_trades(formulate_trading_strategy_input: FormulateTradingStrategyOutput, **kwargs) -> ExecuteTradesOutput:

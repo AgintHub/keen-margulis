@@ -4,59 +4,64 @@ from typing import List
 
 class FetchMarketDataOutput(BaseModel):
     """Pydantic model for fetch_market_data node outputs."""
-    market_prices: List[float] = Field(..., description="List of current market prices for various assets")
-    market_volumes: List[int] = Field(..., description="List of current market volumes for various assets")
-    market_timestamps: List[str] = Field(..., description="Timestamps for when the market data was last updated")
+    market_prices: List[float] = (
+        Field(..., description="List of current market prices.")
+    )
+    market_volumes: List[int] = (
+        Field(..., description="List of current market volumes.")
+    )
 
 
 class AnalyzeMarketTrendsOutput(BaseModel):
     """Pydantic model for analyze_market_trends node outputs."""
-    trend_indicators: List[float] = Field(..., description="Indicators showing the strength and direction of market trends")
-    pattern_alerts: List[str] = Field(..., description="Alerts for detected patterns that could affect trading decisions")
-    trading_opportunities: List[str] = Field(..., description="List of potential trading opportunities based on trend analysis")
+    trend_directions: List[str] = (
+        Field(..., description="List of trend directions (up, down, stable).")
+    )
+    trend_strengths: List[float] = (
+        Field(..., description="List of trend strengths.")
+    )
 
 
 def analyze_market_trends(fetch_market_data_input: FetchMarketDataOutput, **kwargs) -> AnalyzeMarketTrendsOutput:
     """
-    Analyze market data to identify trends, patterns, and potential trading
-    opportunities.
+    Analyzes market trends based on fetched market data, producing trend
+    directions and strengths.
 
     Parameters
     ----------
     market_prices : List[float]
-        List of current market prices for various assets fetched from
-        reliable sources.
+        List of current market prices fetched from reliable sources.
     market_volumes : List[int]
-        List of current market volumes for various assets fetched from
-        reliable sources.
-    market_timestamps : List[str]
-        Timestamps for when the market data was last updated.
+        List of current market volumes fetched from reliable sources.
 
     Returns
     -------
-    dict
-        A dictionary containing trend indicators, pattern alerts, and
-        trading opportunities.
+    Tuple[List[str], List[float]]
+        A tuple containing a list of trend directions (up, down, stable) and
+        a list of corresponding trend strengths.
 
     Raises
     ------
     ValueError
-        If any of the input lists (market_prices, market_volumes,
-        market_timestamps) are empty or of different lengths.
+        If the input lists (market_prices, market_volumes) are of different
+        lengths or empty.
 
     Examples
     --------
     >>> market_prices = [100.0, 120.0, 110.0]
     >>> market_volumes = [1000, 1200, 1100]
-    >>> market_timestamps = ['2023-01-01', '2023-01-02', '2023-01-03']
-    >>> result = analyze_market_trends(market_prices, market_volumes,
-    market_timestamps)
-    {'trend_indicators': [0.5, 0.2], 'pattern_alerts': ['Bullish'],
-    'trading_opportunities': ['Buy']}
+    >>> trend_directions, trend_strengths = analyze_market_trends(market_prices,
+    market_volumes)
+    (['up', 'down', 'stable'], [0.8, 0.4, 0.1])
+
+    >>> market_prices = [50.0, 55.0, 60.0]
+    >>> market_volumes = [500, 550, 600]
+    >>> trend_directions, trend_strengths = analyze_market_trends(market_prices,
+    market_volumes)
+    (['up', 'up', 'up'], [0.9, 0.95, 1.0])
 
     """
     return AnalyzeMarketTrendsOutput(
-        trend_indicators=[],
-        pattern_alerts=[],
-        trading_opportunities=[],
+        trend_directions=[],
+        trend_strengths=[],
     )

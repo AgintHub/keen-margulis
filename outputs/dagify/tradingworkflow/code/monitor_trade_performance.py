@@ -4,16 +4,28 @@ from typing import List
 
 class ExecuteTradesOutput(BaseModel):
     """Pydantic model for execute_trades node outputs."""
-    trade_execution_status: List[str] = Field(..., description="Status of each trade execution (e.g., success, failed, pending)")
-    trade_execution_timestamps: List[str] = Field(..., description="Timestamps for when each trade was executed")
-    trade_details: List[str] = Field(..., description="Details of the executed trades, including assets, quantities, and prices")
+    trade_execution_status: List[str] = (
+        Field(..., description="Status of each trade execution (e.g., success, failed, pending)")
+    )
+    trade_execution_timestamps: List[str] = (
+        Field(..., description="Timestamps for when each trade was executed")
+    )
+    trade_details: List[str] = (
+        Field(..., description="Details of the executed trades, including assets, quantities, and prices")
+    )
 
 
 class MonitorTradePerformanceOutput(BaseModel):
     """Pydantic model for monitor_trade_performance node outputs."""
-    trade_performance_metrics: List[float] = Field(..., description="Metrics evaluating the performance of the executed trades (e.g., returns, Sharpe ratio)")
-    portfolio_value: float = Field(..., description="Current value of the portfolio after executing trades")
-    risk_exposure: float = Field(..., description="Current risk exposure of the portfolio")
+    trade_performance_metrics: List[float] = (
+        Field(..., description="Metrics evaluating the performance of the executed trades (e.g., returns, Sharpe ratio)")
+    )
+    portfolio_value: float = (
+        Field(..., description="Current value of the portfolio after executing trades")
+    )
+    risk_exposure: float = (
+        Field(..., description="Current risk exposure of the portfolio")
+    )
 
 
 def monitor_trade_performance(execute_trades_input: ExecuteTradesOutput, **kwargs) -> MonitorTradePerformanceOutput:

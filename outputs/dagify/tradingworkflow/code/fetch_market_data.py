@@ -4,38 +4,41 @@ from typing import List
 
 class FetchMarketDataOutput(BaseModel):
     """Pydantic model for fetch_market_data node outputs."""
-    market_prices: List[float] = Field(..., description="List of current market prices for various assets")
-    market_volumes: List[int] = Field(..., description="List of current market volumes for various assets")
-    market_timestamps: List[str] = Field(..., description="Timestamps for when the market data was last updated")
+    market_prices: List[float] = (
+        Field(..., description="List of current market prices.")
+    )
+    market_volumes: List[int] = (
+        Field(..., description="List of current market volumes.")
+    )
 
 
 def fetch_market_data(general_input: str, **kwargs) -> FetchMarketDataOutput:
     """
-    Fetches and returns current market data, including prices, volumes, and
-    update timestamps.
+    Retrieve current market data, including prices and volumes, from reliable
+    sources.
 
     Returns
     -------
-    dict
-        Dictionary containing market prices (List[float]), market volumes
-        (List[int]), and market timestamps (List[str]).
+    Tuple[List[float], List[int]]
+        A tuple containing a list of current market prices and a list of
+        current market volumes.
 
     Raises
     ------
     ConnectionError
-        If unable to connect to market data sources.
+        If there's a failure connecting to the market data source.
     DataError
-        If the fetched data is malformed or incomplete.
+        If the retrieved data is malformed or incomplete.
 
     Examples
     --------
-    >>> fetch_market_data()
-    {'market_prices': [123.45, 67.89], 'market_volumes': [1000, 500],
-    'market_timestamps': ['2023-04-01 12:00:00', '2023-04-01 12:00:00']}
+    >>> market_data = fetch_market_data()
+    >>> prices, volumes = market_data['market_prices'],
+    market_data['market_volumes']
+    {'market_prices': [12.5, 13.2, 11.8], 'market_volumes': [100, 200, 150]}
 
     """
     return FetchMarketDataOutput(
         market_prices=[],
         market_volumes=[],
-        market_timestamps=[],
     )
