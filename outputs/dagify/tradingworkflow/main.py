@@ -8,9 +8,9 @@ from typing import Dict, Any, List, Callable, Coroutine, Union, Optional
 
 from code.fetch_market_data import fetch_market_data
 from code.analyze_market_trends import analyze_market_trends
-from code.assess_risk import assess_risk
-from code.determine_trade_signals import determine_trade_signals
-from code.execute_trade import execute_trade
+from code.generate_trade_signals import generate_trade_signals
+from code.execute_trades import execute_trades
+from code.monitor_trade_performance import monitor_trade_performance
 
 # Get async mode from environment variable or default to False
 ASYNC_MODE = os.environ.get('ASYNC_MODE', '').lower() in ('true', '1', 'yes', 'y')
@@ -34,9 +34,9 @@ def make_async(func):
 
 fetch_market_data_async = make_async(fetch_market_data)
 analyze_market_trends_async = make_async(analyze_market_trends)
-assess_risk_async = make_async(assess_risk)
-determine_trade_signals_async = make_async(determine_trade_signals)
-execute_trade_async = make_async(execute_trade)
+generate_trade_signals_async = make_async(generate_trade_signals)
+execute_trades_async = make_async(execute_trades)
+monitor_trade_performance_async = make_async(monitor_trade_performance)
 
 async def run_workflow(user_input: str) -> Dict[str, Any]:
     """Execute the workflow by running each level in the topological sort.
@@ -58,35 +58,37 @@ async def run_workflow(user_input: str) -> Dict[str, Any]:
     # Run level 0 nodes in parallel
     results['fetch_market_data'] = await run_fetch_market_data()
 
-    # Level 1: analyze_market_trends, assess_risk
+    # Level 1: analyze_market_trends
     async def run_analyze_market_trends():
         # Call the async version of analyze_market_trends with results from dependencies
         return await analyze_market_trends_async(results['fetch_market_data'])
 
-    async def run_assess_risk():
-        # Call the async version of assess_risk with results from dependencies
-        return await assess_risk_async(results['fetch_market_data'])
-
     # Run level 1 nodes in parallel
-    level_1_results = await asyncio.gather(run_analyze_market_trends(), run_assess_risk())
-    results['analyze_market_trends'] = level_1_results[0]
-    results['assess_risk'] = level_1_results[1]
+    results['analyze_market_trends'] = await run_analyze_market_trends()
 
-    # Level 2: determine_trade_signals
-    async def run_determine_trade_signals():
-        # Call the async version of determine_trade_signals with results from dependencies
-        return await determine_trade_signals_async(results['analyze_market_trends'], results['assess_risk'])
+    # Level 2: generate_trade_signals
+    async def run_generate_trade_signals():
+        # Call the async version of generate_trade_signals with results from dependencies
+        return await generate_trade_signals_async(results['analyze_market_trends'])
 
     # Run level 2 nodes in parallel
-    results['determine_trade_signals'] = await run_determine_trade_signals()
+    results['generate_trade_signals'] = await run_generate_trade_signals()
 
-    # Level 3: execute_trade
-    async def run_execute_trade():
-        # Call the async version of execute_trade with results from dependencies
-        return await execute_trade_async(results['determine_trade_signals'])
+    # Level 3: execute_trades
+    async def run_execute_trades():
+        # Call the async version of execute_trades with results from dependencies
+        return await execute_trades_async(results['generate_trade_signals'])
 
     # Run level 3 nodes in parallel
-    results['execute_trade'] = await run_execute_trade()
+    results['execute_trades'] = await run_execute_trades()
+
+    # Level 4: monitor_trade_performance
+    async def run_monitor_trade_performance():
+        # Call the async version of monitor_trade_performance with results from dependencies
+        return await monitor_trade_performance_async(results['execute_trades'])
+
+    # Run level 4 nodes in parallel
+    results['monitor_trade_performance'] = await run_monitor_trade_performance()
 
     # Return all results
     return results

@@ -1,358 +1,1784 @@
-dag_type: stub
-description: A workflow for creating and managing trades, including market data analysis
-  and risk assessment.
+dag_type: shim
+description: Execute a trading workflow involving market data analysis, trade signal
+  generation, and trade execution
 name: tradingworkflow
 nodes:
   analyze_market_trends:
     agent: false
-    code_node_type: stub
-    description: Analyze market trends based on the fetched market data.
-    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass FetchMarketDataOutput(BaseModel):\n    \"\"\"Pydantic model for fetch_market_data\
+    code_node_type: shim
+    description: Analyze market trends using historical data and technical indicators
+    implementation: "from ._analyze_market_trends.validate_market_data import validate_market_data\n\
+      from ._analyze_market_trends.calculate_technical_indicators import calculate_technical_indicators\n\
+      from ._analyze_market_trends.determine_trend_directions import determine_trend_directions\n\
+      from ._analyze_market_trends.normalize_trend_indicators import normalize_trend_indicators\n\
+      \nfrom pydantic import BaseModel, Field\nfrom typing import List\n\n\nclass\
+      \ FetchMarketDataOutput(BaseModel):\n    \"\"\"Pydantic model for fetch_market_data\
       \ node outputs.\"\"\"\n    market_prices: List[float] = (\n        Field(...,\
-      \ description=\"List of current market prices.\")\n    )\n    market_volumes:\
-      \ List[int] = (\n        Field(..., description=\"List of current market volumes.\"\
+      \ description=\"List of current market prices\")\n    )\n    market_volumes:\
+      \ List[int] = (\n        Field(..., description=\"List of current market volumes\"\
       )\n    )\n\n\nclass AnalyzeMarketTrendsOutput(BaseModel):\n    \"\"\"Pydantic\
-      \ model for analyze_market_trends node outputs.\"\"\"\n    trend_directions:\
-      \ List[str] = (\n        Field(..., description=\"List of trend directions (up,\
-      \ down, stable).\")\n    )\n    trend_strengths: List[float] = (\n        Field(...,\
-      \ description=\"List of trend strengths.\")\n    )\n\n\ndef analyze_market_trends(fetch_market_data_input:\
+      \ model for analyze_market_trends node outputs.\"\"\"\n    trend_indicators:\
+      \ List[float] = (\n        Field(..., description=\"List of trend indicators\"\
+      )\n    )\n    trend_directions: List[str] = (\n        Field(..., description=\"\
+      List of trend directions (up, down, neutral)\")\n    )\n\n\ndef analyze_market_trends(fetch_market_data_input:\
       \ FetchMarketDataOutput, **kwargs) -> AnalyzeMarketTrendsOutput:\n    \"\"\"\
-      \n    Analyzes market trends based on fetched market data, producing trend\n\
-      \    directions and strengths.\n\n    Parameters\n    ----------\n    market_prices\
-      \ : List[float]\n        List of current market prices fetched from reliable\
-      \ sources.\n    market_volumes : List[int]\n        List of current market volumes\
-      \ fetched from reliable sources.\n\n    Returns\n    -------\n    Tuple[List[str],\
-      \ List[float]]\n        A tuple containing a list of trend directions (up, down,\
-      \ stable) and\n        a list of corresponding trend strengths.\n\n    Raises\n\
-      \    ------\n    ValueError\n        If the input lists (market_prices, market_volumes)\
-      \ are of different\n        lengths or empty.\n\n    Examples\n    --------\n\
+      \n    Analyze market trends using historical data and technical indicators.\n\
+      \n    Parameters\n    ----------\n    market_prices : List[float]\n        List\
+      \ of current market prices from fetch_market_data node.\n    market_volumes\
+      \ : List[int]\n        List of current market volumes from fetch_market_data\
+      \ node.\n\n    Returns\n    -------\n    Tuple[List[float], List[str]]\n   \
+      \     A tuple containing a list of trend indicators and a list of trend\n  \
+      \      directions.\n\n    Raises\n    ------\n    ValueError\n        If market_prices\
+      \ or market_volumes are empty or malformed.\n\n    Examples\n    --------\n\
       \    >>> market_prices = [100.0, 120.0, 110.0]\n    >>> market_volumes = [1000,\
-      \ 1200, 1100]\n    >>> trend_directions, trend_strengths = analyze_market_trends(market_prices,\n\
-      \    market_volumes)\n    (['up', 'down', 'stable'], [0.8, 0.4, 0.1])\n\n  \
-      \  >>> market_prices = [50.0, 55.0, 60.0]\n    >>> market_volumes = [500, 550,\
-      \ 600]\n    >>> trend_directions, trend_strengths = analyze_market_trends(market_prices,\n\
-      \    market_volumes)\n    (['up', 'up', 'up'], [0.9, 0.95, 1.0])\n\n    \"\"\
-      \"\n    return AnalyzeMarketTrendsOutput(\n        trend_directions=[],\n  \
-      \      trend_strengths=[],\n    )"
+      \ 1200, 1100]\n    >>> trend_indicators, trend_directions =\n    analyze_market_trends(market_prices,\
+      \ market_volumes)\n    ([1.2, 0.9, 1.1], ['up', 'down', 'up'])\n\n    \"\"\"\
+      \n    validated_data: dict = validate_market_data(prices=fetch_market_data_input.market_prices,\
+      \ volumes=fetch_market_data_input.market_volumes)\n    \n    technical_indicators:\
+      \ List[float] = calculate_technical_indicators(prices=fetch_market_data_input.market_prices,\
+      \ volumes=fetch_market_data_input.market_volumes)\n    \n    trend_signals:\
+      \ List[str] = determine_trend_directions(indicators=technical_indicators, prices=fetch_market_data_input.market_prices)\n\
+      \    \n    normalized_indicators: List[float] = normalize_trend_indicators(raw_indicators=technical_indicators)\n\
+      \    \n    return AnalyzeMarketTrendsOutput(\n        trend_indicators=normalized_indicators,\n\
+      \        trend_directions=trend_signals\n    )"
     name: analyze_market_trends
     nodes_depended_on:
     - fetch_market_data
-    nodes_dependent_on:
-    - determine_trade_signals
-    output_structure:
-    - description: List of trend directions (up, down, stable).
-      key: trend_directions
-      type: List[str]
-    - description: List of trend strengths.
-      key: trend_strengths
-      type: List[float]
-    prd:
-      conceptual_info: This node analyzes market trends by processing the fetched
-        market data, which includes current prices and volumes, to determine the direction
-        and strength of market trends.
-      docstring:
-        examples:
-        - lines:
-          - market_prices = [100.0, 120.0, 110.0]
-          - market_volumes = [1000, 1200, 1100]
-          - trend_directions, trend_strengths = analyze_market_trends(market_prices,
-            market_volumes)
-          output: (['up', 'down', 'stable'], [0.8, 0.4, 0.1])
-        - lines:
-          - market_prices = [50.0, 55.0, 60.0]
-          - market_volumes = [500, 550, 600]
-          - trend_directions, trend_strengths = analyze_market_trends(market_prices,
-            market_volumes)
-          output: (['up', 'up', 'up'], [0.9, 0.95, 1.0])
-        parameters:
-        - description: List of current market prices fetched from reliable sources.
-          name: market_prices
-          type: List[float]
-        - description: List of current market volumes fetched from reliable sources.
-          name: market_volumes
-          type: List[int]
-        raises:
-        - description: If the input lists (market_prices, market_volumes) are of different
-            lengths or empty.
-          type: ValueError
-        returns:
-          description: A tuple containing a list of trend directions (up, down, stable)
-            and a list of corresponding trend strengths.
-          type: Tuple[List[str], List[float]]
-        summary: Analyzes market trends based on fetched market data, producing trend
-          directions and strengths.
-    prompt: Analyze the market trends using the fetched market data.
-    shims: []
-  assess_risk:
-    agent: false
-    code_node_type: stub
-    description: Assess the risk associated with potential trades based on market
-      data.
-    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass FetchMarketDataOutput(BaseModel):\n    \"\"\"Pydantic model for fetch_market_data\
-      \ node outputs.\"\"\"\n    market_prices: List[float] = (\n        Field(...,\
-      \ description=\"List of current market prices.\")\n    )\n    market_volumes:\
-      \ List[int] = (\n        Field(..., description=\"List of current market volumes.\"\
-      )\n    )\n\n\nclass AssessRiskOutput(BaseModel):\n    \"\"\"Pydantic model for\
-      \ assess_risk node outputs.\"\"\"\n    risk_levels: List[float] = (\n      \
-      \  Field(..., description=\"List of risk levels associated with potential trades.\"\
-      )\n    )\n\n\ndef assess_risk(fetch_market_data_input: FetchMarketDataOutput,\
-      \ **kwargs) -> AssessRiskOutput:\n    \"\"\"\n    Assess the risk levels of\
-      \ potential trades based on market prices and\n    volumes.\n\n    Parameters\n\
-      \    ----------\n    market_prices : List[float]\n        List of current market\
-      \ prices retrieved from `fetch_market_data`.\n    market_volumes : List[int]\n\
-      \        List of current market volumes retrieved from `fetch_market_data`.\n\
-      \n    Returns\n    -------\n    List[float]\n        List of risk levels associated\
-      \ with potential trades, ranging from 0\n        (low risk) to 1 (high risk).\n\
-      \n    Raises\n    ------\n    ValueError\n        If `market_prices` or `market_volumes`\
-      \ are empty or mismatched in\n        length.\n\n    Examples\n    --------\n\
-      \    >>> market_prices = [100.0, 120.0, 110.0]\n    >>> market_volumes = [1000,\
-      \ 1200, 1100]\n    >>> risk_levels = assess_risk(market_prices, market_volumes)\n\
-      \    [0.5, 0.6, 0.55]\n\n    >>> market_prices = [50.0, 40.0, 45.0]\n    >>>\
-      \ market_volumes = [500, 400, 450]\n    >>> risk_levels = assess_risk(market_prices,\
-      \ market_volumes)\n    [0.4, 0.3, 0.35]\n\n    \"\"\"\n    return AssessRiskOutput(\n\
-      \        risk_levels=[],\n    )"
-    name: assess_risk
-    nodes_depended_on:
-    - fetch_market_data
-    nodes_dependent_on:
-    - determine_trade_signals
-    output_structure:
-    - description: List of risk levels associated with potential trades.
-      key: risk_levels
-      type: List[float]
-    prd:
-      conceptual_info: This node assesses the risk associated with potential trades
-        based on the current market data fetched by its parent node, `fetch_market_data`.
-      docstring:
-        examples:
-        - lines:
-          - market_prices = [100.0, 120.0, 110.0]
-          - market_volumes = [1000, 1200, 1100]
-          - risk_levels = assess_risk(market_prices, market_volumes)
-          output: '[0.5, 0.6, 0.55]'
-        - lines:
-          - market_prices = [50.0, 40.0, 45.0]
-          - market_volumes = [500, 400, 450]
-          - risk_levels = assess_risk(market_prices, market_volumes)
-          output: '[0.4, 0.3, 0.35]'
-        parameters:
-        - description: List of current market prices retrieved from `fetch_market_data`.
-          name: market_prices
-          type: List[float]
-        - description: List of current market volumes retrieved from `fetch_market_data`.
-          name: market_volumes
-          type: List[int]
-        raises:
-        - description: If `market_prices` or `market_volumes` are empty or mismatched
-            in length.
-          type: ValueError
-        returns:
-          description: List of risk levels associated with potential trades, ranging
-            from 0 (low risk) to 1 (high risk).
-          type: List[float]
-        summary: Assess the risk levels of potential trades based on market prices
-          and volumes.
-    prompt: Assess the risk of potential trades using the market data.
-    shims: []
-  determine_trade_signals:
-    agent: false
-    code_node_type: stub
-    description: Determine trade signals based on market trend analysis and risk assessment.
-    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass AnalyzeMarketTrendsOutput(BaseModel):\n    \"\"\"Pydantic model for\
-      \ analyze_market_trends node outputs.\"\"\"\n    trend_directions: List[str]\
-      \ = (\n        Field(..., description=\"List of trend directions (up, down,\
-      \ stable).\")\n    )\n    trend_strengths: List[float] = (\n        Field(...,\
-      \ description=\"List of trend strengths.\")\n    )\n\n\nclass AssessRiskOutput(BaseModel):\n\
-      \    \"\"\"Pydantic model for assess_risk node outputs.\"\"\"\n    risk_levels:\
-      \ List[float] = (\n        Field(..., description=\"List of risk levels associated\
-      \ with potential trades.\")\n    )\n\n\nclass DetermineTradeSignalsOutput(BaseModel):\n\
-      \    \"\"\"Pydantic model for determine_trade_signals node outputs.\"\"\"\n\
-      \    trade_signals: List[str] = (\n        Field(..., description=\"List of\
-      \ trade signals (buy, sell, hold).\")\n    )\n\n\ndef determine_trade_signals(analyze_market_trends_input:\
-      \ AnalyzeMarketTrendsOutput, assess_risk_input: AssessRiskOutput, **kwargs)\
-      \ -> DetermineTradeSignalsOutput:\n    \"\"\"\n    Determines trade signals\
-      \ based on trend directions, trend strengths, and\n    risk levels.\n\n    Parameters\n\
-      \    ----------\n    trend_directions : List[str]\n        List of trend directions\
-      \ (up, down, stable) analyzed from market\n        data.\n    trend_strengths\
-      \ : List[float]\n        List of trend strengths indicating the magnitude of\
-      \ the trends.\n    risk_levels : List[float]\n        List of risk levels associated\
-      \ with potential trades.\n\n    Returns\n    -------\n    List[str]\n      \
-      \  List of trade signals (buy, sell, hold) generated based on the input\n  \
-      \      trend analysis and risk assessment.\n\n    Raises\n    ------\n    ValueError\n\
-      \        If the input lists (trend_directions, trend_strengths, risk_levels)\n\
-      \        are of different lengths.\n\n    Examples\n    --------\n    >>> trend_directions\
-      \ = ['up', 'down', 'stable']\n    >>> trend_strengths = [0.8, 0.4, 0.1]\n  \
-      \  >>> risk_levels = [0.2, 0.6, 0.3]\n    >>> trade_signals = determine_trade_signals(trend_directions,\n\
-      \    trend_strengths, risk_levels)\n    ['buy', 'sell', 'hold']\n\n    >>> trend_directions\
-      \ = ['up', 'up', 'down']\n    >>> trend_strengths = [0.9, 0.7, 0.3]\n    >>>\
-      \ risk_levels = [0.1, 0.2, 0.8]\n    >>> trade_signals = determine_trade_signals(trend_directions,\n\
-      \    trend_strengths, risk_levels)\n    ['buy', 'buy', 'sell']\n\n    \"\"\"\
-      \n    return DetermineTradeSignalsOutput(\n        trade_signals=[],\n    )"
-    name: determine_trade_signals
-    nodes_depended_on:
-    - analyze_market_trends
-    - assess_risk
-    nodes_dependent_on:
-    - execute_trade
-    output_structure:
-    - description: List of trade signals (buy, sell, hold).
-      key: trade_signals
-      type: List[str]
-    prd:
-      conceptual_info: This node determines the appropriate trade signals (buy, sell,
-        or hold) based on the analysis of market trends and the assessment of risk
-        levels.
-      docstring:
-        examples:
-        - lines:
-          - trend_directions = ['up', 'down', 'stable']
-          - trend_strengths = [0.8, 0.4, 0.1]
-          - risk_levels = [0.2, 0.6, 0.3]
-          - trade_signals = determine_trade_signals(trend_directions, trend_strengths,
-            risk_levels)
-          output: '[''buy'', ''sell'', ''hold'']'
-        - lines:
-          - trend_directions = ['up', 'up', 'down']
-          - trend_strengths = [0.9, 0.7, 0.3]
-          - risk_levels = [0.1, 0.2, 0.8]
-          - trade_signals = determine_trade_signals(trend_directions, trend_strengths,
-            risk_levels)
-          output: '[''buy'', ''buy'', ''sell'']'
-        parameters:
-        - description: List of trend directions (up, down, stable) analyzed from market
-            data.
-          name: trend_directions
-          type: List[str]
-        - description: List of trend strengths indicating the magnitude of the trends.
-          name: trend_strengths
-          type: List[float]
-        - description: List of risk levels associated with potential trades.
-          name: risk_levels
-          type: List[float]
-        raises:
-        - description: If the input lists (trend_directions, trend_strengths, risk_levels)
-            are of different lengths.
-          type: ValueError
-        returns:
-          description: List of trade signals (buy, sell, hold) generated based on
-            the input trend analysis and risk assessment.
-          type: List[str]
-        summary: Determines trade signals based on trend directions, trend strengths,
-          and risk levels.
-    prompt: Generate trade signals based on the analyzed trends and assessed risk.
-    shims: []
-  execute_trade:
-    agent: false
-    code_node_type: stub
-    description: Execute trades based on the determined trade signals.
-    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass DetermineTradeSignalsOutput(BaseModel):\n    \"\"\"Pydantic model\
-      \ for determine_trade_signals node outputs.\"\"\"\n    trade_signals: List[str]\
-      \ = (\n        Field(..., description=\"List of trade signals (buy, sell, hold).\"\
-      )\n    )\n\n\nclass ExecuteTradeOutput(BaseModel):\n    \"\"\"Pydantic model\
-      \ for execute_trade node outputs.\"\"\"\n    trade_outcomes: List[str] = (\n\
-      \        Field(..., description=\"List of trade outcomes (success, failure).\"\
-      )\n    )\n\n\ndef execute_trade(determine_trade_signals_input: DetermineTradeSignalsOutput,\
-      \ **kwargs) -> ExecuteTradeOutput:\n    \"\"\"\n    Execute trades based on\
-      \ the determined trade signals.\n\n    Parameters\n    ----------\n    trade_signals\
-      \ : List[str]\n        List of trade signals (buy, sell, hold) generated by\
-      \ the\n        determine_trade_signals node.\n\n    Returns\n    -------\n \
-      \   List[str]\n        List of trade outcomes (success, failure).\n\n    Raises\n\
-      \    ------\n    ValueError\n        If trade_signals is empty or contains invalid\
-      \ trade signals.\n\n    Examples\n    --------\n    >>> execute_trade(trade_signals=['buy',\
-      \ 'sell', 'hold'])\n    ['success', 'success', 'success']\n\n    >>> execute_trade(trade_signals=['invalid_signal'])\n\
-      \    ['failure']\n\n    \"\"\"\n    return ExecuteTradeOutput(\n        trade_outcomes=[],\n\
-      \    )"
-    name: execute_trade
-    nodes_depended_on:
-    - determine_trade_signals
     nodes_dependent_on: []
     output_structure:
-    - description: List of trade outcomes (success, failure).
+    - description: List of trend indicators
+      key: trend_indicators
+      type: List[float]
+    - description: List of trend directions (up, down, neutral)
+      key: trend_directions
+      type: List[str]
+    prd:
+      conceptual_info: This node analyzes market trends using historical data and
+        technical indicators, producing trend indicators and directions.
+      docstring:
+        examples:
+        - lines:
+          - market_prices = [100.0, 120.0, 110.0]
+          - market_volumes = [1000, 1200, 1100]
+          - trend_indicators, trend_directions = analyze_market_trends(market_prices,
+            market_volumes)
+          output: ([1.2, 0.9, 1.1], ['up', 'down', 'up'])
+        parameters:
+        - description: List of current market prices from fetch_market_data node.
+          name: market_prices
+          type: List[float]
+        - description: List of current market volumes from fetch_market_data node.
+          name: market_volumes
+          type: List[int]
+        raises:
+        - description: If market_prices or market_volumes are empty or malformed.
+          type: ValueError
+        returns:
+          description: A tuple containing a list of trend indicators and a list of
+            trend directions.
+          type: Tuple[List[float], List[str]]
+        summary: Analyze market trends using historical data and technical indicators.
+    prompt: Analyze market trends using historical data and technical indicators
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates market data by checking the consistency and correctness
+        of the provided prices and volumes.
+      implementation: "def validate_market_data(prices: str, volumes: str) -> str:\n\
+        \    \"\"\"\n    Validates market data by checking the consistency and correctness\
+        \ of the\n    provided prices and volumes.\n\n    Parameters\n    ----------\n\
+        \    prices : str\n        A string representation of a list of market prices.\n\
+        \    volumes : str\n        A string representation of a list of market volumes.\n\
+        \n    Returns\n    -------\n    str\n        A dictionary containing the validation\
+        \ result, including information\n        about the validity of the market\
+        \ data.\n\n    Raises\n    ------\n    ValueError\n        If the input prices\
+        \ or volumes are not valid (e.g., not numeric,\n        negative, or mismatched\
+        \ lengths).\n    TypeError\n        If the input types are incorrect (e.g.,\
+        \ not strings representing\n        lists).\n\n    Examples\n    --------\n\
+        \    >>> validate_market_data(prices='[10.5, 20.3, 30.7]', volumes='[100,\
+        \ 200,\n    300]')\n    {'valid': True, 'message': 'Market data is valid'}\n\
+        \n    >>> validate_market_data(prices='[10.5, 20.3]', volumes='[100, 200,\
+        \ 300]')\n    {'valid': False, 'message': 'Mismatch in prices and volumes\
+        \ lengths'}\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")"
+      name: validate_market_data
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type dict
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: prices
+        type: str
+      - description: Input parameter of type str
+        key: volumes
+        type: str
+      prd:
+        conceptual_info: This shim node is responsible for validating market data,
+          ensuring that the provided prices and volumes are consistent and correct
+          before further processing.
+        docstring:
+          examples:
+          - lines:
+            - validate_market_data(prices='[10.5, 20.3, 30.7]', volumes='[100, 200,
+              300]')
+            output: '{''valid'': True, ''message'': ''Market data is valid''}'
+          - lines:
+            - validate_market_data(prices='[10.5, 20.3]', volumes='[100, 200, 300]')
+            output: '{''valid'': False, ''message'': ''Mismatch in prices and volumes
+              lengths''}'
+          parameters:
+          - description: A string representation of a list of market prices.
+            name: prices
+            type: str
+          - description: A string representation of a list of market volumes.
+            name: volumes
+            type: str
+          raises:
+          - description: If the input prices or volumes are not valid (e.g., not numeric,
+              negative, or mismatched lengths).
+            type: ValueError
+          - description: If the input types are incorrect (e.g., not strings representing
+              lists).
+            type: TypeError
+          returns:
+            description: A dictionary containing the validation result, including
+              information about the validity of the market data.
+            type: str
+          summary: Validates market data by checking the consistency and correctness
+            of the provided prices and volumes.
+      prompt: 'Description: Typed node for shim validate_market_data'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Calculates technical indicators based on given market prices and
+        volumes.
+      implementation: "from typing import List\n\n\ndef calculate_technical_indicators(prices:\
+        \ str, volumes: str) -> List[float]:\n    \"\"\"\n    Calculates technical\
+        \ indicators from given market prices and volumes.\n\n    Parameters\n   \
+        \ ----------\n    prices : str\n        String representation of market prices,\
+        \ expected to be a list of\n        floats.\n    volumes : str\n        String\
+        \ representation of market volumes, expected to be a list of\n        integers.\n\
+        \n    Returns\n    -------\n    List[float]\n        List of technical indicators\
+        \ calculated from the input prices and\n        volumes.\n\n    Raises\n \
+        \   ------\n    ValueError\n        If the input strings cannot be parsed\
+        \ into lists of numbers.\n    TypeError\n        If the input types are not\
+        \ strings or if the parsed lists contain\n        non-numeric values.\n\n\
+        \    Examples\n    --------\n    >>> prices = '[1.0, 2.0, 3.0]'\n    >>> volumes\
+        \ = '[100, 200, 300]'\n    >>> calculate_technical_indicators(prices=prices,\
+        \ volumes=volumes)\n    [0.5, 1.0, 1.5]\n\n    >>> prices = '[4.0, 5.0, 6.0]'\n\
+        \    >>> volumes = '[400, 500, 600]'\n    >>> calculate_technical_indicators(prices=prices,\
+        \ volumes=volumes)\n    [2.0, 2.5, 3.0]\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: calculate_technical_indicators
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[float]
+        key: output
+        type: List[float]
+      - description: Input parameter of type str
+        key: prices
+        type: str
+      - description: Input parameter of type str
+        key: volumes
+        type: str
+      prd:
+        conceptual_info: This shim node is responsible for computing technical indicators
+          from market data, which are crucial for analyzing market trends.
+        docstring:
+          examples:
+          - lines:
+            - prices = '[1.0, 2.0, 3.0]'
+            - volumes = '[100, 200, 300]'
+            - calculate_technical_indicators(prices=prices, volumes=volumes)
+            output: '[0.5, 1.0, 1.5]'
+          - lines:
+            - prices = '[4.0, 5.0, 6.0]'
+            - volumes = '[400, 500, 600]'
+            - calculate_technical_indicators(prices=prices, volumes=volumes)
+            output: '[2.0, 2.5, 3.0]'
+          parameters:
+          - description: String representation of market prices, expected to be a
+              list of floats.
+            name: prices
+            type: str
+          - description: String representation of market volumes, expected to be a
+              list of integers.
+            name: volumes
+            type: str
+          raises:
+          - description: If the input strings cannot be parsed into lists of numbers.
+            type: ValueError
+          - description: If the input types are not strings or if the parsed lists
+              contain non-numeric values.
+            type: TypeError
+          returns:
+            description: List of technical indicators calculated from the input prices
+              and volumes.
+            type: List[float]
+          summary: Calculates technical indicators from given market prices and volumes.
+      prompt: Calculate technical indicators using the given market prices and volumes.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Determines trend directions based on technical indicators and market
+        prices.
+      implementation: "from typing import List\n\n\ndef determine_trend_directions(indicators:\
+        \ str, prices: str) -> List[str]:\n    \"\"\"\n    Determines trend directions\
+        \ based on the provided technical indicators and\n    market prices.\n\n \
+        \   Parameters\n    ----------\n    indicators : str\n        A string representation\
+        \ of technical indicators used for trend\n        analysis.\n    prices :\
+        \ str\n        A string representation of market prices used in conjunction\
+        \ with\n        indicators for trend analysis.\n\n    Returns\n    -------\n\
+        \    List[str]\n        A list of strings representing trend directions (up,\
+        \ down, neutral)\n        corresponding to the input indicators and prices.\n\
+        \n    Raises\n    ------\n    ValueError\n        If the input indicators\
+        \ or prices are not valid or cannot be\n        processed.\n    TypeError\n\
+        \        If the input types do not match the expected types.\n\n    Examples\n\
+        \    --------\n    >>> determine_trend_directions(indicators='[0.5, 0.7, 0.3]',\
+        \ prices='[100,\n    120, 90]')\n    ['up', 'up', 'down']\n\n    >>> determine_trend_directions(indicators='[0.2,\
+        \ 0.4, 0.6]', prices='[80,\n    100, 120]')\n    ['down', 'neutral', 'up']\n\
+        \n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node\
+        \ that needs to be implemented\")"
+      name: determine_trend_directions
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: indicators
+        type: str
+      - description: Input parameter of type str
+        key: prices
+        type: str
+      prd:
+        conceptual_info: This shim node analyzes technical indicators and market prices
+          to determine trend directions, playing a crucial role in market trend analysis.
+        docstring:
+          examples:
+          - lines:
+            - determine_trend_directions(indicators='[0.5, 0.7, 0.3]', prices='[100,
+              120, 90]')
+            output: '[''up'', ''up'', ''down'']'
+          - lines:
+            - determine_trend_directions(indicators='[0.2, 0.4, 0.6]', prices='[80,
+              100, 120]')
+            output: '[''down'', ''neutral'', ''up'']'
+          parameters:
+          - description: A string representation of technical indicators used for
+              trend analysis.
+            name: indicators
+            type: str
+          - description: A string representation of market prices used in conjunction
+              with indicators for trend analysis.
+            name: prices
+            type: str
+          raises:
+          - description: If the input indicators or prices are not valid or cannot
+              be processed.
+            type: ValueError
+          - description: If the input types do not match the expected types.
+            type: TypeError
+          returns:
+            description: A list of strings representing trend directions (up, down,
+              neutral) corresponding to the input indicators and prices.
+            type: List[str]
+          summary: Determines trend directions based on the provided technical indicators
+            and market prices.
+      prompt: 'Description: Typed node for shim determine_trend_directions'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Normalizes raw trend indicators to a standardized scale for consistent
+        trend analysis.
+      implementation: "from typing import List\n\n\ndef normalize_trend_indicators(raw_indicators:\
+        \ str) -> List[float]:\n    \"\"\"\n    Normalizes raw trend indicators to\
+        \ a standardized scale between 0 and 1.\n\n    Parameters\n    ----------\n\
+        \    raw_indicators : str\n        Raw trend indicators as a string representation\
+        \ that needs to be\n        normalized\n\n    Returns\n    -------\n    List[float]\n\
+        \        A list of normalized trend indicators scaled between 0 and 1\n\n\
+        \    Raises\n    ------\n    ValueError\n        When the input string cannot\
+        \ be converted to a list of numbers\n    TypeError\n        When the input\
+        \ is not a string or when the input string contains\n        non-numeric values\n\
+        \n    Examples\n    --------\n    >>> import json\n    >>> raw_indicators\
+        \ = '[1.2, 2.3, 3.4, 4.5]'\n    >>> normalized = normalize_trend_indicators(raw_indicators=raw_indicators)\n\
+        \    >>> print(json.dumps(normalized))\n    [0.0, 0.3333333333333333, 0.6666666666666666,\
+        \ 1.0]\n\n    >>> raw_indicators = '[10, 20, 30, 40]'\n    >>> normalized\
+        \ = normalize_trend_indicators(raw_indicators=raw_indicators)\n    >>> print(normalized)\n\
+        \    [0.0, 0.3333333333333333, 0.6666666666666666, 1.0]\n\n    \"\"\"\n  \
+        \  raise NotImplementedError(\"This is a virtual stub node that needs to be\
+        \ implemented\")"
+      name: normalize_trend_indicators
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[float]
+        key: output
+        type: List[float]
+      - description: Input parameter of type str
+        key: raw_indicators
+        type: str
+      prd:
+        conceptual_info: This shim node is responsible for normalizing raw trend indicators
+          to a standardized scale, enabling consistent trend analysis across different
+          market conditions.
+        docstring:
+          examples:
+          - lines:
+            - import json
+            - raw_indicators = '[1.2, 2.3, 3.4, 4.5]'
+            - normalized = normalize_trend_indicators(raw_indicators=raw_indicators)
+            - print(json.dumps(normalized))
+            output: '[0.0, 0.3333333333333333, 0.6666666666666666, 1.0]'
+          - lines:
+            - raw_indicators = '[10, 20, 30, 40]'
+            - normalized = normalize_trend_indicators(raw_indicators=raw_indicators)
+            - print(normalized)
+            output: '[0.0, 0.3333333333333333, 0.6666666666666666, 1.0]'
+          parameters:
+          - description: Raw trend indicators as a string representation that needs
+              to be normalized
+            name: raw_indicators
+            type: str
+          raises:
+          - description: When the input string cannot be converted to a list of numbers
+            type: ValueError
+          - description: When the input is not a string or when the input string contains
+              non-numeric values
+            type: TypeError
+          returns:
+            description: A list of normalized trend indicators scaled between 0 and
+              1
+            type: List[float]
+          summary: Normalizes raw trend indicators to a standardized scale between
+            0 and 1.
+      prompt: Implement the normalize_trend_indicators function to normalize raw trend
+        indicators
+      shims: []
+  execute_trades:
+    agent: false
+    code_node_type: shim
+    description: Execute trades based on generated trade signals
+    implementation: "from ._execute_trades.validate_signal_inputs import validate_signal_inputs\n\
+      from ._execute_trades.generate_trade_id import generate_trade_id\nfrom ._execute_trades.execute_single_trade\
+      \ import execute_single_trade\n\nfrom pydantic import BaseModel, Field\nfrom\
+      \ typing import List\n\n\nclass GenerateTradeSignalsOutput(BaseModel):\n   \
+      \ \"\"\"Pydantic model for generate_trade_signals node outputs.\"\"\"\n    trade_signals:\
+      \ List[str] = (\n        Field(..., description=\"List of trade signals (buy,\
+      \ sell, hold)\")\n    )\n    signal_confidences: List[float] = (\n        Field(...,\
+      \ description=\"List of signal confidences\")\n    )\n\n\nclass ExecuteTradesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for execute_trades node outputs.\"\"\"\n    trade_outcomes:\
+      \ List[str] = (\n        Field(..., description=\"List of trade outcomes (success,\
+      \ failure)\")\n    )\n    trade_ids: List[str] = Field(..., description=\"List\
+      \ of trade IDs\")\n\n\ndef execute_trades(generate_trade_signals_input: GenerateTradeSignalsOutput,\
+      \ **kwargs) -> ExecuteTradesOutput:\n    \"\"\"\n    Execute trades based on\
+      \ generated trade signals and return the outcomes and\n    trade IDs.\n\n  \
+      \  Parameters\n    ----------\n    trade_signals : List[str]\n        List of\
+      \ trade signals (buy, sell, hold) generated by the\n        generate_trade_signals\
+      \ node.\n    signal_confidences : List[float]\n        List of signal confidences\
+      \ corresponding to the trade signals.\n\n    Returns\n    -------\n    Tuple[List[str],\
+      \ List[str]]\n        A tuple containing a list of trade outcomes (success,\
+      \ failure) and a\n        list of trade IDs.\n\n    Raises\n    ------\n   \
+      \ ValueError\n        If the lengths of trade_signals and signal_confidences\
+      \ do not match.\n    RuntimeError\n        If trade execution fails due to external\
+      \ factors.\n\n    Examples\n    --------\n    >>> trade_signals = ['buy', 'sell',\
+      \ 'hold']\n    >>> signal_confidences = [0.8, 0.9, 0.7]\n    >>> trade_outcomes,\
+      \ trade_ids = execute_trades(trade_signals,\n    signal_confidences)\n    (['success',\
+      \ 'success', 'failure'], ['trade123', 'trade456', 'trade789'])\n\n    >>> trade_signals\
+      \ = ['buy', 'sell']\n    >>> signal_confidences = [0.85, 0.95]\n    >>> trade_outcomes,\
+      \ trade_ids = execute_trades(trade_signals,\n    signal_confidences)\n    (['success',\
+      \ 'success'], ['trade101', 'trade102'])\n\n    \"\"\"\n    trade_signals = generate_trade_signals_input.trade_signals\n\
+      \    signal_confidences = generate_trade_signals_input.signal_confidences\n\
+      \    \n    validate_signal_inputs(signals=trade_signals, confidences=signal_confidences)\n\
+      \    \n    trade_outcomes: List[str] = []\n    trade_ids: List[str] = []\n \
+      \   \n    for signal, confidence in zip(trade_signals, signal_confidences):\n\
+      \        trade_id: str = generate_trade_id()\n        execution_result: str\
+      \ = execute_single_trade(signal=signal, confidence=confidence, trade_id=trade_id)\n\
+      \        trade_outcomes.append(execution_result)\n        trade_ids.append(trade_id)\n\
+      \    \n    return ExecuteTradesOutput(\n        trade_outcomes=trade_outcomes,\n\
+      \        trade_ids=trade_ids,\n    )"
+    name: execute_trades
+    nodes_depended_on:
+    - generate_trade_signals
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of trade outcomes (success, failure)
       key: trade_outcomes
+      type: List[str]
+    - description: List of trade IDs
+      key: trade_ids
       type: List[str]
     prd:
       conceptual_info: This node executes trades based on the trade signals generated
-        by the determine_trade_signals node.
+        by its parent node, generate_trade_signals.
       docstring:
         examples:
         - lines:
-          - execute_trade(trade_signals=['buy', 'sell', 'hold'])
-          output: '[''success'', ''success'', ''success'']'
+          - trade_signals = ['buy', 'sell', 'hold']
+          - signal_confidences = [0.8, 0.9, 0.7]
+          - trade_outcomes, trade_ids = execute_trades(trade_signals, signal_confidences)
+          output: (['success', 'success', 'failure'], ['trade123', 'trade456', 'trade789'])
         - lines:
-          - execute_trade(trade_signals=['invalid_signal'])
-          output: '[''failure'']'
+          - trade_signals = ['buy', 'sell']
+          - signal_confidences = [0.85, 0.95]
+          - trade_outcomes, trade_ids = execute_trades(trade_signals, signal_confidences)
+          output: (['success', 'success'], ['trade101', 'trade102'])
         parameters:
-        - description: List of trade signals (buy, sell, hold) generated by the determine_trade_signals
+        - description: List of trade signals (buy, sell, hold) generated by the generate_trade_signals
             node.
           name: trade_signals
           type: List[str]
+        - description: List of signal confidences corresponding to the trade signals.
+          name: signal_confidences
+          type: List[float]
         raises:
-        - description: If trade_signals is empty or contains invalid trade signals.
+        - description: If the lengths of trade_signals and signal_confidences do not
+            match.
           type: ValueError
+        - description: If trade execution fails due to external factors.
+          type: RuntimeError
         returns:
-          description: List of trade outcomes (success, failure).
-          type: List[str]
-        summary: Execute trades based on the determined trade signals.
-    prompt: Execute trades according to the generated trade signals.
-    shims: []
+          description: A tuple containing a list of trade outcomes (success, failure)
+            and a list of trade IDs.
+          type: Tuple[List[str], List[str]]
+        summary: Execute trades based on generated trade signals and return the outcomes
+          and trade IDs.
+    prompt: Execute trades based on generated trade signals
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates the input signals and their corresponding confidences
+        for trading.
+      implementation: "def validate_signal_inputs(signals: str, confidences: str)\
+        \ -> str:\n    \"\"\"\n    Validates the input trade signals and their corresponding\
+        \ confidences.\n\n    Parameters\n    ----------\n    signals : str\n    \
+        \    A string representation of a list of trade signals (buy, sell,\n    \
+        \    hold).\n    confidences : str\n        A string representation of a list\
+        \ of signal confidences\n        corresponding to the trade signals.\n\n \
+        \   Returns\n    -------\n    str\n        A string indicating whether the\
+        \ input signals are valid.\n\n    Raises\n    ------\n    ValueError\n   \
+        \     If the lengths of signals and confidences lists do not match.\n    TypeError\n\
+        \        If the input signals or confidences are not in the expected format.\n\
+        \n    Examples\n    --------\n    >>> validate_signal_inputs(signals='[\"\
+        buy\", \"sell\", \"hold\"]',\n    confidences='[0.8, 0.7, 0.9]')\n    'Valid\
+        \ signals and confidences'\n\n    >>> validate_signal_inputs(signals='[\"\
+        buy\", \"sell\"]', confidences='[0.8,\n    0.7, 0.9]')\n    ValueError: Signals\
+        \ and confidences lists must be of the same length\n\n    \"\"\"\n    raise\
+        \ NotImplementedError(\"This is a virtual stub node that needs to be implemented\"\
+        )"
+      name: validate_signal_inputs
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: signals
+        type: str
+      - description: Input parameter of type str
+        key: confidences
+        type: str
+      prd:
+        conceptual_info: This shim node is responsible for validating trade signals
+          and their confidences before they are used for executing trades.
+        docstring:
+          examples:
+          - lines:
+            - validate_signal_inputs(signals='["buy", "sell", "hold"]', confidences='[0.8,
+              0.7, 0.9]')
+            output: '''Valid signals and confidences'''
+          - lines:
+            - validate_signal_inputs(signals='["buy", "sell"]', confidences='[0.8,
+              0.7, 0.9]')
+            output: 'ValueError: Signals and confidences lists must be of the same
+              length'
+          parameters:
+          - description: A string representation of a list of trade signals (buy,
+              sell, hold).
+            name: signals
+            type: str
+          - description: A string representation of a list of signal confidences corresponding
+              to the trade signals.
+            name: confidences
+            type: str
+          raises:
+          - description: If the lengths of signals and confidences lists do not match.
+            type: ValueError
+          - description: If the input signals or confidences are not in the expected
+              format.
+            type: TypeError
+          returns:
+            description: A string indicating whether the input signals are valid.
+            type: str
+          summary: Validates the input trade signals and their corresponding confidences.
+      prompt: Validate the input trade signals and their confidences.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Generates a unique identifier for a trade execution.
+      implementation: "def generate_trade_id() -> str:\n    \"\"\"\n    Generates\
+        \ a unique identifier for a trade.\n\n    Returns\n    -------\n    str\n\
+        \        A unique string identifier for the trade execution.\n\n    Raises\n\
+        \    ------\n    RuntimeError\n        If the system fails to generate a unique\
+        \ ID.\n\n    Examples\n    --------\n    >>> trade_id = generate_trade_id()\n\
+        \    'trade_001'\n\n    >>> print(generate_trade_id())\n    'trade_002'\n\n\
+        \    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node that\
+        \ needs to be implemented\")"
+      name: generate_trade_id
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      prd:
+        conceptual_info: This shim generates unique identifiers for trade executions,
+          ensuring that each trade can be distinctly tracked and managed within the
+          system.
+        docstring:
+          examples:
+          - lines:
+            - trade_id = generate_trade_id()
+            output: '''trade_001'''
+          - lines:
+            - print(generate_trade_id())
+            output: '''trade_002'''
+          parameters: []
+          raises:
+          - description: If the system fails to generate a unique ID.
+            type: RuntimeError
+          returns:
+            description: A unique string identifier for the trade execution.
+            type: str
+          summary: Generates a unique identifier for a trade.
+      prompt: Generate a unique trade ID
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Executes a single trade based on the provided signal, confidence,
+        and trade ID.
+      implementation: "def execute_single_trade(signal: str, confidence: str, trade_id:\
+        \ str) -> str:\n    \"\"\"\n    Executes a single trade based on the provided\
+        \ signal, confidence, and trade\n    ID, returning the outcome of the trade\
+        \ execution.\n\n    Parameters\n    ----------\n    signal : str\n       \
+        \ The trade signal to be executed (e.g., 'buy', 'sell', 'hold').\n    confidence\
+        \ : str\n        The confidence level associated with the trade signal.\n\
+        \    trade_id : str\n        The unique identifier for the trade being executed.\n\
+        \n    Returns\n    -------\n    str\n        The outcome of the trade execution\
+        \ (e.g., 'success', 'failure').\n\n    Raises\n    ------\n    ValueError\n\
+        \        If the signal is not one of 'buy', 'sell', or 'hold'.\n    TypeError\n\
+        \        If the input types are not as expected (e.g., signal is not a\n \
+        \       string).\n\n    Examples\n    --------\n    >>> execute_single_trade(signal='buy',\
+        \ confidence='0.8',\n    trade_id='trade123')\n    'success'\n\n    >>> execute_single_trade(signal='invalid_signal',\
+        \ confidence='0.5',\n    trade_id='trade456')\n    ValueError: Invalid trade\
+        \ signal\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")"
+      name: execute_single_trade
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: signal
+        type: str
+      - description: Input parameter of type str
+        key: confidence
+        type: str
+      - description: Input parameter of type str
+        key: trade_id
+        type: str
+      prd:
+        conceptual_info: This shim node represents the execution of a single trade
+          based on a given trade signal, its confidence level, and a unique trade
+          ID. It is part of a larger trading system that generates trade signals and
+          executes trades accordingly.
+        docstring:
+          examples:
+          - lines:
+            - execute_single_trade(signal='buy', confidence='0.8', trade_id='trade123')
+            output: '''success'''
+          - lines:
+            - execute_single_trade(signal='invalid_signal', confidence='0.5', trade_id='trade456')
+            output: 'ValueError: Invalid trade signal'
+          parameters:
+          - description: The trade signal to be executed (e.g., 'buy', 'sell', 'hold').
+            name: signal
+            type: str
+          - description: The confidence level associated with the trade signal.
+            name: confidence
+            type: str
+          - description: The unique identifier for the trade being executed.
+            name: trade_id
+            type: str
+          raises:
+          - description: If the signal is not one of 'buy', 'sell', or 'hold'.
+            type: ValueError
+          - description: If the input types are not as expected (e.g., signal is not
+              a string).
+            type: TypeError
+          returns:
+            description: The outcome of the trade execution (e.g., 'success', 'failure').
+            type: str
+          summary: Executes a single trade based on the provided signal, confidence,
+            and trade ID, returning the outcome of the trade execution.
+      prompt: Execute a single trade with signal '{signal}', confidence '{confidence}',
+        and trade ID '{trade_id}'.
+      shims: []
   fetch_market_data:
     agent: false
-    code_node_type: stub
-    description: Retrieve current market data, including prices and volumes.
-    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass FetchMarketDataOutput(BaseModel):\n    \"\"\"Pydantic model for fetch_market_data\
-      \ node outputs.\"\"\"\n    market_prices: List[float] = (\n        Field(...,\
-      \ description=\"List of current market prices.\")\n    )\n    market_volumes:\
-      \ List[int] = (\n        Field(..., description=\"List of current market volumes.\"\
-      )\n    )\n\n\ndef fetch_market_data(general_input: str, **kwargs) -> FetchMarketDataOutput:\n\
-      \    \"\"\"\n    Retrieve current market data, including prices and volumes,\
-      \ from reliable\n    sources.\n\n    Returns\n    -------\n    Tuple[List[float],\
-      \ List[int]]\n        A tuple containing a list of current market prices and\
-      \ a list of\n        current market volumes.\n\n    Raises\n    ------\n   \
-      \ ConnectionError\n        If there's a failure connecting to the market data\
-      \ source.\n    DataError\n        If the retrieved data is malformed or incomplete.\n\
-      \n    Examples\n    --------\n    >>> market_data = fetch_market_data()\n  \
-      \  >>> prices, volumes = market_data['market_prices'],\n    market_data['market_volumes']\n\
-      \    {'market_prices': [12.5, 13.2, 11.8], 'market_volumes': [100, 200, 150]}\n\
-      \n    \"\"\"\n    return FetchMarketDataOutput(\n        market_prices=[],\n\
-      \        market_volumes=[],\n    )"
+    code_node_type: shim
+    description: Retrieve current market data from various sources
+    implementation: "from ._fetch_market_data.get_market_data_sources import get_market_data_sources\n\
+      from ._fetch_market_data.fetch_data_from_sources import fetch_data_from_sources\n\
+      from ._fetch_market_data.parse_market_data import parse_market_data\nfrom ._fetch_market_data.extract_prices\
+      \ import extract_prices\nfrom ._fetch_market_data.extract_volumes import extract_volumes\n\
+      from ._fetch_market_data.validate_market_data import validate_market_data\n\n\
+      from pydantic import BaseModel, Field\nfrom typing import List\n\n\nclass FetchMarketDataOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for fetch_market_data node outputs.\"\"\"\n    market_prices:\
+      \ List[float] = (\n        Field(..., description=\"List of current market prices\"\
+      )\n    )\n    market_volumes: List[int] = (\n        Field(..., description=\"\
+      List of current market volumes\")\n    )\n\n\ndef fetch_market_data(general_input:\
+      \ str, **kwargs) -> FetchMarketDataOutput:\n    \"\"\"\n    Fetches current\
+      \ market data, including prices and volumes, from multiple\n    sources.\n\n\
+      \    Returns\n    -------\n    Tuple[List[float], List[int]]\n        A tuple\
+      \ containing a list of current market prices and a list of\n        current\
+      \ market volumes.\n\n    Raises\n    ------\n    ConnectionError\n        If\
+      \ there's a failure connecting to market data sources.\n    DataParsingError\n\
+      \        If there's an issue parsing the received market data.\n\n    Examples\n\
+      \    --------\n    >>> market_data = fetch_market_data()\n    ([123.45, 67.89],\
+      \ [1000, 2000])\n\n    >>> prices, volumes = fetch_market_data()\n    >>> print(f'Prices:\
+      \ {prices}')\n    >>> print(f'Volumes: {volumes}')\n    Prices: [123.45, 67.89]\n\
+      \    Volumes: [1000, 2000]\n\n    \"\"\"\n    source_urls: List[str] = get_market_data_sources()\n\
+      \    raw_data: List[dict] = fetch_data_from_sources(sources=source_urls)\n \
+      \   parsed_data: dict = parse_market_data(raw_data=raw_data)\n    prices: List[float]\
+      \ = extract_prices(parsed_data=parsed_data)\n    volumes: List[int] = extract_volumes(parsed_data=parsed_data)\n\
+      \    validate_market_data(prices=prices, volumes=volumes)\n    return FetchMarketDataOutput(\n\
+      \        market_prices=prices,\n        market_volumes=volumes,\n    )"
     name: fetch_market_data
     nodes_depended_on: []
-    nodes_dependent_on:
-    - analyze_market_trends
-    - assess_risk
+    nodes_dependent_on: []
     output_structure:
-    - description: List of current market prices.
+    - description: List of current market prices
       key: market_prices
       type: List[float]
-    - description: List of current market volumes.
+    - description: List of current market volumes
       key: market_volumes
       type: List[int]
     prd:
-      conceptual_info: Fetches the latest market data, including prices and volumes,
-        from reliable sources.
+      conceptual_info: The fetch_market_data node retrieves current market data from
+        various sources, providing essential information for downstream analysis and
+        decision-making.
       docstring:
         examples:
         - lines:
           - market_data = fetch_market_data()
-          - prices, volumes = market_data['market_prices'], market_data['market_volumes']
-          output: '{''market_prices'': [12.5, 13.2, 11.8], ''market_volumes'': [100,
-            200, 150]}'
+          output: ([123.45, 67.89], [1000, 2000])
+        - lines:
+          - prices, volumes = fetch_market_data()
+          - 'print(f''Prices: {prices}'')'
+          - 'print(f''Volumes: {volumes}'')'
+          output: 'Prices: [123.45, 67.89]
+
+            Volumes: [1000, 2000]'
         parameters: []
         raises:
-        - description: If there's a failure connecting to the market data source.
+        - description: If there's a failure connecting to market data sources.
           type: ConnectionError
-        - description: If the retrieved data is malformed or incomplete.
-          type: DataError
+        - description: If there's an issue parsing the received market data.
+          type: DataParsingError
         returns:
           description: A tuple containing a list of current market prices and a list
             of current market volumes.
           type: Tuple[List[float], List[int]]
-        summary: Retrieve current market data, including prices and volumes, from
-          reliable sources.
-    prompt: Fetch the latest market data from reliable sources.
-    shims: []
+        summary: Fetches current market data, including prices and volumes, from multiple
+          sources.
+    prompt: Fetch current market data, including prices, volumes, and other relevant
+      metrics
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Retrieves a list of URLs for market data sources.
+      implementation: "from typing import List\n\n\ndef get_market_data_sources()\
+        \ -> List[str]:\n    \"\"\"\n    Fetches and returns a list of URLs for market\
+        \ data sources.\n\n    Returns\n    -------\n    List[str]\n        A list\
+        \ of URLs where market data can be fetched.\n\n    Raises\n    ------\n  \
+        \  RuntimeError\n        If there's an issue retrieving the market data sources.\n\
+        \n    Examples\n    --------\n    >>> sources = get_market_data_sources()\n\
+        \    ['https://source1.com/data', 'https://source2.com/data']\n\n    >>> print(get_market_data_sources())\n\
+        \    ['https://source1.com/data', 'https://source2.com/data']\n\n    \"\"\"\
+        \n    raise NotImplementedError(\"This is a virtual stub node that needs to\
+        \ be implemented\")"
+      name: get_market_data_sources
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      prd:
+        conceptual_info: This shim function is responsible for providing a list of
+          URLs that serve as sources for market data. It acts as a bridge to fetch
+          the necessary data for further processing.
+        docstring:
+          examples:
+          - lines:
+            - sources = get_market_data_sources()
+            output: '[''https://source1.com/data'', ''https://source2.com/data'']'
+          - lines:
+            - print(get_market_data_sources())
+            output: '[''https://source1.com/data'', ''https://source2.com/data'']'
+          parameters: []
+          raises:
+          - description: If there's an issue retrieving the market data sources.
+            type: RuntimeError
+          returns:
+            description: A list of URLs where market data can be fetched.
+            type: List[str]
+          summary: Fetches and returns a list of URLs for market data sources.
+      prompt: Retrieve market data sources
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Fetches data from multiple sources and returns it in a structured
+        format.
+      implementation: "from typing import List\n\n\ndef fetch_data_from_sources(sources:\
+        \ str) -> List[str]:\n    \"\"\"\n    Fetches data from the provided sources\
+        \ and returns it as a list of\n    dictionaries.\n\n    Parameters\n    ----------\n\
+        \    sources : str\n        A string representing the sources from which data\
+        \ should be fetched.\n\n    Returns\n    -------\n    List[dict]\n       \
+        \ A list of dictionaries containing the fetched data from various\n      \
+        \  sources.\n\n    Raises\n    ------\n    ValueError\n        If the input\
+        \ 'sources' is not a valid string or is empty.\n    TypeError\n        If\
+        \ the input 'sources' is not of type string.\n\n    Examples\n    --------\n\
+        \    >>> sources = 'https://example.com/data1,https://example.com/data2'\n\
+        \    >>> result = fetch_data_from_sources(sources=sources)\n    [{'source':\
+        \ 'https://example.com/data1', 'data': '...'}, {'source':\n    'https://example.com/data2',\
+        \ 'data': '...'}]\n\n    >>> sources = 'https://example.com/data3'\n    >>>\
+        \ result = fetch_data_from_sources(sources=sources)\n    [{'source': 'https://example.com/data3',\
+        \ 'data': '...'}]\n\n    \"\"\"\n    raise NotImplementedError(\"This is a\
+        \ virtual stub node that needs to be implemented\")"
+      name: fetch_data_from_sources
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[dict]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: sources
+        type: str
+      prd:
+        conceptual_info: This shim node is responsible for fetching data from multiple
+          sources and returning it in a structured format that can be further processed
+          downstream.
+        docstring:
+          examples:
+          - lines:
+            - sources = 'https://example.com/data1,https://example.com/data2'
+            - result = fetch_data_from_sources(sources=sources)
+            output: '[{''source'': ''https://example.com/data1'', ''data'': ''...''},
+              {''source'': ''https://example.com/data2'', ''data'': ''...''}]'
+          - lines:
+            - sources = 'https://example.com/data3'
+            - result = fetch_data_from_sources(sources=sources)
+            output: '[{''source'': ''https://example.com/data3'', ''data'': ''...''}]'
+          parameters:
+          - description: A string representing the sources from which data should
+              be fetched.
+            name: sources
+            type: str
+          raises:
+          - description: If the input 'sources' is not a valid string or is empty.
+            type: ValueError
+          - description: If the input 'sources' is not of type string.
+            type: TypeError
+          returns:
+            description: A list of dictionaries containing the fetched data from various
+              sources.
+            type: List[dict]
+          summary: Fetches data from the provided sources and returns it as a list
+            of dictionaries.
+      prompt: Fetch data from the given sources and return it as a list of dictionaries.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Parses raw market data into a structured dictionary format.
+      implementation: "def parse_market_data(raw_data: str) -> str:\n    \"\"\"\n\
+        \    Parses raw market data string into a structured dictionary.\n\n    Parameters\n\
+        \    ----------\n    raw_data : str\n        The raw market data as a string\
+        \ representation of a list of\n        dictionaries.\n\n    Returns\n    -------\n\
+        \    str\n        A dictionary containing the parsed market data, where keys\
+        \ and\n        values are appropriately structured for further processing.\n\
+        \n    Raises\n    ------\n    ValueError\n        If the input raw_data is\
+        \ not a valid string representation of a list\n        of dictionaries.\n\
+        \    TypeError\n        If the input raw_data is not a string.\n\n    Examples\n\
+        \    --------\n    >>> raw_data = '[{\"price\": 10.5, \"volume\": 100}, {\"\
+        price\": 11.2, \"volume\":\n    50}]'\n    >>> parsed_data = parse_market_data(raw_data=raw_data)\n\
+        \    {'prices': [10.5, 11.2], 'volumes': [100, 50]}\n\n    >>> raw_data =\
+        \ '[{\"price\": 12.0, \"volume\": 200}]'\n    >>> parsed_data = parse_market_data(raw_data=raw_data)\n\
+        \    {'prices': [12.0], 'volumes': [200]}\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: parse_market_data
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type dict
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: raw_data
+        type: str
+      prd:
+        conceptual_info: This shim node is responsible for taking raw market data,
+          which is a list of dictionaries, and parsing it into a structured dictionary
+          format that can be used downstream for extracting prices and volumes.
+        docstring:
+          examples:
+          - lines:
+            - 'raw_data = ''[{"price": 10.5, "volume": 100}, {"price": 11.2, "volume":
+              50}]'''
+            - parsed_data = parse_market_data(raw_data=raw_data)
+            output: '{''prices'': [10.5, 11.2], ''volumes'': [100, 50]}'
+          - lines:
+            - 'raw_data = ''[{"price": 12.0, "volume": 200}]'''
+            - parsed_data = parse_market_data(raw_data=raw_data)
+            output: '{''prices'': [12.0], ''volumes'': [200]}'
+          parameters:
+          - description: The raw market data as a string representation of a list
+              of dictionaries.
+            name: raw_data
+            type: str
+          raises:
+          - description: If the input raw_data is not a valid string representation
+              of a list of dictionaries.
+            type: ValueError
+          - description: If the input raw_data is not a string.
+            type: TypeError
+          returns:
+            description: A dictionary containing the parsed market data, where keys
+              and values are appropriately structured for further processing.
+            type: str
+          summary: Parses raw market data string into a structured dictionary.
+      prompt: Parse the given raw market data into a structured dictionary.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Extracts a list of prices from the given parsed market data.
+      implementation: "from typing import List\n\n\ndef extract_prices(parsed_data:\
+        \ str) -> List[float]:\n    \"\"\"\n    Extracts prices from the given parsed\
+        \ market data and returns them as a list\n    of floats.\n\n    Parameters\n\
+        \    ----------\n    parsed_data : str\n        A string representation of\
+        \ the parsed market data, expected to\n        contain price information.\n\
+        \n    Returns\n    -------\n    List[float]\n        A list of float values\
+        \ representing the extracted prices.\n\n    Raises\n    ------\n    ValueError\n\
+        \        If the parsed data is malformed or does not contain valid price\n\
+        \        information.\n    TypeError\n        If the input parsed_data is\
+        \ not of type str.\n\n    Examples\n    --------\n    >>> parsed_data = '{\
+        \ \"prices\": [10.5, 20.8, 30.1] }'\n    >>> prices = extract_prices(parsed_data=parsed_data)\n\
+        \    >>> print(prices)\n    [10.5, 20.8, 30.1]\n\n    >>> parsed_data = 'Invalid\
+        \ data'\n    >>> try: extract_prices(parsed_data=parsed_data)\n    >>> except\
+        \ ValueError as e: print(e)\n    Malformed input data\n\n    \"\"\"\n    raise\
+        \ NotImplementedError(\"This is a virtual stub node that needs to be implemented\"\
+        )"
+      name: extract_prices
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[float]
+        key: output
+        type: List[float]
+      - description: Input parameter of type str
+        key: parsed_data
+        type: str
+      prd:
+        conceptual_info: This shim node is responsible for extracting a list of prices
+          from the parsed market data, which is crucial for further analysis and processing
+          in the market data pipeline.
+        docstring:
+          examples:
+          - lines:
+            - 'parsed_data = ''{ "prices": [10.5, 20.8, 30.1] }'''
+            - prices = extract_prices(parsed_data=parsed_data)
+            - print(prices)
+            output: '[10.5, 20.8, 30.1]'
+          - lines:
+            - parsed_data = 'Invalid data'
+            - 'try: extract_prices(parsed_data=parsed_data)'
+            - 'except ValueError as e: print(e)'
+            output: Malformed input data
+          parameters:
+          - description: A string representation of the parsed market data, expected
+              to contain price information.
+            name: parsed_data
+            type: str
+          raises:
+          - description: If the parsed data is malformed or does not contain valid
+              price information.
+            type: ValueError
+          - description: If the input parsed_data is not of type str.
+            type: TypeError
+          returns:
+            description: A list of float values representing the extracted prices.
+            type: List[float]
+          summary: Extracts prices from the given parsed market data and returns them
+            as a list of floats.
+      prompt: Extract prices from the parsed market data
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Extracts market volumes from parsed market data.
+      implementation: "from typing import List\n\n\ndef extract_volumes(parsed_data:\
+        \ str) -> List[int]:\n    \"\"\"\n    Extracts and returns market volumes\
+        \ as a list of integers from the given\n    parsed market data.\n\n    Parameters\n\
+        \    ----------\n    parsed_data : str\n        A string representation of\
+        \ parsed market data containing volume\n        information.\n\n    Returns\n\
+        \    -------\n    List[int]\n        A list of integers representing the extracted\
+        \ market volumes.\n\n    Raises\n    ------\n    ValueError\n        If the\
+        \ parsed_data is not in the expected format or if volume\n        extraction\
+        \ fails.\n    TypeError\n        If the input parsed_data is not of type str.\n\
+        \n    Examples\n    --------\n    >>> parsed_data = '{ \"market_volumes\"\
+        : [100, 200, 300] }'\n    >>> volumes = extract_volumes(parsed_data=parsed_data)\n\
+        \    >>> print(volumes)\n    [100, 200, 300]\n\n    >>> parsed_data = 'Invalid\
+        \ data format'\n    >>> try:\n    ...     volumes = extract_volumes(parsed_data=parsed_data)\n\
+        \    >>> except ValueError as e:\n    ...     print(e)\n    Invalid data format\n\
+        \n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node\
+        \ that needs to be implemented\")"
+      name: extract_volumes
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[int]
+        key: output
+        type: List[int]
+      - description: Input parameter of type str
+        key: parsed_data
+        type: str
+      prd:
+        conceptual_info: This shim function is responsible for extracting market volumes
+          from the parsed market data, playing a crucial role in processing financial
+          data for further analysis.
+        docstring:
+          examples:
+          - lines:
+            - 'parsed_data = ''{ "market_volumes": [100, 200, 300] }'''
+            - volumes = extract_volumes(parsed_data=parsed_data)
+            - print(volumes)
+            output: '[100, 200, 300]'
+          - lines:
+            - parsed_data = 'Invalid data format'
+            - 'try:'
+            - '    volumes = extract_volumes(parsed_data=parsed_data)'
+            - 'except ValueError as e:'
+            - '    print(e)'
+            output: Invalid data format
+          parameters:
+          - description: A string representation of parsed market data containing
+              volume information.
+            name: parsed_data
+            type: str
+          raises:
+          - description: If the parsed_data is not in the expected format or if volume
+              extraction fails.
+            type: ValueError
+          - description: If the input parsed_data is not of type str.
+            type: TypeError
+          returns:
+            description: A list of integers representing the extracted market volumes.
+            type: List[int]
+          summary: Extracts and returns market volumes as a list of integers from
+            the given parsed market data.
+      prompt: Extract volumes from parsed market data
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates market data by checking prices and volumes for consistency
+        and correctness.
+      implementation: "def validate_market_data(prices: str, volumes: str) -> str:\n\
+        \    \"\"\"\n    Validates market data by checking the consistency and correctness\
+        \ of prices\n    and volumes.\n\n    Parameters\n    ----------\n    prices\
+        \ : List[float]\n        List of current market prices to be validated.\n\
+        \    volumes : List[int]\n        List of current market volumes to be validated.\n\
+        \n    Returns\n    -------\n    str\n        Output indicating whether the\
+        \ market data is valid or not.\n\n    Raises\n    ------\n    ValueError\n\
+        \        When the lengths of prices and volumes lists do not match.\n    TypeError\n\
+        \        When prices or volumes contain invalid data types.\n\n    Examples\n\
+        \    --------\n    >>> validate_market_data(prices=[10.5, 20.8, 30.1], volumes=[100,\
+        \ 200, 300])\n    'Market data is valid'\n\n    >>> validate_market_data(prices=[10.5,\
+        \ 'invalid', 30.1], volumes=[100, 200,\n    300])\n    TypeError: Prices must\
+        \ be a list of floats.\n\n    \"\"\"\n    raise NotImplementedError(\"This\
+        \ is a virtual stub node that needs to be implemented\")"
+      name: validate_market_data
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: prices
+        type: str
+      - description: Input parameter of type str
+        key: volumes
+        type: str
+      prd:
+        conceptual_info: This shim node is responsible for validating market data,
+          specifically checking if the provided prices and volumes are consistent
+          and correct.
+        docstring:
+          examples:
+          - lines:
+            - validate_market_data(prices=[10.5, 20.8, 30.1], volumes=[100, 200, 300])
+            output: '''Market data is valid'''
+          - lines:
+            - validate_market_data(prices=[10.5, 'invalid', 30.1], volumes=[100, 200,
+              300])
+            output: 'TypeError: Prices must be a list of floats.'
+          parameters:
+          - description: List of current market prices to be validated.
+            name: prices
+            type: List[float]
+          - description: List of current market volumes to be validated.
+            name: volumes
+            type: List[int]
+          raises:
+          - description: When the lengths of prices and volumes lists do not match.
+            type: ValueError
+          - description: When prices or volumes contain invalid data types.
+            type: TypeError
+          returns:
+            description: Output indicating whether the market data is valid or not.
+            type: str
+          summary: Validates market data by checking the consistency and correctness
+            of prices and volumes.
+      prompt: Validate market data by checking prices and volumes for consistency
+        and correctness.
+      shims: []
+  generate_trade_signals:
+    agent: false
+    code_node_type: shim
+    description: Generate trade signals based on market trends and other factors
+    implementation: "from ._generate_trade_signals.validate_inputs import validate_inputs\n\
+      from ._generate_trade_signals.generate_signals_from_trends import generate_signals_from_trends\n\
+      from ._generate_trade_signals.calculate_signal_confidences import calculate_signal_confidences\n\
+      \nfrom pydantic import BaseModel, Field\nfrom typing import List\n\n\nclass\
+      \ AnalyzeMarketTrendsOutput(BaseModel):\n    \"\"\"Pydantic model for analyze_market_trends\
+      \ node outputs.\"\"\"\n    trend_indicators: List[float] = (\n        Field(...,\
+      \ description=\"List of trend indicators\")\n    )\n    trend_directions: List[str]\
+      \ = (\n        Field(..., description=\"List of trend directions (up, down,\
+      \ neutral)\")\n    )\n\n\nclass GenerateTradeSignalsOutput(BaseModel):\n   \
+      \ \"\"\"Pydantic model for generate_trade_signals node outputs.\"\"\"\n    trade_signals:\
+      \ List[str] = (\n        Field(..., description=\"List of trade signals (buy,\
+      \ sell, hold)\")\n    )\n    signal_confidences: List[float] = (\n        Field(...,\
+      \ description=\"List of signal confidences\")\n    )\n\n\ndef generate_trade_signals(analyze_market_trends_input:\
+      \ AnalyzeMarketTrendsOutput, **kwargs) -> GenerateTradeSignalsOutput:\n    \"\
+      \"\"\n    Generate trade signals based on market trends and other factors.\n\
+      \n    Parameters\n    ----------\n    trend_indicators : List[float]\n     \
+      \   List of trend indicators from the analyze_market_trends node.\n    trend_directions\
+      \ : List[str]\n        List of trend directions (up, down, neutral) from the\n\
+      \        analyze_market_trends node.\n\n    Returns\n    -------\n    Tuple[List[str],\
+      \ List[float]]\n        A tuple containing a list of trade signals (buy, sell,\
+      \ hold) and a\n        list of corresponding signal confidences.\n\n    Raises\n\
+      \    ------\n    ValueError\n        If the lengths of trend_indicators and\
+      \ trend_directions do not\n        match.\n    TypeError\n        If trend_indicators\
+      \ or trend_directions are not of the expected\n        type.\n\n    Examples\n\
+      \    --------\n    >>> trend_indicators = [0.5, 0.7, 0.3]\n    >>> trend_directions\
+      \ = ['up', 'down', 'neutral']\n    >>> trade_signals, signal_confidences =\n\
+      \    generate_trade_signals(trend_indicators, trend_directions)\n    (['buy',\
+      \ 'sell', 'hold'], [0.8, 0.9, 0.4])\n\n    >>> trend_indicators = [0.2, 0.6]\n\
+      \    >>> trend_directions = ['down', 'up']\n    >>> trade_signals, signal_confidences\
+      \ =\n    generate_trade_signals(trend_indicators, trend_directions)\n    (['sell',\
+      \ 'buy'], [0.7, 0.85])\n\n    \"\"\"\n    validate_inputs(trend_indicators=analyze_market_trends_input.trend_indicators,\
+      \ trend_directions=analyze_market_trends_input.trend_directions)\n    \n   \
+      \ trade_signals: List[str] = generate_signals_from_trends(trend_indicators=analyze_market_trends_input.trend_indicators,\
+      \ trend_directions=analyze_market_trends_input.trend_directions)\n    \n   \
+      \ signal_confidences: List[float] = calculate_signal_confidences(trend_indicators=analyze_market_trends_input.trend_indicators,\
+      \ trend_directions=analyze_market_trends_input.trend_directions, trade_signals=trade_signals)\n\
+      \    \n    return GenerateTradeSignalsOutput(trade_signals=trade_signals, signal_confidences=signal_confidences)"
+    name: generate_trade_signals
+    nodes_depended_on:
+    - analyze_market_trends
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of trade signals (buy, sell, hold)
+      key: trade_signals
+      type: List[str]
+    - description: List of signal confidences
+      key: signal_confidences
+      type: List[float]
+    prd:
+      conceptual_info: This node generates trade signals based on the analysis of
+        market trends and other relevant factors, providing a crucial step in the
+        trading workflow.
+      docstring:
+        examples:
+        - lines:
+          - trend_indicators = [0.5, 0.7, 0.3]
+          - trend_directions = ['up', 'down', 'neutral']
+          - trade_signals, signal_confidences = generate_trade_signals(trend_indicators,
+            trend_directions)
+          output: (['buy', 'sell', 'hold'], [0.8, 0.9, 0.4])
+        - lines:
+          - trend_indicators = [0.2, 0.6]
+          - trend_directions = ['down', 'up']
+          - trade_signals, signal_confidences = generate_trade_signals(trend_indicators,
+            trend_directions)
+          output: (['sell', 'buy'], [0.7, 0.85])
+        parameters:
+        - description: List of trend indicators from the analyze_market_trends node.
+          name: trend_indicators
+          type: List[float]
+        - description: List of trend directions (up, down, neutral) from the analyze_market_trends
+            node.
+          name: trend_directions
+          type: List[str]
+        raises:
+        - description: If the lengths of trend_indicators and trend_directions do
+            not match.
+          type: ValueError
+        - description: If trend_indicators or trend_directions are not of the expected
+            type.
+          type: TypeError
+        returns:
+          description: A tuple containing a list of trade signals (buy, sell, hold)
+            and a list of corresponding signal confidences.
+          type: Tuple[List[str], List[float]]
+        summary: Generate trade signals based on market trends and other factors.
+    prompt: Generate trade signals based on market trends and other factors
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates the input trend indicators and directions to ensure they
+        are of the correct type and format for further processing.
+      implementation: "def validate_inputs(trend_indicators: str, trend_directions:\
+        \ str) -> str:\n    \"\"\"\n    Validates input trend indicators and directions.\n\
+        \n    Parameters\n    ----------\n    trend_indicators : List[float]\n   \
+        \     A list of float values representing trend indicators.\n    trend_directions\
+        \ : List[str]\n        A list of string values representing trend directions\
+        \ (up, down,\n        neutral).\n\n    Returns\n    -------\n    str\n   \
+        \     A success message if the inputs are valid.\n\n    Raises\n    ------\n\
+        \    ValueError\n        If the lengths of trend indicators and directions\
+        \ do not match, or\n        if the trend directions contain invalid values.\n\
+        \    TypeError\n        If trend indicators are not a list of floats or if\
+        \ trend directions\n        are not a list of strings.\n\n    Examples\n \
+        \   --------\n    >>> validate_inputs(trend_indicators=[0.5, 0.7, 0.3],\n\
+        \    trend_directions=['up', 'down', 'neutral'])\n    >>> print('Validation\
+        \ successful')\n    Validation successful\n\n    >>> try:\n    ...     validate_inputs(trend_indicators=[0.5,\
+        \ 'invalid', 0.3],\n    trend_directions=['up', 'down', 'neutral'])\n    >>>\
+        \ except TypeError as e:\n    ...     print(e)\n    Trend indicators must\
+        \ be a list of floats.\n\n    \"\"\"\n    raise NotImplementedError(\"This\
+        \ is a virtual stub node that needs to be implemented\")"
+      name: validate_inputs
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: trend_indicators
+        type: str
+      - description: Input parameter of type str
+        key: trend_directions
+        type: str
+      prd:
+        conceptual_info: This shim function is designed to validate the input trend
+          indicators and directions provided to it, ensuring they meet the required
+          format and type expectations before they are used in subsequent processing
+          steps.
+        docstring:
+          examples:
+          - lines:
+            - validate_inputs(trend_indicators=[0.5, 0.7, 0.3], trend_directions=['up',
+              'down', 'neutral'])
+            - print('Validation successful')
+            output: Validation successful
+          - lines:
+            - 'try:'
+            - '    validate_inputs(trend_indicators=[0.5, ''invalid'', 0.3], trend_directions=[''up'',
+              ''down'', ''neutral''])'
+            - 'except TypeError as e:'
+            - '    print(e)'
+            output: Trend indicators must be a list of floats.
+          parameters:
+          - description: A list of float values representing trend indicators.
+            name: trend_indicators
+            type: List[float]
+          - description: A list of string values representing trend directions (up,
+              down, neutral).
+            name: trend_directions
+            type: List[str]
+          raises:
+          - description: If the lengths of trend indicators and directions do not
+              match, or if the trend directions contain invalid values.
+            type: ValueError
+          - description: If trend indicators are not a list of floats or if trend
+              directions are not a list of strings.
+            type: TypeError
+          returns:
+            description: A success message if the inputs are valid.
+            type: str
+          summary: Validates input trend indicators and directions.
+      prompt: Validate the input trend indicators and directions.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Generates trade signals based on trend indicators and directions.
+      implementation: "from typing import List\n\n\ndef generate_signals_from_trends(trend_indicators:\
+        \ str, trend_directions: str) -> List[str]:\n    \"\"\"\n    Generates trade\
+        \ signals based on trend indicators and their directions.\n\n    Parameters\n\
+        \    ----------\n    trend_indicators : str\n        Serialized list of trend\
+        \ indicators used to generate trade signals.\n    trend_directions : str\n\
+        \        Serialized list of trend directions (up, down, neutral)\n       \
+        \ corresponding to the trend indicators.\n\n    Returns\n    -------\n   \
+        \ List[str]\n        List of generated trade signals (buy, sell, hold) based\
+        \ on the input\n        trend indicators and directions.\n\n    Raises\n \
+        \   ------\n    ValueError\n        If the input trend indicators or directions\
+        \ are invalid or cannot be\n        deserialized.\n    TypeError\n       \
+        \ If the input types are not as expected (e.g., not strings\n        representing\
+        \ lists).\n\n    Examples\n    --------\n    >>> import json\n    >>> trend_indicators\
+        \ = json.dumps([0.5, 0.7, 0.3])\n    >>> trend_directions = json.dumps(['up',\
+        \ 'down', 'neutral'])\n    >>> generate_signals_from_trends(trend_indicators=trend_indicators,\n\
+        \    trend_directions=trend_directions)\n    ['buy', 'sell', 'hold']\n\n \
+        \   >>> import json\n    >>> trend_indicators = json.dumps([0.2, 0.9])\n \
+        \   >>> trend_directions = json.dumps(['down', 'up'])\n    >>> generate_signals_from_trends(trend_indicators=trend_indicators,\n\
+        \    trend_directions=trend_directions)\n    ['sell', 'buy']\n\n    \"\"\"\
+        \n    raise NotImplementedError(\"This is a virtual stub node that needs to\
+        \ be implemented\")"
+      name: generate_signals_from_trends
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: trend_indicators
+        type: str
+      - description: Input parameter of type str
+        key: trend_directions
+        type: str
+      prd:
+        conceptual_info: This shim node generates trade signals based on the provided
+          trend indicators and their directions, serving as an intermediary step in
+          the trade signal generation process.
+        docstring:
+          examples:
+          - lines:
+            - import json
+            - trend_indicators = json.dumps([0.5, 0.7, 0.3])
+            - trend_directions = json.dumps(['up', 'down', 'neutral'])
+            - generate_signals_from_trends(trend_indicators=trend_indicators, trend_directions=trend_directions)
+            output: '[''buy'', ''sell'', ''hold'']'
+          - lines:
+            - import json
+            - trend_indicators = json.dumps([0.2, 0.9])
+            - trend_directions = json.dumps(['down', 'up'])
+            - generate_signals_from_trends(trend_indicators=trend_indicators, trend_directions=trend_directions)
+            output: '[''sell'', ''buy'']'
+          parameters:
+          - description: Serialized list of trend indicators used to generate trade
+              signals.
+            name: trend_indicators
+            type: str
+          - description: Serialized list of trend directions (up, down, neutral) corresponding
+              to the trend indicators.
+            name: trend_directions
+            type: str
+          raises:
+          - description: If the input trend indicators or directions are invalid or
+              cannot be deserialized.
+            type: ValueError
+          - description: If the input types are not as expected (e.g., not strings
+              representing lists).
+            type: TypeError
+          returns:
+            description: List of generated trade signals (buy, sell, hold) based on
+              the input trend indicators and directions.
+            type: List[str]
+          summary: Generates trade signals based on trend indicators and their directions.
+      prompt: Generate trade signals from the given trend indicators and directions.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Calculates signal confidences based on trend indicators, trend
+        directions, and trade signals.
+      implementation: "from typing import List\n\n\ndef calculate_signal_confidences(trend_indicators:\
+        \ str, trend_directions: str, trade_signals: str) -> List[float]:\n    \"\"\
+        \"\n    Calculates signal confidences based on trend indicators, trend directions,\n\
+        \    and trade signals.\n\n    Parameters\n    ----------\n    trend_indicators\
+        \ : str\n        Serialized list of trend indicators (List[float]).\n    trend_directions\
+        \ : str\n        Serialized list of trend directions (List[str]).\n    trade_signals\
+        \ : str\n        Serialized list of trade signals (List[str]).\n\n    Returns\n\
+        \    -------\n    List[float]\n        List of signal confidences corresponding\
+        \ to the input trade signals.\n\n    Raises\n    ------\n    ValueError\n\
+        \        When the input lists are of different lengths or when the\n     \
+        \   deserialization of input strings fails.\n    TypeError\n        When the\
+        \ input types are not as expected (e.g., trend indicators are\n        not\
+        \ numbers).\n\n    Examples\n    --------\n    >>> import json\n    >>> trend_indicators\
+        \ = json.dumps([0.5, 0.7, 0.3])\n    >>> trend_directions = json.dumps(['up',\
+        \ 'down', 'neutral'])\n    >>> trade_signals = json.dumps(['buy', 'sell',\
+        \ 'hold'])\n    >>> signal_confidences = calculate_signal_confidences(trend_indicators,\n\
+        \    trend_directions, trade_signals)\n    [0.8, 0.4, 0.6]\n\n    >>> import\
+        \ json\n    >>> trend_indicators = json.dumps([0.2, 0.9])\n    >>> trend_directions\
+        \ = json.dumps(['down', 'up'])\n    >>> trade_signals = json.dumps(['sell',\
+        \ 'buy'])\n    >>> signal_confidences = calculate_signal_confidences(trend_indicators,\n\
+        \    trend_directions, trade_signals)\n    [0.7, 0.9]\n\n    \"\"\"\n    raise\
+        \ NotImplementedError(\"This is a virtual stub node that needs to be implemented\"\
+        )"
+      name: calculate_signal_confidences
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[float]
+        key: output
+        type: List[float]
+      - description: Input parameter of type str
+        key: trend_indicators
+        type: str
+      - description: Input parameter of type str
+        key: trend_directions
+        type: str
+      - description: Input parameter of type str
+        key: trade_signals
+        type: str
+      prd:
+        conceptual_info: This shim node is responsible for calculating signal confidences
+          based on the provided trend indicators, trend directions, and trade signals.
+          It plays a crucial role in determining the reliability of trade signals
+          generated by the system.
+        docstring:
+          examples:
+          - lines:
+            - import json
+            - trend_indicators = json.dumps([0.5, 0.7, 0.3])
+            - trend_directions = json.dumps(['up', 'down', 'neutral'])
+            - trade_signals = json.dumps(['buy', 'sell', 'hold'])
+            - signal_confidences = calculate_signal_confidences(trend_indicators,
+              trend_directions, trade_signals)
+            output: '[0.8, 0.4, 0.6]'
+          - lines:
+            - import json
+            - trend_indicators = json.dumps([0.2, 0.9])
+            - trend_directions = json.dumps(['down', 'up'])
+            - trade_signals = json.dumps(['sell', 'buy'])
+            - signal_confidences = calculate_signal_confidences(trend_indicators,
+              trend_directions, trade_signals)
+            output: '[0.7, 0.9]'
+          parameters:
+          - description: Serialized list of trend indicators (List[float]).
+            name: trend_indicators
+            type: str
+          - description: Serialized list of trend directions (List[str]).
+            name: trend_directions
+            type: str
+          - description: Serialized list of trade signals (List[str]).
+            name: trade_signals
+            type: str
+          raises:
+          - description: When the input lists are of different lengths or when the
+              deserialization of input strings fails.
+            type: ValueError
+          - description: When the input types are not as expected (e.g., trend indicators
+              are not numbers).
+            type: TypeError
+          returns:
+            description: List of signal confidences corresponding to the input trade
+              signals.
+            type: List[float]
+          summary: Calculates signal confidences based on trend indicators, trend
+            directions, and trade signals.
+      prompt: Implement the calculation of signal confidences using provided trend
+        indicators, trend directions, and trade signals.
+      shims: []
+  monitor_trade_performance:
+    agent: false
+    code_node_type: shim
+    description: Monitor trade performance and adjust trading strategy as needed
+    implementation: "from ._monitor_trade_performance.validate_trade_data import validate_trade_data\n\
+      from ._monitor_trade_performance.calculate_performance_metrics import calculate_performance_metrics\n\
+      from ._monitor_trade_performance.extract_metrics_values import extract_metrics_values\n\
+      from ._monitor_trade_performance.determine_strategy_adjustments import determine_strategy_adjustments\n\
+      \nfrom pydantic import BaseModel, Field\nfrom typing import List\n\n\nclass\
+      \ ExecuteTradesOutput(BaseModel):\n    \"\"\"Pydantic model for execute_trades\
+      \ node outputs.\"\"\"\n    trade_outcomes: List[str] = (\n        Field(...,\
+      \ description=\"List of trade outcomes (success, failure)\")\n    )\n    trade_ids:\
+      \ List[str] = Field(..., description=\"List of trade IDs\")\n\n\nclass MonitorTradePerformanceOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for monitor_trade_performance node outputs.\"\"\"\n\
+      \    performance_metrics: List[float] = (\n        Field(..., description=\"\
+      List of performance metrics (e.g. returns, Sharpe ratio)\")\n    )\n    strategy_adjustments:\
+      \ List[str] = (\n        Field(..., description=\"List of strategy adjustments\
+      \ made\")\n    )\n\n\ndef monitor_trade_performance(execute_trades_input: ExecuteTradesOutput,\
+      \ **kwargs) -> MonitorTradePerformanceOutput:\n    \"\"\"\n    Monitor trade\
+      \ performance and adjust trading strategy.\n\n    Parameters\n    ----------\n\
+      \    trade_outcomes : List[str]\n        List of trade outcomes (success, failure)\
+      \ from the execute_trades\n        node.\n    trade_ids : List[str]\n      \
+      \  List of trade IDs from the execute_trades node.\n\n    Returns\n    -------\n\
+      \    Tuple[List[float], List[str]]\n        A tuple containing a list of performance\
+      \ metrics and a list of\n        strategy adjustments made.\n\n    Raises\n\
+      \    ------\n    ValueError\n        If trade_outcomes or trade_ids are empty\
+      \ or mismatched in length.\n\n    Examples\n    --------\n    >>> trade_outcomes\
+      \ = ['success', 'failure', 'success']\n    >>> trade_ids = ['trade1', 'trade2',\
+      \ 'trade3']\n    >>> monitor_trade_performance(trade_outcomes, trade_ids)\n\
+      \    ([0.05, 0.02], ['increased_risk', 'adjusted_stop_loss'])\n\n    >>> trade_outcomes\
+      \ = ['success', 'success']\n    >>> trade_ids = ['trade4', 'trade5']\n    >>>\
+      \ monitor_trade_performance(trade_outcomes, trade_ids)\n    ([0.03, 0.01], ['maintained_risk'])\n\
+      \n    \"\"\"\n    validated_data = validate_trade_data(trade_outcomes=execute_trades_input.trade_outcomes,\
+      \ trade_ids=execute_trades_input.trade_ids)\n    \n    performance_data = calculate_performance_metrics(trade_outcomes=execute_trades_input.trade_outcomes,\
+      \ trade_ids=execute_trades_input.trade_ids)\n    \n    calculated_metrics: List[float]\
+      \ = extract_metrics_values(performance_data=performance_data)\n    \n    strategy_recommendations:\
+      \ List[str] = determine_strategy_adjustments(performance_metrics=calculated_metrics,\
+      \ trade_outcomes=execute_trades_input.trade_outcomes)\n    \n    return MonitorTradePerformanceOutput(\n\
+      \        performance_metrics=calculated_metrics,\n        strategy_adjustments=strategy_recommendations\n\
+      \    )"
+    name: monitor_trade_performance
+    nodes_depended_on:
+    - execute_trades
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of performance metrics (e.g. returns, Sharpe ratio)
+      key: performance_metrics
+      type: List[float]
+    - description: List of strategy adjustments made
+      key: strategy_adjustments
+      type: List[str]
+    prd:
+      conceptual_info: This node monitors the performance of trades executed by the
+        trading system and adjusts the trading strategy as needed based on the performance
+        metrics.
+      docstring:
+        examples:
+        - lines:
+          - trade_outcomes = ['success', 'failure', 'success']
+          - trade_ids = ['trade1', 'trade2', 'trade3']
+          - monitor_trade_performance(trade_outcomes, trade_ids)
+          output: ([0.05, 0.02], ['increased_risk', 'adjusted_stop_loss'])
+        - lines:
+          - trade_outcomes = ['success', 'success']
+          - trade_ids = ['trade4', 'trade5']
+          - monitor_trade_performance(trade_outcomes, trade_ids)
+          output: ([0.03, 0.01], ['maintained_risk'])
+        parameters:
+        - description: List of trade outcomes (success, failure) from the execute_trades
+            node.
+          name: trade_outcomes
+          type: List[str]
+        - description: List of trade IDs from the execute_trades node.
+          name: trade_ids
+          type: List[str]
+        raises:
+        - description: If trade_outcomes or trade_ids are empty or mismatched in length.
+          type: ValueError
+        returns:
+          description: A tuple containing a list of performance metrics and a list
+            of strategy adjustments made.
+          type: Tuple[List[float], List[str]]
+        summary: Monitor trade performance and adjust trading strategy.
+    prompt: Monitor trade performance and adjust trading strategy as needed
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates trade data inputs to ensure they meet the required format
+        and structure for further processing.
+      implementation: "def validate_trade_data(trade_outcomes: str, trade_ids: str)\
+        \ -> str:\n    \"\"\"\n    Validates trade data inputs (trade outcomes and\
+        \ IDs) to ensure they are\n    correctly formatted and contain valid information.\n\
+        \n    Parameters\n    ----------\n    trade_outcomes : str\n        Serialized\
+        \ list of trade outcomes (e.g., success, failure) that need\n        to be\
+        \ validated.\n    trade_ids : str\n        Serialized list of trade IDs that\
+        \ correspond to the trade outcomes\n        and need to be validated.\n\n\
+        \    Returns\n    -------\n    str\n        A validation result indicating\
+        \ whether the trade data is valid.\n        Returns 'valid' if the data passes\
+        \ all checks, otherwise returns an\n        appropriate error message.\n\n\
+        \    Raises\n    ------\n    ValueError\n        Raised when the input data\
+        \ is not in the expected format or contains\n        invalid values.\n   \
+        \ TypeError\n        Raised when the input types are not as expected (e.g.,\
+        \ not strings).\n\n    Examples\n    --------\n    >>> validate_trade_data(trade_outcomes='[\"\
+        success\", \"failure\"]',\n    trade_ids='[\"trade1\", \"trade2\"]')\n   \
+        \ 'valid'\n\n    >>> validate_trade_data(trade_outcomes='invalid_data', trade_ids='[\"\
+        trade1\",\n    \"trade2\"]')\n    'Error: Invalid trade outcomes format.'\n\
+        \n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node\
+        \ that needs to be implemented\")"
+      name: validate_trade_data
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: trade_outcomes
+        type: str
+      - description: Input parameter of type str
+        key: trade_ids
+        type: str
+      prd:
+        conceptual_info: This shim function is crucial for validating trade data before
+          it is processed further in the trade performance monitoring pipeline. It
+          ensures that the trade outcomes and IDs are correctly formatted and meet
+          the necessary criteria for analysis.
+        docstring:
+          examples:
+          - lines:
+            - validate_trade_data(trade_outcomes='["success", "failure"]', trade_ids='["trade1",
+              "trade2"]')
+            output: '''valid'''
+          - lines:
+            - validate_trade_data(trade_outcomes='invalid_data', trade_ids='["trade1",
+              "trade2"]')
+            output: '''Error: Invalid trade outcomes format.'''
+          parameters:
+          - description: Serialized list of trade outcomes (e.g., success, failure)
+              that need to be validated.
+            name: trade_outcomes
+            type: str
+          - description: Serialized list of trade IDs that correspond to the trade
+              outcomes and need to be validated.
+            name: trade_ids
+            type: str
+          raises:
+          - description: Raised when the input data is not in the expected format
+              or contains invalid values.
+            type: ValueError
+          - description: Raised when the input types are not as expected (e.g., not
+              strings).
+            type: TypeError
+          returns:
+            description: A validation result indicating whether the trade data is
+              valid. Returns 'valid' if the data passes all checks, otherwise returns
+              an appropriate error message.
+            type: str
+          summary: Validates trade data inputs (trade outcomes and IDs) to ensure
+            they are correctly formatted and contain valid information.
+      prompt: Validate the trade data for the given trade outcomes and IDs.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Calculates performance metrics based on trade outcomes and trade
+        IDs.
+      implementation: "def calculate_performance_metrics(trade_outcomes: str, trade_ids:\
+        \ str) -> str:\n    \"\"\"\n    Calculates performance metrics based on the\
+        \ provided trade outcomes and\n    trade IDs.\n\n    Parameters\n    ----------\n\
+        \    trade_outcomes : str\n        Serialized string representing a list of\
+        \ trade outcomes.\n    trade_ids : str\n        Serialized string representing\
+        \ a list of trade IDs corresponding to\n        the trade outcomes.\n\n  \
+        \  Returns\n    -------\n    str\n        Serialized string representing the\
+        \ calculated performance metrics\n        data.\n\n    Raises\n    ------\n\
+        \    ValueError\n        If the input strings cannot be deserialized into\
+        \ lists or if the\n        lists are of different lengths.\n    TypeError\n\
+        \        If the deserialized lists contain elements that are not of the\n\
+        \        expected type (e.g., non-string elements).\n\n    Examples\n    --------\n\
+        \    >>> import json\n    >>> trade_outcomes = json.dumps(['success', 'failure',\
+        \ 'success'])\n    >>> trade_ids = json.dumps(['trade1', 'trade2', 'trade3'])\n\
+        \    >>> output = calculate_performance_metrics(trade_outcomes, trade_ids)\n\
+        \    '{\"metric1\": 0.5, \"metric2\": 0.8}'\n\n    >>> import json\n    >>>\
+        \ trade_outcomes = json.dumps(['failure', 'success'])\n    >>> trade_ids =\
+        \ json.dumps(['trade4', 'trade5'])\n    >>> output = calculate_performance_metrics(trade_outcomes,\
+        \ trade_ids)\n    '{\"metric1\": 0.3, \"metric2\": 0.6}'\n\n    \"\"\"\n \
+        \   raise NotImplementedError(\"This is a virtual stub node that needs to\
+        \ be implemented\")"
+      name: calculate_performance_metrics
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: trade_outcomes
+        type: str
+      - description: Input parameter of type str
+        key: trade_ids
+        type: str
+      prd:
+        conceptual_info: This shim function serves as a placeholder for calculating
+          performance metrics from trade outcomes and IDs, which will be used in monitoring
+          trade performance.
+        docstring:
+          examples:
+          - lines:
+            - import json
+            - trade_outcomes = json.dumps(['success', 'failure', 'success'])
+            - trade_ids = json.dumps(['trade1', 'trade2', 'trade3'])
+            - output = calculate_performance_metrics(trade_outcomes, trade_ids)
+            output: '''{"metric1": 0.5, "metric2": 0.8}'''
+          - lines:
+            - import json
+            - trade_outcomes = json.dumps(['failure', 'success'])
+            - trade_ids = json.dumps(['trade4', 'trade5'])
+            - output = calculate_performance_metrics(trade_outcomes, trade_ids)
+            output: '''{"metric1": 0.3, "metric2": 0.6}'''
+          parameters:
+          - description: Serialized string representing a list of trade outcomes.
+            name: trade_outcomes
+            type: str
+          - description: Serialized string representing a list of trade IDs corresponding
+              to the trade outcomes.
+            name: trade_ids
+            type: str
+          raises:
+          - description: If the input strings cannot be deserialized into lists or
+              if the lists are of different lengths.
+            type: ValueError
+          - description: If the deserialized lists contain elements that are not of
+              the expected type (e.g., non-string elements).
+            type: TypeError
+          returns:
+            description: Serialized string representing the calculated performance
+              metrics data.
+            type: str
+          summary: Calculates performance metrics based on the provided trade outcomes
+            and trade IDs.
+      prompt: Implement the calculate_performance_metrics function to compute performance
+        metrics based on trade outcomes and IDs.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Extracts numerical performance metrics from the provided performance
+        data string.
+      implementation: "from typing import List\n\n\ndef extract_metrics_values(performance_data:\
+        \ str) -> List[float]:\n    \"\"\"\n    Extracts numerical performance metrics\
+        \ from the input performance data\n    string.\n\n    Parameters\n    ----------\n\
+        \    performance_data : str\n        A string representation of performance\
+        \ metrics calculated by the\n        calculate_performance_metrics function.\n\
+        \n    Returns\n    -------\n    List[float]\n        A list of numerical performance\
+        \ metrics extracted from the input\n        string.\n\n    Raises\n    ------\n\
+        \    ValueError\n        If the input string is malformed or cannot be parsed\
+        \ into numerical\n        metrics.\n    TypeError\n        If the input is\
+        \ not a string.\n\n    Examples\n    --------\n    >>> performance_data =\
+        \ 'returns:0.05,Sharpe_ratio:1.2,max_drawdown:0.15'\n    >>> extracted_metrics\
+        \ = extract_metrics_values(performance_data)\n    [0.05, 1.2, 0.15]\n\n  \
+        \  >>> performance_data = 'metric1:10,metric2:20.5,metric3:30.2'\n    >>>\
+        \ extracted_metrics = extract_metrics_values(performance_data)\n    [10.0,\
+        \ 20.5, 30.2]\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")"
+      name: extract_metrics_values
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[float]
+        key: output
+        type: List[float]
+      - description: Input parameter of type str
+        key: performance_data
+        type: str
+      prd:
+        conceptual_info: This shim function is designed to extract numerical performance
+          metrics from a given string representation of performance data, which is
+          expected to be generated by the calculate_performance_metrics function.
+        docstring:
+          examples:
+          - lines:
+            - performance_data = 'returns:0.05,Sharpe_ratio:1.2,max_drawdown:0.15'
+            - extracted_metrics = extract_metrics_values(performance_data)
+            output: '[0.05, 1.2, 0.15]'
+          - lines:
+            - performance_data = 'metric1:10,metric2:20.5,metric3:30.2'
+            - extracted_metrics = extract_metrics_values(performance_data)
+            output: '[10.0, 20.5, 30.2]'
+          parameters:
+          - description: A string representation of performance metrics calculated
+              by the calculate_performance_metrics function.
+            name: performance_data
+            type: str
+          raises:
+          - description: If the input string is malformed or cannot be parsed into
+              numerical metrics.
+            type: ValueError
+          - description: If the input is not a string.
+            type: TypeError
+          returns:
+            description: A list of numerical performance metrics extracted from the
+              input string.
+            type: List[float]
+          summary: Extracts numerical performance metrics from the input performance
+            data string.
+      prompt: Implement the extract_metrics_values function to extract numerical performance
+        metrics from the input string.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Determines strategy adjustments based on performance metrics and
+        trade outcomes.
+      implementation: "from typing import List\n\n\ndef determine_strategy_adjustments(performance_metrics:\
+        \ str, trade_outcomes: str) -> List[str]:\n    \"\"\"\n    Analyzes performance\
+        \ metrics and trade outcomes to recommend strategy\n    adjustments.\n\n \
+        \   Parameters\n    ----------\n    performance_metrics : str\n        Serialized\
+        \ performance metrics data used to evaluate strategy\n        effectiveness.\n\
+        \    trade_outcomes : str\n        Serialized trade outcomes data providing\
+        \ context for strategy\n        adjustments.\n\n    Returns\n    -------\n\
+        \    List[str]\n        List of strategy adjustments recommended based on\
+        \ the analysis of\n        performance metrics and trade outcomes.\n\n   \
+        \ Raises\n    ------\n    ValueError\n        If the input performance metrics\
+        \ or trade outcomes are not in the\n        expected format or are missing\
+        \ required data.\n    TypeError\n        If the input types for performance\
+        \ metrics or trade outcomes are not\n        as expected (should be str).\n\
+        \n    Examples\n    --------\n    >>> performance_metrics = '[0.05, 0.02,\
+        \ -0.01]'\n    >>> trade_outcomes = '[\"success\", \"failure\", \"success\"\
+        ]'\n    >>> determine_strategy_adjustments(performance_metrics, trade_outcomes)\n\
+        \    ['Increase investment', 'Adjust risk parameters']\n\n    >>> performance_metrics\
+        \ = '[0.03, 0.01, 0.02]'\n    >>> trade_outcomes = '[\"success\", \"success\"\
+        , \"success\"]'\n    >>> determine_strategy_adjustments(performance_metrics,\
+        \ trade_outcomes)\n    ['Maintain current strategy', 'Consider increasing\
+        \ position size']\n\n    \"\"\"\n    raise NotImplementedError(\"This is a\
+        \ virtual stub node that needs to be implemented\")"
+      name: determine_strategy_adjustments
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: performance_metrics
+        type: str
+      - description: Input parameter of type str
+        key: trade_outcomes
+        type: str
+      prd:
+        conceptual_info: This shim node plays a crucial role in analyzing trading
+          performance by determining necessary strategy adjustments based on the provided
+          performance metrics and trade outcomes.
+        docstring:
+          examples:
+          - lines:
+            - performance_metrics = '[0.05, 0.02, -0.01]'
+            - trade_outcomes = '["success", "failure", "success"]'
+            - determine_strategy_adjustments(performance_metrics, trade_outcomes)
+            output: '[''Increase investment'', ''Adjust risk parameters'']'
+          - lines:
+            - performance_metrics = '[0.03, 0.01, 0.02]'
+            - trade_outcomes = '["success", "success", "success"]'
+            - determine_strategy_adjustments(performance_metrics, trade_outcomes)
+            output: '[''Maintain current strategy'', ''Consider increasing position
+              size'']'
+          parameters:
+          - description: Serialized performance metrics data used to evaluate strategy
+              effectiveness.
+            name: performance_metrics
+            type: str
+          - description: Serialized trade outcomes data providing context for strategy
+              adjustments.
+            name: trade_outcomes
+            type: str
+          raises:
+          - description: If the input performance metrics or trade outcomes are not
+              in the expected format or are missing required data.
+            type: ValueError
+          - description: If the input types for performance metrics or trade outcomes
+              are not as expected (should be str).
+            type: TypeError
+          returns:
+            description: List of strategy adjustments recommended based on the analysis
+              of performance metrics and trade outcomes.
+            type: List[str]
+          summary: Analyzes performance metrics and trade outcomes to recommend strategy
+            adjustments.
+      prompt: Typed node for shim determine_strategy_adjustments
+      shims: []

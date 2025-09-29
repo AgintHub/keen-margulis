@@ -1,228 +1,218 @@
-# stockmarketanalysisworkflow - Complete PRD Documentation
+# tradingworkflow - Complete PRD Documentation
 
 ## Overview
-PRDs for nodes in the 'stockmarketanalysisworkflow' module.
+PRDs for nodes in the 'tradingworkflow' module.
 
 ## Table of Contents
 
-- [collect_stock_data](#collect_stock_data)
+- [fetch_market_data](#fetch_market_data)
 
-- [process_stock_data](#process_stock_data)
+- [analyze_market_trends](#analyze_market_trends)
 
-- [analyze_stock_trends](#analyze_stock_trends)
+- [generate_trade_signals](#generate_trade_signals)
 
-- [calculate_stock_metrics](#calculate_stock_metrics)
+- [execute_trades](#execute_trades)
 
-- [generate_stock_insights](#generate_stock_insights)
+- [monitor_trade_performance](#monitor_trade_performance)
 
 
 
 ---
 
-## collect_stock_data
+## fetch_market_data
 
 ### Description
-Collect raw stock market data from reliable sources.
+Retrieve current market data from various sources
 
 ### Conceptual Info
 
-This node collects raw stock market data, including historical prices and trading volumes, for specified stock symbols from reliable sources.
+The fetch_market_data node retrieves current market data from various sources, providing essential information for downstream analysis and decision-making.
 
 ### Docstring
 
-**Summary:** Collects historical stock prices and trading volumes for given stock symbols.
+**Summary:** Fetches current market data, including prices and volumes, from multiple sources.
 
-**Parameters:**
-
-- stock_symbols (List[str]): List of stock symbols to gather data for.
-**Returns:** Tuple[List[str], List[float], List[int]] - A tuple containing the list of stock symbols, their historical prices, and trading volumes.
+**Returns:** Tuple[List[float], List[int]] - A tuple containing a list of current market prices and a list of current market volumes.
 
 **Raises:**
 
-- ValueError: If the input stock symbols list is empty or contains invalid symbols.
-- ConnectionError: If there's a failure connecting to the data source.
+- ConnectionError: If there's a failure connecting to market data sources.
+- DataParsingError: If there's an issue parsing the received market data.
 **Examples:**
 
 ```python
->>> stock_data = collect_stock_data(['AAPL', 'GOOG'])
->>> print(stock_data)
-(['AAPL', 'GOOG'], [150.5, 2800.2], [100000, 50000])
+>>> market_data = fetch_market_data()
+([123.45, 67.89], [1000, 2000])
 ```
 
 ```python
->>> stock_symbols = ['MSFT', 'AMZN']
->>> data = collect_stock_data(stock_symbols)
->>> print(data)
-(['MSFT', 'AMZN'], [220.1, 3200.5], [80000, 70000])
+>>> prices, volumes = fetch_market_data()
+>>> print(f'Prices: {prices}')
+>>> print(f'Volumes: {volumes}')
+Prices: [123.45, 67.89]
+Volumes: [1000, 2000]
 ```
 
 
 
 ---
 
-## process_stock_data
+## analyze_market_trends
 
 ### Description
-Preprocess stock data to ensure it's clean and ready for analysis.
+Analyze market trends using historical data and technical indicators
 
 ### Conceptual Info
 
-This node takes raw stock market data, cleans it, normalizes the trading volumes, and preprocesses the stock prices for further analysis.
+This node analyzes market trends using historical data and technical indicators, producing trend indicators and directions.
 
 ### Docstring
 
-**Summary:** Preprocesses stock data by cleaning and normalizing it for analysis.
+**Summary:** Analyze market trends using historical data and technical indicators.
 
 **Parameters:**
 
-- historical_prices (List[float]): Historical stock prices collected from reliable sources.
-- trading_volumes (List[int]): Trading volumes for each stock symbol collected from reliable sources.
-**Returns:** Tuple[List[float], List[float]] - A tuple containing the cleaned stock price data and normalized trading volumes.
+- market_prices (List[float]): List of current market prices from fetch_market_data node.
+- market_volumes (List[int]): List of current market volumes from fetch_market_data node.
+**Returns:** Tuple[List[float], List[str]] - A tuple containing a list of trend indicators and a list of trend directions.
 
 **Raises:**
 
-- ValueError: If historical_prices or trading_volumes are empty or not of the correct type.
+- ValueError: If market_prices or market_volumes are empty or malformed.
 **Examples:**
 
 ```python
->>> historical_prices = [100.0, 101.0, 102.0, 103.0]
->>> trading_volumes = [1000, 1200, 1100, 1300]
->>> cleaned_stock_data, normalized_volumes = process_stock_data(historical_prices, trading_volumes)
-([100.0, 101.0, 102.0, 103.0], [0.0, 0.6666666666666666, 0.3333333333333333, 1.0])
+>>> market_prices = [100.0, 120.0, 110.0]
+>>> market_volumes = [1000, 1200, 1100]
+>>> trend_indicators, trend_directions = analyze_market_trends(market_prices, market_volumes)
+([1.2, 0.9, 1.1], ['up', 'down', 'up'])
 ```
 
 
 
 ---
 
-## analyze_stock_trends
+## generate_trade_signals
 
 ### Description
-Perform in-depth analysis of stock trends and patterns.
+Generate trade signals based on market trends and other factors
 
 ### Conceptual Info
 
-This node analyzes preprocessed stock data to identify significant trends, patterns, and anomalies, providing crucial insights for investment decisions.
+This node generates trade signals based on the analysis of market trends and other relevant factors, providing a crucial step in the trading workflow.
 
 ### Docstring
 
-**Summary:** Analyze preprocessed stock data to identify trends, patterns, and anomalies.
+**Summary:** Generate trade signals based on market trends and other factors.
 
 **Parameters:**
 
-- cleaned_stock_data (List[float]): Preprocessed stock price data from process_stock_data node
-- normalized_volumes (List[float]): Normalized trading volumes from process_stock_data node
-**Returns:** Tuple[List[str], bool] - A tuple containing a list of identified trends and patterns, and a boolean indicating whether any anomalies were detected
+- trend_indicators (List[float]): List of trend indicators from the analyze_market_trends node.
+- trend_directions (List[str]): List of trend directions (up, down, neutral) from the analyze_market_trends node.
+**Returns:** Tuple[List[str], List[float]] - A tuple containing a list of trade signals (buy, sell, hold) and a list of corresponding signal confidences.
 
 **Raises:**
 
-- ValueError: If cleaned_stock_data or normalized_volumes are empty or malformed
+- ValueError: If the lengths of trend_indicators and trend_directions do not match.
+- TypeError: If trend_indicators or trend_directions are not of the expected type.
 **Examples:**
 
 ```python
->>> cleaned_stock_data = [100.0, 102.0, 101.0, 103.0, 105.0]
->>> normalized_volumes = [0.5, 0.6, 0.4, 0.7, 0.8]
->>> result = analyze_stock_trends(cleaned_stock_data, normalized_volumes)
-(['Uptrend', 'Increasing Volume'], True)
+>>> trend_indicators = [0.5, 0.7, 0.3]
+>>> trend_directions = ['up', 'down', 'neutral']
+>>> trade_signals, signal_confidences = generate_trade_signals(trend_indicators, trend_directions)
+(['buy', 'sell', 'hold'], [0.8, 0.9, 0.4])
 ```
 
 ```python
->>> cleaned_stock_data = [50.0, 49.0, 48.0, 47.0, 46.0]
->>> normalized_volumes = [0.3, 0.2, 0.1, 0.4, 0.5]
->>> result = analyze_stock_trends(cleaned_stock_data, normalized_volumes)
-(['Downtrend', 'Mixed Volume'], False)
+>>> trend_indicators = [0.2, 0.6]
+>>> trend_directions = ['down', 'up']
+>>> trade_signals, signal_confidences = generate_trade_signals(trend_indicators, trend_directions)
+(['sell', 'buy'], [0.7, 0.85])
 ```
 
 
 
 ---
 
-## calculate_stock_metrics
+## execute_trades
 
 ### Description
-Compute important stock performance metrics.
+Execute trades based on generated trade signals
 
 ### Conceptual Info
 
-This node computes key stock performance metrics using preprocessed stock data.
+This node executes trades based on the trade signals generated by its parent node, generate_trade_signals.
 
 ### Docstring
 
-**Summary:** Calculates moving averages, Relative Strength Index (RSI), and volatility from preprocessed stock data.
+**Summary:** Execute trades based on generated trade signals and return the outcomes and trade IDs.
 
 **Parameters:**
 
-- cleaned_stock_data (List[float]): Preprocessed stock price data from the 'process_stock_data' node.
-- normalized_volumes (List[float]): Normalized trading volumes from the 'process_stock_data' node.
-**Returns:** Tuple[List[float], List[float], float] - A tuple containing moving averages, RSI values, and volatility measure.
+- trade_signals (List[str]): List of trade signals (buy, sell, hold) generated by the generate_trade_signals node.
+- signal_confidences (List[float]): List of signal confidences corresponding to the trade signals.
+**Returns:** Tuple[List[str], List[str]] - A tuple containing a list of trade outcomes (success, failure) and a list of trade IDs.
 
 **Raises:**
 
-- ValueError: If cleaned_stock_data or normalized_volumes are empty or malformed.
+- ValueError: If the lengths of trade_signals and signal_confidences do not match.
+- RuntimeError: If trade execution fails due to external factors.
 **Examples:**
 
 ```python
->>> cleaned_data = [100.0, 101.0, 102.0, 103.0, 104.0]
->>> normalized_volumes = [0.5, 0.6, 0.7, 0.8, 0.9]
->>> moving_averages, rsi_values, volatility = calculate_stock_metrics(cleaned_data, normalized_volumes)
-([101.0, 102.0], [0.2, 0.3], 0.015)
+>>> trade_signals = ['buy', 'sell', 'hold']
+>>> signal_confidences = [0.8, 0.9, 0.7]
+>>> trade_outcomes, trade_ids = execute_trades(trade_signals, signal_confidences)
+(['success', 'success', 'failure'], ['trade123', 'trade456', 'trade789'])
 ```
 
 ```python
->>> cleaned_data = [50.0, 51.0, 52.0, 53.0, 54.0]
->>> normalized_volumes = [0.1, 0.2, 0.3, 0.4, 0.5]
->>> moving_averages, rsi_values, volatility = calculate_stock_metrics(cleaned_data, normalized_volumes)
-([51.0, 52.0], [0.1, 0.2], 0.020)
+>>> trade_signals = ['buy', 'sell']
+>>> signal_confidences = [0.85, 0.95]
+>>> trade_outcomes, trade_ids = execute_trades(trade_signals, signal_confidences)
+(['success', 'success'], ['trade101', 'trade102'])
 ```
 
 
 
 ---
 
-## generate_stock_insights
+## monitor_trade_performance
 
 ### Description
-Generate comprehensive insights for stock market investors.
+Monitor trade performance and adjust trading strategy as needed
 
 ### Conceptual Info
 
-This node generates comprehensive insights for stock market investors by synthesizing analyzed trends, patterns, and metrics.
+This node monitors the performance of trades executed by the trading system and adjusts the trading strategy as needed based on the performance metrics.
 
 ### Docstring
 
-**Summary:** Generate investment recommendations, risk assessment, and confidence score based on stock trend analysis and metrics.
+**Summary:** Monitor trade performance and adjust trading strategy.
 
 **Parameters:**
 
-- trend_analysis (List[str]): List of identified trends and patterns from stock data analysis.
-- anomaly_detected (bool): Whether any anomalies were detected in the stock data.
-- moving_averages (List[float]): Moving averages for the stock prices.
-- rsi_values (List[float]): Relative Strength Index values for the stock.
-- volatility (float): Stock price volatility measure.
-**Returns:** Tuple[List[str], str, float] - A tuple containing investment recommendations, risk assessment, and confidence score.
+- trade_outcomes (List[str]): List of trade outcomes (success, failure) from the execute_trades node.
+- trade_ids (List[str]): List of trade IDs from the execute_trades node.
+**Returns:** Tuple[List[float], List[str]] - A tuple containing a list of performance metrics and a list of strategy adjustments made.
 
 **Raises:**
 
-- ValueError: If input data is inconsistent or missing required fields.
+- ValueError: If trade_outcomes or trade_ids are empty or mismatched in length.
 **Examples:**
 
 ```python
->>> trend_analysis = ['uptrend', 'bullish']
->>> anomaly_detected = False
->>> moving_averages = [100.0, 120.0]
->>> rsi_values = [30.0, 40.0]
->>> volatility = 0.05
->>> generate_stock_insights(trend_analysis, anomaly_detected, moving_averages, rsi_values, volatility)
-(['Buy', 'Hold'], 'Low', 0.8)
+>>> trade_outcomes = ['success', 'failure', 'success']
+>>> trade_ids = ['trade1', 'trade2', 'trade3']
+>>> monitor_trade_performance(trade_outcomes, trade_ids)
+([0.05, 0.02], ['increased_risk', 'adjusted_stop_loss'])
 ```
 
 ```python
->>> trend_analysis = ['downtrend']
->>> anomaly_detected = True
->>> moving_averages = [80.0, 70.0]
->>> rsi_values = [70.0, 80.0]
->>> volatility = 0.1
->>> generate_stock_insights(trend_analysis, anomaly_detected, moving_averages, rsi_values, volatility)
-(['Sell'], 'High', 0.6)
+>>> trade_outcomes = ['success', 'success']
+>>> trade_ids = ['trade4', 'trade5']
+>>> monitor_trade_performance(trade_outcomes, trade_ids)
+([0.03, 0.01], ['maintained_risk'])
 ```
 

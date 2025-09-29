@@ -1,222 +1,228 @@
-# chesspositionanalysisworkflow - Complete PRD Documentation
+# stockmarketanalysisworkflow - Complete PRD Documentation
 
 ## Overview
-PRDs for nodes in the 'chesspositionanalysisworkflow' module.
+PRDs for nodes in the 'stockmarketanalysisworkflow' module.
 
 ## Table of Contents
 
-- [analyze_pawn_structure](#analyze_pawn_structure)
+- [collect_stock_data](#collect_stock_data)
 
-- [assess_king_safety](#assess_king_safety)
+- [process_stock_data](#process_stock_data)
 
-- [evaluate_material_balance](#evaluate_material_balance)
+- [analyze_stock_trends](#analyze_stock_trends)
 
-- [parse_chess_position](#parse_chess_position)
+- [calculate_stock_metrics](#calculate_stock_metrics)
 
-- [synthesize_analysis](#synthesize_analysis)
-
-
-
----
-
-## analyze_pawn_structure
-
-### Description
-Examine pawn chain, isolated pawns, and other structural elements.
-
-### Conceptual Info
-
-This node analyzes the pawn structure of a given chess position to identify strengths and weaknesses.
-
-### Docstring
-
-**Summary:** Analyze the pawn structure from the parsed chess position.
-
-**Parameters:**
-
-- piece_positions (List[str]): Positions of all pieces on the board, provided by the parse_chess_position node.
-- side_to_move (str): Side to move (white or black), provided by the parse_chess_position node.
-**Returns:** Tuple[List[str], List[str], List[str]] - A tuple containing the analysis of pawn chains, positions of isolated pawns, and positions of passed pawns.
-
-**Raises:**
-
-- ValueError: If the piece_positions list is empty or if side_to_move is not 'white' or 'black'.
-**Examples:**
-
-```python
->>> piece_positions = ['e2', 'e4', 'd4', 'c3']
->>> side_to_move = 'white'
->>> result = analyze_pawn_structure(piece_positions, side_to_move)
-(['Pawn chain on d4 and c3 is strong'], ['b2'], ['e4'])
-```
-
-```python
->>> piece_positions = ['e7', 'd5', 'c6']
->>> side_to_move = 'black'
->>> result = analyze_pawn_structure(piece_positions, side_to_move)
-(['Pawn chain on d5 and c6 is flexible'], ['a7'], ['d5'])
-```
+- [generate_stock_insights](#generate_stock_insights)
 
 
 
 ---
 
-## assess_king_safety
+## collect_stock_data
 
 ### Description
-Assess king safety and potential vulnerabilities
+Collect raw stock market data from reliable sources.
 
 ### Conceptual Info
 
-This node assesses the safety of the kings on a chessboard by analyzing their positions, surrounding pieces, and potential threats.
+This node collects raw stock market data, including historical prices and trading volumes, for specified stock symbols from reliable sources.
 
 ### Docstring
 
-**Summary:** Assess king safety based on position and threats.
+**Summary:** Collects historical stock prices and trading volumes for given stock symbols.
 
 **Parameters:**
 
-- piece_positions (List[str]): Positions of all pieces on the board from parse_chess_position.
-- castling_rights (List[bool]): Castling rights for both white and black from parse_chess_position.
-- en_passant_square (str): En passant square if available from parse_chess_position.
-- side_to_move (str): Side to move (white or black) from parse_chess_position.
-**Returns:** Tuple[float, List[str]] - A tuple containing the king safety score and a list of potential threats.
+- stock_symbols (List[str]): List of stock symbols to gather data for.
+**Returns:** Tuple[List[str], List[float], List[int]] - A tuple containing the list of stock symbols, their historical prices, and trading volumes.
 
 **Raises:**
 
-- ValueError: If piece_positions is not a valid list of chess positions.
+- ValueError: If the input stock symbols list is empty or contains invalid symbols.
+- ConnectionError: If there's a failure connecting to the data source.
 **Examples:**
 
 ```python
->>> piece_positions = ['e1', 'e8', 'e2', 'e7']
->>> castling_rights = [True, False]
->>> en_passant_square = 'e3'
->>> side_to_move = 'white'
->>> result = assess_king_safety(piece_positions, castling_rights, en_passant_square, side_to_move)
-(0.7, ['Queen on d5', 'Knight on f3'])
+>>> stock_data = collect_stock_data(['AAPL', 'GOOG'])
+>>> print(stock_data)
+(['AAPL', 'GOOG'], [150.5, 2800.2], [100000, 50000])
 ```
 
 ```python
->>> piece_positions = ['e1', 'e8', 'd4', 'd5']
->>> castling_rights = [False, True]
->>> en_passant_square = None
->>> side_to_move = 'black'
->>> result = assess_king_safety(piece_positions, castling_rights, en_passant_square, side_to_move)
-(0.4, ['Rook on e1', 'Bishop on c4'])
+>>> stock_symbols = ['MSFT', 'AMZN']
+>>> data = collect_stock_data(stock_symbols)
+>>> print(data)
+(['MSFT', 'AMZN'], [220.1, 3200.5], [80000, 70000])
 ```
 
 
 
 ---
 
-## evaluate_material_balance
+## process_stock_data
 
 ### Description
-Assess material advantage or disadvantage
+Preprocess stock data to ensure it's clean and ready for analysis.
 
 ### Conceptual Info
 
-This node evaluates the material balance between white and black in a given chess position, providing a score that indicates the material advantage or disadvantage.
+This node takes raw stock market data, cleans it, normalizes the trading volumes, and preprocesses the stock prices for further analysis.
 
 ### Docstring
 
-**Summary:** Evaluates the material balance in a chess position based on piece positions.
+**Summary:** Preprocesses stock data by cleaning and normalizing it for analysis.
 
 **Parameters:**
 
-- piece_positions (List[str]): Positions of all pieces on the board, obtained from parse_chess_position.
-**Returns:** Tuple[float, List[int]] - A tuple containing the material score (float) and the count of each piece type for both sides (List[int]).
+- historical_prices (List[float]): Historical stock prices collected from reliable sources.
+- trading_volumes (List[int]): Trading volumes for each stock symbol collected from reliable sources.
+**Returns:** Tuple[List[float], List[float]] - A tuple containing the cleaned stock price data and normalized trading volumes.
 
 **Raises:**
 
-- ValueError: If the input piece_positions are invalid or not in the expected format.
+- ValueError: If historical_prices or trading_volumes are empty or not of the correct type.
 **Examples:**
 
 ```python
->>> piece_positions = ['e2', 'e4', 'Nb1', 'c3']
->>> result = evaluate_material_balance(piece_positions)
-(0.5, [1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0])
-```
-
-```python
->>> piece_positions = ['d2', 'd4', 'd7', 'd5']
->>> result = evaluate_material_balance(piece_positions)
-(0.0, [0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0])
+>>> historical_prices = [100.0, 101.0, 102.0, 103.0]
+>>> trading_volumes = [1000, 1200, 1100, 1300]
+>>> cleaned_stock_data, normalized_volumes = process_stock_data(historical_prices, trading_volumes)
+([100.0, 101.0, 102.0, 103.0], [0.0, 0.6666666666666666, 0.3333333333333333, 1.0])
 ```
 
 
 
 ---
 
-## parse_chess_position
+## analyze_stock_trends
 
 ### Description
-Convert chess position notation into a usable data structure
+Perform in-depth analysis of stock trends and patterns.
 
 ### Conceptual Info
 
-This node converts chess position notation into a structured data format that includes piece positions, castling rights, en passant square, and the side to move.
+This node analyzes preprocessed stock data to identify significant trends, patterns, and anomalies, providing crucial insights for investment decisions.
 
 ### Docstring
 
-**Summary:** Parses a given chess position in standard algebraic notation (FEN) into a structured format.
+**Summary:** Analyze preprocessed stock data to identify trends, patterns, and anomalies.
 
 **Parameters:**
 
-- fen_notation (str): The chess position in FEN notation to be parsed.
-**Returns:** dict - A dictionary containing piece positions, castling rights, en passant square, and side to move.
+- cleaned_stock_data (List[float]): Preprocessed stock price data from process_stock_data node
+- normalized_volumes (List[float]): Normalized trading volumes from process_stock_data node
+**Returns:** Tuple[List[str], bool] - A tuple containing a list of identified trends and patterns, and a boolean indicating whether any anomalies were detected
 
 **Raises:**
 
-- ValueError: If the input FEN notation is invalid or malformed.
+- ValueError: If cleaned_stock_data or normalized_volumes are empty or malformed
 **Examples:**
 
 ```python
->>> fen_notation = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
->>> parse_chess_position(fen_notation)
-{'piece_positions': ['e2', 'e4', ...], 'castling_rights': [true, true], 'en_passant_square': 'e3', 'side_to_move': 'white'}
+>>> cleaned_stock_data = [100.0, 102.0, 101.0, 103.0, 105.0]
+>>> normalized_volumes = [0.5, 0.6, 0.4, 0.7, 0.8]
+>>> result = analyze_stock_trends(cleaned_stock_data, normalized_volumes)
+(['Uptrend', 'Increasing Volume'], True)
 ```
 
 ```python
->>> fen_notation = '8/8/8/8/8/8/8/8 b - - 0 1'
->>> parse_chess_position(fen_notation)
-{'piece_positions': [], 'castling_rights': [false, false], 'en_passant_square': None, 'side_to_move': 'black'}
+>>> cleaned_stock_data = [50.0, 49.0, 48.0, 47.0, 46.0]
+>>> normalized_volumes = [0.3, 0.2, 0.1, 0.4, 0.5]
+>>> result = analyze_stock_trends(cleaned_stock_data, normalized_volumes)
+(['Downtrend', 'Mixed Volume'], False)
 ```
 
 
 
 ---
 
-## synthesize_analysis
+## calculate_stock_metrics
 
 ### Description
-Synthesize findings into a comprehensive analysis
+Compute important stock performance metrics.
 
 ### Conceptual Info
 
-This node integrates the outputs from material balance evaluation, pawn structure analysis, and king safety assessment to provide a comprehensive analysis of the chess position.
+This node computes key stock performance metrics using preprocessed stock data.
 
 ### Docstring
 
-**Summary:** Synthesizes findings from various analyses into a comprehensive evaluation of the chess position.
+**Summary:** Calculates moving averages, Relative Strength Index (RSI), and volatility from preprocessed stock data.
 
 **Parameters:**
 
-- material_balance (dict): Output from evaluate_material_balance containing material_score and piece_counts.
-- pawn_structure_analysis (dict): Output from analyze_pawn_structure containing pawn_chain_analysis, isolated_pawns, and passed_pawns.
-- king_safety_assessment (dict): Output from assess_king_safety containing king_safety_score and threats.
-**Returns:** dict - A dictionary containing overall_evaluation, strategic_recommendations, and tactical_opportunities.
+- cleaned_stock_data (List[float]): Preprocessed stock price data from the 'process_stock_data' node.
+- normalized_volumes (List[float]): Normalized trading volumes from the 'process_stock_data' node.
+**Returns:** Tuple[List[float], List[float], float] - A tuple containing moving averages, RSI values, and volatility measure.
 
 **Raises:**
 
-- ValueError: If any of the input analyses are missing or malformed.
+- ValueError: If cleaned_stock_data or normalized_volumes are empty or malformed.
 **Examples:**
 
 ```python
->>> material_balance = {'material_score': 0.5, 'piece_counts': [1, 2, 3, 4, 5, 6]}
->>> pawn_structure_analysis = {'pawn_chain_analysis': ['strong'], 'isolated_pawns': ['e4'], 'passed_pawns': ['d5']}
->>> king_safety_assessment = {'king_safety_score': 0.8, 'threats': ['checkmate']}
->>> synthesize_analysis(material_balance, pawn_structure_analysis, king_safety_assessment)
-{'overall_evaluation': 'White has a slight advantage', 'strategic_recommendations': ['Control the center', 'Develop pieces'], 'tactical_opportunities': ['Attack weak pawns']}
+>>> cleaned_data = [100.0, 101.0, 102.0, 103.0, 104.0]
+>>> normalized_volumes = [0.5, 0.6, 0.7, 0.8, 0.9]
+>>> moving_averages, rsi_values, volatility = calculate_stock_metrics(cleaned_data, normalized_volumes)
+([101.0, 102.0], [0.2, 0.3], 0.015)
+```
+
+```python
+>>> cleaned_data = [50.0, 51.0, 52.0, 53.0, 54.0]
+>>> normalized_volumes = [0.1, 0.2, 0.3, 0.4, 0.5]
+>>> moving_averages, rsi_values, volatility = calculate_stock_metrics(cleaned_data, normalized_volumes)
+([51.0, 52.0], [0.1, 0.2], 0.020)
+```
+
+
+
+---
+
+## generate_stock_insights
+
+### Description
+Generate comprehensive insights for stock market investors.
+
+### Conceptual Info
+
+This node generates comprehensive insights for stock market investors by synthesizing analyzed trends, patterns, and metrics.
+
+### Docstring
+
+**Summary:** Generate investment recommendations, risk assessment, and confidence score based on stock trend analysis and metrics.
+
+**Parameters:**
+
+- trend_analysis (List[str]): List of identified trends and patterns from stock data analysis.
+- anomaly_detected (bool): Whether any anomalies were detected in the stock data.
+- moving_averages (List[float]): Moving averages for the stock prices.
+- rsi_values (List[float]): Relative Strength Index values for the stock.
+- volatility (float): Stock price volatility measure.
+**Returns:** Tuple[List[str], str, float] - A tuple containing investment recommendations, risk assessment, and confidence score.
+
+**Raises:**
+
+- ValueError: If input data is inconsistent or missing required fields.
+**Examples:**
+
+```python
+>>> trend_analysis = ['uptrend', 'bullish']
+>>> anomaly_detected = False
+>>> moving_averages = [100.0, 120.0]
+>>> rsi_values = [30.0, 40.0]
+>>> volatility = 0.05
+>>> generate_stock_insights(trend_analysis, anomaly_detected, moving_averages, rsi_values, volatility)
+(['Buy', 'Hold'], 'Low', 0.8)
+```
+
+```python
+>>> trend_analysis = ['downtrend']
+>>> anomaly_detected = True
+>>> moving_averages = [80.0, 70.0]
+>>> rsi_values = [70.0, 80.0]
+>>> volatility = 0.1
+>>> generate_stock_insights(trend_analysis, anomaly_detected, moving_averages, rsi_values, volatility)
+(['Sell'], 'High', 0.6)
 ```
 

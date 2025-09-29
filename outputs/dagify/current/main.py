@@ -6,11 +6,11 @@ import json
 import sys
 from typing import Dict, Any, List, Callable, Coroutine, Union, Optional
 
-from code.collect_stock_data import collect_stock_data
-from code.process_stock_data import process_stock_data
-from code.analyze_stock_trends import analyze_stock_trends
-from code.calculate_stock_metrics import calculate_stock_metrics
-from code.generate_stock_insights import generate_stock_insights
+from code.fetch_market_data import fetch_market_data
+from code.analyze_market_trends import analyze_market_trends
+from code.generate_trade_signals import generate_trade_signals
+from code.execute_trades import execute_trades
+from code.monitor_trade_performance import monitor_trade_performance
 
 # Get async mode from environment variable or default to False
 ASYNC_MODE = os.environ.get('ASYNC_MODE', '').lower() in ('true', '1', 'yes', 'y')
@@ -32,11 +32,11 @@ def make_async(func):
 
     return async_wrapper
 
-collect_stock_data_async = make_async(collect_stock_data)
-process_stock_data_async = make_async(process_stock_data)
-analyze_stock_trends_async = make_async(analyze_stock_trends)
-calculate_stock_metrics_async = make_async(calculate_stock_metrics)
-generate_stock_insights_async = make_async(generate_stock_insights)
+fetch_market_data_async = make_async(fetch_market_data)
+analyze_market_trends_async = make_async(analyze_market_trends)
+generate_trade_signals_async = make_async(generate_trade_signals)
+execute_trades_async = make_async(execute_trades)
+monitor_trade_performance_async = make_async(monitor_trade_performance)
 
 async def run_workflow(user_input: str) -> Dict[str, Any]:
     """Execute the workflow by running each level in the topological sort.
@@ -50,43 +50,45 @@ async def run_workflow(user_input: str) -> Dict[str, Any]:
     # Store results for each node
     results = {}
 
-    # Level 0: collect_stock_data
-    async def run_collect_stock_data():
-        # Call the async version of collect_stock_data with results from dependencies
-        return await collect_stock_data_async(user_input)
+    # Level 0: fetch_market_data
+    async def run_fetch_market_data():
+        # Call the async version of fetch_market_data with results from dependencies
+        return await fetch_market_data_async(user_input)
 
     # Run level 0 nodes in parallel
-    results['collect_stock_data'] = await run_collect_stock_data()
+    results['fetch_market_data'] = await run_fetch_market_data()
 
-    # Level 1: process_stock_data
-    async def run_process_stock_data():
-        # Call the async version of process_stock_data with results from dependencies
-        return await process_stock_data_async(results['collect_stock_data'])
+    # Level 1: analyze_market_trends
+    async def run_analyze_market_trends():
+        # Call the async version of analyze_market_trends with results from dependencies
+        return await analyze_market_trends_async(results['fetch_market_data'])
 
     # Run level 1 nodes in parallel
-    results['process_stock_data'] = await run_process_stock_data()
+    results['analyze_market_trends'] = await run_analyze_market_trends()
 
-    # Level 2: analyze_stock_trends, calculate_stock_metrics
-    async def run_analyze_stock_trends():
-        # Call the async version of analyze_stock_trends with results from dependencies
-        return await analyze_stock_trends_async(results['collect_stock_data'], results['process_stock_data'])
-
-    async def run_calculate_stock_metrics():
-        # Call the async version of calculate_stock_metrics with results from dependencies
-        return await calculate_stock_metrics_async(results['process_stock_data'])
+    # Level 2: generate_trade_signals
+    async def run_generate_trade_signals():
+        # Call the async version of generate_trade_signals with results from dependencies
+        return await generate_trade_signals_async(results['analyze_market_trends'])
 
     # Run level 2 nodes in parallel
-    level_2_results = await asyncio.gather(run_analyze_stock_trends(), run_calculate_stock_metrics())
-    results['analyze_stock_trends'] = level_2_results[0]
-    results['calculate_stock_metrics'] = level_2_results[1]
+    results['generate_trade_signals'] = await run_generate_trade_signals()
 
-    # Level 3: generate_stock_insights
-    async def run_generate_stock_insights():
-        # Call the async version of generate_stock_insights with results from dependencies
-        return await generate_stock_insights_async(results['analyze_stock_trends'], results['calculate_stock_metrics'])
+    # Level 3: execute_trades
+    async def run_execute_trades():
+        # Call the async version of execute_trades with results from dependencies
+        return await execute_trades_async(results['generate_trade_signals'])
 
     # Run level 3 nodes in parallel
-    results['generate_stock_insights'] = await run_generate_stock_insights()
+    results['execute_trades'] = await run_execute_trades()
+
+    # Level 4: monitor_trade_performance
+    async def run_monitor_trade_performance():
+        # Call the async version of monitor_trade_performance with results from dependencies
+        return await monitor_trade_performance_async(results['execute_trades'])
+
+    # Run level 4 nodes in parallel
+    results['monitor_trade_performance'] = await run_monitor_trade_performance()
 
     # Return all results
     return results

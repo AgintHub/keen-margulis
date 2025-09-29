@@ -6,11 +6,11 @@ import json
 import sys
 from typing import Dict, Any, List, Callable, Coroutine, Union, Optional
 
-from code.analyze_pawn_structure import analyze_pawn_structure
-from code.assess_king_safety import assess_king_safety
-from code.evaluate_material_balance import evaluate_material_balance
-from code.parse_chess_position import parse_chess_position
-from code.synthesize_analysis import synthesize_analysis
+from code.collect_stock_data import collect_stock_data
+from code.process_stock_data import process_stock_data
+from code.analyze_stock_trends import analyze_stock_trends
+from code.calculate_stock_metrics import calculate_stock_metrics
+from code.generate_stock_insights import generate_stock_insights
 
 # Get async mode from environment variable or default to False
 ASYNC_MODE = os.environ.get('ASYNC_MODE', '').lower() in ('true', '1', 'yes', 'y')
@@ -32,11 +32,11 @@ def make_async(func):
 
     return async_wrapper
 
-analyze_pawn_structure_async = make_async(analyze_pawn_structure)
-assess_king_safety_async = make_async(assess_king_safety)
-evaluate_material_balance_async = make_async(evaluate_material_balance)
-parse_chess_position_async = make_async(parse_chess_position)
-synthesize_analysis_async = make_async(synthesize_analysis)
+collect_stock_data_async = make_async(collect_stock_data)
+process_stock_data_async = make_async(process_stock_data)
+analyze_stock_trends_async = make_async(analyze_stock_trends)
+calculate_stock_metrics_async = make_async(calculate_stock_metrics)
+generate_stock_insights_async = make_async(generate_stock_insights)
 
 async def run_workflow(user_input: str) -> Dict[str, Any]:
     """Execute the workflow by running each level in the topological sort.
@@ -50,40 +50,43 @@ async def run_workflow(user_input: str) -> Dict[str, Any]:
     # Store results for each node
     results = {}
 
-    # Level 0: parse_chess_position
-    async def run_parse_chess_position():
-        # Call the async version of parse_chess_position with results from dependencies
-        return await parse_chess_position_async(user_input)
+    # Level 0: collect_stock_data
+    async def run_collect_stock_data():
+        # Call the async version of collect_stock_data with results from dependencies
+        return await collect_stock_data_async(user_input)
 
     # Run level 0 nodes in parallel
-    results['parse_chess_position'] = await run_parse_chess_position()
+    results['collect_stock_data'] = await run_collect_stock_data()
 
-    # Level 1: evaluate_material_balance, assess_king_safety, analyze_pawn_structure
-    async def run_evaluate_material_balance():
-        # Call the async version of evaluate_material_balance with results from dependencies
-        return await evaluate_material_balance_async(results['parse_chess_position'])
-
-    async def run_assess_king_safety():
-        # Call the async version of assess_king_safety with results from dependencies
-        return await assess_king_safety_async(results['parse_chess_position'])
-
-    async def run_analyze_pawn_structure():
-        # Call the async version of analyze_pawn_structure with results from dependencies
-        return await analyze_pawn_structure_async(results['parse_chess_position'])
+    # Level 1: process_stock_data
+    async def run_process_stock_data():
+        # Call the async version of process_stock_data with results from dependencies
+        return await process_stock_data_async(results['collect_stock_data'])
 
     # Run level 1 nodes in parallel
-    level_1_results = await asyncio.gather(run_evaluate_material_balance(), run_assess_king_safety(), run_analyze_pawn_structure())
-    results['evaluate_material_balance'] = level_1_results[0]
-    results['assess_king_safety'] = level_1_results[1]
-    results['analyze_pawn_structure'] = level_1_results[2]
+    results['process_stock_data'] = await run_process_stock_data()
 
-    # Level 2: synthesize_analysis
-    async def run_synthesize_analysis():
-        # Call the async version of synthesize_analysis with results from dependencies
-        return await synthesize_analysis_async(results['evaluate_material_balance'], results['analyze_pawn_structure'], results['assess_king_safety'])
+    # Level 2: analyze_stock_trends, calculate_stock_metrics
+    async def run_analyze_stock_trends():
+        # Call the async version of analyze_stock_trends with results from dependencies
+        return await analyze_stock_trends_async(results['collect_stock_data'], results['process_stock_data'])
+
+    async def run_calculate_stock_metrics():
+        # Call the async version of calculate_stock_metrics with results from dependencies
+        return await calculate_stock_metrics_async(results['process_stock_data'])
 
     # Run level 2 nodes in parallel
-    results['synthesize_analysis'] = await run_synthesize_analysis()
+    level_2_results = await asyncio.gather(run_analyze_stock_trends(), run_calculate_stock_metrics())
+    results['analyze_stock_trends'] = level_2_results[0]
+    results['calculate_stock_metrics'] = level_2_results[1]
+
+    # Level 3: generate_stock_insights
+    async def run_generate_stock_insights():
+        # Call the async version of generate_stock_insights with results from dependencies
+        return await generate_stock_insights_async(results['analyze_stock_trends'], results['calculate_stock_metrics'])
+
+    # Run level 3 nodes in parallel
+    results['generate_stock_insights'] = await run_generate_stock_insights()
 
     # Return all results
     return results
