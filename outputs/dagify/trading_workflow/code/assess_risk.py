@@ -4,14 +4,22 @@ from typing import List
 
 class FetchMarketDataOutput(BaseModel):
     """Pydantic model for fetch_market_data node outputs."""
-    current_prices: List[float] = Field(..., description="List of current stock prices.")
-    historical_data: List[float] = Field(..., description="2D list of historical stock prices and volumes.")
+    current_prices: List[float] = (
+        Field(..., description="List of current stock prices.")
+    )
+    historical_data: List[float] = (
+        Field(..., description="2D list of historical stock prices and volumes.")
+    )
 
 
 class AssessRiskOutput(BaseModel):
     """Pydantic model for assess_risk node outputs."""
-    risk_levels: List[float] = Field(..., description="List of risk levels associated with potential trades.")
-    risk_factors: List[str] = Field(..., description="List of factors contributing to the risk assessment.")
+    risk_levels: List[float] = (
+        Field(..., description="List of risk levels associated with potential trades.")
+    )
+    risk_factors: List[str] = (
+        Field(..., description="List of factors contributing to the risk assessment.")
+    )
 
 
 def assess_risk(fetch_market_data_input: FetchMarketDataOutput, **kwargs) -> AssessRiskOutput:

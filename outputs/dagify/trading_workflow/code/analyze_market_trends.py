@@ -4,15 +4,25 @@ from typing import List
 
 class GatherMarketDataOutput(BaseModel):
     """Pydantic model for gather_market_data node outputs."""
-    current_prices: List[float] = Field(..., description="Current prices of relevant assets")
-    historical_prices: List[float] = Field(..., description="Historical price data for relevant assets")
-    market_volumes: List[float] = Field(..., description="Current trading volumes of relevant assets")
+    current_prices: List[float] = (
+        Field(..., description="Current prices of relevant assets")
+    )
+    historical_prices: List[float] = (
+        Field(..., description="Historical price data for relevant assets")
+    )
+    market_volumes: List[float] = (
+        Field(..., description="Current trading volumes of relevant assets")
+    )
 
 
 class AnalyzeMarketTrendsOutput(BaseModel):
     """Pydantic model for analyze_market_trends node outputs."""
-    trend_indicators: List[float] = Field(..., description="Indicators showing the direction and strength of market trends")
-    pattern_recognition_results: List[str] = Field(..., description="Results of pattern recognition analysis")
+    trend_indicators: List[float] = (
+        Field(..., description="Indicators showing the direction and strength of market trends")
+    )
+    pattern_recognition_results: List[str] = (
+        Field(..., description="Results of pattern recognition analysis")
+    )
 
 
 def analyze_market_trends(gather_market_data_input: GatherMarketDataOutput, **kwargs) -> AnalyzeMarketTrendsOutput:

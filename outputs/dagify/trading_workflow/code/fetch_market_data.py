@@ -4,8 +4,12 @@ from typing import List
 
 class FetchMarketDataOutput(BaseModel):
     """Pydantic model for fetch_market_data node outputs."""
-    current_prices: List[float] = Field(..., description="List of current stock prices.")
-    historical_data: List[float] = Field(..., description="2D list of historical stock prices and volumes.")
+    current_prices: List[float] = (
+        Field(..., description="List of current stock prices.")
+    )
+    historical_data: List[float] = (
+        Field(..., description="2D list of historical stock prices and volumes.")
+    )
 
 
 def fetch_market_data(general_input: str, **kwargs) -> FetchMarketDataOutput:
