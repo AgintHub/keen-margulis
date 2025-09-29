@@ -6,11 +6,12 @@ import json
 import sys
 from typing import Dict, Any, List, Callable, Coroutine, Union, Optional
 
-from code.fetch_market_data import fetch_market_data
-from code.analyze_market_trends import analyze_market_trends
-from code.assess_risk import assess_risk
-from code.generate_trading_signals import generate_trading_signals
-from code.execute_trades import execute_trades
+from code.collect_sports_data import collect_sports_data
+from code.clean_and_preprocess_data import clean_and_preprocess_data
+from code.analyze_player_performance import analyze_player_performance
+from code.analyze_team_performance import analyze_team_performance
+from code.generate_insights_and_recommendations import generate_insights_and_recommendations
+from code.produce_sports_analysis_report import produce_sports_analysis_report
 
 # Get async mode from environment variable or default to False
 ASYNC_MODE = os.environ.get('ASYNC_MODE', '').lower() in ('true', '1', 'yes', 'y')
@@ -32,11 +33,12 @@ def make_async(func):
 
     return async_wrapper
 
-fetch_market_data_async = make_async(fetch_market_data)
-analyze_market_trends_async = make_async(analyze_market_trends)
-assess_risk_async = make_async(assess_risk)
-generate_trading_signals_async = make_async(generate_trading_signals)
-execute_trades_async = make_async(execute_trades)
+collect_sports_data_async = make_async(collect_sports_data)
+clean_and_preprocess_data_async = make_async(clean_and_preprocess_data)
+analyze_player_performance_async = make_async(analyze_player_performance)
+analyze_team_performance_async = make_async(analyze_team_performance)
+generate_insights_and_recommendations_async = make_async(generate_insights_and_recommendations)
+produce_sports_analysis_report_async = make_async(produce_sports_analysis_report)
 
 async def run_workflow(user_input: str) -> Dict[str, Any]:
     """Execute the workflow by running each level in the topological sort.
@@ -50,43 +52,51 @@ async def run_workflow(user_input: str) -> Dict[str, Any]:
     # Store results for each node
     results = {}
 
-    # Level 0: fetch_market_data
-    async def run_fetch_market_data():
-        # Call the async version of fetch_market_data with results from dependencies
-        return await fetch_market_data_async(user_input)
+    # Level 0: collect_sports_data
+    async def run_collect_sports_data():
+        # Call the async version of collect_sports_data with results from dependencies
+        return await collect_sports_data_async(user_input)
 
     # Run level 0 nodes in parallel
-    results['fetch_market_data'] = await run_fetch_market_data()
+    results['collect_sports_data'] = await run_collect_sports_data()
 
-    # Level 1: analyze_market_trends, assess_risk
-    async def run_analyze_market_trends():
-        # Call the async version of analyze_market_trends with results from dependencies
-        return await analyze_market_trends_async(results['fetch_market_data'])
-
-    async def run_assess_risk():
-        # Call the async version of assess_risk with results from dependencies
-        return await assess_risk_async(results['fetch_market_data'])
+    # Level 1: clean_and_preprocess_data
+    async def run_clean_and_preprocess_data():
+        # Call the async version of clean_and_preprocess_data with results from dependencies
+        return await clean_and_preprocess_data_async(results['collect_sports_data'])
 
     # Run level 1 nodes in parallel
-    level_1_results = await asyncio.gather(run_analyze_market_trends(), run_assess_risk())
-    results['analyze_market_trends'] = level_1_results[0]
-    results['assess_risk'] = level_1_results[1]
+    results['clean_and_preprocess_data'] = await run_clean_and_preprocess_data()
 
-    # Level 2: generate_trading_signals
-    async def run_generate_trading_signals():
-        # Call the async version of generate_trading_signals with results from dependencies
-        return await generate_trading_signals_async(results['analyze_market_trends'], results['assess_risk'])
+    # Level 2: analyze_player_performance, analyze_team_performance
+    async def run_analyze_player_performance():
+        # Call the async version of analyze_player_performance with results from dependencies
+        return await analyze_player_performance_async(results['clean_and_preprocess_data'])
+
+    async def run_analyze_team_performance():
+        # Call the async version of analyze_team_performance with results from dependencies
+        return await analyze_team_performance_async(results['clean_and_preprocess_data'])
 
     # Run level 2 nodes in parallel
-    results['generate_trading_signals'] = await run_generate_trading_signals()
+    level_2_results = await asyncio.gather(run_analyze_player_performance(), run_analyze_team_performance())
+    results['analyze_player_performance'] = level_2_results[0]
+    results['analyze_team_performance'] = level_2_results[1]
 
-    # Level 3: execute_trades
-    async def run_execute_trades():
-        # Call the async version of execute_trades with results from dependencies
-        return await execute_trades_async(results['generate_trading_signals'])
+    # Level 3: generate_insights_and_recommendations
+    async def run_generate_insights_and_recommendations():
+        # Call the async version of generate_insights_and_recommendations with results from dependencies
+        return await generate_insights_and_recommendations_async(results['analyze_player_performance'], results['analyze_team_performance'])
 
     # Run level 3 nodes in parallel
-    results['execute_trades'] = await run_execute_trades()
+    results['generate_insights_and_recommendations'] = await run_generate_insights_and_recommendations()
+
+    # Level 4: produce_sports_analysis_report
+    async def run_produce_sports_analysis_report():
+        # Call the async version of produce_sports_analysis_report with results from dependencies
+        return await produce_sports_analysis_report_async(results['generate_insights_and_recommendations'])
+
+    # Run level 4 nodes in parallel
+    results['produce_sports_analysis_report'] = await run_produce_sports_analysis_report()
 
     # Return all results
     return results
