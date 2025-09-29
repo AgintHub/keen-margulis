@@ -1,73 +1,90 @@
+from ._identify_trading_opportunities.validate_historical_data import validate_historical_data
+from ._identify_trading_opportunities.validate_trend_analysis import validate_trend_analysis
+from ._identify_trading_opportunities.analyze_price_patterns import analyze_price_patterns
+from ._identify_trading_opportunities.analyze_volume_patterns import analyze_volume_patterns
+from ._identify_trading_opportunities.combine_trend_indicators import combine_trend_indicators
+from ._identify_trading_opportunities.merge_trading_signals import merge_trading_signals
+from ._identify_trading_opportunities.filter_trading_opportunities import filter_trading_opportunities
+from ._identify_trading_opportunities.rank_and_select_opportunities import rank_and_select_opportunities
+
 from pydantic import BaseModel, Field
 from typing import List
 
 
-class GatherMarketDataOutput(BaseModel):
-    """Pydantic model for gather_market_data node outputs."""
-    current_prices: List[float] = (
-        Field(..., description="Current prices of relevant assets")
-    )
+class CollectHistoricalMarketDataOutput(BaseModel):
+    """Pydantic model for collect_historical_market_data node outputs."""
     historical_prices: List[float] = (
-        Field(..., description="Historical price data for relevant assets")
+        Field(..., description="List of historical prices")
     )
-    market_volumes: List[float] = (
-        Field(..., description="Current trading volumes of relevant assets")
+    historical_volumes: List[float] = (
+        Field(..., description="List of historical volumes")
+    )
+    other_metrics: List[str] = (
+        Field(..., description="Other relevant historical metrics")
+    )
+
+
+class AnalyzeMarketTrendsOutput(BaseModel):
+    """Pydantic model for analyze_market_trends node outputs."""
+    trend_indicators: List[str] = (
+        Field(..., description="List of trend indicators")
+    )
+    trend_directions: List[str] = (
+        Field(..., description="List of trend directions")
     )
 
 
 class IdentifyTradingOpportunitiesOutput(BaseModel):
     """Pydantic model for identify_trading_opportunities node outputs."""
-    buy_signals: List[str] = Field(..., description="List of assets to buy")
-    sell_signals: List[str] = Field(..., description="List of assets to sell")
+    trading_opportunities: List[str] = (
+        Field(..., description="List of potential trading opportunities")
+    )
 
 
-def identify_trading_opportunities(gather_market_data_input: GatherMarketDataOutput, **kwargs) -> IdentifyTradingOpportunitiesOutput:
+def identify_trading_opportunities(collect_historical_market_data_input: CollectHistoricalMarketDataOutput, analyze_market_trends_input: AnalyzeMarketTrendsOutput, **kwargs) -> IdentifyTradingOpportunitiesOutput:
     """
-    Identify potential trading opportunities based on the analyzed market data,
-    generating lists of assets to buy or sell.
+    Identify potential trading opportunities based on historical market data and
+    trend analysis.
 
     Parameters
     ----------
-    current_prices : List[float]
-        Current prices of relevant assets gathered from various market
-        sources.
-    historical_prices : List[float]
-        Historical price data for relevant assets used to analyze trends and
-        patterns.
-    market_volumes : List[float]
-        Current trading volumes of relevant assets, indicating market
-        activity and liquidity.
+    historical_market_data : dict
+        Historical market data including prices, volumes, and other relevant
+        metrics from 'collect_historical_market_data' node.
+    trend_analysis : dict
+        Trend indicators and directions from 'analyze_market_trends' node.
 
     Returns
     -------
-    {'buy_signals': List[str], 'sell_signals': List[str]}
-        A dictionary containing two lists: 'buy_signals' for assets to buy
-        and 'sell_signals' for assets to sell.
+    List[str]
+        List of identified trading opportunities.
 
     Raises
     ------
     ValueError
-        If any of the input lists (current_prices, historical_prices,
-        market_volumes) are empty or inconsistent in length.
+        If historical market data or trend analysis is missing or malformed.
 
     Examples
     --------
-    >>> current_prices = [100.0, 200.0, 300.0]
-    >>> historical_prices = [90.0, 210.0, 290.0]
-    >>> market_volumes = [1000.0, 2000.0, 3000.0]
-    >>> result = identify_trading_opportunities(current_prices,
-    historical_prices, market_volumes)
-    {'buy_signals': ['Asset1', 'Asset3'], 'sell_signals': ['Asset2']}
-
-    >>> current_prices = [150.0, 250.0, 350.0]
-    >>> historical_prices = [140.0, 260.0, 340.0]
-    >>> market_volumes = [1500.0, 2500.0, 3500.0]
-    >>> result = identify_trading_opportunities(current_prices,
-    historical_prices, market_volumes)
-    {'buy_signals': ['Asset2'], 'sell_signals': ['Asset1', 'Asset3']}
+    >>> historical_data = {'historical_prices': [100.0, 120.0, 110.0],
+    'historical_volumes': [1000, 1200, 1100], 'other_metrics': ['metric1',
+    'metric2']}
+    >>> trend_analysis = {'trend_indicators': ['indicator1', 'indicator2'],
+    'trend_directions': ['up', 'down']}
+    >>> trading_opportunities = identify_trading_opportunities(historical_data,
+    trend_analysis)
+    ['buy', 'sell']
 
     """
-    return IdentifyTradingOpportunitiesOutput(
-        buy_signals=[],
-        sell_signals=[],
-    )
+    validate_historical_data(historical_data=collect_historical_market_data_input)
+    validate_trend_analysis(trend_analysis=analyze_market_trends_input)
+    
+    price_signals: List[str] = analyze_price_patterns(prices=collect_historical_market_data_input.historical_prices)
+    volume_signals: List[str] = analyze_volume_patterns(volumes=collect_historical_market_data_input.historical_volumes)
+    trend_signals: List[str] = combine_trend_indicators(indicators=analyze_market_trends_input.trend_indicators, directions=analyze_market_trends_input.trend_directions)
+    
+    all_signals: List[str] = merge_trading_signals(price_signals=price_signals, volume_signals=volume_signals, trend_signals=trend_signals)
+    filtered_opportunities: List[str] = filter_trading_opportunities(signals=all_signals, other_metrics=collect_historical_market_data_input.other_metrics)
+    final_opportunities: List[str] = rank_and_select_opportunities(opportunities=filtered_opportunities)
+    
+    return IdentifyTradingOpportunitiesOutput(trading_opportunities=final_opportunities)

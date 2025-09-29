@@ -1,93 +1,205 @@
-# trading_workflow - Complete PRD Documentation
+# tradingworkflow - Complete PRD Documentation
 
 ## Overview
-PRDs for nodes in the 'trading_workflow' module.
+PRDs for nodes in the 'tradingworkflow' module.
 
 ## Table of Contents
 
-- [collect_market_data](#collect_market_data)
+- [collect_historical_market_data](#collect_historical_market_data)
 
-- [analyze_market_data](#analyze_market_data)
+- [collect_account_data](#collect_account_data)
+
+- [analyze_market_trends](#analyze_market_trends)
+
+- [determine_trading_parameters](#determine_trading_parameters)
+
+- [identify_trading_opportunities](#identify_trading_opportunities)
 
 - [generate_trading_signals](#generate_trading_signals)
 
 - [execute_trades](#execute_trades)
 
-- [monitor_trades](#monitor_trades)
-
 
 
 ---
 
-## collect_market_data
+## collect_historical_market_data
 
 ### Description
-Collect market data from various sources, including stock prices, trading volumes, and economic indicators.
+Gather historical market data from various sources
 
 ### Conceptual Info
 
-This node is responsible for aggregating market data from multiple sources, providing a comprehensive view of the current market state.
+This node is responsible for gathering historical market data, including prices, volumes, and other relevant metrics, from various sources.
 
 ### Docstring
 
-**Summary:** Collects and structures market data for analysis.
+**Summary:** Collects historical market data from multiple sources, returning prices, volumes, and other metrics.
 
-**Returns:** Tuple[List[float], List[int], List[float], bool] - A tuple containing lists of stock prices, trading volumes, economic indicators, and a boolean indicating whether data collection was successful.
+**Returns:** Tuple[List[float], List[float], List[str]] - A tuple containing historical prices, volumes, and other metrics.
 
 **Raises:**
 
-- ConnectionError: If there's a failure connecting to any data source.
-- DataParsingError: If there's an issue parsing data from any source.
+- ConnectionError: If there's an issue connecting to the data sources.
+- DataError: If the retrieved data is malformed or incomplete.
 **Examples:**
 
 ```python
->>> data = collect_market_data()
-({'stock_prices': [100.5, 102.1], 'trading_volumes': [1000, 1200], 'economic_indicators': [2.5, 2.7], 'data_collection_status': True})
-```
-
-```python
->>> stock_prices, trading_volumes, economic_indicators, status = collect_market_data()
-([100.5, 102.1], [1000, 1200], [2.5, 2.7], True)
+>>> historical_data = collect_historical_market_data()
+([100.0, 101.0, 102.0], [1000.0, 1100.0, 1200.0], ['metric1', 'metric2', 'metric3'])
 ```
 
 
 
 ---
 
-## analyze_market_data
+## collect_account_data
 
 ### Description
-Analyze market data to identify trends, patterns, and anomalies.
+Gather account data including balance and positions
 
 ### Conceptual Info
 
-This node analyzes market data collected from various sources to identify trends, patterns, and anomalies, providing insights for generating trading signals.
+This node is responsible for collecting account data, including the current balance and positions, to provide a snapshot of the current trading account status.
 
 ### Docstring
 
-**Summary:** Analyzes market data to identify trends, patterns, and anomalies.
+**Summary:** Collects and returns account data including balance and positions.
+
+**Returns:** Dict[str, Union[float, List[str]]] - A dictionary containing the account balance as a float and positions as a list of strings.
+
+**Raises:**
+
+- ConnectionError: If there's an issue connecting to the data source.
+- DataRetrievalError: If there's an error retrieving account data.
+**Examples:**
+
+```python
+>>> account_data = collect_account_data()
+{'account_balance': 10000.0, 'positions': ['AAPL', 'GOOG']}
+```
+
+```python
+>>> account_data = collect_account_data()
+>>> print(account_data['account_balance'])
+>>> print(account_data['positions'])
+10000.0
+['AAPL', 'GOOG']
+```
+
+
+
+---
+
+## analyze_market_trends
+
+### Description
+Analyze historical market data to identify trends
+
+### Conceptual Info
+
+This node analyzes historical market data to identify trends and patterns, providing trend indicators and directions.
+
+### Docstring
+
+**Summary:** Analyze historical market data to identify trends and patterns, returning trend indicators and directions.
 
 **Parameters:**
 
-- stock_prices (List[float]): List of stock prices collected from various sources.
-- trading_volumes (List[int]): List of trading volumes collected from various sources.
-- economic_indicators (List[float]): List of economic indicators collected from various sources.
-- data_collection_status (bool): Whether data collection was successful.
-**Returns:** Tuple[List[str], List[str], List[str], bool] - A tuple containing the list of identified trends, recognized patterns, detected anomalies, and a boolean indicating whether the analysis was successful.
+- historical_prices (List[float]): List of historical prices from collect_historical_market_data
+- historical_volumes (List[float]): List of historical volumes from collect_historical_market_data
+- other_metrics (List[str]): Other relevant historical metrics from collect_historical_market_data
+**Returns:** Tuple[List[str], List[str]] - A tuple containing a list of trend indicators and a list of trend directions.
 
 **Raises:**
 
-- ValueError: If the input data is inconsistent or missing.
-- RuntimeError: If an error occurs during the analysis process.
+- ValueError: If historical_prices, historical_volumes, or other_metrics are empty or inconsistent.
 **Examples:**
 
 ```python
->>> stock_prices = [100.0, 120.0, 110.0]
->>> trading_volumes = [1000, 1200, 1100]
->>> economic_indicators = [2.0, 2.1, 2.2]
->>> data_collection_status = True
->>> analyze_market_data(stock_prices, trading_volumes, economic_indicators, data_collection_status)
-(['uptrend'], ['increasing_volume'], ['price_spike'], True)
+>>> historical_prices = [100.0, 105.0, 110.0, 115.0, 120.0]
+>>> historical_volumes = [1000.0, 1200.0, 1500.0, 1800.0, 2000.0]
+>>> other_metrics = ['metric1', 'metric2', 'metric3', 'metric4', 'metric5']
+>>> trend_indicators, trend_directions = analyze_market_trends(historical_prices, historical_volumes, other_metrics)
+(['indicator1', 'indicator2'], ['up', 'up'])
+```
+
+
+
+---
+
+## determine_trading_parameters
+
+### Description
+Determine trading parameters based on account data and market analysis
+
+### Conceptual Info
+
+This node calculates trading parameters based on account data and market trends analysis, providing essential inputs for generating trading signals.
+
+### Docstring
+
+**Summary:** Determines trading parameters including risk tolerance and position sizing based on account data and market trends.
+
+**Parameters:**
+
+- account_data (dict): Account data including balance and positions, typically output from 'collect_account_data' node.
+- market_trends (dict): Market trends analysis including trend indicators and directions, typically output from 'analyze_market_trends' node.
+**Returns:** dict - Dictionary containing 'risk_tolerance' and 'position_sizing' as floats.
+
+**Raises:**
+
+- ValueError: If account balance is negative or if market trends data is inconsistent.
+- TypeError: If input data types are incorrect or missing required fields.
+**Examples:**
+
+```python
+>>> account_data = {'account_balance': 10000.0, 'positions': ['AAPL', 'GOOG']}
+>>> market_trends = {'trend_indicators': ['MACD', 'RSI'], 'trend_directions': ['UP', 'DOWN']}
+>>> trading_params = determine_trading_parameters(account_data, market_trends)
+{'risk_tolerance': 0.5, 'position_sizing': 0.2}
+```
+
+```python
+>>> account_data = {'account_balance': 5000.0, 'positions': ['AMZN']}
+>>> market_trends = {'trend_indicators': ['SMA'], 'trend_directions': ['UP']}
+>>> trading_params = determine_trading_parameters(account_data, market_trends)
+{'risk_tolerance': 0.3, 'position_sizing': 0.15}
+```
+
+
+
+---
+
+## identify_trading_opportunities
+
+### Description
+Identify potential trading opportunities based on market trends and analysis
+
+### Conceptual Info
+
+This node identifies potential trading opportunities by analyzing historical market data and trends.
+
+### Docstring
+
+**Summary:** Identify potential trading opportunities based on historical market data and trend analysis.
+
+**Parameters:**
+
+- historical_market_data (dict): Historical market data including prices, volumes, and other relevant metrics from 'collect_historical_market_data' node.
+- trend_analysis (dict): Trend indicators and directions from 'analyze_market_trends' node.
+**Returns:** List[str] - List of identified trading opportunities.
+
+**Raises:**
+
+- ValueError: If historical market data or trend analysis is missing or malformed.
+**Examples:**
+
+```python
+>>> historical_data = {'historical_prices': [100.0, 120.0, 110.0], 'historical_volumes': [1000, 1200, 1100], 'other_metrics': ['metric1', 'metric2']}
+>>> trend_analysis = {'trend_indicators': ['indicator1', 'indicator2'], 'trend_directions': ['up', 'down']}
+>>> trading_opportunities = identify_trading_opportunities(historical_data, trend_analysis)
+['buy', 'sell']
 ```
 
 
@@ -97,40 +209,39 @@ This node analyzes market data collected from various sources to identify trends
 ## generate_trading_signals
 
 ### Description
-Generate trading signals based on the analyzed market data.
+Generate trading signals based on trading parameters and opportunities
 
 ### Conceptual Info
 
-This node generates trading signals based on the analysis of market data, leveraging the outputs from both the market data collection and analysis.
+This node generates trading signals based on the trading parameters determined by the 'determine_trading_parameters' node and the trading opportunities identified by the 'identify_trading_opportunities' node.
 
 ### Docstring
 
-**Summary:** Generate trading signals based on analyzed market data, including stock prices, trading volumes, economic indicators, identified trends, recognized patterns, and detected anomalies.
+**Summary:** Generate trading signals including buy/sell orders based on trading parameters and opportunities.
 
 **Parameters:**
 
-- market_data (dict): Collected market data including stock prices, trading volumes, and economic indicators.
-- analysis_results (dict): Results of the market data analysis, including identified trends, recognized patterns, and detected anomalies.
-**Returns:** Tuple[List[str], List[float], bool] - A tuple containing the list of generated trading signals, their confidence levels, and the status of signal generation.
+- trading_parameters (dict): Dictionary containing risk tolerance and position sizing strategy, output of 'determine_trading_parameters' node.
+- trading_opportunities (List[str]): List of potential trading opportunities, output of 'identify_trading_opportunities' node.
+**Returns:** List[str] - List of trading signals generated based on the input parameters.
 
 **Raises:**
 
-- ValueError: If the input data is incomplete or inconsistent.
-- RuntimeError: If there's an issue during signal generation.
+- ValueError: If trading parameters are invalid or trading opportunities are empty.
 **Examples:**
 
 ```python
->>> market_data = {'stock_prices': [100.0, 101.0], 'trading_volumes': [1000, 1200], 'economic_indicators': [0.5, 0.6]}
->>> analysis_results = {'trend_identification': ['uptrend'], 'pattern_recognition': ['bullish'], 'anomaly_detection': ['none']}
->>> generate_trading_signals(market_data, analysis_results)
-(['buy'], [0.8], True)
+>>> trading_parameters = {'risk_tolerance': 0.5, 'position_sizing': 0.2}
+>>> trading_opportunities = ['buy AAPL', 'sell GOOG']
+>>> generate_trading_signals(trading_parameters, trading_opportunities)
+['buy AAPL at 150', 'sell GOOG at 2000']
 ```
 
 ```python
->>> market_data = {'stock_prices': [100.0, 99.0], 'trading_volumes': [1000, 800], 'economic_indicators': [0.5, 0.4]}
->>> analysis_results = {'trend_identification': ['downtrend'], 'pattern_recognition': ['bearish'], 'anomaly_detection': ['none']}
->>> generate_trading_signals(market_data, analysis_results)
-(['sell'], [0.7], True)
+>>> trading_parameters = {'risk_tolerance': 0.3, 'position_sizing': 0.1}
+>>> trading_opportunities = ['buy MSFT', 'sell AMZN']
+>>> generate_trading_signals(trading_parameters, trading_opportunities)
+['buy MSFT at 200', 'sell AMZN at 3000']
 ```
 
 
@@ -140,87 +251,34 @@ This node generates trading signals based on the analysis of market data, levera
 ## execute_trades
 
 ### Description
-Execute trades based on the generated trading signals.
+Execute trades based on generated trading signals
 
 ### Conceptual Info
 
-This node executes trades based on the generated trading signals, transforming the input signals into trade execution outcomes.
+This node executes trades based on the trading signals generated by its parent node, generate_trading_signals. It takes the list of trading signals as input and returns a list of trade outcomes.
 
 ### Docstring
 
-**Summary:** Execute trades based on the generated trading signals, returning the status of trade execution and details of the trades.
+**Summary:** Execute trades based on generated trading signals.
 
 **Parameters:**
 
-- trading_signals (List[str]): List of generated trading signals from the 'generate_trading_signals' node.
-- signal_confidence (List[float]): List of confidence levels for each trading signal from the 'generate_trading_signals' node.
-- signal_generation_status (bool): Whether signal generation was successful from the 'generate_trading_signals' node.
-**Returns:** Tuple[bool, List[str]] - A tuple containing a boolean indicating whether trade execution was successful and a list of trade details.
+- trading_signals (List[str]): List of trading signals generated by the generate_trading_signals node.
+**Returns:** List[str] - List of trade outcomes resulting from the executed trades.
 
 **Raises:**
 
-- ValueError: If the input trading signals are invalid or if signal generation was not successful.
-- RuntimeError: If trade execution fails due to external factors.
+- ValueError: If the input trading_signals list is empty or contains invalid signals.
+- ConnectionError: If there's a failure in sending orders to the exchange or broker.
 **Examples:**
 
 ```python
->>> trading_signals = ['buy', 'sell', 'hold']
->>> signal_confidence = [0.8, 0.7, 0.9]
->>> signal_generation_status = True
->>> trade_execution_status, trade_details = execute_trades(trading_signals, signal_confidence, signal_generation_status)
-(True, ['trade_type=buy,quantity=100,price=50.0', 'trade_type=sell,quantity=50,price=51.0'])
+>>> execute_trades(trading_signals=['buy', 'sell', 'hold'])
+['success', 'success', 'skipped']
 ```
 
 ```python
->>> trading_signals = ['invalid_signal']
->>> signal_confidence = [0.5]
->>> signal_generation_status = True
->>> try:
-...     trade_execution_status, trade_details = execute_trades(trading_signals, signal_confidence, signal_generation_status)
->>> except ValueError as e:
-...     print(e)
-'Invalid trading signal: invalid_signal'
-```
-
-
-
----
-
-## monitor_trades
-
-### Description
-Monitor trades and adjust the trading strategy as needed.
-
-### Conceptual Info
-
-This node monitors the trades executed by the 'execute_trades' node and adjusts the trading strategy accordingly.
-
-### Docstring
-
-**Summary:** Monitor trades and adjust the trading strategy as needed based on the trade execution status and trade details.
-
-**Parameters:**
-
-- trade_execution_status (bool): Whether trade execution was successful, received from 'execute_trades' node.
-- trade_details (List[str]): List of trade details including trade type, quantity, and price, received from 'execute_trades' node.
-**Returns:** Tuple[bool, List[str]] - A tuple containing a boolean indicating whether trade monitoring was successful and a list of adjustments made to the trading strategy.
-
-**Raises:**
-
-- ValueError: If trade execution status is False or trade details are empty or malformed.
-**Examples:**
-
-```python
->>> trade_execution_status = True
->>> trade_details = ['Buy:100:AAPL:150.0', 'Sell:50:GOOG:2500.0']
->>> monitor_trades(trade_execution_status, trade_details)
-(True, ['Adjusted risk tolerance', 'Updated position sizing'])
-```
-
-```python
->>> trade_execution_status = False
->>> trade_details = []
->>> monitor_trades(trade_execution_status, trade_details)
-(False, [])
+>>> execute_trades(trading_signals=['buy', 'invalid_signal'])
+['success', 'failed']
 ```
 

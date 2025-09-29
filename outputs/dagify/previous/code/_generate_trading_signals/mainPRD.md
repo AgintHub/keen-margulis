@@ -5,481 +5,220 @@ PRDs for nodes in the '_generate_trading_signals' module.
 
 ## Table of Contents
 
-- [validate_input_data](#validate_input_data)
+- [validate_trading_parameters](#validate_trading_parameters)
 
-- [generate_trend_based_signals](#generate_trend_based_signals)
+- [validate_trading_opportunities](#validate_trading_opportunities)
 
-- [generate_pattern_based_signals](#generate_pattern_based_signals)
+- [parse_trading_opportunities](#parse_trading_opportunities)
 
-- [generate_anomaly_based_signals](#generate_anomaly_based_signals)
+- [calculate_signal_details](#calculate_signal_details)
 
-- [analyze_price_momentum](#analyze_price_momentum)
-
-- [analyze_volume_patterns](#analyze_volume_patterns)
-
-- [analyze_economic_indicators](#analyze_economic_indicators)
-
-- [combine_all_signals](#combine_all_signals)
-
-- [filter_and_prioritize_signals](#filter_and_prioritize_signals)
-
-- [calculate_signal_confidence](#calculate_signal_confidence)
-
-- [validate_signal_generation](#validate_signal_generation)
+- [format_trading_signal](#format_trading_signal)
 
 
 
 ---
 
-## validate_input_data
+## validate_trading_parameters
 
 ### Description
-Validates the input data for market analysis and trading signal generation.
+Validates trading parameters to ensure they meet the required criteria for risk tolerance and position sizing.
 
 ### Conceptual Info
 
-This shim node is responsible for validating the input data used for market analysis and trading signal generation, ensuring that the data is correct and consistent before further processing.
+This shim node is responsible for validating trading parameters, specifically risk tolerance and position sizing, to ensure they are within acceptable ranges and properly formatted for further processing in the trading signal generation pipeline.
 
 ### Docstring
 
-**Summary:** Validate input data for market analysis and trading signal generation.
+**Summary:** Validates the risk tolerance and position sizing parameters to ensure they are appropriate for generating trading signals.
 
 **Parameters:**
 
-- market_data (str): The market data to be validated, expected to be a string representation of the collected market data output.
-- analysis_results (str): The analysis results to be validated, expected to be a string representation of the analyzed market data output.
-**Returns:** bool - True if the input data is valid, False otherwise.
+- risk_tolerance (str): The risk tolerance level as a string, expected to be convertible to a float between 0 and 1.
+- position_sizing (str): The position sizing strategy as a string, expected to be convertible to a float representing a proportion of the account balance.
+**Returns:** str - A JSON string representing a dictionary with validated 'risk_tolerance' and 'position_sizing' parameters.
 
 **Raises:**
 
-- ValueError: If the input data is not in the expected format or contains invalid values.
-- TypeError: If the input types are not as expected (str for market_data and analysis_results).
+- ValueError: If the risk tolerance or position sizing values are out of the expected range or cannot be converted to float.
+- TypeError: If the input parameters are not strings or if the conversion to float fails.
 **Examples:**
 
 ```python
->>> validate_input_data(market_data='{"stock_prices": [100.0, 101.0], "trading_volumes": [1000, 1200]}', analysis_results='{"trend_identification": ["uptrend"], "pattern_recognition": ["bullish"]}')
->>> validate_input_data(market_data='{"stock_prices": [100.0, 101.0]}', analysis_results='{"trend_identification": ["uptrend"]}')
->>> validate_input_data(market_data='invalid_data', analysis_results='{"trend_identification": ["uptrend"]}')
-True
+>>> validate_trading_parameters(risk_tolerance='0.5', position_sizing='0.2')
+{'risk_tolerance': '0.5', 'position_sizing': '0.2'}
 ```
 
 ```python
->>> validate_input_data(market_data='{"stock_prices": [100.0, 'invalid'], "trading_volumes": [1000, 1200]}', analysis_results='{"trend_identification": ["uptrend"]}')
-False
+>>> validate_trading_parameters(risk_tolerance='1.5', position_sizing='0.2')
+ValueError: Risk tolerance must be between 0 and 1
 ```
 
 
 
 ---
 
-## generate_trend_based_signals
+## validate_trading_opportunities
 
 ### Description
-Generates trading signals based on identified market trends.
+Validates a list of trading opportunities to ensure they are properly formatted and meet required criteria.
 
 ### Conceptual Info
 
-This shim function generates trading signals based on the trend identification results from market data analysis.
+This shim node is responsible for validating a list of trading opportunities. It ensures that the opportunities are properly formatted and meet specific criteria before they are used in further processing.
 
 ### Docstring
 
-**Summary:** Generates a list of trading signals based on the provided trend identification results.
+**Summary:** Validates a list of trading opportunities to ensure they are properly formatted and meet required criteria.
 
 **Parameters:**
 
-- trends (str): String containing trend identification results, expected to be a comma-separated list of trend indicators or identifiers.
-**Returns:** List[str] - A list of trading signals generated based on the input trend identification results.
+- opportunities (str): A string representing a list of trading opportunities, likely in a serialized format such as JSON.
+**Returns:** List[str] - A list of validated trading opportunities. Each opportunity is represented as a string.
 
 **Raises:**
 
-- ValueError: Raised when the input trends string is empty or malformed.
-- TypeError: Raised when the input trends is not a string.
-**Examples:**
-
-```python
->>> trends = 'uptrend,downtrend,sidetrend'
->>> signals = generate_trend_based_signals(trends)
->>> print(signals)
-['buy', 'sell', 'hold']
-```
-
-```python
->>> trends = ''
->>> try:
-...     signals = generate_trend_based_signals(trends)
->>> except ValueError as e:
-...     print(e)
->>> except TypeError as e:
-...     print(e)
-Input trends string is empty or malformed
-```
-
-
-
----
-
-## generate_pattern_based_signals
-
-### Description
-Generates trading signals based on recognized patterns in market data.
-
-### Conceptual Info
-
-This shim node generates trading signals based on the patterns recognized in the market data analysis. It plays a crucial role in the overall trading signal generation process by providing pattern-based insights.
-
-### Docstring
-
-**Summary:** Generates a list of trading signals based on the input patterns recognized in market data analysis.
-
-**Parameters:**
-
-- patterns (str): A string representing the patterns recognized in market data analysis. The exact format of this string is not specified but should be consistent with the requirements of the signal generation logic.
-**Returns:** List[str] - A list of strings representing the trading signals generated based on the input patterns. Each signal should be a string that can be interpreted by downstream processes.
-
-**Raises:**
-
-- ValueError: If the input 'patterns' string is malformed or cannot be processed.
-- TypeError: If the input 'patterns' is not a string.
-**Examples:**
-
-```python
->>> patterns = 'uptrend,downtrend,support_level'
->>> signals = generate_pattern_based_signals(patterns=patterns)
-['buy','sell','hold']
-```
-
-```python
->>> patterns = 'resistance_level,continuation_pattern'
->>> signals = generate_pattern_based_signals(patterns=patterns)
-['sell','hold']
-```
-
-
-
----
-
-## generate_anomaly_based_signals
-
-### Description
-Generates trading signals based on the anomalies detected in the market data analysis
-
-### Conceptual Info
-
-This shim generates trading signals based on anomalies detected in market data analysis, serving as a crucial component in the overall trading signal generation pipeline
-
-### Docstring
-
-**Summary:** Generates trading signals based on the input anomalies detected in market data
-
-**Parameters:**
-
-- anomalies (str): String containing the detected anomalies in the market data analysis
-**Returns:** List[str] - List of trading signals generated based on the input anomalies
-
-**Raises:**
-
-- ValueError: If the input anomalies string is empty or malformed
-- TypeError: If the input anomalies is not a string
-**Examples:**
-
-```python
->>> anomaly_signals = generate_anomaly_based_signals(anomalies='unusual_volume_spikes,price_drops')
->>> print(anomaly_signals)
-['buy_signal', 'sell_signal']
-```
-
-```python
->>> anomaly_signals = generate_anomaly_based_signals(anomalies='price_surges,unusual_trading_activity')
->>> print(anomaly_signals)
-['strong_buy_signal', 'caution_signal']
-```
-
-
-
----
-
-## analyze_price_momentum
-
-### Description
-Analyzes price momentum from given stock prices and returns a list of signals.
-
-### Conceptual Info
-
-This shim analyzes the momentum of stock prices to generate trading signals, playing a crucial role in the trading signal generation pipeline.
-
-### Docstring
-
-**Summary:** Analyzes price momentum from given stock prices and returns a list of trading signals.
-
-**Parameters:**
-
-- prices (str): Stock prices in string format, expected to be a comma-separated list of float values.
-**Returns:** List[str] - List of trading signals generated based on the analysis of price momentum.
-
-**Raises:**
-
-- ValueError: When the input string is not properly formatted or cannot be converted to float values.
+- ValueError: When the input string is not a valid representation of a list of trading opportunities.
 - TypeError: When the input is not a string.
 **Examples:**
 
 ```python
->>> analyze_price_momentum(prices='100.5,101.2,102.1,101.5,100.8')
->>> analyze_price_momentum(prices='105.0,106.0,107.0,108.0,109.0')
-['Buy', 'Sell']
+>>> import json
+>>> opportunities = json.dumps(['opportunity1', 'opportunity2'])
+>>> result = validate_trading_opportunities(opportunities=opportunities)
+['opportunity1', 'opportunity2']
 ```
 
 ```python
->>> analyze_price_momentum(prices='110.0,109.0,108.0,107.0,106.0')
-['Sell']
-```
-
-
-
----
-
-## analyze_volume_patterns
-
-### Description
-Analyzes trading volume patterns to generate signals for trading decisions.
-
-### Conceptual Info
-
-This shim analyzes trading volume patterns to identify significant trends or anomalies that can inform trading decisions.
-
-### Docstring
-
-**Summary:** Analyzes trading volume patterns to generate trading signals.
-
-**Parameters:**
-
-- volumes (str): A string representing a list of trading volumes, e.g., '[100, 200, 300]' or a serialized volume data.
-**Returns:** List[str] - A list of trading signals generated based on the analysis of volume patterns, where each signal is represented as a string.
-
-**Raises:**
-
-- ValueError: If the input string cannot be parsed into a list of integers representing trading volumes.
-- TypeError: If the input is not a string or if the parsed volumes are not integers.
-**Examples:**
-
-```python
->>> analyze_volume_patterns('[100, 200, 300]')
->>> // Assuming the function correctly parses the string and analyzes the volume pattern.
-['signal1', 'signal2']
-```
-
-```python
->>> analyze_volume_patterns('not a list')
->>> // This should raise a ValueError because 'not a list' cannot be parsed into a list of integers.
-ValueError: Invalid input format. Expected a string representation of a list of integers.
+>>> try:
+...     validate_trading_opportunities(opportunities=123)
+>>> except TypeError as e:
+...     print(e)
+Input opportunities must be a string.
 ```
 
 
 
 ---
 
-## analyze_economic_indicators
+## parse_trading_opportunities
 
 ### Description
-Analyzes economic indicators to generate signals based on their values and trends.
+Parses a list of trading opportunities from string format to a structured dictionary representation.
 
 ### Conceptual Info
 
-This shim node analyzes economic indicators to produce trading signals, playing a crucial role in the trading signal generation pipeline.
+This shim function is crucial for transforming raw trading opportunity data into a format that can be further analyzed and processed by downstream components in the trading pipeline.
 
 ### Docstring
 
-**Summary:** Analyzes economic indicators to generate trading signals based on their values and trends.
+**Summary:** Converts a list of trading opportunities in string format into a list of dictionaries, each representing a structured trading opportunity.
 
 **Parameters:**
 
-- indicators (str): A string representation of economic indicators, potentially in a format like CSV or JSON, that will be analyzed to generate trading signals.
-**Returns:** List[str] - A list of trading signals generated based on the analysis of the provided economic indicators.
+- opportunities (List[str]): A list of trading opportunities as strings that need to be parsed into a structured format.
+**Returns:** List[dict] - A list of dictionaries where each dictionary represents a parsed trading opportunity with relevant details.
 
 **Raises:**
 
-- ValueError: If the input indicators string is malformed or cannot be processed.
-- TypeError: If the input type is not a string.
+- ValueError: If the input list contains strings that cannot be parsed into valid trading opportunities.
+- TypeError: If the input is not a list or if the elements of the list are not strings.
 **Examples:**
 
 ```python
->>> indicators_str = 'GDP:2.5%,Inflation:1.8%,Unemployment:4.2%'
->>> signals = analyze_economic_indicators(indicators=indicators_str)
-['STRONG_BUY', 'HOLD']
+>>> parse_trading_opportunities(opportunities=['opportunity1', 'opportunity2'])
+[{'details': 'parsed_opportunity1'}, {'details': 'parsed_opportunity2'}]
 ```
 
 ```python
->>> indicators_json = '{"GDP": 2.5, "Inflation": 1.8, "Unemployment": 4.2}'
->>> signals = analyze_economic_indicators(indicators=indicators_json)
-['BUY', 'SELL']
+>>> parse_trading_opportunities(opportunities=['invalid_opportunity'])
+ValueError: Invalid opportunity format
 ```
 
 
 
 ---
 
-## combine_all_signals
+## calculate_signal_details
 
 ### Description
-Combines various trading signals into a single list of signals.
+Calculates detailed trading signal information based on trading opportunity, risk tolerance, and position sizing parameters.
 
 ### Conceptual Info
 
-This node is responsible for aggregating different types of trading signals generated from various market data analyses into a single list.
+This shim node plays a crucial role in generating trading signals by calculating detailed signal information based on the provided trading opportunity, risk tolerance, and position sizing parameters.
 
 ### Docstring
 
-**Summary:** Combines trend, pattern, anomaly, price, volume, and economic signals into a single list.
+**Summary:** Calculates detailed trading signal information based on the provided trading opportunity, risk tolerance, and position sizing parameters.
 
 **Parameters:**
 
-- trend_signals (str): A string representation of trend-based trading signals.
-- pattern_signals (str): A string representation of pattern-based trading signals.
-- anomaly_signals (str): A string representation of anomaly-based trading signals.
-- price_signals (str): A string representation of price momentum-based trading signals.
-- volume_signals (str): A string representation of volume pattern-based trading signals.
-- economic_signals (str): A string representation of economic indicator-based trading signals.
-**Returns:** LIST_STR - A combined list of all input trading signals.
+- opportunity (str): A string representing the trading opportunity, expected to be a JSON-formatted dictionary containing relevant opportunity details.
+- risk_tolerance (str): A string representing the risk tolerance level, expected to be a float value between 0 and 1.
+- position_sizing (str): A string representing the position sizing strategy, expected to be a float value indicating the proportion of account balance to be used.
+**Returns:** str - A JSON-formatted string representing a dictionary containing detailed trading signal information, including potential profit/loss, risk assessment, and recommended action.
 
 **Raises:**
 
-- ValueError: If any of the input signals are not in the expected format.
-- TypeError: If any of the input parameters are not strings.
+- ValueError: If the input parameters are not valid JSON or do not contain the required information.
+- TypeError: If the input parameters are of incorrect type or cannot be converted to the expected types.
 **Examples:**
 
 ```python
->>> combine_all_signals(trend_signals='["uptrend"]', pattern_signals='["bullish"]', anomaly_signals='[]', price_signals='["buy"]', volume_signals='["high"]', economic_signals='["positive"]')
-...   -> ['uptrend', 'bullish', 'buy', 'high', 'positive']
-['uptrend', 'bullish', 'buy', 'high', 'positive']
+>>> import json
+>>> opportunity = json.dumps({'asset': 'stock', 'action': 'buy'})
+>>> risk_tolerance = '0.5'
+>>> position_sizing = '0.2'
+>>> signal_details = calculate_signal_details(opportunity, risk_tolerance, position_sizing)
+"{'signal': 'buy', 'risk_level': 'medium', 'expected_return': '5%%'}"
 ```
 
 ```python
->>> combine_all_signals(trend_signals='[]', pattern_signals='[]', anomaly_signals='["outlier"]', price_signals='[]', volume_signals='[]', economic_signals='[]')
-...   -> ['outlier']
-['outlier']
+>>> opportunity = json.dumps({'asset': 'forex', 'action': 'sell'})
+>>> risk_tolerance = '0.8'
+>>> position_sizing = '0.1'
+>>> signal_details = calculate_signal_details(opportunity, risk_tolerance, position_sizing)
+"{'signal': 'sell', 'risk_level': 'high', 'expected_return': '-2%%'}"
 ```
 
 
 
 ---
 
-## filter_and_prioritize_signals
+## format_trading_signal
 
 ### Description
-Filters and prioritizes a list of trading signals based on their relevance and importance.
+Formats trading signal details into a standardized string representation for further processing or output.
 
 ### Conceptual Info
 
-This node is responsible for filtering and prioritizing trading signals generated from various market data analyses.
+This shim node is responsible for taking trading signal details and formatting them into a standardized string representation. It plays a crucial role in the generate_trading_signals function by ensuring that the output is consistent and can be easily processed or displayed.
 
 ### Docstring
 
-**Summary:** Filters and prioritizes trading signals based on their relevance and importance.
+**Summary:** Formats the given trading signal details into a standardized string representation.
 
 **Parameters:**
 
-- signals (str): A string representation of a list of trading signals.
-**Returns:** List[str] - A list of filtered and prioritized trading signals.
+- signal_details (str): A string containing the trading signal details to be formatted.
+**Returns:** str - The formatted trading signal as a string, following a standardized format.
 
 **Raises:**
 
-- ValueError: If the input signals string is not properly formatted.
-- TypeError: If the input signals is not a string.
+- ValueError: If the input signal_details are not in the expected format or are missing required information.
+- TypeError: If the input signal_details is not of type str.
 **Examples:**
 
 ```python
->>> signals = 'signal1,signal2,signal3'
->>> filtered_signals = filter_and_prioritize_signals(signals=signals)
-['signal1', 'signal2', 'signal3']
+>>> signal_details = '{"signal_type": "buy", "symbol": "AAPL", "confidence": 0.8}'
+>>> formatted_signal = format_trading_signal(signal_details=signal_details)
+'BUY:AAPL:0.8'
 ```
 
 ```python
->>> signals = ''
->>> filtered_signals = filter_and_prioritize_signals(signals=signals)
-[]
-```
-
-
-
----
-
-## calculate_signal_confidence
-
-### Description
-Calculates confidence levels for given trading signals based on market data and analysis results.
-
-### Conceptual Info
-
-This shim function is designed to compute confidence levels for trading signals by analyzing market data and analysis results. It plays a crucial role in the trading signal generation pipeline by providing a measure of reliability for each signal.
-
-### Docstring
-
-**Summary:** Calculates confidence levels for trading signals based on market data and analysis results.
-
-**Parameters:**
-
-- signals (str): Serialized list of trading signals for which confidence levels are to be calculated.
-- market_data (str): Serialized market data used in calculating signal confidence, including stock prices, trading volumes, and economic indicators.
-- analysis_results (str): Serialized analysis results including trend identification, pattern recognition, and anomaly detection.
-**Returns:** List[float] - List of confidence levels corresponding to each trading signal, ranging from 0 (lowest confidence) to 1 (highest confidence).
-
-**Raises:**
-
-- ValueError: If the input signals, market data, or analysis results are not in the expected format or are missing required information.
-- TypeError: If the input types are not as expected (e.g., not strings for serialized data).
-**Examples:**
-
-```python
->>> signals = '["buy","sell","hold"]'
->>> market_data = '{"stock_prices": [100.0, 101.0], "trading_volumes": [1000, 1200]}'
->>> analysis_results = '{"trends": ["uptrend"], "patterns": ["bullish"], "anomalies": ["outlier"]}'
->>> confidence_levels = calculate_signal_confidence(signals=signals, market_data=market_data, analysis_results=analysis_results)
-[0.8, 0.6, 0.7]
-```
-
-```python
->>> signals = '["buy"]'
->>> market_data = '{"stock_prices": [50.0], "trading_volumes": [500]}'
->>> analysis_results = '{"trends": ["downtrend"], "patterns": ["bearish"], "anomalies": []}'
->>> confidence_levels = calculate_signal_confidence(signals=signals, market_data=market_data, analysis_results=analysis_results)
-[0.4]
-```
-
-
-
----
-
-## validate_signal_generation
-
-### Description
-Validates the generation of trading signals based on the provided signals and their confidence levels.
-
-### Conceptual Info
-
-This shim node validates the generation of trading signals by checking the provided signals and their corresponding confidence levels.
-
-### Docstring
-
-**Summary:** Validates trading signal generation based on input signals and confidence levels.
-
-**Parameters:**
-
-- signals (str): String representation of a list of generated trading signals.
-- confidence (str): String representation of a list of confidence levels corresponding to the trading signals.
-**Returns:** bool - True if signal generation is valid, False otherwise.
-
-**Raises:**
-
-- ValueError: When the input signals or confidence levels are not valid or properly formatted.
-- TypeError: When the input types are not as expected (e.g., not string representations of lists).
-**Examples:**
-
-```python
->>> validate_signal_generation(signals='["buy", "sell"]', confidence='[0.8, 0.7]')
-True
-```
-
-```python
->>> validate_signal_generation(signals='[]', confidence='[]')
-False
+>>> signal_details = '{"signal_type": "sell", "symbol": "GOOG", "confidence": 0.4}'
+>>> formatted_signal = format_trading_signal(signal_details=signal_details)
+'SELL:GOOG:0.4'
 ```
 

@@ -1,38 +1,38 @@
 # analyze_market_trends PRD
 
 ## Description
-Use technical indicators and machine learning algorithms to analyze market trends.
+Analyze historical market data to identify trends
 
 
 ## Conceptual Info
 
-This node analyzes market trends using technical indicators and machine learning algorithms.
+This node analyzes historical market data to identify trends and patterns, providing trend indicators and directions.
 
 ## Docstring
 
 ### Summary
-Analyzes market data to identify trends and patterns.
+Analyze historical market data to identify trends and patterns, returning trend indicators and directions.
 
 ### Parameters
 
-- **current_prices** (List[float]): Current prices of relevant assets gathered from gather_market_data node.
-- **historical_prices** (List[float]): Historical price data for relevant assets gathered from gather_market_data node.
-- **market_volumes** (List[float]): Current trading volumes of relevant assets gathered from gather_market_data node.
+- **historical_prices** (List[float]): List of historical prices from collect_historical_market_data
+- **historical_volumes** (List[float]): List of historical volumes from collect_historical_market_data
+- **other_metrics** (List[str]): Other relevant historical metrics from collect_historical_market_data
 
 ### Returns
 
-Tuple[List[float], List[str]]: A tuple containing trend indicators and pattern recognition results.
+Tuple[List[str], List[str]]: A tuple containing a list of trend indicators and a list of trend directions.
 
 ### Raises
 
-- ValueError: If input data is inconsistent or missing.
+- ValueError: If historical_prices, historical_volumes, or other_metrics are empty or inconsistent.
 
 ### Examples
 
 ```python
->>> current_prices = [100.0, 120.0, 110.0]
->>> historical_prices = [90.0, 100.0, 110.0, 120.0, 130.0]
->>> market_volumes = [1000.0, 1200.0, 1100.0]
->>> result = analyze_market_trends(current_prices, historical_prices, market_volumes)
-([0.5, 0.7, 0.3], ['uptrend', 'reversal'])
+>>> historical_prices = [100.0, 105.0, 110.0, 115.0, 120.0]
+>>> historical_volumes = [1000.0, 1200.0, 1500.0, 1800.0, 2000.0]
+>>> other_metrics = ['metric1', 'metric2', 'metric3', 'metric4', 'metric5']
+>>> trend_indicators, trend_directions = analyze_market_trends(historical_prices, historical_volumes, other_metrics)
+(['indicator1', 'indicator2'], ['up', 'up'])
 ```
