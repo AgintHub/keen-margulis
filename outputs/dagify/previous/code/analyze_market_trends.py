@@ -1,72 +1,67 @@
-from ._analyze_market_trends.validate_market_data import validate_market_data
-from ._analyze_market_trends.calculate_technical_indicators import calculate_technical_indicators
-from ._analyze_market_trends.determine_trend_directions import determine_trend_directions
-from ._analyze_market_trends.normalize_trend_indicators import normalize_trend_indicators
-
 from pydantic import BaseModel, Field
 from typing import List
 
 
-class FetchMarketDataOutput(BaseModel):
-    """Pydantic model for fetch_market_data node outputs."""
-    market_prices: List[float] = (
-        Field(..., description="List of current market prices")
+class GatherMarketDataOutput(BaseModel):
+    """Pydantic model for gather_market_data node outputs."""
+    current_prices: List[float] = (
+        Field(..., description="Current prices of relevant assets")
     )
-    market_volumes: List[int] = (
-        Field(..., description="List of current market volumes")
+    historical_prices: List[float] = (
+        Field(..., description="Historical price data for relevant assets")
+    )
+    market_volumes: List[float] = (
+        Field(..., description="Current trading volumes of relevant assets")
     )
 
 
 class AnalyzeMarketTrendsOutput(BaseModel):
     """Pydantic model for analyze_market_trends node outputs."""
     trend_indicators: List[float] = (
-        Field(..., description="List of trend indicators")
+        Field(..., description="Indicators showing the direction and strength of market trends")
     )
-    trend_directions: List[str] = (
-        Field(..., description="List of trend directions (up, down, neutral)")
+    pattern_recognition_results: List[str] = (
+        Field(..., description="Results of pattern recognition analysis")
     )
 
 
-def analyze_market_trends(fetch_market_data_input: FetchMarketDataOutput, **kwargs) -> AnalyzeMarketTrendsOutput:
+def analyze_market_trends(gather_market_data_input: GatherMarketDataOutput, **kwargs) -> AnalyzeMarketTrendsOutput:
     """
-    Analyze market trends using historical data and technical indicators.
+    Analyzes market data to identify trends and patterns.
 
     Parameters
     ----------
-    market_prices : List[float]
-        List of current market prices from fetch_market_data node.
-    market_volumes : List[int]
-        List of current market volumes from fetch_market_data node.
+    current_prices : List[float]
+        Current prices of relevant assets gathered from gather_market_data
+        node.
+    historical_prices : List[float]
+        Historical price data for relevant assets gathered from
+        gather_market_data node.
+    market_volumes : List[float]
+        Current trading volumes of relevant assets gathered from
+        gather_market_data node.
 
     Returns
     -------
     Tuple[List[float], List[str]]
-        A tuple containing a list of trend indicators and a list of trend
-        directions.
+        A tuple containing trend indicators and pattern recognition results.
 
     Raises
     ------
     ValueError
-        If market_prices or market_volumes are empty or malformed.
+        If input data is inconsistent or missing.
 
     Examples
     --------
-    >>> market_prices = [100.0, 120.0, 110.0]
-    >>> market_volumes = [1000, 1200, 1100]
-    >>> trend_indicators, trend_directions =
-    analyze_market_trends(market_prices, market_volumes)
-    ([1.2, 0.9, 1.1], ['up', 'down', 'up'])
+    >>> current_prices = [100.0, 120.0, 110.0]
+    >>> historical_prices = [90.0, 100.0, 110.0, 120.0, 130.0]
+    >>> market_volumes = [1000.0, 1200.0, 1100.0]
+    >>> result = analyze_market_trends(current_prices, historical_prices,
+    market_volumes)
+    ([0.5, 0.7, 0.3], ['uptrend', 'reversal'])
 
     """
-    validated_data: dict = validate_market_data(prices=fetch_market_data_input.market_prices, volumes=fetch_market_data_input.market_volumes)
-    
-    technical_indicators: List[float] = calculate_technical_indicators(prices=fetch_market_data_input.market_prices, volumes=fetch_market_data_input.market_volumes)
-    
-    trend_signals: List[str] = determine_trend_directions(indicators=technical_indicators, prices=fetch_market_data_input.market_prices)
-    
-    normalized_indicators: List[float] = normalize_trend_indicators(raw_indicators=technical_indicators)
-    
     return AnalyzeMarketTrendsOutput(
-        trend_indicators=normalized_indicators,
-        trend_directions=trend_signals
+        trend_indicators=[],
+        pattern_recognition_results=[],
     )

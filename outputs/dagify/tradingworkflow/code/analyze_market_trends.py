@@ -1,72 +1,86 @@
-from ._analyze_market_trends.validate_market_data import validate_market_data
-from ._analyze_market_trends.calculate_technical_indicators import calculate_technical_indicators
+from ._analyze_market_trends.validate_input_data import validate_input_data
+from ._analyze_market_trends.preprocess_price_data import preprocess_price_data
+from ._analyze_market_trends.preprocess_volume_data import preprocess_volume_data
+from ._analyze_market_trends.analyze_price_trends import analyze_price_trends
+from ._analyze_market_trends.analyze_volume_trends import analyze_volume_trends
+from ._analyze_market_trends.analyze_other_metrics import analyze_other_metrics
+from ._analyze_market_trends.combine_trend_indicators import combine_trend_indicators
 from ._analyze_market_trends.determine_trend_directions import determine_trend_directions
-from ._analyze_market_trends.normalize_trend_indicators import normalize_trend_indicators
 
 from pydantic import BaseModel, Field
 from typing import List
 
 
-class FetchMarketDataOutput(BaseModel):
-    """Pydantic model for fetch_market_data node outputs."""
-    market_prices: List[float] = (
-        Field(..., description="List of current market prices")
+class CollectHistoricalMarketDataOutput(BaseModel):
+    """Pydantic model for collect_historical_market_data node outputs."""
+    historical_prices: List[float] = (
+        Field(..., description="List of historical prices")
     )
-    market_volumes: List[int] = (
-        Field(..., description="List of current market volumes")
+    historical_volumes: List[float] = (
+        Field(..., description="List of historical volumes")
+    )
+    other_metrics: List[str] = (
+        Field(..., description="Other relevant historical metrics")
     )
 
 
 class AnalyzeMarketTrendsOutput(BaseModel):
     """Pydantic model for analyze_market_trends node outputs."""
-    trend_indicators: List[float] = (
+    trend_indicators: List[str] = (
         Field(..., description="List of trend indicators")
     )
     trend_directions: List[str] = (
-        Field(..., description="List of trend directions (up, down, neutral)")
+        Field(..., description="List of trend directions")
     )
 
 
-def analyze_market_trends(fetch_market_data_input: FetchMarketDataOutput, **kwargs) -> AnalyzeMarketTrendsOutput:
+def analyze_market_trends(collect_historical_market_data_input: CollectHistoricalMarketDataOutput, **kwargs) -> AnalyzeMarketTrendsOutput:
     """
-    Analyze market trends using historical data and technical indicators.
+    Analyze historical market data to identify trends and patterns, returning
+    trend indicators and directions.
 
     Parameters
     ----------
-    market_prices : List[float]
-        List of current market prices from fetch_market_data node.
-    market_volumes : List[int]
-        List of current market volumes from fetch_market_data node.
+    historical_prices : List[float]
+        List of historical prices from collect_historical_market_data
+    historical_volumes : List[float]
+        List of historical volumes from collect_historical_market_data
+    other_metrics : List[str]
+        Other relevant historical metrics from
+        collect_historical_market_data
 
     Returns
     -------
-    Tuple[List[float], List[str]]
+    Tuple[List[str], List[str]]
         A tuple containing a list of trend indicators and a list of trend
         directions.
 
     Raises
     ------
     ValueError
-        If market_prices or market_volumes are empty or malformed.
+        If historical_prices, historical_volumes, or other_metrics are empty
+        or inconsistent.
 
     Examples
     --------
-    >>> market_prices = [100.0, 120.0, 110.0]
-    >>> market_volumes = [1000, 1200, 1100]
+    >>> historical_prices = [100.0, 105.0, 110.0, 115.0, 120.0]
+    >>> historical_volumes = [1000.0, 1200.0, 1500.0, 1800.0, 2000.0]
+    >>> other_metrics = ['metric1', 'metric2', 'metric3', 'metric4', 'metric5']
     >>> trend_indicators, trend_directions =
-    analyze_market_trends(market_prices, market_volumes)
-    ([1.2, 0.9, 1.1], ['up', 'down', 'up'])
+    analyze_market_trends(historical_prices, historical_volumes, other_metrics)
+    (['indicator1', 'indicator2'], ['up', 'up'])
 
     """
-    validated_data: dict = validate_market_data(prices=fetch_market_data_input.market_prices, volumes=fetch_market_data_input.market_volumes)
+    validate_input_data(prices=collect_historical_market_data_input.historical_prices, volumes=collect_historical_market_data_input.historical_volumes, metrics=collect_historical_market_data_input.other_metrics)
     
-    technical_indicators: List[float] = calculate_technical_indicators(prices=fetch_market_data_input.market_prices, volumes=fetch_market_data_input.market_volumes)
+    cleaned_prices: List[float] = preprocess_price_data(prices=collect_historical_market_data_input.historical_prices)
+    cleaned_volumes: List[float] = preprocess_volume_data(volumes=collect_historical_market_data_input.historical_volumes)
     
-    trend_signals: List[str] = determine_trend_directions(indicators=technical_indicators, prices=fetch_market_data_input.market_prices)
+    price_trends: List[str] = analyze_price_trends(prices=cleaned_prices)
+    volume_trends: List[str] = analyze_volume_trends(volumes=cleaned_volumes)
+    metric_indicators: List[str] = analyze_other_metrics(metrics=collect_historical_market_data_input.other_metrics)
     
-    normalized_indicators: List[float] = normalize_trend_indicators(raw_indicators=technical_indicators)
+    combined_indicators: List[str] = combine_trend_indicators(price_trends=price_trends, volume_trends=volume_trends, metric_indicators=metric_indicators)
+    trend_directions: List[str] = determine_trend_directions(indicators=combined_indicators, prices=cleaned_prices, volumes=cleaned_volumes)
     
-    return AnalyzeMarketTrendsOutput(
-        trend_indicators=normalized_indicators,
-        trend_directions=trend_signals
-    )
+    return AnalyzeMarketTrendsOutput(trend_indicators=combined_indicators, trend_directions=trend_directions)
