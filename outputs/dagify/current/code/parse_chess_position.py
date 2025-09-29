@@ -1,3 +1,10 @@
+from ._parse_chess_position.validate_fen_notation import validate_fen_notation
+from ._parse_chess_position.split_fen_components import split_fen_components
+from ._parse_chess_position.extract_piece_positions import extract_piece_positions
+from ._parse_chess_position.parse_side_to_move import parse_side_to_move
+from ._parse_chess_position.parse_castling_rights import parse_castling_rights
+from ._parse_chess_position.parse_en_passant_square import parse_en_passant_square
+
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -51,9 +58,15 @@ def parse_chess_position(general_input: str, **kwargs) -> ParseChessPositionOutp
     'en_passant_square': None, 'side_to_move': 'black'}
 
     """
+    validated_fen: str = validate_fen_notation(fen=general_input)
+    fen_parts: List[str] = split_fen_components(fen=validated_fen)
+    piece_positions: List[str] = extract_piece_positions(board_section=fen_parts[0])
+    side_to_move: str = parse_side_to_move(side_section=fen_parts[1])
+    castling_rights: List[bool] = parse_castling_rights(castling_section=fen_parts[2])
+    en_passant_square: str = parse_en_passant_square(en_passant_section=fen_parts[3])
     return ParseChessPositionOutput(
-        piece_positions=[],
-        castling_rights=[],
-        en_passant_square="",
-        side_to_move="",
+        piece_positions=piece_positions,
+        castling_rights=castling_rights,
+        en_passant_square=en_passant_square,
+        side_to_move=side_to_move
     )

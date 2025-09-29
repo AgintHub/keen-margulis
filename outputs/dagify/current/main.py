@@ -6,10 +6,10 @@ import json
 import sys
 from typing import Dict, Any, List, Callable, Coroutine, Union, Optional
 
-from code.parse_chess_position import parse_chess_position
-from code.evaluate_material_balance import evaluate_material_balance
 from code.analyze_pawn_structure import analyze_pawn_structure
 from code.assess_king_safety import assess_king_safety
+from code.evaluate_material_balance import evaluate_material_balance
+from code.parse_chess_position import parse_chess_position
 from code.synthesize_analysis import synthesize_analysis
 
 # Get async mode from environment variable or default to False
@@ -32,10 +32,10 @@ def make_async(func):
 
     return async_wrapper
 
-parse_chess_position_async = make_async(parse_chess_position)
-evaluate_material_balance_async = make_async(evaluate_material_balance)
 analyze_pawn_structure_async = make_async(analyze_pawn_structure)
 assess_king_safety_async = make_async(assess_king_safety)
+evaluate_material_balance_async = make_async(evaluate_material_balance)
+parse_chess_position_async = make_async(parse_chess_position)
 synthesize_analysis_async = make_async(synthesize_analysis)
 
 async def run_workflow(user_input: str) -> Dict[str, Any]:

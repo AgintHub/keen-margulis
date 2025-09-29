@@ -1,3 +1,11 @@
+from ._evaluate_material_balance.validate_piece_positions import validate_piece_positions
+from ._evaluate_material_balance.extract_white_pieces import extract_white_pieces
+from ._evaluate_material_balance.extract_black_pieces import extract_black_pieces
+from ._evaluate_material_balance.count_pieces_by_type import count_pieces_by_type
+from ._evaluate_material_balance.calculate_material_value import calculate_material_value
+from ._evaluate_material_balance.compute_material_score import compute_material_score
+from ._evaluate_material_balance.combine_piece_counts import combine_piece_counts
+
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -59,7 +67,22 @@ def evaluate_material_balance(parse_chess_position_input: ParseChessPositionOutp
     (0.0, [0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0])
 
     """
+    validated_positions: List[str] = validate_piece_positions(piece_positions=parse_chess_position_input.piece_positions)
+    
+    white_pieces: List[str] = extract_white_pieces(piece_positions=validated_positions)
+    black_pieces: List[str] = extract_black_pieces(piece_positions=validated_positions)
+    
+    white_piece_counts: List[int] = count_pieces_by_type(pieces=white_pieces)
+    black_piece_counts: List[int] = count_pieces_by_type(pieces=black_pieces)
+    
+    white_material_value: float = calculate_material_value(piece_counts=white_piece_counts)
+    black_material_value: float = calculate_material_value(piece_counts=black_piece_counts)
+    
+    material_score: float = compute_material_score(white_value=white_material_value, black_value=black_material_value)
+    
+    combined_piece_counts: List[int] = combine_piece_counts(white_counts=white_piece_counts, black_counts=black_piece_counts)
+    
     return EvaluateMaterialBalanceOutput(
-        material_score=0.0,
-        piece_counts=0,
+        material_score=material_score,
+        piece_counts=combined_piece_counts
     )

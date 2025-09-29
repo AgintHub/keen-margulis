@@ -1,3 +1,10 @@
+from ._analyze_pawn_structure.validate_input import validate_input
+from ._analyze_pawn_structure.extract_pawn_positions import extract_pawn_positions
+from ._analyze_pawn_structure.identify_pawn_chains import identify_pawn_chains
+from ._analyze_pawn_structure.analyze_pawn_chains import analyze_pawn_chains
+from ._analyze_pawn_structure.find_isolated_pawns import find_isolated_pawns
+from ._analyze_pawn_structure.find_passed_pawns import find_passed_pawns
+
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -19,7 +26,9 @@ class ParseChessPositionOutput(BaseModel):
 class AnalyzePawnStructureOutput(BaseModel):
     """Pydantic model for analyze_pawn_structure node outputs."""
     pawn_chain_analysis: List[str] = (
-        Field(..., description="Analysis of pawn chains and their implications.")
+        Field(..., description = (
+            "Analysis of pawn chains and their implications.")
+        )
     )
     isolated_pawns: List[str] = (
         Field(..., description="Positions of isolated pawns.")
@@ -67,8 +76,19 @@ def analyze_pawn_structure(parse_chess_position_input: ParseChessPositionOutput,
     (['Pawn chain on d5 and c6 is flexible'], ['a7'], ['d5'])
 
     """
+    validate_input(piece_positions=parse_chess_position_input.piece_positions, side_to_move=parse_chess_position_input.side_to_move)
+    
+    pawn_positions: List[str] = extract_pawn_positions(piece_positions=parse_chess_position_input.piece_positions, side=parse_chess_position_input.side_to_move)
+    
+    pawn_chains: List[str] = identify_pawn_chains(pawn_positions=pawn_positions)
+    chain_analysis: List[str] = analyze_pawn_chains(pawn_chains=pawn_chains)
+    
+    isolated_pawn_positions: List[str] = find_isolated_pawns(pawn_positions=pawn_positions)
+    
+    passed_pawn_positions: List[str] = find_passed_pawns(pawn_positions=pawn_positions, all_piece_positions=parse_chess_position_input.piece_positions, side=parse_chess_position_input.side_to_move)
+    
     return AnalyzePawnStructureOutput(
-        pawn_chain_analysis=[],
-        isolated_pawns=[],
-        passed_pawns=[],
+        pawn_chain_analysis=chain_analysis,
+        isolated_pawns=isolated_pawn_positions,
+        passed_pawns=passed_pawn_positions
     )
