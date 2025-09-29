@@ -5,93 +5,15 @@ PRDs for nodes in the 'chesspositionanalysisworkflow' module.
 
 ## Table of Contents
 
-- [parse_chess_position](#parse_chess_position)
-
-- [evaluate_material_balance](#evaluate_material_balance)
-
 - [analyze_pawn_structure](#analyze_pawn_structure)
 
 - [assess_king_safety](#assess_king_safety)
 
+- [evaluate_material_balance](#evaluate_material_balance)
+
+- [parse_chess_position](#parse_chess_position)
+
 - [synthesize_analysis](#synthesize_analysis)
-
-
-
----
-
-## parse_chess_position
-
-### Description
-Convert chess position notation into a usable data structure
-
-### Conceptual Info
-
-This node converts chess position notation into a structured data format that includes piece positions, castling rights, en passant square, and the side to move.
-
-### Docstring
-
-**Summary:** Parses a given chess position in standard algebraic notation (FEN) into a structured format.
-
-**Parameters:**
-
-- fen_notation (str): The chess position in FEN notation to be parsed.
-**Returns:** dict - A dictionary containing piece positions, castling rights, en passant square, and side to move.
-
-**Raises:**
-
-- ValueError: If the input FEN notation is invalid or malformed.
-**Examples:**
-
-```python
->>> fen_notation = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
->>> parse_chess_position(fen_notation)
-{'piece_positions': ['e2', 'e4', ...], 'castling_rights': [true, true], 'en_passant_square': 'e3', 'side_to_move': 'white'}
-```
-
-```python
->>> fen_notation = '8/8/8/8/8/8/8/8 b - - 0 1'
->>> parse_chess_position(fen_notation)
-{'piece_positions': [], 'castling_rights': [false, false], 'en_passant_square': None, 'side_to_move': 'black'}
-```
-
-
-
----
-
-## evaluate_material_balance
-
-### Description
-Assess material advantage or disadvantage
-
-### Conceptual Info
-
-This node evaluates the material balance between white and black in a given chess position, providing a score that indicates the material advantage or disadvantage.
-
-### Docstring
-
-**Summary:** Evaluates the material balance in a chess position based on piece positions.
-
-**Parameters:**
-
-- piece_positions (List[str]): Positions of all pieces on the board, obtained from parse_chess_position.
-**Returns:** Tuple[float, List[int]] - A tuple containing the material score (float) and the count of each piece type for both sides (List[int]).
-
-**Raises:**
-
-- ValueError: If the input piece_positions are invalid or not in the expected format.
-**Examples:**
-
-```python
->>> piece_positions = ['e2', 'e4', 'Nb1', 'c3']
->>> result = evaluate_material_balance(piece_positions)
-(0.5, [1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0])
-```
-
-```python
->>> piece_positions = ['d2', 'd4', 'd7', 'd5']
->>> result = evaluate_material_balance(piece_positions)
-(0.0, [0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0])
-```
 
 
 
@@ -181,6 +103,84 @@ This node assesses the safety of the kings on a chessboard by analyzing their po
 >>> side_to_move = 'black'
 >>> result = assess_king_safety(piece_positions, castling_rights, en_passant_square, side_to_move)
 (0.4, ['Rook on e1', 'Bishop on c4'])
+```
+
+
+
+---
+
+## evaluate_material_balance
+
+### Description
+Assess material advantage or disadvantage
+
+### Conceptual Info
+
+This node evaluates the material balance between white and black in a given chess position, providing a score that indicates the material advantage or disadvantage.
+
+### Docstring
+
+**Summary:** Evaluates the material balance in a chess position based on piece positions.
+
+**Parameters:**
+
+- piece_positions (List[str]): Positions of all pieces on the board, obtained from parse_chess_position.
+**Returns:** Tuple[float, List[int]] - A tuple containing the material score (float) and the count of each piece type for both sides (List[int]).
+
+**Raises:**
+
+- ValueError: If the input piece_positions are invalid or not in the expected format.
+**Examples:**
+
+```python
+>>> piece_positions = ['e2', 'e4', 'Nb1', 'c3']
+>>> result = evaluate_material_balance(piece_positions)
+(0.5, [1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0])
+```
+
+```python
+>>> piece_positions = ['d2', 'd4', 'd7', 'd5']
+>>> result = evaluate_material_balance(piece_positions)
+(0.0, [0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0])
+```
+
+
+
+---
+
+## parse_chess_position
+
+### Description
+Convert chess position notation into a usable data structure
+
+### Conceptual Info
+
+This node converts chess position notation into a structured data format that includes piece positions, castling rights, en passant square, and the side to move.
+
+### Docstring
+
+**Summary:** Parses a given chess position in standard algebraic notation (FEN) into a structured format.
+
+**Parameters:**
+
+- fen_notation (str): The chess position in FEN notation to be parsed.
+**Returns:** dict - A dictionary containing piece positions, castling rights, en passant square, and side to move.
+
+**Raises:**
+
+- ValueError: If the input FEN notation is invalid or malformed.
+**Examples:**
+
+```python
+>>> fen_notation = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+>>> parse_chess_position(fen_notation)
+{'piece_positions': ['e2', 'e4', ...], 'castling_rights': [true, true], 'en_passant_square': 'e3', 'side_to_move': 'white'}
+```
+
+```python
+>>> fen_notation = '8/8/8/8/8/8/8/8 b - - 0 1'
+>>> parse_chess_position(fen_notation)
+{'piece_positions': [], 'castling_rights': [false, false], 'en_passant_square': None, 'side_to_move': 'black'}
 ```
 
 

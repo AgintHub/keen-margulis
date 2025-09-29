@@ -1,3 +1,14 @@
+from ._assess_king_safety.validate_piece_positions import validate_piece_positions
+from ._assess_king_safety.find_king_positions import find_king_positions
+from ._assess_king_safety.get_current_side_king import get_current_side_king
+from ._assess_king_safety.identify_attacking_pieces import identify_attacking_pieces
+from ._assess_king_safety.evaluate_castling_safety import evaluate_castling_safety
+from ._assess_king_safety.evaluate_pawn_shield import evaluate_pawn_shield
+from ._assess_king_safety.calculate_threat_proximity import calculate_threat_proximity
+from ._assess_king_safety.evaluate_en_passant_threat import evaluate_en_passant_threat
+from ._assess_king_safety.calculate_final_safety_score import calculate_final_safety_score
+from ._assess_king_safety.format_threat_descriptions import format_threat_descriptions
+
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -69,7 +80,24 @@ def assess_king_safety(parse_chess_position_input: ParseChessPositionOutput, **k
     (0.4, ['Rook on e1', 'Bishop on c4'])
 
     """
-    return AssessKingSafetyOutput(
-        king_safety_score=0.0,
-        threats="",
-    )
+    validated_positions: List[str] = validate_piece_positions(positions=parse_chess_position_input.piece_positions)
+    
+    king_positions: List[str] = find_king_positions(piece_positions=validated_positions)
+    
+    current_side_king: str = get_current_side_king(king_positions=king_positions, side_to_move=parse_chess_position_input.side_to_move)
+    
+    attacking_pieces: List[str] = identify_attacking_pieces(piece_positions=validated_positions, target_king=current_side_king, side_to_move=parse_chess_position_input.side_to_move)
+    
+    castling_safety_bonus: float = evaluate_castling_safety(castling_rights=parse_chess_position_input.castling_rights, side_to_move=parse_chess_position_input.side_to_move)
+    
+    pawn_shield_score: float = evaluate_pawn_shield(piece_positions=validated_positions, king_position=current_side_king, side_to_move=parse_chess_position_input.side_to_move)
+    
+    threat_proximity_score: float = calculate_threat_proximity(attacking_pieces=attacking_pieces, king_position=current_side_king)
+    
+    en_passant_threat: float = evaluate_en_passant_threat(en_passant_square=parse_chess_position_input.en_passant_square, king_position=current_side_king)
+    
+    final_safety_score: float = calculate_final_safety_score(castling_bonus=castling_safety_bonus, pawn_shield=pawn_shield_score, threat_proximity=threat_proximity_score, en_passant_threat=en_passant_threat)
+    
+    threat_descriptions: str = format_threat_descriptions(attacking_pieces=attacking_pieces)
+    
+    return AssessKingSafetyOutput(king_safety_score=final_safety_score, threats=threat_descriptions)
