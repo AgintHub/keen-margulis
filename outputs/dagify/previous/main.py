@@ -6,12 +6,10 @@ import json
 import sys
 from typing import Dict, Any, List, Callable, Coroutine, Union, Optional
 
-from code.collect_sports_data import collect_sports_data
-from code.clean_and_preprocess_data import clean_and_preprocess_data
-from code.analyze_player_performance import analyze_player_performance
-from code.analyze_team_performance import analyze_team_performance
-from code.generate_insights_and_recommendations import generate_insights_and_recommendations
-from code.produce_sports_analysis_report import produce_sports_analysis_report
+from code.prepareforprayer import prepareforprayer
+from code.invokeprayer import invokeprayer
+from code.reflectonprayer import reflectonprayer
+from code.concludeprayer import concludeprayer
 
 # Get async mode from environment variable or default to False
 ASYNC_MODE = os.environ.get('ASYNC_MODE', '').lower() in ('true', '1', 'yes', 'y')
@@ -33,12 +31,10 @@ def make_async(func):
 
     return async_wrapper
 
-collect_sports_data_async = make_async(collect_sports_data)
-clean_and_preprocess_data_async = make_async(clean_and_preprocess_data)
-analyze_player_performance_async = make_async(analyze_player_performance)
-analyze_team_performance_async = make_async(analyze_team_performance)
-generate_insights_and_recommendations_async = make_async(generate_insights_and_recommendations)
-produce_sports_analysis_report_async = make_async(produce_sports_analysis_report)
+prepareforprayer_async = make_async(prepareforprayer)
+invokeprayer_async = make_async(invokeprayer)
+reflectonprayer_async = make_async(reflectonprayer)
+concludeprayer_async = make_async(concludeprayer)
 
 async def run_workflow(user_input: str) -> Dict[str, Any]:
     """Execute the workflow by running each level in the topological sort.
@@ -52,51 +48,37 @@ async def run_workflow(user_input: str) -> Dict[str, Any]:
     # Store results for each node
     results = {}
 
-    # Level 0: collect_sports_data
-    async def run_collect_sports_data():
-        # Call the async version of collect_sports_data with results from dependencies
-        return await collect_sports_data_async(user_input)
+    # Level 0: prepareforprayer
+    async def run_prepareforprayer():
+        # Call the async version of prepareforprayer with results from dependencies
+        return await prepareforprayer_async(user_input)
 
     # Run level 0 nodes in parallel
-    results['collect_sports_data'] = await run_collect_sports_data()
+    results['prepareforprayer'] = await run_prepareforprayer()
 
-    # Level 1: clean_and_preprocess_data
-    async def run_clean_and_preprocess_data():
-        # Call the async version of clean_and_preprocess_data with results from dependencies
-        return await clean_and_preprocess_data_async(results['collect_sports_data'])
+    # Level 1: invokeprayer
+    async def run_invokeprayer():
+        # Call the async version of invokeprayer with results from dependencies
+        return await invokeprayer_async(results['prepareforprayer'])
 
     # Run level 1 nodes in parallel
-    results['clean_and_preprocess_data'] = await run_clean_and_preprocess_data()
+    results['invokeprayer'] = await run_invokeprayer()
 
-    # Level 2: analyze_player_performance, analyze_team_performance
-    async def run_analyze_player_performance():
-        # Call the async version of analyze_player_performance with results from dependencies
-        return await analyze_player_performance_async(results['clean_and_preprocess_data'])
-
-    async def run_analyze_team_performance():
-        # Call the async version of analyze_team_performance with results from dependencies
-        return await analyze_team_performance_async(results['clean_and_preprocess_data'])
+    # Level 2: reflectonprayer
+    async def run_reflectonprayer():
+        # Call the async version of reflectonprayer with results from dependencies
+        return await reflectonprayer_async(results['invokeprayer'])
 
     # Run level 2 nodes in parallel
-    level_2_results = await asyncio.gather(run_analyze_player_performance(), run_analyze_team_performance())
-    results['analyze_player_performance'] = level_2_results[0]
-    results['analyze_team_performance'] = level_2_results[1]
+    results['reflectonprayer'] = await run_reflectonprayer()
 
-    # Level 3: generate_insights_and_recommendations
-    async def run_generate_insights_and_recommendations():
-        # Call the async version of generate_insights_and_recommendations with results from dependencies
-        return await generate_insights_and_recommendations_async(results['analyze_player_performance'], results['analyze_team_performance'])
+    # Level 3: concludeprayer
+    async def run_concludeprayer():
+        # Call the async version of concludeprayer with results from dependencies
+        return await concludeprayer_async(results['reflectonprayer'])
 
     # Run level 3 nodes in parallel
-    results['generate_insights_and_recommendations'] = await run_generate_insights_and_recommendations()
-
-    # Level 4: produce_sports_analysis_report
-    async def run_produce_sports_analysis_report():
-        # Call the async version of produce_sports_analysis_report with results from dependencies
-        return await produce_sports_analysis_report_async(results['generate_insights_and_recommendations'])
-
-    # Run level 4 nodes in parallel
-    results['produce_sports_analysis_report'] = await run_produce_sports_analysis_report()
+    results['concludeprayer'] = await run_concludeprayer()
 
     # Return all results
     return results
