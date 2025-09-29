@@ -5,220 +5,229 @@ PRDs for nodes in the '_generate_trading_signals' module.
 
 ## Table of Contents
 
-- [validate_trading_parameters](#validate_trading_parameters)
+- [validate_input_lengths](#validate_input_lengths)
 
-- [validate_trading_opportunities](#validate_trading_opportunities)
+- [validate_value_ranges](#validate_value_ranges)
 
-- [parse_trading_opportunities](#parse_trading_opportunities)
+- [generate_signals_from_trends_and_patterns](#generate_signals_from_trends_and_patterns)
 
-- [calculate_signal_details](#calculate_signal_details)
+- [adjust_signals_for_risk](#adjust_signals_for_risk)
 
-- [format_trading_signal](#format_trading_signal)
-
-
-
----
-
-## validate_trading_parameters
-
-### Description
-Validates trading parameters to ensure they meet the required criteria for risk tolerance and position sizing.
-
-### Conceptual Info
-
-This shim node is responsible for validating trading parameters, specifically risk tolerance and position sizing, to ensure they are within acceptable ranges and properly formatted for further processing in the trading signal generation pipeline.
-
-### Docstring
-
-**Summary:** Validates the risk tolerance and position sizing parameters to ensure they are appropriate for generating trading signals.
-
-**Parameters:**
-
-- risk_tolerance (str): The risk tolerance level as a string, expected to be convertible to a float between 0 and 1.
-- position_sizing (str): The position sizing strategy as a string, expected to be convertible to a float representing a proportion of the account balance.
-**Returns:** str - A JSON string representing a dictionary with validated 'risk_tolerance' and 'position_sizing' parameters.
-
-**Raises:**
-
-- ValueError: If the risk tolerance or position sizing values are out of the expected range or cannot be converted to float.
-- TypeError: If the input parameters are not strings or if the conversion to float fails.
-**Examples:**
-
-```python
->>> validate_trading_parameters(risk_tolerance='0.5', position_sizing='0.2')
-{'risk_tolerance': '0.5', 'position_sizing': '0.2'}
-```
-
-```python
->>> validate_trading_parameters(risk_tolerance='1.5', position_sizing='0.2')
-ValueError: Risk tolerance must be between 0 and 1
-```
+- [calculate_signal_confidence](#calculate_signal_confidence)
 
 
 
 ---
 
-## validate_trading_opportunities
+## validate_input_lengths
 
 ### Description
-Validates a list of trading opportunities to ensure they are properly formatted and meet required criteria.
+Validates that the input lists have consistent lengths.
 
 ### Conceptual Info
 
-This shim node is responsible for validating a list of trading opportunities. It ensures that the opportunities are properly formatted and meet specific criteria before they are used in further processing.
+This shim function validates the consistency of input list lengths for further processing.
 
 ### Docstring
 
-**Summary:** Validates a list of trading opportunities to ensure they are properly formatted and meet required criteria.
+**Summary:** Validates that the input lists have the same length.
 
 **Parameters:**
 
-- opportunities (str): A string representing a list of trading opportunities, likely in a serialized format such as JSON.
-**Returns:** List[str] - A list of validated trading opportunities. Each opportunity is represented as a string.
+- trend_indicators (str): Serialized list of trend indicators.
+- pattern_results (str): Serialized list of pattern recognition results.
+- risk_levels (str): Serialized list of risk levels.
+- risk_factors (str): Serialized list of risk factors.
+**Returns:** str - Output indicating whether the input lengths are valid.
 
 **Raises:**
 
-- ValueError: When the input string is not a valid representation of a list of trading opportunities.
-- TypeError: When the input is not a string.
+- ValueError: If the input lists have different lengths.
+- TypeError: If the input types are not as expected.
 **Examples:**
 
 ```python
->>> import json
->>> opportunities = json.dumps(['opportunity1', 'opportunity2'])
->>> result = validate_trading_opportunities(opportunities=opportunities)
-['opportunity1', 'opportunity2']
+>>> validate_input_lengths(trend_indicators='[1.0, 2.0]', pattern_results='["pattern1", "pattern2"]', risk_levels='[0.5, 0.6]', risk_factors='["factor1", "factor2"]')
+'Input lengths are valid'
 ```
 
 ```python
->>> try:
-...     validate_trading_opportunities(opportunities=123)
->>> except TypeError as e:
-...     print(e)
-Input opportunities must be a string.
+>>> validate_input_lengths(trend_indicators='[1.0]', pattern_results='["pattern1", "pattern2"]', risk_levels='[0.5, 0.6]', risk_factors='["factor1", "factor2"]')
+ValueError: 'Input lists have different lengths'
 ```
 
 
 
 ---
 
-## parse_trading_opportunities
+## validate_value_ranges
 
 ### Description
-Parses a list of trading opportunities from string format to a structured dictionary representation.
+Validates the input value ranges for trend indicators and risk levels to ensure they are within acceptable limits.
 
 ### Conceptual Info
 
-This shim function is crucial for transforming raw trading opportunity data into a format that can be further analyzed and processed by downstream components in the trading pipeline.
+This shim function is responsible for validating the input value ranges for trend indicators and risk levels. It ensures that these values are within acceptable limits, which is crucial for generating reliable trading signals.
 
 ### Docstring
 
-**Summary:** Converts a list of trading opportunities in string format into a list of dictionaries, each representing a structured trading opportunity.
+**Summary:** Validates the input value ranges for trend indicators and risk levels.
 
 **Parameters:**
 
-- opportunities (List[str]): A list of trading opportunities as strings that need to be parsed into a structured format.
-**Returns:** List[dict] - A list of dictionaries where each dictionary represents a parsed trading opportunity with relevant details.
+- trend_indicators (str): A string representation of a list of trend indicators that need to be validated.
+- risk_levels (str): A string representation of a list of risk levels that need to be validated.
+**Returns:** str - A message indicating whether the input value ranges are valid. It returns 'Valid' if both trend indicators and risk levels are within acceptable ranges, otherwise it returns an appropriate error message.
 
 **Raises:**
 
-- ValueError: If the input list contains strings that cannot be parsed into valid trading opportunities.
-- TypeError: If the input is not a list or if the elements of the list are not strings.
+- ValueError: If the input trend indicators or risk levels are not within the acceptable ranges.
+- TypeError: If the input trend indicators or risk levels are not in the correct format.
 **Examples:**
 
 ```python
->>> parse_trading_opportunities(opportunities=['opportunity1', 'opportunity2'])
-[{'details': 'parsed_opportunity1'}, {'details': 'parsed_opportunity2'}]
+>>> validate_value_ranges(trend_indicators='[0.5, 0.7, 0.3]', risk_levels='[0.2, 0.1, 0.4]')
+>>> validate_value_ranges(trend_indicators='[1.5, 0.7, 0.3]', risk_levels='[0.2, 0.1, 0.4]')
+'Valid'
 ```
 
 ```python
->>> parse_trading_opportunities(opportunities=['invalid_opportunity'])
-ValueError: Invalid opportunity format
+>>> validate_value_ranges(trend_indicators='[0.5, 0.7, 0.3]', risk_levels='[1.2, 0.1, 0.4]')
+'Risk levels are out of range.'
 ```
 
 
 
 ---
 
-## calculate_signal_details
+## generate_signals_from_trends_and_patterns
 
 ### Description
-Calculates detailed trading signal information based on trading opportunity, risk tolerance, and position sizing parameters.
+Generates trading signals based on market trend indicators and recognized patterns.
 
 ### Conceptual Info
 
-This shim node plays a crucial role in generating trading signals by calculating detailed signal information based on the provided trading opportunity, risk tolerance, and position sizing parameters.
+This shim node serves as a crucial component in a trading signal generation system, taking market trend indicators and pattern recognition results as input to produce a list of trading signals.
 
 ### Docstring
 
-**Summary:** Calculates detailed trading signal information based on the provided trading opportunity, risk tolerance, and position sizing parameters.
+**Summary:** Generates a list of trading signals by analyzing market trend indicators and recognized patterns.
 
 **Parameters:**
 
-- opportunity (str): A string representing the trading opportunity, expected to be a JSON-formatted dictionary containing relevant opportunity details.
-- risk_tolerance (str): A string representing the risk tolerance level, expected to be a float value between 0 and 1.
-- position_sizing (str): A string representing the position sizing strategy, expected to be a float value indicating the proportion of account balance to be used.
-**Returns:** str - A JSON-formatted string representing a dictionary containing detailed trading signal information, including potential profit/loss, risk assessment, and recommended action.
+- trend_indicators (str): String representation of a list of market trend indicators.
+- patterns (str): String representation of a list of recognized patterns in the market data.
+**Returns:** List[str] - A list of trading signals (buy/sell/hold) generated based on the input trend indicators and patterns.
 
 **Raises:**
 
-- ValueError: If the input parameters are not valid JSON or do not contain the required information.
-- TypeError: If the input parameters are of incorrect type or cannot be converted to the expected types.
+- ValueError: If the input trend indicators or patterns are not in the expected format or range.
+- TypeError: If the input types do not match the expected types.
 **Examples:**
 
 ```python
->>> import json
->>> opportunity = json.dumps({'asset': 'stock', 'action': 'buy'})
->>> risk_tolerance = '0.5'
->>> position_sizing = '0.2'
->>> signal_details = calculate_signal_details(opportunity, risk_tolerance, position_sizing)
-"{'signal': 'buy', 'risk_level': 'medium', 'expected_return': '5%%'}"
+>>> trend_indicators = '[0.5, 0.7, 0.3]'
+>>> patterns = "['pattern1', 'pattern2']"
+>>> generate_signals_from_trends_and_patterns(trend_indicators=trend_indicators, patterns=patterns)
+['buy', 'sell', 'hold']
 ```
 
 ```python
->>> opportunity = json.dumps({'asset': 'forex', 'action': 'sell'})
->>> risk_tolerance = '0.8'
->>> position_sizing = '0.1'
->>> signal_details = calculate_signal_details(opportunity, risk_tolerance, position_sizing)
-"{'signal': 'sell', 'risk_level': 'high', 'expected_return': '-2%%'}"
+>>> trend_indicators = '[0.2, 0.4]'
+>>> patterns = "['pattern3']"
+>>> generate_signals_from_trends_and_patterns(trend_indicators=trend_indicators, patterns=patterns)
+['sell', 'hold']
 ```
 
 
 
 ---
 
-## format_trading_signal
+## adjust_signals_for_risk
 
 ### Description
-Formats trading signal details into a standardized string representation for further processing or output.
+Adjusts trading signals based on risk levels and factors to produce risk-adjusted signals.
 
 ### Conceptual Info
 
-This shim node is responsible for taking trading signal details and formatting them into a standardized string representation. It plays a crucial role in the generate_trading_signals function by ensuring that the output is consistent and can be easily processed or displayed.
+This shim node adjusts trading signals based on the provided risk levels and factors, playing a crucial role in generating risk-adjusted trading signals.
 
 ### Docstring
 
-**Summary:** Formats the given trading signal details into a standardized string representation.
+**Summary:** Adjusts trading signals for risk based on risk levels and factors.
 
 **Parameters:**
 
-- signal_details (str): A string containing the trading signal details to be formatted.
-**Returns:** str - The formatted trading signal as a string, following a standardized format.
+- signals (str): Comma-separated list of trading signals to be adjusted.
+- risk_levels (str): Comma-separated list of risk levels associated with the trading signals.
+- risk_factors (str): Comma-separated list of risk factors contributing to the risk assessment.
+**Returns:** List[str] - List of risk-adjusted trading signals.
 
 **Raises:**
 
-- ValueError: If the input signal_details are not in the expected format or are missing required information.
-- TypeError: If the input signal_details is not of type str.
+- ValueError: If the input lists are not of the same length or contain invalid values.
+- TypeError: If the input types are not as expected.
 **Examples:**
 
 ```python
->>> signal_details = '{"signal_type": "buy", "symbol": "AAPL", "confidence": 0.8}'
->>> formatted_signal = format_trading_signal(signal_details=signal_details)
-'BUY:AAPL:0.8'
+>>> signals = 'buy,sell,hold'
+>>> risk_levels = '0.5,0.3,0.2'
+>>> risk_factors = 'market volatility,economic indicators,company performance'
+>>> adjusted_signals = adjust_signals_for_risk(signals, risk_levels, risk_factors)
+['buy adjusted for market volatility', 'sell adjusted for economic indicators', 'hold adjusted for company performance']
 ```
 
 ```python
->>> signal_details = '{"signal_type": "sell", "symbol": "GOOG", "confidence": 0.4}'
->>> formatted_signal = format_trading_signal(signal_details=signal_details)
-'SELL:GOOG:0.4'
+>>> signals = 'buy,sell'
+>>> risk_levels = '0.4,0.6'
+>>> risk_factors = 'interest rates,market sentiment'
+>>> adjusted_signals = adjust_signals_for_risk(signals, risk_levels, risk_factors)
+['buy adjusted for interest rates', 'sell adjusted for market sentiment']
+```
+
+
+
+---
+
+## calculate_signal_confidence
+
+### Description
+Calculates confidence levels for trading signals based on trend indicators, pattern recognition results, and risk levels.
+
+### Conceptual Info
+
+This shim node calculates the confidence levels for trading signals by considering trend indicators, pattern recognition results, and risk levels.
+
+### Docstring
+
+**Summary:** Calculates confidence levels for trading signals based on input trend indicators, patterns, and risk levels.
+
+**Parameters:**
+
+- trend_indicators (str): Serialized list of float values representing market trend indicators.
+- patterns (str): Serialized list of string values representing identified patterns in market data.
+- risk_levels (str): Serialized list of float values representing risk levels associated with trades.
+**Returns:** List[float] - List of float values representing confidence levels for each trading signal.
+
+**Raises:**
+
+- ValueError: If the input strings cannot be deserialized into their respective lists.
+- TypeError: If the deserialized lists contain elements of incorrect types.
+**Examples:**
+
+```python
+>>> trend_indicators = '[0.5, 0.7, 0.3]'
+>>> patterns = '['uptrend', 'downtrend']'
+>>> risk_levels = '[0.2, 0.1, 0.4]'
+>>> confidence_levels = calculate_signal_confidence(trend_indicators, patterns, risk_levels)
+[0.75, 0.65, 0.55]
+```
+
+```python
+>>> trend_indicators = '[0.1, 0.9]'
+>>> patterns = '['stable']'
+>>> risk_levels = '[0.05, 0.15]'
+>>> confidence_levels = calculate_signal_confidence(trend_indicators, patterns, risk_levels)
+[0.85, 0.80]
 ```
 

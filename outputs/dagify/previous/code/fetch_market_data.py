@@ -1,9 +1,9 @@
-from ._fetch_market_data.get_market_data_sources import get_market_data_sources
-from ._fetch_market_data.fetch_data_from_sources import fetch_data_from_sources
-from ._fetch_market_data.parse_market_data import parse_market_data
-from ._fetch_market_data.extract_prices import extract_prices
-from ._fetch_market_data.extract_volumes import extract_volumes
-from ._fetch_market_data.validate_market_data import validate_market_data
+from ._fetch_market_data.establish_market_data_connection import establish_market_data_connection
+from ._fetch_market_data.retrieve_raw_market_data import retrieve_raw_market_data
+from ._fetch_market_data.validate_market_data_integrity import validate_market_data_integrity
+from ._fetch_market_data.extract_market_prices import extract_market_prices
+from ._fetch_market_data.extract_market_volumes import extract_market_volumes
+from ._fetch_market_data.close_market_data_connection import close_market_data_connection
 
 from pydantic import BaseModel, Field
 from typing import List
@@ -12,50 +12,44 @@ from typing import List
 class FetchMarketDataOutput(BaseModel):
     """Pydantic model for fetch_market_data node outputs."""
     market_prices: List[float] = (
-        Field(..., description="List of current market prices")
+        Field(..., description="List of current market prices.")
     )
     market_volumes: List[int] = (
-        Field(..., description="List of current market volumes")
+        Field(..., description="List of current market volumes.")
     )
 
 
 def fetch_market_data(general_input: str, **kwargs) -> FetchMarketDataOutput:
     """
-    Fetches current market data, including prices and volumes, from multiple
-    sources.
+    Fetches current market data including prices and volumes.
 
     Returns
     -------
     Tuple[List[float], List[int]]
-        A tuple containing a list of current market prices and a list of
-        current market volumes.
+        A tuple containing a list of current market prices as floats and a
+        list of current market volumes as integers.
 
     Raises
     ------
     ConnectionError
-        If there's a failure connecting to market data sources.
-    DataParsingError
-        If there's an issue parsing the received market data.
+        If there's a failure in connecting to the market data source.
+    DataError
+        If the retrieved data is malformed or incomplete.
 
     Examples
     --------
-    >>> market_data = fetch_market_data()
-    ([123.45, 67.89], [1000, 2000])
+    >>> fetch_market_data()
+    ([12.5, 15.2, 10.8], [100, 200, 50])
 
     >>> prices, volumes = fetch_market_data()
-    >>> print(f'Prices: {prices}')
-    >>> print(f'Volumes: {volumes}')
-    Prices: [123.45, 67.89]
-    Volumes: [1000, 2000]
+    prices: [12.5, 15.2, 10.8]
+    volumes: [100, 200, 50]
 
     """
-    source_urls: List[str] = get_market_data_sources()
-    raw_data: List[dict] = fetch_data_from_sources(sources=source_urls)
-    parsed_data: dict = parse_market_data(raw_data=raw_data)
-    prices: List[float] = extract_prices(parsed_data=parsed_data)
-    volumes: List[int] = extract_volumes(parsed_data=parsed_data)
-    validate_market_data(prices=prices, volumes=volumes)
-    return FetchMarketDataOutput(
-        market_prices=prices,
-        market_volumes=volumes,
-    )
+    connection = establish_market_data_connection()
+    raw_data: dict = retrieve_raw_market_data(connection=connection)
+    validated_data: dict = validate_market_data_integrity(data=raw_data)
+    prices: List[float] = extract_market_prices(data=validated_data)
+    volumes: List[int] = extract_market_volumes(data=validated_data)
+    close_market_data_connection(connection=connection)
+    return FetchMarketDataOutput(market_prices=prices, market_volumes=volumes)

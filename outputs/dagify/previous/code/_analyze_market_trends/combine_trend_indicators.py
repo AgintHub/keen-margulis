@@ -1,52 +1,45 @@
 from typing import List
 
 
-def combine_trend_indicators(price_trends: str, volume_trends: str, metric_indicators: str) -> List[str]:
+def combine_trend_indicators(price_trends: str, volume_trends: str) -> List[float]:
     """
-    Combines trend indicators from price trends, volume trends, and other metric
-    indicators into a unified list.
+    Combines string representations of price and volume trends into a single
+    list of float trend indicators.
 
     Parameters
     ----------
     price_trends : str
-        String representation of price trend indicators, expected to be a
-        serialized list or a simple string value.
+        String representation of price trends.
     volume_trends : str
-        String representation of volume trend indicators, expected to be a
-        serialized list or a simple string value.
-    metric_indicators : str
-        String representation of other metric indicators, expected to be a
-        serialized list or a simple string value.
+        String representation of volume trends.
 
     Returns
     -------
-    List[str]
-        A list of combined trend indicators, where each indicator is
-        represented as a string.
+    List[float]
+        A list of float values representing the combined trend indicators.
 
     Raises
     ------
     ValueError
-        If any of the input strings are not properly formatted or cannot be
-        parsed into a list of indicators.
+        If the input strings cannot be parsed into float values.
     TypeError
-        If the input parameters are not strings.
+        If the input types are not strings.
 
     Examples
     --------
-    >>> price_trends = '["up", "down", "stable"]'
-    >>> volume_trends = '["increasing", "decreasing"]'
-    >>> metric_indicators = '["high", "low"]'
-    >>> combined = combine_trend_indicators(price_trends=price_trends,
-    volume_trends=volume_trends, metric_indicators=metric_indicators)
-    ['up', 'down', 'stable', 'increasing', 'decreasing', 'high', 'low']
+    >>> price_trends_str = '[1.2, 3.4, 5.6]'
+    >>> volume_trends_str = '[7.8, 9.0, 1.2]'
+    >>> combined_trends =
+    combine_trend_indicators(price_trends=price_trends_str,
+    volume_trends=volume_trends_str)
+    [1.2, 3.4, 5.6, 7.8, 9.0, 1.2]
 
-    >>> price_trends = 'up,down'
-    >>> volume_trends = 'increasing,decreasing'
-    >>> metric_indicators = 'high,low'
-    >>> combined = combine_trend_indicators(price_trends=price_trends,
-    volume_trends=volume_trends, metric_indicators=metric_indicators)
-    ['up', 'down', 'increasing', 'decreasing', 'high', 'low']
+    >>> price_trends_str = '[-1.2, -3.4]'
+    >>> volume_trends_str = '[0.0, 0.0]'
+    >>> combined_trends =
+    combine_trend_indicators(price_trends=price_trends_str,
+    volume_trends=volume_trends_str)
+    [-1.2, -3.4, 0.0, 0.0]
 
     """
     raise NotImplementedError("This is a virtual stub node that needs to be implemented")

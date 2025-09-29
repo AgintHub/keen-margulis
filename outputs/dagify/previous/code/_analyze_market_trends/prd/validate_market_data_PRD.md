@@ -1,40 +1,41 @@
 # validate_market_data PRD
 
 ## Description
-Validates market data by checking the consistency and correctness of the provided prices and volumes.
+Validates market data by processing input prices and volumes to produce a list of validated float values.
 
 
 ## Conceptual Info
 
-This shim node is responsible for validating market data, ensuring that the provided prices and volumes are consistent and correct before further processing.
+This shim node is responsible for validating market data. It takes string representations of prices and volumes, processes them, and returns a list of float values representing the validated market data.
 
 ## Docstring
 
 ### Summary
-Validates market data by checking the consistency and correctness of the provided prices and volumes.
+Validates market data by converting input string representations of prices and volumes into a list of float values.
 
 ### Parameters
 
-- **prices** (str): A string representation of a list of market prices.
-- **volumes** (str): A string representation of a list of market volumes.
+- **prices** (str): String representation of market prices to be validated.
+- **volumes** (str): String representation of market volumes to be validated.
 
 ### Returns
 
-str: A dictionary containing the validation result, including information about the validity of the market data.
+List[float]: List of validated market data as float values.
 
 ### Raises
 
-- ValueError: If the input prices or volumes are not valid (e.g., not numeric, negative, or mismatched lengths).
-- TypeError: If the input types are incorrect (e.g., not strings representing lists).
+- ValueError: If the input strings cannot be converted to float values.
+- TypeError: If the input types are not strings.
 
 ### Examples
 
 ```python
->>> validate_market_data(prices='[10.5, 20.3, 30.7]', volumes='[100, 200, 300]')
-{'valid': True, 'message': 'Market data is valid'}
+>>> validate_market_data(prices='1.2, 3.4, 5.6', volumes='10, 20, 30')
+>>> validate_market_data(prices='7.8, 9.0', volumes='40, 50')
+[1.2, 3.4, 5.6]
 ```
 
 ```python
->>> validate_market_data(prices='[10.5, 20.3]', volumes='[100, 200, 300]')
-{'valid': False, 'message': 'Mismatch in prices and volumes lengths'}
+>>> validate_market_data(prices='invalid, data', volumes='10, 20')
+ValueError: Invalid input data
 ```

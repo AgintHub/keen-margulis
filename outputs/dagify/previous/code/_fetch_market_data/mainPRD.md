@@ -5,254 +5,239 @@ PRDs for nodes in the '_fetch_market_data' module.
 
 ## Table of Contents
 
-- [get_market_data_sources](#get_market_data_sources)
+- [establish_market_data_connection](#establish_market_data_connection)
 
-- [fetch_data_from_sources](#fetch_data_from_sources)
+- [retrieve_raw_market_data](#retrieve_raw_market_data)
 
-- [parse_market_data](#parse_market_data)
+- [validate_market_data_integrity](#validate_market_data_integrity)
 
-- [extract_prices](#extract_prices)
+- [extract_market_prices](#extract_market_prices)
 
-- [extract_volumes](#extract_volumes)
+- [extract_market_volumes](#extract_market_volumes)
 
-- [validate_market_data](#validate_market_data)
+- [close_market_data_connection](#close_market_data_connection)
 
 
 
 ---
 
-## get_market_data_sources
+## establish_market_data_connection
 
 ### Description
-Retrieves a list of URLs for market data sources.
+Establishes a connection to retrieve market data.
 
 ### Conceptual Info
 
-This shim function is responsible for providing a list of URLs that serve as sources for market data. It acts as a bridge to fetch the necessary data for further processing.
+This shim is responsible for creating a connection to a market data source, which is then used to fetch raw market data.
 
 ### Docstring
 
-**Summary:** Fetches and returns a list of URLs for market data sources.
+**Summary:** Establishes a connection to a market data source and returns a connection object.
 
-**Returns:** List[str] - A list of URLs where market data can be fetched.
+**Returns:** str - A connection object that can be used to retrieve market data.
 
 **Raises:**
 
-- RuntimeError: If there's an issue retrieving the market data sources.
+- ConnectionError: If the connection to the market data source cannot be established.
 **Examples:**
 
 ```python
->>> sources = get_market_data_sources()
-['https://source1.com/data', 'https://source2.com/data']
-```
-
-```python
->>> print(get_market_data_sources())
-['https://source1.com/data', 'https://source2.com/data']
+>>> connection = establish_market_data_connection()
+<market_data_connection_object>
 ```
 
 
 
 ---
 
-## fetch_data_from_sources
+## retrieve_raw_market_data
 
 ### Description
-Fetches data from multiple sources and returns it in a structured format.
+Retrieves raw market data from a given connection.
 
 ### Conceptual Info
 
-This shim node is responsible for fetching data from multiple sources and returning it in a structured format that can be further processed downstream.
+This shim function serves as an interface to retrieve raw market data from an established connection. It plays a crucial role in the data processing pipeline by providing the initial raw data that will be further processed and validated.
 
 ### Docstring
 
-**Summary:** Fetches data from the provided sources and returns it as a list of dictionaries.
+**Summary:** Retrieves raw market data from the given connection and returns it as a string representation of a dictionary.
 
 **Parameters:**
 
-- sources (str): A string representing the sources from which data should be fetched.
-**Returns:** List[dict] - A list of dictionaries containing the fetched data from various sources.
+- connection (str): The established market data connection used to retrieve raw data.
+**Returns:** str - A string representation of the raw market data dictionary.
 
 **Raises:**
 
-- ValueError: If the input 'sources' is not a valid string or is empty.
-- TypeError: If the input 'sources' is not of type string.
+- ConnectionError: If the connection to the market data source fails.
+- TypeError: If the connection parameter is not a string.
 **Examples:**
 
 ```python
->>> sources = 'https://example.com/data1,https://example.com/data2'
->>> result = fetch_data_from_sources(sources=sources)
-[{'source': 'https://example.com/data1', 'data': '...'}, {'source': 'https://example.com/data2', 'data': '...'}]
+>>> connection = 'market_data_connection'
+>>> raw_data = retrieve_raw_market_data(connection=connection)
+{'market_prices': [10.5, 20.3], 'market_volumes': [100, 200]}
 ```
 
 ```python
->>> sources = 'https://example.com/data3'
->>> result = fetch_data_from_sources(sources=sources)
-[{'source': 'https://example.com/data3', 'data': '...'}]
+>>> invalid_connection = 123
+>>> try:
+...     retrieve_raw_market_data(connection=invalid_connection)
+>>> except TypeError as e:
+...     print(e)
+Connection parameter must be a string.
 ```
 
 
 
 ---
 
-## parse_market_data
+## validate_market_data_integrity
 
 ### Description
-Parses raw market data into a structured dictionary format.
+Validates the integrity of the provided market data to ensure it is correct and consistent.
 
 ### Conceptual Info
 
-This shim node is responsible for taking raw market data, which is a list of dictionaries, and parsing it into a structured dictionary format that can be used downstream for extracting prices and volumes.
+This shim is responsible for validating the integrity of market data retrieved from an external source, ensuring that it is accurate and consistent before further processing.
 
 ### Docstring
 
-**Summary:** Parses raw market data string into a structured dictionary.
+**Summary:** Validates the integrity of the given market data dictionary.
 
 **Parameters:**
 
-- raw_data (str): The raw market data as a string representation of a list of dictionaries.
-**Returns:** str - A dictionary containing the parsed market data, where keys and values are appropriately structured for further processing.
+- data (str): The raw market data to be validated, expected to be a string representation of a dictionary.
+**Returns:** str - A string representation of the validated market data dictionary.
 
 **Raises:**
 
-- ValueError: If the input raw_data is not a valid string representation of a list of dictionaries.
-- TypeError: If the input raw_data is not a string.
+- ValueError: If the input data is not a valid dictionary or contains inconsistent information.
+- TypeError: If the input data is not of type string or cannot be parsed into a dictionary.
 **Examples:**
 
 ```python
->>> raw_data = '[{"price": 10.5, "volume": 100}, {"price": 11.2, "volume": 50}]'
->>> parsed_data = parse_market_data(raw_data=raw_data)
-{'prices': [10.5, 11.2], 'volumes': [100, 50]}
+>>> validate_market_data_integrity(data='{"market_prices": [10.5, 20.3], "market_volumes": [100, 200]}')
+'{"market_prices": [10.5, 20.3], "market_volumes": [100, 200]}'
 ```
 
 ```python
->>> raw_data = '[{"price": 12.0, "volume": 200}]'
->>> parsed_data = parse_market_data(raw_data=raw_data)
-{'prices': [12.0], 'volumes': [200]}
+>>> validate_market_data_integrity(data='invalid_data')
+ValueError: Invalid market data format.
 ```
 
 
 
 ---
 
-## extract_prices
+## extract_market_prices
 
 ### Description
-Extracts a list of prices from the given parsed market data.
+Extracts a list of market prices from the provided validated market data.
 
 ### Conceptual Info
 
-This shim node is responsible for extracting a list of prices from the parsed market data, which is crucial for further analysis and processing in the market data pipeline.
+This shim extracts market prices from validated market data, playing a crucial role in the market data processing pipeline.
 
 ### Docstring
 
-**Summary:** Extracts prices from the given parsed market data and returns them as a list of floats.
+**Summary:** Extracts market prices from the provided validated market data string.
 
 **Parameters:**
 
-- parsed_data (str): A string representation of the parsed market data, expected to contain price information.
-**Returns:** List[float] - A list of float values representing the extracted prices.
+- data (str): Validated market data containing prices to be extracted.
+**Returns:** List[float] - List of extracted market prices.
 
 **Raises:**
 
-- ValueError: If the parsed data is malformed or does not contain valid price information.
-- TypeError: If the input parsed_data is not of type str.
+- ValueError: If the input data is malformed or does not contain valid market prices.
+- TypeError: If the input data is not of type string.
 **Examples:**
 
 ```python
->>> parsed_data = '{ "prices": [10.5, 20.8, 30.1] }'
->>> prices = extract_prices(parsed_data=parsed_data)
->>> print(prices)
-[10.5, 20.8, 30.1]
+>>> extract_market_prices(data='{"prices": [10.5, 20.3, 30.7]}')
+[10.5, 20.3, 30.7]
 ```
 
 ```python
->>> parsed_data = 'Invalid data'
->>> try: extract_prices(parsed_data=parsed_data)
->>> except ValueError as e: print(e)
-Malformed input data
+>>> extract_market_prices(data='{}')
+[]
 ```
 
 
 
 ---
 
-## extract_volumes
+## extract_market_volumes
 
 ### Description
-Extracts market volumes from parsed market data.
+Extracts market volumes from validated market data.
 
 ### Conceptual Info
 
-This shim function is responsible for extracting market volumes from the parsed market data, playing a crucial role in processing financial data for further analysis.
+This shim node is responsible for extracting market volumes from validated market data, playing a crucial role in providing the necessary data for further processing in the market data pipeline.
 
 ### Docstring
 
-**Summary:** Extracts and returns market volumes as a list of integers from the given parsed market data.
+**Summary:** Extracts market volumes from the provided validated market data string.
 
 **Parameters:**
 
-- parsed_data (str): A string representation of parsed market data containing volume information.
-**Returns:** List[int] - A list of integers representing the extracted market volumes.
+- data (str): Validated market data in string format, expected to contain volume information.
+**Returns:** List[int] - A list of integers representing the current market volumes extracted from the input data.
 
 **Raises:**
 
-- ValueError: If the parsed_data is not in the expected format or if volume extraction fails.
-- TypeError: If the input parsed_data is not of type str.
+- ValueError: When the input data is malformed or does not contain valid volume information.
+- TypeError: When the input data is not of type string.
 **Examples:**
 
 ```python
->>> parsed_data = '{ "market_volumes": [100, 200, 300] }'
->>> volumes = extract_volumes(parsed_data=parsed_data)
->>> print(volumes)
+>>> extract_market_volumes(data='{"market_volumes": [100, 200, 300]}')
 [100, 200, 300]
 ```
 
 ```python
->>> parsed_data = 'Invalid data format'
->>> try:
-...     volumes = extract_volumes(parsed_data=parsed_data)
->>> except ValueError as e:
-...     print(e)
-Invalid data format
+>>> extract_market_volumes(data='invalid_data')
+ValueError: Invalid data format
 ```
 
 
 
 ---
 
-## validate_market_data
+## close_market_data_connection
 
 ### Description
-Validates market data by checking prices and volumes for consistency and correctness.
+Closes the established market data connection to free up resources.
 
 ### Conceptual Info
 
-This shim node is responsible for validating market data, specifically checking if the provided prices and volumes are consistent and correct.
+This shim is responsible for closing an established market data connection, ensuring that system resources are properly released after use.
 
 ### Docstring
 
-**Summary:** Validates market data by checking the consistency and correctness of prices and volumes.
+**Summary:** Closes a market data connection and returns a status message.
 
 **Parameters:**
 
-- prices (List[float]): List of current market prices to be validated.
-- volumes (List[int]): List of current market volumes to be validated.
-**Returns:** str - Output indicating whether the market data is valid or not.
+- connection (str): The identifier or object representing the market data connection to be closed.
+**Returns:** str - A message indicating the result of closing the connection, such as 'Connection closed successfully' or an error message.
 
 **Raises:**
 
-- ValueError: When the lengths of prices and volumes lists do not match.
-- TypeError: When prices or volumes contain invalid data types.
+- ValueError: If the provided connection is invalid or not found.
+- ConnectionError: If there's an issue closing the connection.
 **Examples:**
 
 ```python
->>> validate_market_data(prices=[10.5, 20.8, 30.1], volumes=[100, 200, 300])
-'Market data is valid'
+>>> close_market_data_connection(connection='market_data_conn_123')
+'Connection closed successfully'
 ```
 
 ```python
->>> validate_market_data(prices=[10.5, 'invalid', 30.1], volumes=[100, 200, 300])
-TypeError: Prices must be a list of floats.
+>>> close_market_data_connection(connection='invalid_conn')
+'Error: Invalid connection ID'
 ```
 

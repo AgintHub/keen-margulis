@@ -5,84 +5,162 @@ PRDs for nodes in the '_analyze_market_trends' module.
 
 ## Table of Contents
 
-- [validate_input_data](#validate_input_data)
+- [validate_market_data](#validate_market_data)
 
-- [preprocess_price_data](#preprocess_price_data)
+- [validate_volume_data](#validate_volume_data)
 
-- [preprocess_volume_data](#preprocess_volume_data)
+- [calculate_price_trends](#calculate_price_trends)
 
-- [analyze_price_trends](#analyze_price_trends)
-
-- [analyze_volume_trends](#analyze_volume_trends)
-
-- [analyze_other_metrics](#analyze_other_metrics)
+- [calculate_volume_trends](#calculate_volume_trends)
 
 - [combine_trend_indicators](#combine_trend_indicators)
 
-- [determine_trend_directions](#determine_trend_directions)
+- [identify_price_patterns](#identify_price_patterns)
+
+- [identify_volume_patterns](#identify_volume_patterns)
+
+- [combine_pattern_results](#combine_pattern_results)
 
 
 
 ---
 
-## validate_input_data
+## validate_market_data
 
 ### Description
-Validates the input data for market trend analysis by checking prices, volumes, and other metrics.
+Validates market data by processing input prices and volumes to produce a list of validated float values.
 
 ### Conceptual Info
 
-This shim node is responsible for validating the input data used in market trend analysis, ensuring that prices, volumes, and other metrics are properly formatted and contain valid values.
+This shim node is responsible for validating market data. It takes string representations of prices and volumes, processes them, and returns a list of float values representing the validated market data.
 
 ### Docstring
 
-**Summary:** Validates input data for market trend analysis by checking prices, volumes, and other metrics for correct format and valid values.
+**Summary:** Validates market data by converting input string representations of prices and volumes into a list of float values.
 
 **Parameters:**
 
-- prices (str): List of historical prices to be validated.
-- volumes (str): List of historical volumes to be validated.
-- metrics (str): List of other relevant historical metrics to be validated.
-**Returns:** str - Output indicating whether the input data is valid or not.
+- prices (str): String representation of market prices to be validated.
+- volumes (str): String representation of market volumes to be validated.
+**Returns:** List[float] - List of validated market data as float values.
 
 **Raises:**
 
-- ValueError: When input data contains invalid or inconsistent values.
-- TypeError: When input types are not as expected (e.g., not lists or containing non-numeric values).
+- ValueError: If the input strings cannot be converted to float values.
+- TypeError: If the input types are not strings.
 **Examples:**
 
 ```python
->>> validate_input_data(prices='[1.0, 2.0, 3.0]', volumes='[10, 20, 30]', metrics='["metric1", "metric2"]')
->>> validate_input_data(prices='[1.0, 2.0, 3.0]', volumes='[10, 20, 30]', metrics='["metric1", "metric2"]')
-'Input data is valid'
+>>> validate_market_data(prices='1.2, 3.4, 5.6', volumes='10, 20, 30')
+>>> validate_market_data(prices='7.8, 9.0', volumes='40, 50')
+[1.2, 3.4, 5.6]
 ```
 
 ```python
->>> validate_input_data(prices='[1.0, abc, 3.0]', volumes='[10, 20, 30]', metrics='["metric1", "metric2"]')
-ValueError: Invalid price value 'abc'
+>>> validate_market_data(prices='invalid, data', volumes='10, 20')
+ValueError: Invalid input data
 ```
 
 
 
 ---
 
-## preprocess_price_data
+## validate_volume_data
 
 ### Description
-This shim preprocesses historical price data to clean and prepare it for trend analysis.
+Validates market volume data to ensure it meets required standards.
 
 ### Conceptual Info
 
-The preprocess_price_data shim is responsible for taking historical price data as input, cleaning it, and returning a preprocessed list of prices that can be used for further analysis.
+This shim validates market volume data, ensuring it's in the correct format and within acceptable ranges for further analysis.
 
 ### Docstring
 
-**Summary:** Preprocesses historical price data to clean and prepare it for trend analysis.
+**Summary:** Validates market volume data represented as a string.
 
 **Parameters:**
 
-- prices (str): A string representation of historical price data that needs to be preprocessed.
-**Returns:** List[float] - A list of cleaned and preprocessed historical prices.
+- volumes (str): String representation of market volume data.
+**Returns:** List[int] - List of integers representing validated market volume data.
+
+**Raises:**
+
+- ValueError: If the input string cannot be parsed into a list of integers.
+- TypeError: If the input is not a string.
+**Examples:**
+
+```python
+>>> validate_volume_data(volumes='[100, 200, 300]')
+[100, 200, 300]
+```
+
+```python
+>>> validate_volume_data(volumes='100,200,300')
+[100, 200, 300]
+```
+
+
+
+---
+
+## calculate_price_trends
+
+### Description
+Calculates price trends from a list of market prices.
+
+### Conceptual Info
+
+This shim function is designed to analyze a list of market prices and calculate the trends based on these prices. It is part of a larger system that analyzes market data to predict trends and patterns.
+
+### Docstring
+
+**Summary:** Calculates price trends from a given list of market prices.
+
+**Parameters:**
+
+- prices (str): A string representation of a list of market prices.
+**Returns:** List[float] - A list of float values representing the calculated price trends.
+
+**Raises:**
+
+- ValueError: If the input string cannot be parsed into a list of floats.
+- TypeError: If the input is not a string.
+**Examples:**
+
+```python
+>>> import json
+>>> prices = json.dumps([10.5, 11.2, 10.8, 11.5])
+>>> result = calculate_price_trends(prices=prices)
+[0.1, -0.4, 0.7]
+```
+
+```python
+>>> prices = '[12.1, 12.3, 12.0]'
+>>> result = calculate_price_trends(prices=prices)
+[0.2, -0.3]
+```
+
+
+
+---
+
+## calculate_volume_trends
+
+### Description
+Calculates volume trends from the given market volume data.
+
+### Conceptual Info
+
+This shim node is responsible for analyzing the given market volume data to identify trends, which are then used in the broader market analysis pipeline.
+
+### Docstring
+
+**Summary:** Calculates volume trends from the provided market volume data.
+
+**Parameters:**
+
+- volumes (str): A string representing the market volume data.
+**Returns:** List[float] - A list of floating point numbers representing the calculated volume trends.
 
 **Raises:**
 
@@ -91,171 +169,15 @@ The preprocess_price_data shim is responsible for taking historical price data a
 **Examples:**
 
 ```python
->>> preprocess_price_data('[100.0, 101.2, 102.5]')
->>> # Expected output: [100.0, 101.2, 102.5]
-[100.0, 101.2, 102.5]
+>>> calculate_volume_trends(volumes='100,200,300,400,500')
+>>> # Expected output: [0.0, 0.25, 0.5, 0.75, 1.0]
+[0.0, 0.25, 0.5, 0.75, 1.0]
 ```
 
 ```python
->>> preprocess_price_data('100.0,101.2,102.5')
->>> # Expected output: [100.0, 101.2, 102.5]
-[100.0, 101.2, 102.5]
-```
-
-
-
----
-
-## preprocess_volume_data
-
-### Description
-Cleans and preprocesses volume data for market trend analysis.
-
-### Conceptual Info
-
-This shim function preprocesses volume data, potentially handling tasks like data normalization, outlier removal, or formatting adjustments, to prepare it for market trend analysis.
-
-### Docstring
-
-**Summary:** Preprocesses volume data for market trend analysis by cleaning and potentially normalizing the input data.
-
-**Parameters:**
-
-- volumes (str): Input volume data as a string representation that needs to be preprocessed.
-**Returns:** List[float] - List of cleaned and preprocessed volume data ready for trend analysis.
-
-**Raises:**
-
-- ValueError: When the input volume data is not in the expected format or contains invalid values.
-- TypeError: When the input type is not a string or when the converted data type is not as expected.
-**Examples:**
-
-```python
->>> preprocess_volume_data(volumes='100, 200, 300, 400')
->>> # Expected to return a list of floats after preprocessing
-[100.0, 200.0, 300.0, 400.0]
-```
-
-```python
->>> preprocess_volume_data(volumes='invalid_data')
->>> # Expected to raise an error due to invalid input
-ValueError: Invalid input format for volume data.
-```
-
-
-
----
-
-## analyze_price_trends
-
-### Description
-Analyzes price trends based on the given historical price data and returns a list of trend indicators as strings.
-
-### Conceptual Info
-
-This shim node is responsible for analyzing historical price trends and generating a list of trend indicators. It serves as a placeholder for a more complex analysis that will be implemented later.
-
-### Docstring
-
-**Summary:** Analyzes historical price data to determine trend indicators.
-
-**Parameters:**
-
-- prices (str): A string representation of historical price data. It is expected to be a comma-separated list of float values representing prices over time.
-**Returns:** List[str] - A list of strings where each string represents a trend indicator derived from the input price data.
-
-**Raises:**
-
-- ValueError: If the input string cannot be parsed into a list of float values.
-- TypeError: If the input is not a string.
-**Examples:**
-
-```python
->>> prices = '10.5, 11.2, 10.8, 11.5, 12.1'
->>> analyze_price_trends(prices=prices)
-['Upward', 'Stable', 'Upward', 'Upward']
-```
-
-```python
->>> prices = '20.0, 19.5, 19.0, 18.5'
->>> analyze_price_trends(prices=prices)
-['Downward', 'Downward', 'Downward']
-```
-
-
-
----
-
-## analyze_volume_trends
-
-### Description
-Analyzes volume trends based on input volume data and returns a list of trend indicators.
-
-### Conceptual Info
-
-This shim node is designed to analyze volume trends in market data. It takes input volume data, processes it, and returns a list of trend indicators that can be used for further market analysis.
-
-### Docstring
-
-**Summary:** Analyzes volume trends based on the input volume data and returns a list of trend indicators.
-
-**Parameters:**
-
-- volumes (str): Input volume data in string format that needs to be analyzed for trends.
-**Returns:** List[str] - A list of trend indicators derived from the input volume data.
-
-**Raises:**
-
-- ValueError: If the input volume data is not in the expected format or is invalid.
-- TypeError: If the input type is not a string.
-**Examples:**
-
-```python
->>> analyze_volume_trends(volumes='100,200,300,400,500')
-['Increasing', 'Stable', 'Volatile']
-```
-
-```python
->>> analyze_volume_trends(volumes='500,400,300,200,100')
-['Decreasing', 'Stable']
-```
-
-
-
----
-
-## analyze_other_metrics
-
-### Description
-Analyzes other relevant historical metrics to generate indicators for market trend analysis.
-
-### Conceptual Info
-
-This shim is responsible for analyzing additional historical market data beyond prices and volumes, providing indicators that contribute to understanding market trends.
-
-### Docstring
-
-**Summary:** Analyzes other historical metrics to produce a list of indicators for market trend analysis.
-
-**Parameters:**
-
-- metrics (str): A string containing other relevant historical metrics, potentially in a serialized or encoded format.
-**Returns:** List[str] - A list of indicators derived from the analysis of the input metrics, which can be used in conjunction with other trend indicators.
-
-**Raises:**
-
-- ValueError: If the input metrics string is malformed or cannot be processed.
-- TypeError: If the input metrics is not a string.
-**Examples:**
-
-```python
->>> analyze_other_metrics(metrics='metric1,metric2,metric3')
-['indicator1', 'indicator2', 'indicator3']
-```
-
-```python
->>> analyze_other_metrics(metrics='invalid_metric')
-[]
+>>> calculate_volume_trends(volumes='500,400,300,200,100')
+>>> # Expected output: [1.0, 0.75, 0.5, 0.25, 0.0]
+[1.0, 0.75, 0.5, 0.25, 0.0]
 ```
 
 
@@ -265,82 +187,163 @@ This shim is responsible for analyzing additional historical market data beyond 
 ## combine_trend_indicators
 
 ### Description
-This shim node combines trend indicators from various market data sources into a unified list.
+Combines price and volume trend indicators into a single list of float values.
 
 ### Conceptual Info
 
-This shim function integrates multiple trend indicators from different market data sources (price, volume, and other metrics) into a single, comprehensive list, providing a holistic view of market trends.
+This shim node is responsible for integrating price and volume trend indicators, which are crucial for analyzing market trends. It takes string representations of price and volume trends as input and produces a list of float values representing the combined trend indicators.
 
 ### Docstring
 
-**Summary:** Combines trend indicators from price trends, volume trends, and other metric indicators into a unified list.
+**Summary:** Combines string representations of price and volume trends into a single list of float trend indicators.
 
 **Parameters:**
 
-- price_trends (str): String representation of price trend indicators, expected to be a serialized list or a simple string value.
-- volume_trends (str): String representation of volume trend indicators, expected to be a serialized list or a simple string value.
-- metric_indicators (str): String representation of other metric indicators, expected to be a serialized list or a simple string value.
-**Returns:** List[str] - A list of combined trend indicators, where each indicator is represented as a string.
+- price_trends (str): String representation of price trends.
+- volume_trends (str): String representation of volume trends.
+**Returns:** List[float] - A list of float values representing the combined trend indicators.
 
 **Raises:**
 
-- ValueError: If any of the input strings are not properly formatted or cannot be parsed into a list of indicators.
-- TypeError: If the input parameters are not strings.
+- ValueError: If the input strings cannot be parsed into float values.
+- TypeError: If the input types are not strings.
 **Examples:**
 
 ```python
->>> price_trends = '["up", "down", "stable"]'
->>> volume_trends = '["increasing", "decreasing"]'
->>> metric_indicators = '["high", "low"]'
->>> combined = combine_trend_indicators(price_trends=price_trends, volume_trends=volume_trends, metric_indicators=metric_indicators)
-['up', 'down', 'stable', 'increasing', 'decreasing', 'high', 'low']
+>>> price_trends_str = '[1.2, 3.4, 5.6]'
+>>> volume_trends_str = '[7.8, 9.0, 1.2]'
+>>> combined_trends = combine_trend_indicators(price_trends=price_trends_str, volume_trends=volume_trends_str)
+[1.2, 3.4, 5.6, 7.8, 9.0, 1.2]
 ```
 
 ```python
->>> price_trends = 'up,down'
->>> volume_trends = 'increasing,decreasing'
->>> metric_indicators = 'high,low'
->>> combined = combine_trend_indicators(price_trends=price_trends, volume_trends=volume_trends, metric_indicators=metric_indicators)
-['up', 'down', 'increasing', 'decreasing', 'high', 'low']
+>>> price_trends_str = '[-1.2, -3.4]'
+>>> volume_trends_str = '[0.0, 0.0]'
+>>> combined_trends = combine_trend_indicators(price_trends=price_trends_str, volume_trends=volume_trends_str)
+[-1.2, -3.4, 0.0, 0.0]
 ```
 
 
 
 ---
 
-## determine_trend_directions
+## identify_price_patterns
 
 ### Description
-Determines the trend directions based on the given indicators, prices, and volumes.
+Identifies specific patterns in the given market price data.
 
 ### Conceptual Info
 
-This shim node is responsible for analyzing the given trend indicators, historical prices, and volumes to determine the trend directions in the market.
+This shim node is designed to analyze market price data to identify significant patterns, playing a crucial role in market trend analysis.
 
 ### Docstring
 
-**Summary:** Determines trend directions based on the provided indicators, prices, and volumes.
+**Summary:** Analyzes the given market price data to identify specific patterns.
 
 **Parameters:**
 
-- indicators (str): A string representation of trend indicators, expected to be a list or a serialized format.
-- prices (str): A string representation of historical prices, expected to be a list or a serialized format.
-- volumes (str): A string representation of historical volumes, expected to be a list or a serialized format.
-**Returns:** List[str] - A list of trend directions as strings, e.g., 'up', 'down', or 'stable'.
+- prices (str): A string representation of a list of market prices (floats) to be analyzed for patterns.
+**Returns:** List[str] - A list of strings representing the identified patterns in the price data.
 
 **Raises:**
 
-- ValueError: If the input parameters are not in the expected format or if there's an inconsistency in the input data.
-- TypeError: If the types of the input parameters do not match the expected types.
+- ValueError: When the input 'prices' cannot be parsed into a list of floats.
+- TypeError: When the input 'prices' is not a string.
 **Examples:**
 
 ```python
->>> determine_trend_directions(indicators='["up","down","up"]', prices='[100.0, 90.0, 110.0]', volumes='[1000, 1200, 900]')
-['up', 'down', 'up']
+>>> import json
+>>> prices = '[1.2, 3.4, 5.6]'
+>>> result = identify_price_patterns(prices=prices)
+>>> print(json.dumps(result))
+["uptrend", "stable"]
 ```
 
 ```python
->>> determine_trend_directions(indicators='["stable","up","down"]', prices='[50.0, 55.0, 48.0]', volumes='[500, 600, 450]')
-['stable', 'up', 'down']
+>>> prices = '[7.8, 9.0, 1.2]'
+>>> result = identify_price_patterns(prices=prices)
+>>> print(result)
+["downtrend", "volatile"]
+```
+
+
+
+---
+
+## identify_volume_patterns
+
+### Description
+Identifies patterns in the given market volume data and returns them as a list of strings.
+
+### Conceptual Info
+
+This shim node is responsible for analyzing market volume data to identify significant patterns, which are then used in market trend analysis.
+
+### Docstring
+
+**Summary:** Analyzes the given market volume data to identify patterns and returns them as a list of strings.
+
+**Parameters:**
+
+- volumes (str): A string representing market volume data, expected to be a comma-separated list of volume values.
+**Returns:** List[str] - A list of strings where each string represents a pattern identified in the volume data.
+
+**Raises:**
+
+- ValueError: If the input string is not properly formatted or if volume values are invalid.
+- TypeError: If the input is not a string.
+**Examples:**
+
+```python
+>>> identify_volume_patterns(volumes='100,200,300,400')
+['Increasing trend', 'Volume spike at 300']
+```
+
+```python
+>>> identify_volume_patterns(volumes='500,400,300,200')
+['Decreasing trend']
+```
+
+
+
+---
+
+## combine_pattern_results
+
+### Description
+A shim function that combines price and volume pattern results into a single list of patterns.
+
+### Conceptual Info
+
+This shim function serves as a bridge to combine pattern recognition results from price and volume data analysis, providing a unified output for further processing.
+
+### Docstring
+
+**Summary:** Combines price and volume pattern results into a single list, handling input validation and appropriate error handling.
+
+**Parameters:**
+
+- price_patterns (str): A string containing or representing a list of price patterns.
+- volume_patterns (str): A string containing or representing a list of volume patterns.
+**Returns:** List[str] - A list of strings representing the combined pattern results from both price and volume patterns.
+
+**Raises:**
+
+- ValueError: If either price_patterns or volume_patterns is not a valid string representation of a list.
+- TypeError: If the input types are not as expected (e.g., not strings).
+**Examples:**
+
+```python
+>>> price_patterns = '["uptrend", "stability"]'
+>>> volume_patterns = '["increasing", "stable"]'
+>>> result = combine_pattern_results(price_patterns=price_patterns, volume_patterns=volume_patterns)
+["uptrend", "stability", "increasing", "stable"]
+```
+
+```python
+>>> price_patterns = '[]'
+>>> volume_patterns = '["decreasing"]'
+>>> result = combine_pattern_results(price_patterns=price_patterns, volume_patterns=volume_patterns)
+["decreasing"]
 ```
 

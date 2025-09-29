@@ -1,84 +1,91 @@
-from ._generate_trading_signals.validate_trading_parameters import validate_trading_parameters
-from ._generate_trading_signals.validate_trading_opportunities import validate_trading_opportunities
-from ._generate_trading_signals.parse_trading_opportunities import parse_trading_opportunities
-from ._generate_trading_signals.calculate_signal_details import calculate_signal_details
-from ._generate_trading_signals.format_trading_signal import format_trading_signal
+from ._generate_trading_signals.validate_input_lengths import validate_input_lengths
+from ._generate_trading_signals.validate_value_ranges import validate_value_ranges
+from ._generate_trading_signals.generate_signals_from_trends_and_patterns import generate_signals_from_trends_and_patterns
+from ._generate_trading_signals.adjust_signals_for_risk import adjust_signals_for_risk
+from ._generate_trading_signals.calculate_signal_confidence import calculate_signal_confidence
 
 from pydantic import BaseModel, Field
 from typing import List
 
 
-class DetermineTradingParametersOutput(BaseModel):
-    """Pydantic model for determine_trading_parameters node outputs."""
-    risk_tolerance: float = (
-        Field(..., description="Risk tolerance level between 0 and 1")
+class AnalyzeMarketTrendsOutput(BaseModel):
+    """Pydantic model for analyze_market_trends node outputs."""
+    trend_indicators: List[float] = (
+        Field(..., description="List of indicators showing market trends.")
     )
-    position_sizing: float = (
-        Field(..., description="Position sizing strategy as a proportion of account balance")
+    pattern_recognition_results: List[str] = (
+        Field(..., description="List of identified patterns in the market data.")
     )
 
 
-class IdentifyTradingOpportunitiesOutput(BaseModel):
-    """Pydantic model for identify_trading_opportunities node outputs."""
-    trading_opportunities: List[str] = (
-        Field(..., description="List of potential trading opportunities")
+class AssessRiskOutput(BaseModel):
+    """Pydantic model for assess_risk node outputs."""
+    risk_levels: List[float] = (
+        Field(..., description="List of risk levels associated with different trades.")
+    )
+    risk_factors: List[str] = (
+        Field(..., description="List of factors contributing to the risk assessment.")
     )
 
 
 class GenerateTradingSignalsOutput(BaseModel):
     """Pydantic model for generate_trading_signals node outputs."""
     trading_signals: List[str] = (
-        Field(..., description="List of trading signals")
+        Field(..., description="List of trading signals (buy/sell/hold).")
+    )
+    signal_confidence: List[float] = (
+        Field(..., description="List of confidence levels for each trading signal.")
     )
 
 
-def generate_trading_signals(determine_trading_parameters_input: DetermineTradingParametersOutput, identify_trading_opportunities_input: IdentifyTradingOpportunitiesOutput, **kwargs) -> GenerateTradingSignalsOutput:
+def generate_trading_signals(analyze_market_trends_input: AnalyzeMarketTrendsOutput, assess_risk_input: AssessRiskOutput, **kwargs) -> GenerateTradingSignalsOutput:
     """
-    Generate trading signals including buy/sell orders based on trading
-    parameters and opportunities.
+    Generate trading signals based on analyzed trends and risk assessment.
 
     Parameters
     ----------
-    trading_parameters : dict
-        Dictionary containing risk tolerance and position sizing strategy,
-        output of 'determine_trading_parameters' node.
-    trading_opportunities : List[str]
-        List of potential trading opportunities, output of
-        'identify_trading_opportunities' node.
+    trend_indicators : List[float]
+        List of indicators showing market trends from the
+        analyze_market_trends node.
+    pattern_recognition_results : List[str]
+        List of identified patterns in the market data from the
+        analyze_market_trends node.
+    risk_levels : List[float]
+        List of risk levels associated with different trades from the
+        assess_risk node.
+    risk_factors : List[str]
+        List of factors contributing to the risk assessment from the
+        assess_risk node.
 
     Returns
     -------
-    List[str]
-        List of trading signals generated based on the input parameters.
+    Tuple[List[str], List[float]]
+        A tuple containing a list of trading signals and a list of their
+        confidence levels.
 
     Raises
     ------
     ValueError
-        If trading parameters are invalid or trading opportunities are
-        empty.
+        If the input lists are of different lengths or if the trend
+        indicators or risk levels are out of expected ranges.
 
     Examples
     --------
-    >>> trading_parameters = {'risk_tolerance': 0.5, 'position_sizing': 0.2}
-    >>> trading_opportunities = ['buy AAPL', 'sell GOOG']
-    >>> generate_trading_signals(trading_parameters, trading_opportunities)
-    ['buy AAPL at 150', 'sell GOOG at 2000']
-
-    >>> trading_parameters = {'risk_tolerance': 0.3, 'position_sizing': 0.1}
-    >>> trading_opportunities = ['buy MSFT', 'sell AMZN']
-    >>> generate_trading_signals(trading_parameters, trading_opportunities)
-    ['buy MSFT at 200', 'sell AMZN at 3000']
+    >>> trend_indicators = [0.5, 0.7, 0.3]
+    >>> pattern_recognition_results = ['uptrend', 'downtrend', 'uptrend']
+    >>> risk_levels = [0.2, 0.5, 0.1]
+    >>> risk_factors = ['volatility', 'economic indicators', 'market sentiment']
+    >>> trading_signals, signal_confidence =
+    generate_trading_signals(trend_indicators, pattern_recognition_results,
+    risk_levels, risk_factors)
+    (['buy', 'sell', 'hold'], [0.8, 0.6, 0.9])
 
     """
-    validated_parameters: dict = validate_trading_parameters(risk_tolerance=determine_trading_parameters_input.risk_tolerance, position_sizing=determine_trading_parameters_input.position_sizing)
-    validated_opportunities: List[str] = validate_trading_opportunities(opportunities=identify_trading_opportunities_input.trading_opportunities)
+    validate_input_lengths(trend_indicators=analyze_market_trends_input.trend_indicators, pattern_results=analyze_market_trends_input.pattern_recognition_results, risk_levels=assess_risk_input.risk_levels, risk_factors=assess_risk_input.risk_factors)
+    validate_value_ranges(trend_indicators=analyze_market_trends_input.trend_indicators, risk_levels=assess_risk_input.risk_levels)
     
-    parsed_opportunities: List[dict] = parse_trading_opportunities(opportunities=validated_opportunities)
+    trading_signals: List[str] = generate_signals_from_trends_and_patterns(trend_indicators=analyze_market_trends_input.trend_indicators, patterns=analyze_market_trends_input.pattern_recognition_results)
+    risk_adjusted_signals: List[str] = adjust_signals_for_risk(signals=trading_signals, risk_levels=assess_risk_input.risk_levels, risk_factors=assess_risk_input.risk_factors)
+    confidence_levels: List[float] = calculate_signal_confidence(trend_indicators=analyze_market_trends_input.trend_indicators, patterns=analyze_market_trends_input.pattern_recognition_results, risk_levels=assess_risk_input.risk_levels)
     
-    signal_list: List[str] = []
-    for opportunity in parsed_opportunities:
-        signal_details: dict = calculate_signal_details(opportunity=opportunity, risk_tolerance=validated_parameters['risk_tolerance'], position_sizing=validated_parameters['position_sizing'])
-        formatted_signal: str = format_trading_signal(signal_details=signal_details)
-        signal_list.append(formatted_signal)
-    
-    return GenerateTradingSignalsOutput(trading_signals=signal_list)
+    return GenerateTradingSignalsOutput(trading_signals=risk_adjusted_signals, signal_confidence=confidence_levels)

@@ -1,0 +1,41 @@
+# validate_input_data PRD
+
+## Description
+Validates the input data for type and structure conformity.
+
+
+## Conceptual Info
+
+This shim node is responsible for validating the input data received from the generate_insights_and_recommendations node to ensure it conforms to the expected structure and types before being processed further.
+
+## Docstring
+
+### Summary
+Validates the input data for type and structure conformity, returning a dictionary if valid.
+
+### Parameters
+
+- **input_data** (str): The input data to be validated, expected to be of type GenerateInsightsAndRecommendationsOutput.
+
+### Returns
+
+str: A dictionary representation of the validated input data.
+
+### Raises
+
+- ValueError: When the input data fails validation checks.
+- TypeError: When the input data type is not as expected.
+
+### Examples
+
+```python
+>>> from pydantic import BaseModel, Field
+>>> from typing import List
+>>> class GenerateInsightsAndRecommendationsOutput(BaseModel):
+...     insights: List[str] = Field(..., description='List of insights derived from the analysis')
+...     recommendations: List[str] = Field(..., description='List of recommendations for improvement')
+...     confidence_score: float = Field(..., description='Score indicating confidence in the recommendations')
+>>> input_data = GenerateInsightsAndRecommendationsOutput(insights=['insight1'], recommendations=['rec1'], confidence_score=0.8)
+>>> validate_input_data(input_data=input_data.json())
+{'insights': ['insight1'], 'recommendations': ['rec1'], 'confidence_score': 0.8}
+```
