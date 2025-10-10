@@ -1,3 +1,8 @@
+from ._identify_task_dependencies.validate_tasks_input import validate_tasks_input
+from ._identify_task_dependencies.analyze_task_dependencies import analyze_task_dependencies
+from ._identify_task_dependencies.format_dependencies import format_dependencies
+from ._identify_task_dependencies.check_dependencies_exist import check_dependencies_exist
+
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -5,10 +10,14 @@ from typing import List
 class DecomposeObjectiveIntoTasksOutput(BaseModel):
     """Pydantic model for decompose_objective_into_tasks node outputs."""
     tasks: List[str] = (
-        Field(..., description="List of task descriptions that represent the decomposed workflow objective")
+        Field(..., description = (
+            "List of task descriptions that represent the decomposed workflow objective")
+        )
     )
     task_count: int = (
-        Field(..., description="Number of tasks identified in the decomposition")
+        Field(..., description = (
+            "Number of tasks identified in the decomposition")
+        )
     )
 
 
@@ -16,10 +25,14 @@ class IdentifyTaskDependenciesOutput(BaseModel):
     """Pydantic model for identify_task_dependencies node outputs."""
     tasks: List[str] = Field(..., description="List of identified task names.")
     dependencies: List[str] = (
-        Field(..., description="List of dependency relationships in the format 'TaskA depends on TaskB'.")
+        Field(..., description = (
+            "List of dependency relationships in the format 'TaskA depends on TaskB'.")
+        )
     )
     dependency_exists: bool = (
-        Field(..., description="Indicates whether any dependencies were identified.")
+        Field(..., description = (
+            "Indicates whether any dependencies were identified.")
+        )
     )
 
 
@@ -66,8 +79,18 @@ def identify_task_dependencies(decompose_objective_into_tasks_input: DecomposeOb
     'dependency_exists': False}
 
     """
+    tasks: List[str] = decompose_objective_into_tasks_input.tasks
+    
+    validated_tasks: List[str] = validate_tasks_input(tasks=tasks)
+    
+    dependency_pairs: List[tuple] = analyze_task_dependencies(tasks=validated_tasks)
+    
+    dependency_strings: List[str] = format_dependencies(dependency_pairs=dependency_pairs)
+    
+    has_dependencies: bool = check_dependencies_exist(dependencies=dependency_strings)
+    
     return IdentifyTaskDependenciesOutput(
-        tasks=[],
-        dependencies=[],
-        dependency_exists=False,
+        tasks=validated_tasks,
+        dependencies=dependency_strings,
+        dependency_exists=has_dependencies
     )

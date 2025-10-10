@@ -4,23 +4,33 @@ from pydantic import BaseModel, Field
 class CreateTaskDagOutput(BaseModel):
     """Pydantic model for create_task_dag node outputs."""
     task_ids: str = (
-        Field(..., description="List of unique task identifiers used in the DAG")
+        Field(..., description = (
+            "List of unique task identifiers used in the DAG")
+        )
     )
     edge_sources: str = (
-        Field(..., description="List of source task identifiers for each directed edge in the DAG")
+        Field(..., description = (
+            "List of source task identifiers for each directed edge in the DAG")
+        )
     )
     edge_destinations: str = (
-        Field(..., description="List of destination task identifiers for each directed edge in the DAG")
+        Field(..., description = (
+            "List of destination task identifiers for each directed edge in the DAG")
+        )
     )
     is_valid: bool = (
-        Field(..., description="Indicates whether the constructed DAG is acyclic and complete")
+        Field(..., description = (
+            "Indicates whether the constructed DAG is acyclic and complete")
+        )
     )
 
 
 class ValidateDagOutput(BaseModel):
     """Pydantic model for validate_dag node outputs."""
     is_valid: bool = (
-        Field(..., description="Indicates whether the DAG passes all validation checks.")
+        Field(..., description = (
+            "Indicates whether the DAG passes all validation checks.")
+        )
     )
     node_count: int = (
         Field(..., description="Total number of nodes present in the DAG.")
@@ -29,13 +39,19 @@ class ValidateDagOutput(BaseModel):
         Field(..., description="Total number of directed edges in the DAG.")
     )
     cycles_detected: str = (
-        Field(..., description="List of cycle identifiers or descriptions found in the DAG (empty if none).")
+        Field(..., description = (
+            "List of cycle identifiers or descriptions found in the DAG (empty if none).")
+        )
     )
     missing_dependencies: str = (
-        Field(..., description="List of node names that reference non\u2011existent dependencies (empty if none).")
+        Field(..., description = (
+            "List of node names that reference non\u2011existent dependencies (empty if none).")
+        )
     )
     errors: str = (
-        Field(..., description="Detailed error messages for any validation failures.")
+        Field(..., description = (
+            "Detailed error messages for any validation failures.")
+        )
     )
 
 
