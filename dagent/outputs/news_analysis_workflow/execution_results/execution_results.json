@@ -1,0 +1,44 @@
+{
+  "analyze_sentiment": {
+    "output": {
+      "output": "The overall sentiment of the news articles is positive."
+    },
+    "description": "Analyze the sentiment of the news articles."
+  },
+  "categorize_news_articles": {
+    "output": {
+      "output": "{\"politics\": [\"Government announces new policy on climate change.\"], \"economics\": [\"Stock market sees significant gains today.\"], \"social issues\": [\"Community rallies for social justice.\"]}"
+    },
+    "description": "Categorize news articles by topic or theme."
+  },
+  "compile_analysis_report": {
+    "output": {
+      "output": "The overall sentiment of the news articles is positive. The trends or patterns in the news articles are as follows: The government has announced a new policy on climate change, indicating a significant development in politics. The stock market has seen significant gains, suggesting a positive trend in economics. The community has rallied for social justice, highlighting ongoing activism in social issues."
+    },
+    "description": "Compile the sentiment and trend data produced by the preceding analysis nodes into a single, coherent textual report and concise summaries."
+  },
+  "filter_news_articles": {
+    "output": {
+      "output": "Filtered news articles after removing irrelevant or redundant ones."
+    },
+    "description": "Filter out irrelevant or redundant news articles."
+  },
+  "identify_trends": {
+    "output": {
+      "output": "The trends or patterns in the news articles are as follows: The government has announced a new policy on climate change, indicating a significant development in politics. The stock market has seen significant gains, suggesting a positive trend in economics. The community has rallied for social justice, highlighting ongoing activism in social issues."
+    },
+    "description": "Identify trends or patterns in the news articles."
+  },
+  "source_news_articles": {
+    "output": {
+      "output": "Collecting news articles from multiple sources, focusing on diverse topics and viewpoints."
+    },
+    "description": "Gather news articles from various sources."
+  },
+  "summarize_news_articles": {
+    "output": {
+      "output": "The key points of the news articles are as follows: In politics, the government has announced a new policy on climate change. In economics, the stock market has seen significant gains today. In social issues, the community has rallied for social justice."
+    },
+    "description": "Summarize the key points of the news articles."
+  }
+}

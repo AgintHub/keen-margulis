@@ -22,7 +22,8 @@ nodes:
       or social issues.
   compile_analysis_report:
     agent: false
-    description: Compile the analysis into a comprehensive report.
+    description: Compile the sentiment and trend data produced by the preceding analysis
+      nodes into a single, coherent textual report and concise summaries.
     name: compile_analysis_report
     nodes_depended_on:
     - analyze_sentiment
