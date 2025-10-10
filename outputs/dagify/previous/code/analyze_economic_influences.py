@@ -1,3 +1,11 @@
+from ._analyze_economic_influences.validate_economic_factors_input import validate_economic_factors_input
+from ._analyze_economic_influences.analyze_factor_impact import analyze_factor_impact
+from ._analyze_economic_influences.gather_evidence_sources import gather_evidence_sources
+from ._analyze_economic_influences.format_evidence_sources import format_evidence_sources
+from ._analyze_economic_influences.calculate_impact_strength import calculate_impact_strength
+from ._analyze_economic_influences.determine_time_period_affected import determine_time_period_affected
+from ._analyze_economic_influences.check_scholarly_consensus import check_scholarly_consensus
+
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -5,16 +13,24 @@ from typing import List
 class IdentifyKeyFactorsOutput(BaseModel):
     """Pydantic model for identify_key_factors node outputs."""
     social_factors: List[str] = (
-        Field(..., description="List of primary social factors that influenced the event or period.")
+        Field(..., description = (
+            "List of primary social factors that influenced the event or period.")
+        )
     )
     political_factors: List[str] = (
-        Field(..., description="List of primary political factors that influenced the event or period.")
+        Field(..., description = (
+            "List of primary political factors that influenced the event or period.")
+        )
     )
     economic_factors: List[str] = (
-        Field(..., description="List of primary economic factors that influenced the event or period.")
+        Field(..., description = (
+            "List of primary economic factors that influenced the event or period.")
+        )
     )
     cultural_factors: List[str] = (
-        Field(..., description="List of primary cultural factors that influenced the event or period.")
+        Field(..., description = (
+            "List of primary cultural factors that influenced the event or period.")
+        )
     )
 
 
@@ -24,19 +40,29 @@ class AnalyzeEconomicInfluencesOutput(BaseModel):
         Field(..., description="Name of the economic factor considered.")
     )
     impact_summary: str = (
-        Field(..., description="Brief description of how this factor impacted the event.")
+        Field(..., description = (
+            "Brief description of how this factor impacted the event.")
+        )
     )
     evidence_sources: str = (
-        Field(..., description="List of primary source references or data points supporting the analysis.")
+        Field(..., description = (
+            "List of primary source references or data points supporting the analysis.")
+        )
     )
     impact_strength: float = (
-        Field(..., description="Rating of the factor's impact strength on a scale from 0 to 1.")
+        Field(..., description = (
+            "Rating of the factor's impact strength on a scale from 0 to 1.")
+        )
     )
     time_period_affected: str = (
-        Field(..., description="Time period during which the factor was most influential.")
+        Field(..., description = (
+            "Time period during which the factor was most influential.")
+        )
     )
     is_consensus: bool = (
-        Field(..., description="Whether there is scholarly consensus on the factor's significance.")
+        Field(..., description = (
+            "Whether there is scholarly consensus on the factor's significance.")
+        )
     )
 
 
@@ -84,11 +110,28 @@ def analyze_economic_influences(identify_key_factors_input: IdentifyKeyFactorsOu
     'time_period_affected': '1942-1945', 'is_consensus': True}]
 
     """
+    economic_factors: List[str] = identify_key_factors_input.economic_factors
+    
+    validated_factors: List[str] = validate_economic_factors_input(factors=economic_factors)
+    
+    factor_name: str = validated_factors[0]
+    
+    impact_analysis: str = analyze_factor_impact(factor_name=factor_name, historical_context=kwargs.get('historical_context', ''))
+    
+    evidence_list: List[str] = gather_evidence_sources(factor_name=factor_name)
+    evidence_sources_str: str = format_evidence_sources(evidence_list=evidence_list)
+    
+    impact_strength_score: float = calculate_impact_strength(factor_name=factor_name, impact_analysis=impact_analysis)
+    
+    time_period: str = determine_time_period_affected(factor_name=factor_name, historical_context=kwargs.get('historical_context', ''))
+    
+    consensus_status: bool = check_scholarly_consensus(factor_name=factor_name)
+    
     return AnalyzeEconomicInfluencesOutput(
-        economic_factor_name="",
-        impact_summary="",
-        evidence_sources="",
-        impact_strength=0.0,
-        time_period_affected="",
-        is_consensus=False,
+        economic_factor_name=factor_name,
+        impact_summary=impact_analysis,
+        evidence_sources=evidence_sources_str,
+        impact_strength=impact_strength_score,
+        time_period_affected=time_period,
+        is_consensus=consensus_status
     )

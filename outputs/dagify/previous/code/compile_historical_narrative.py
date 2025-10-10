@@ -1,3 +1,12 @@
+from ._compile_historical_narrative.validate_required_inputs import validate_required_inputs
+from ._compile_historical_narrative.generate_narrative_title import generate_narrative_title
+from ._compile_historical_narrative.create_introduction import create_introduction
+from ._compile_historical_narrative.build_historical_context import build_historical_context
+from ._compile_historical_narrative.format_key_factors_for_narrative import format_key_factors_for_narrative
+from ._compile_historical_narrative.synthesize_impact_summary import synthesize_impact_summary
+from ._compile_historical_narrative.craft_narrative_conclusion import craft_narrative_conclusion
+from ._compile_historical_narrative.compile_full_narrative import compile_full_narrative
+
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -5,19 +14,29 @@ from typing import List
 class DrawConclusionsOutput(BaseModel):
     """Pydantic model for draw_conclusions node outputs."""
     conclusion_summary: str = (
-        Field(..., description="Concise summary of the main conclusions about the key drivers and outcomes.")
+        Field(..., description = (
+            "Concise summary of the main conclusions about the key drivers and outcomes.")
+        )
     )
     key_factors: List[str] = (
-        Field(..., description="List of primary factors identified as key drivers.")
+        Field(..., description = (
+            "List of primary factors identified as key drivers.")
+        )
     )
     impact_assessment: List[str] = (
-        Field(..., description="Assessment of each factor's impact level (e.g., high, medium, low).")
+        Field(..., description = (
+            "Assessment of each factor's impact level (e.g., high, medium, low).")
+        )
     )
     confidence_score: float = (
-        Field(..., description="Overall confidence level (0-1) in the conclusions.")
+        Field(..., description = (
+            "Overall confidence level (0-1) in the conclusions.")
+        )
     )
     recommendations: List[str] = (
-        Field(..., description="Actionable recommendations or implications derived from the conclusions.")
+        Field(..., description = (
+            "Actionable recommendations or implications derived from the conclusions.")
+        )
     )
 
 
@@ -33,16 +52,24 @@ class CompileHistoricalNarrativeOutput(BaseModel):
         Field(..., description="Summary of the historical context.")
     )
     key_factors: List[str] = (
-        Field(..., description="List of key factors (cultural, economic, political, social) influencing the event.")
+        Field(..., description = (
+            "List of key factors (cultural, economic, political, social) influencing the event.")
+        )
     )
     impact_summary: str = (
-        Field(..., description="Summary of how these factors impacted the event.")
+        Field(..., description = (
+            "Summary of how these factors impacted the event.")
+        )
     )
     conclusion: str = (
-        Field(..., description="Concluding remarks linking narrative to the conclusions drawn.")
+        Field(..., description = (
+            "Concluding remarks linking narrative to the conclusions drawn.")
+        )
     )
     overall_narrative: str = (
-        Field(..., description="Full cohesive narrative string combining all parts.")
+        Field(..., description = (
+            "Full cohesive narrative string combining all parts.")
+        )
     )
 
 
@@ -133,12 +160,31 @@ def compile_historical_narrative(draw_conclusions_input: DrawConclusionsOutput, 
     followed.\n"
 
     """
+    historical_event: str = kwargs.get('historical_event', '')
+    time_frame: str = kwargs.get('time_frame', '')
+    
+    validate_required_inputs(draw_conclusions_input, historical_event, time_frame)
+    
+    narrative_title: str = generate_narrative_title(event=historical_event, time_frame=time_frame)
+    
+    introduction: str = create_introduction(event=historical_event, time_frame=time_frame, context=draw_conclusions_input.conclusion_summary)
+    
+    historical_context: str = build_historical_context(event=historical_event, time_frame=time_frame, factors=draw_conclusions_input.key_factors)
+    
+    key_factors_narrative: List[str] = format_key_factors_for_narrative(factors=draw_conclusions_input.key_factors, assessments=draw_conclusions_input.impact_assessment)
+    
+    impact_summary: str = synthesize_impact_summary(factors=draw_conclusions_input.key_factors, assessments=draw_conclusions_input.impact_assessment, conclusion=draw_conclusions_input.conclusion_summary)
+    
+    conclusion: str = craft_narrative_conclusion(confidence=draw_conclusions_input.confidence_score, recommendations=draw_conclusions_input.recommendations, summary=draw_conclusions_input.conclusion_summary)
+    
+    overall_narrative: str = compile_full_narrative(title=narrative_title, intro=introduction, context=historical_context, impact=impact_summary, conclusion=conclusion)
+    
     return CompileHistoricalNarrativeOutput(
-        narrative_title="",
-        introduction="",
-        historical_context="",
-        key_factors=[],
-        impact_summary="",
-        conclusion="",
-        overall_narrative="",
+        narrative_title=narrative_title,
+        introduction=introduction,
+        historical_context=historical_context,
+        key_factors=key_factors_narrative,
+        impact_summary=impact_summary,
+        conclusion=conclusion,
+        overall_narrative=overall_narrative
     )
