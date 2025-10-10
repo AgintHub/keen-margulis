@@ -36,7 +36,6 @@ def extract_leaf_characteristics(raw_data: str) -> List[str]:
     ['oval', 'heart-shaped']
 
     """
-    
     if not isinstance(raw_data, str):
         raise TypeError("When the input type is not a string.")
     

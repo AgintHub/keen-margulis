@@ -36,4 +36,33 @@ def count_shape_categories(categories: str) -> List[int]:
     [2, 1, 1]
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    if not isinstance(categories, str):
+        raise TypeError("Input categories must be of type str")
+    
+    if not categories.strip():
+        raise ValueError("Input categories string is empty or contains only whitespace")
+    
+    try:
+        category_list = [cat.strip() for cat in categories.split(',')]
+        category_list = [cat for cat in category_list if cat]  # Remove empty strings
+        
+        if not category_list:
+            raise ValueError("No valid categories found after parsing")
+        
+        unique_categories = []
+        counts = []
+        
+        for category in category_list:
+            if category in unique_categories:
+                index = unique_categories.index(category)
+                counts[index] += 1
+            else:
+                unique_categories.append(category)
+                counts.append(1)
+        
+        return counts
+    
+    except Exception as e:
+        if isinstance(e, (ValueError, TypeError)):
+            raise
+        raise ValueError("Error parsing categories") from e

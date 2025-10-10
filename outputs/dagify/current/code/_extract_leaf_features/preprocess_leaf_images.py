@@ -37,7 +37,6 @@ def preprocess_leaf_images(images: str) -> List[str]:
     ['preprocessed_image1.jpg', 'preprocessed_image2.jpg']
 
     """
-    
     if not isinstance(images, str):
         raise TypeError("If the input is not a string or a list of strings.")
     

@@ -54,4 +54,53 @@ def generate_insights_summary(common_patterns: str, variations: str, vein_patter
     faint. Leaf colors vary between variegated and uniform.'
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    if not isinstance(common_patterns, str):
+        raise TypeError("common_patterns must be a string")
+    if not isinstance(variations, str):
+        raise TypeError("variations must be a string")
+    if not isinstance(vein_patterns, str):
+        raise TypeError("vein_patterns must be a string")
+    if not isinstance(colors, str):
+        raise TypeError("colors must be a string")
+    
+    if not common_patterns.strip():
+        raise ValueError("common_patterns cannot be empty")
+    if not variations.strip():
+        raise ValueError("variations cannot be empty")
+    if not vein_patterns.strip():
+        raise ValueError("vein_patterns cannot be empty")
+    if not colors.strip():
+        raise ValueError("colors cannot be empty")
+    
+    common_patterns_list = [pattern.strip() for pattern in common_patterns.split(',')]
+    variations_list = [variation.strip() for variation in variations.split(',')]
+    vein_patterns_list = [pattern.strip() for pattern in vein_patterns.split(',')]
+    colors_list = [color.strip() for color in colors.split(',')]
+    
+    summary_parts = []
+    
+    if len(common_patterns_list) == 1:
+        summary_parts.append(f"The leaves exhibit common patterns such as {common_patterns_list[0]} venation.")
+    else:
+        patterns_text = ' and '.join([', '.join(common_patterns_list[:-1]), common_patterns_list[-1]])
+        summary_parts.append(f"The leaves exhibit common patterns such as {patterns_text} venation.")
+    
+    if len(variations_list) == 1:
+        summary_parts.append(f"Variations include {variations_list[0]} patterns.")
+    else:
+        variations_text = ' and '.join([', '.join(variations_list[:-1]), variations_list[-1]])
+        summary_parts.append(f"Variations include {variations_text} patterns.")
+    
+    if len(vein_patterns_list) == 1:
+        summary_parts.append(f"Vein patterns are {vein_patterns_list[0]}.")
+    else:
+        vein_text = ' to '.join(vein_patterns_list)
+        summary_parts.append(f"Vein patterns range from {vein_text}.")
+    
+    if len(colors_list) == 1:
+        summary_parts.append(f"The leaves are predominantly {colors_list[0]}.")
+    else:
+        colors_text = ' and '.join([', '.join(colors_list[:-1]), colors_list[-1]])
+        summary_parts.append(f"The leaves are predominantly {colors_text}.")
+    
+    return ' '.join(summary_parts)

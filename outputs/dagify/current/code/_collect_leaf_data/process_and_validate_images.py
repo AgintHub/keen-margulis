@@ -37,7 +37,6 @@ def process_and_validate_images(images: str) -> List[str]:
     []
 
     """
-    
     if not isinstance(images, str):
         raise TypeError("Input must be a string")
     

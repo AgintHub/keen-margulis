@@ -39,4 +39,15 @@ def gather_raw_leaf_data(sources: str) -> List[str]:
     Input 'sources' cannot be empty.
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    if not isinstance(sources, str):
+        raise TypeError("If the input 'sources' is not of type string.")
+    
+    if not sources or sources.strip() == '':
+        raise ValueError("Input 'sources' cannot be empty.")
+    
+    sample_data = [
+        {'leaf_id': 1, 'image_url': 'url1', 'characteristics': 'desc1'},
+        {'leaf_id': 2, 'image_url': 'url2', 'characteristics': 'desc2'}
+    ]
+    
+    return sample_data

@@ -16,6 +16,11 @@ nodes:
       from ._analyze_leaf_shapes.normalize_characteristics import normalize_characteristics\n\
       from ._analyze_leaf_shapes.extract_shape_categories import extract_shape_categories\n\
       from ._analyze_leaf_shapes.count_shape_categories import count_shape_categories\n\
+      \nfrom ._analyze_leaf_shapes.validate_input_lengths import validate_input_lengths\n\
+      from ._analyze_leaf_shapes.preprocess_leaf_images import preprocess_leaf_images\n\
+      from ._analyze_leaf_shapes.normalize_characteristics import normalize_characteristics\n\
+      from ._analyze_leaf_shapes.extract_shape_categories import extract_shape_categories\n\
+      from ._analyze_leaf_shapes.count_shape_categories import count_shape_categories\n\
       \nfrom pydantic import BaseModel, Field\nfrom typing import List\n\n\nclass\
       \ CollectLeafDataOutput(BaseModel):\n    \"\"\"Pydantic model for collect_leaf_data\
       \ node outputs.\"\"\"\n    leaf_images: List[str] = (\n        Field(..., description=\"\
@@ -181,8 +186,8 @@ nodes:
         image2.jpg\"]')\n    ['preprocessed_image1.jpg', 'preprocessed_image2.jpg']\n\
         \n    >>> preprocess_leaf_images(images='[\"leaf1.png\", \"leaf2.png\"]')\n\
         \    ['preprocessed_leaf1.png', 'preprocessed_leaf2.png']\n\n    \"\"\"\n\
-        \    \n    if not isinstance(images, str):\n        raise TypeError(\"Input\
-        \ must be a string\")\n    \n    try:\n        image_list = json.loads(images)\n\
+        \    if not isinstance(images, str):\n        raise TypeError(\"Input must\
+        \ be a string\")\n    \n    try:\n        image_list = json.loads(images)\n\
         \    except json.JSONDecodeError:\n        raise ValueError(\"Input string\
         \ is not a valid representation of a list of image file names or URLs\")\n\
         \    \n    if not isinstance(image_list, list):\n        raise ValueError(\"\
@@ -469,6 +474,12 @@ nodes:
       \ ._collect_leaf_data.process_and_validate_images import process_and_validate_images\n\
       from ._collect_leaf_data.extract_leaf_characteristics import extract_leaf_characteristics\n\
       from ._collect_leaf_data.validate_characteristics import validate_characteristics\n\
+      \nfrom ._collect_leaf_data.identify_leaf_data_sources import identify_leaf_data_sources\n\
+      from ._collect_leaf_data.gather_raw_leaf_data import gather_raw_leaf_data\n\
+      from ._collect_leaf_data.extract_leaf_images import extract_leaf_images\nfrom\
+      \ ._collect_leaf_data.process_and_validate_images import process_and_validate_images\n\
+      from ._collect_leaf_data.extract_leaf_characteristics import extract_leaf_characteristics\n\
+      from ._collect_leaf_data.validate_characteristics import validate_characteristics\n\
       \nfrom pydantic import BaseModel, Field\nfrom typing import List\n\n\nclass\
       \ CollectLeafDataOutput(BaseModel):\n    \"\"\"Pydantic model for collect_leaf_data\
       \ node outputs.\"\"\"\n    leaf_images: List[str] = (\n        Field(..., description=\"\
@@ -549,14 +560,14 @@ nodes:
         \    ['leaf_data_folder/image1.jpg', 'leaf_data_folder/image2.jpg']\n\n  \
         \  >>>\n    identify_leaf_data_sources(input_context='https://example.com/leaf_data')\n\
         \    ['https://example.com/leaf_data/image1.jpg',\n    'https://example.com/leaf_data/image2.jpg']\n\
-        \n    \"\"\"\n    \n    if not isinstance(input_context, str):\n        raise\
-        \ TypeError(\"Input context must be a string\")\n    \n    if not input_context\
-        \ or input_context.strip() == \"\":\n        raise ValueError(\"Input context\
-        \ is empty or does not contain valid information for identifying data sources\"\
-        )\n    \n    input_context = input_context.strip()\n    leaf_data_sources\
-        \ = []\n    \n    parsed_url = urlparse(input_context)\n    if parsed_url.scheme\
-        \ in ['http', 'https']:\n        try:\n            response = requests.get(input_context)\n\
-        \            response.raise_for_status()\n            content = response.text\n\
+        \n    \"\"\"\n    if not isinstance(input_context, str):\n        raise TypeError(\"\
+        Input context must be a string\")\n    \n    if not input_context or input_context.strip()\
+        \ == \"\":\n        raise ValueError(\"Input context is empty or does not\
+        \ contain valid information for identifying data sources\")\n    \n    input_context\
+        \ = input_context.strip()\n    leaf_data_sources = []\n    \n    parsed_url\
+        \ = urlparse(input_context)\n    if parsed_url.scheme in ['http', 'https']:\n\
+        \        try:\n            response = requests.get(input_context)\n      \
+        \      response.raise_for_status()\n            content = response.text\n\
         \            image_pattern = r'href=[\"\\']([^\"\\']*.(?:jpg|jpeg|png|gif|bmp|tiff|svg))[\"\
         \\']|src=[\"\\']([^\"\\']*.(?:jpg|jpeg|png|gif|bmp|tiff|svg))[\"\\']'\n  \
         \          matches = re.findall(image_pattern, content, re.IGNORECASE)\n \
@@ -707,7 +718,7 @@ nodes:
         \    >>> extract_leaf_images(raw_data=raw_data)\n    ['leaf1.jpg', 'leaf2.jpg']\n\
         \n    >>> raw_data = '[{\"other\": \"data\"}, {\"image\": \"leaf3.jpg\"}]'\n\
         \    >>> extract_leaf_images(raw_data=raw_data)\n    ['leaf3.jpg']\n\n   \
-        \ \"\"\"\n    \n    if not isinstance(raw_data, str):\n        raise TypeError(\"\
+        \ \"\"\"\n    if not isinstance(raw_data, str):\n        raise TypeError(\"\
         If the input raw_data is not of type str.\")\n    \n    try:\n        data\
         \ = json.loads(raw_data)\n    except json.JSONDecodeError:\n        raise\
         \ ValueError(\"If the raw_data is not a valid string or if it's not properly\
@@ -770,8 +781,8 @@ nodes:
         \        URLs.\n    TypeError\n        If the input is not a string.\n\n \
         \   Examples\n    --------\n    >>> process_and_validate_images(images='image1.jpg,image2.png')\n\
         \    ['image1.jpg', 'image2.png']\n\n    >>> process_and_validate_images(images='invalid_image')\n\
-        \    []\n\n    \"\"\"\n    \n    if not isinstance(images, str):\n       \
-        \ raise TypeError(\"Input must be a string\")\n    \n    if not images.strip():\n\
+        \    []\n\n    \"\"\"\n    if not isinstance(images, str):\n        raise\
+        \ TypeError(\"Input must be a string\")\n    \n    if not images.strip():\n\
         \        raise ValueError(\"Input string is empty\")\n    \n    image_list\
         \ = re.split(r'[,;\\n\\s]+', images.strip())\n    \n    image_list = [img.strip()\
         \ for img in image_list if img.strip()]\n    \n    valid_extensions = {'.jpg',\
@@ -837,8 +848,8 @@ nodes:
         leaf1\": \"green\", \"leaf2\":\n    \"yellow\"}')\n    ['green', 'yellow']\n\
         \n    >>> extract_leaf_characteristics(raw_data='{\"leaf1\": \"oval\", \"\
         leaf2\":\n    \"heart-shaped\"}')\n    ['oval', 'heart-shaped']\n\n    \"\"\
-        \"\n    \n    if not isinstance(raw_data, str):\n        raise TypeError(\"\
-        When the input type is not a string.\")\n    \n    try:\n        data = json.loads(raw_data)\n\
+        \"\n    if not isinstance(raw_data, str):\n        raise TypeError(\"When\
+        \ the input type is not a string.\")\n    \n    try:\n        data = json.loads(raw_data)\n\
         \    except json.JSONDecodeError:\n        raise ValueError(\"When the input\
         \ raw data is not in the expected format.\")\n    \n    if not isinstance(data,\
         \ dict):\n        raise ValueError(\"When the input raw data is not in the\
@@ -978,6 +989,10 @@ nodes:
       \ import validate_input_consistency\nfrom ._extract_leaf_features.preprocess_leaf_images\
       \ import preprocess_leaf_images\nfrom ._extract_leaf_features.extract_vein_patterns\
       \ import extract_vein_patterns\nfrom ._extract_leaf_features.extract_leaf_colors\
+      \ import extract_leaf_colors\n\nfrom ._extract_leaf_features.validate_input_consistency\
+      \ import validate_input_consistency\nfrom ._extract_leaf_features.preprocess_leaf_images\
+      \ import preprocess_leaf_images\nfrom ._extract_leaf_features.extract_vein_patterns\
+      \ import extract_vein_patterns\nfrom ._extract_leaf_features.extract_leaf_colors\
       \ import extract_leaf_colors\n\nfrom pydantic import BaseModel, Field\nfrom\
       \ typing import List\n\n\nclass CollectLeafDataOutput(BaseModel):\n    \"\"\"\
       Pydantic model for collect_leaf_data node outputs.\"\"\"\n    leaf_images: List[str]\
@@ -1111,7 +1126,7 @@ nodes:
         \ = ['image1.jpg', 'image2.jpg']\n    >>> leaf_characteristics = ['characteristic1']\n\
         \    >>> validate_input_consistency(leaf_images=leaf_images,\n    leaf_characteristics=leaf_characteristics)\n\
         \    ValueError: 'Lengths of leaf_images and leaf_characteristics do not match.'\n\
-        \n    \"\"\"\n    \n    if not isinstance(leaf_images, str) or not isinstance(leaf_characteristics,\
+        \n    \"\"\"\n    if not isinstance(leaf_images, str) or not isinstance(leaf_characteristics,\
         \ str):\n        raise TypeError(\"When the input types are incorrect, such\
         \ as non-string or non-list inputs.\")\n    \n    try:\n        images_list\
         \ = json.loads(leaf_images)\n        characteristics_list = json.loads(leaf_characteristics)\n\
@@ -1189,7 +1204,7 @@ nodes:
         \ of strings.\n\n    Examples\n    --------\n    >>> preprocess_leaf_images(images='image1.jpg,image2.jpg')\n\
         \    ['preprocessed_image1.jpg', 'preprocessed_image2.jpg']\n\n    >>> preprocess_leaf_images(images=['image1.jpg',\
         \ 'image2.jpg'])\n    ['preprocessed_image1.jpg', 'preprocessed_image2.jpg']\n\
-        \n    \"\"\"\n    \n    if not isinstance(images, str):\n        raise TypeError(\"\
+        \n    \"\"\"\n    if not isinstance(images, str):\n        raise TypeError(\"\
         If the input is not a string or a list of strings.\")\n    \n    if not images\
         \ or not images.strip():\n        raise ValueError(\"If the input list is\
         \ empty or contains invalid image file names or URLs.\")\n    \n    image_list\
@@ -1377,7 +1392,7 @@ nodes:
         \ characteristics='green,\n    oval, smooth edges')\n    ['green', 'light\
         \ green']\n\n    >>> extract_leaf_colors(images='leaf1.jpg,leaf2.jpg',\n \
         \   characteristics='variegated, lobed')\n    ['green, white', 'deep green']\n\
-        \n    \"\"\"\n    \n    if not isinstance(images, str):\n        raise TypeError(\"\
+        \n    \"\"\"\n    if not isinstance(images, str):\n        raise TypeError(\"\
         Images parameter must be a string\")\n    if not isinstance(characteristics,\
         \ str):\n        raise TypeError(\"Characteristics parameter must be a string\"\
         )\n    \n    if not images.strip():\n        raise ValueError(\"Images parameter\
@@ -1462,6 +1477,12 @@ nodes:
     description: Generate insights on leaf patterns based on the extracted features
     implementation: "from ._generate_leaf_pattern_insights.validate_input_data import\
       \ validate_input_data\nfrom ._generate_leaf_pattern_insights.identify_common_patterns\
+      \ import identify_common_patterns\nfrom ._generate_leaf_pattern_insights.combine_pattern_lists\
+      \ import combine_pattern_lists\nfrom ._generate_leaf_pattern_insights.identify_pattern_variations\
+      \ import identify_pattern_variations\nfrom ._generate_leaf_pattern_insights.combine_variation_lists\
+      \ import combine_variation_lists\nfrom ._generate_leaf_pattern_insights.generate_insights_summary\
+      \ import generate_insights_summary\n\nfrom ._generate_leaf_pattern_insights.validate_input_data\
+      \ import validate_input_data\nfrom ._generate_leaf_pattern_insights.identify_common_patterns\
       \ import identify_common_patterns\nfrom ._generate_leaf_pattern_insights.combine_pattern_lists\
       \ import combine_pattern_lists\nfrom ._generate_leaf_pattern_insights.identify_pattern_variations\
       \ import identify_pattern_variations\nfrom ._generate_leaf_pattern_insights.combine_variation_lists\
@@ -1595,7 +1616,7 @@ nodes:
         pattern1\", \"pattern2\"]',\n    colors='[\"red\", \"green\"]')\n    'Input\
         \ data is valid'\n\n    >>> validate_input_data(vein_patterns='[]', colors='[\"\
         red\", \"green\"]')\n    ValueError: Input lists cannot be empty\n\n    \"\
-        \"\"\n    \n    if not isinstance(vein_patterns, str) or not isinstance(colors,\
+        \"\"\n    if not isinstance(vein_patterns, str) or not isinstance(colors,\
         \ str):\n        raise TypeError(\"Input types for vein_patterns or colors\
         \ are not as expected.\")\n    \n    try:\n        vein_patterns_list = json.loads(vein_patterns)\n\
         \        colors_list = json.loads(colors)\n    except json.JSONDecodeError:\n\
@@ -1671,18 +1692,17 @@ nodes:
         \ a list.\n\n    Examples\n    --------\n    >>> identify_common_patterns(patterns='[\"\
         parallel\", \"netlike\", \"parallel\"]')\n    >>> identify_common_patterns(patterns='[\"\
         green\", \"yellow\", \"green\"]')\n    ['parallel', 'green']\n\n    >>> identify_common_patterns(patterns='[\"\
-        simple\", \"complex\", \"simple\"]')\n    ['simple']\n\n    \"\"\"\n    \n\
-        \    if not isinstance(patterns, str):\n        raise TypeError(\"If the input\
-        \ type is not a string representation of a list.\")\n    \n    try:\n    \
-        \    pattern_list = json.loads(patterns)\n    except json.JSONDecodeError:\n\
-        \        raise ValueError(\"If the input patterns are not in the expected\
-        \ format.\")\n    \n    if not isinstance(pattern_list, list):\n        raise\
+        simple\", \"complex\", \"simple\"]')\n    ['simple']\n\n    \"\"\"\n    if\
+        \ not isinstance(patterns, str):\n        raise TypeError(\"If the input type\
+        \ is not a string representation of a list.\")\n    \n    try:\n        pattern_list\
+        \ = json.loads(patterns)\n    except json.JSONDecodeError:\n        raise\
         \ ValueError(\"If the input patterns are not in the expected format.\")\n\
-        \    \n    pattern_counts = {}\n    for pattern in pattern_list:\n       \
-        \ if not isinstance(pattern, str):\n            continue\n        pattern_counts[pattern]\
-        \ = pattern_counts.get(pattern, 0) + 1\n    \n    common_patterns = [pattern\
-        \ for pattern, count in pattern_counts.items() if count > 1]\n    \n    return\
-        \ common_patterns"
+        \    \n    if not isinstance(pattern_list, list):\n        raise ValueError(\"\
+        If the input patterns are not in the expected format.\")\n    \n    pattern_counts\
+        \ = {}\n    for pattern in pattern_list:\n        if not isinstance(pattern,\
+        \ str):\n            continue\n        pattern_counts[pattern] = pattern_counts.get(pattern,\
+        \ 0) + 1\n    \n    common_patterns = [pattern for pattern, count in pattern_counts.items()\
+        \ if count > 1]\n    \n    return common_patterns"
       name: identify_common_patterns
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -1743,8 +1763,8 @@ nodes:
         \ 'color_pattern1', 'color_pattern2']\n\n    >>> vein_patterns = '[pattern1,\
         \ pattern2]'\n    >>> color_patterns = '[pattern2, pattern3]'\n    >>> combined\
         \ = combine_pattern_lists(vein_patterns=vein_patterns,\n    color_patterns=color_patterns)\n\
-        \    ['pattern1', 'pattern2', 'pattern3']\n\n    \"\"\"\n    \n    try:\n\
-        \        vein_list = ast.literal_eval(vein_patterns)\n        if not isinstance(vein_list,\
+        \    ['pattern1', 'pattern2', 'pattern3']\n\n    \"\"\"\n    try:\n      \
+        \  vein_list = ast.literal_eval(vein_patterns)\n        if not isinstance(vein_list,\
         \ list):\n            raise ValueError(\"vein_patterns is not a valid list\
         \ representation\")\n    except (ValueError, SyntaxError) as e:\n        raise\
         \ ValueError(\"vein_patterns is not a valid list representation\") from e\n\

@@ -38,7 +38,6 @@ def extract_leaf_images(raw_data: str) -> List[str]:
     ['leaf3.jpg']
 
     """
-    
     if not isinstance(raw_data, str):
         raise TypeError("If the input raw_data is not of type str.")
     

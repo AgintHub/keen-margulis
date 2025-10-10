@@ -35,7 +35,6 @@ def identify_common_patterns(patterns: str) -> List[str]:
     ['simple']
 
     """
-    
     if not isinstance(patterns, str):
         raise TypeError("If the input type is not a string representation of a list.")
     

@@ -1,6 +1,9 @@
 from typing import List
 
 
+import re
+
+
 def normalize_characteristics(characteristics: str) -> List[str]:
     """
     Normalizes a string of leaf characteristics into a list of standardized
@@ -34,4 +37,17 @@ def normalize_characteristics(characteristics: str) -> List[str]:
     []
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    if not isinstance(characteristics, str):
+        raise TypeError("Input must be a string")
+    
+    if not characteristics:
+        return []
+    
+    
+    if not re.match(r'^[a-zA-Z0-9\s,\-]+$', characteristics):
+        raise ValueError("Input contains invalid characters")
+    
+    parts = [part.strip() for part in characteristics.split(',')]
+    normalized = [part for part in parts if part]
+    
+    return normalized

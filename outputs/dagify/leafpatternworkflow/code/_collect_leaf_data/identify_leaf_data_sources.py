@@ -42,7 +42,6 @@ def identify_leaf_data_sources(input_context: str) -> List[str]:
     'https://example.com/leaf_data/image2.jpg']
 
     """
-    
     if not isinstance(input_context, str):
         raise TypeError("Input context must be a string")
     

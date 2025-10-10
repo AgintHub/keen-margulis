@@ -1,6 +1,9 @@
 from typing import List
 
 
+import json
+
+
 def preprocess_leaf_images(images: str) -> List[str]:
     """
     Preprocesses a list of leaf images represented as file names or URLs.
@@ -34,4 +37,32 @@ def preprocess_leaf_images(images: str) -> List[str]:
     ['preprocessed_leaf1.png', 'preprocessed_leaf2.png']
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    
+    if not isinstance(images, str):
+        raise TypeError("Input must be a string")
+    
+    try:
+        image_list = json.loads(images)
+    except json.JSONDecodeError:
+        raise ValueError("Input string is not a valid representation of a list of image file names or URLs")
+    
+    if not isinstance(image_list, list):
+        raise ValueError("Input string is not a valid representation of a list of image file names or URLs")
+    
+    preprocessed_images = []
+    for image in image_list:
+        if not isinstance(image, str):
+            raise ValueError("Input string is not a valid representation of a list of image file names or URLs")
+        
+        if '/' in image:
+            parts = image.rsplit('/', 1)
+            if len(parts) == 2:
+                preprocessed_image = parts[0] + '/preprocessed_' + parts[1]
+            else:
+                preprocessed_image = 'preprocessed_' + image
+        else:
+            preprocessed_image = 'preprocessed_' + image
+        
+        preprocessed_images.append(preprocessed_image)
+    
+    return preprocessed_images

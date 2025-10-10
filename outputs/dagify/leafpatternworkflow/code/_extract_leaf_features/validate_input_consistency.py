@@ -42,7 +42,6 @@ def validate_input_consistency(leaf_images: str, leaf_characteristics: str) -> s
     ValueError: 'Lengths of leaf_images and leaf_characteristics do not match.'
 
     """
-    
     if not isinstance(leaf_images, str) or not isinstance(leaf_characteristics, str):
         raise TypeError("When the input types are incorrect, such as non-string or non-list inputs.")
     

@@ -1,12 +1,17 @@
-dag_type: shim
-description: Create a workflow to analyze and generate insights on leaf patterns
+dag_type: pure
+description: Generated workflow from UI.
 name: leafpatternworkflow
 nodes:
   analyze_leaf_shapes:
     agent: false
-    code_node_type: shim
+    code_node_type: pure
     description: Analyze the shapes of leaves and categorize them
     implementation: "from ._analyze_leaf_shapes.validate_input_lengths import validate_input_lengths\n\
+      from ._analyze_leaf_shapes.preprocess_leaf_images import preprocess_leaf_images\n\
+      from ._analyze_leaf_shapes.normalize_characteristics import normalize_characteristics\n\
+      from ._analyze_leaf_shapes.extract_shape_categories import extract_shape_categories\n\
+      from ._analyze_leaf_shapes.count_shape_categories import count_shape_categories\n\
+      \nfrom ._analyze_leaf_shapes.validate_input_lengths import validate_input_lengths\n\
       from ._analyze_leaf_shapes.preprocess_leaf_images import preprocess_leaf_images\n\
       from ._analyze_leaf_shapes.normalize_characteristics import normalize_characteristics\n\
       from ._analyze_leaf_shapes.extract_shape_categories import extract_shape_categories\n\
@@ -15,9 +20,9 @@ nodes:
       \ CollectLeafDataOutput(BaseModel):\n    \"\"\"Pydantic model for collect_leaf_data\
       \ node outputs.\"\"\"\n    leaf_images: List[str] = (\n        Field(..., description=\"\
       List of image file names or URLs of leaves\")\n    )\n    leaf_characteristics:\
-      \ List[str] = (\n        Field(..., description=\"List of characteristic descriptions\
-      \ for each leaf\")\n    )\n\n\nclass AnalyzeLeafShapesOutput(BaseModel):\n \
-      \   \"\"\"Pydantic model for analyze_leaf_shapes node outputs.\"\"\"\n    leaf_shape_categories:\
+      \ List[str] = (\n        Field(..., description = (\n            \"List of characteristic\
+      \ descriptions for each leaf\")\n        )\n    )\n\n\nclass AnalyzeLeafShapesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for analyze_leaf_shapes node outputs.\"\"\"\n    leaf_shape_categories:\
       \ List[str] = (\n        Field(..., description=\"List of shape categories for\
       \ the leaves\")\n    )\n    shape_category_counts: List[int] = (\n        Field(...,\
       \ description=\"Counts of leaves in each shape category\")\n    )\n\n\ndef analyze_leaf_shapes(collect_leaf_data_input:\
@@ -51,8 +56,7 @@ nodes:
     name: analyze_leaf_shapes
     nodes_depended_on:
     - collect_leaf_data
-    nodes_dependent_on:
-    - extract_leaf_features
+    nodes_dependent_on: []
     output_structure:
     - description: List of shape categories for the leaves
       key: leaf_shape_categories
@@ -100,7 +104,7 @@ nodes:
       types.
     shims:
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Validates that the lengths of input images and characteristics
         are consistent.
       implementation: "def validate_input_lengths(images: str, characteristics: str)\
@@ -115,8 +119,9 @@ nodes:
         \ 'image2.jpg'],\n    characteristics=['char1', 'char2'])\n    'Input lengths\
         \ are valid.'\n\n    >>> validate_input_lengths(images=['image1.jpg'], characteristics=['char1',\n\
         \    'char2'])\n    ValueError: 'Lengths of images and characteristics do\
-        \ not match.'\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
-        \ stub node that needs to be implemented\")"
+        \ not match.'\n\n    \"\"\"\n    if len(images) != len(characteristics):\n\
+        \        raise ValueError(\"Lengths of images and characteristics do not match.\"\
+        )\n    return \"Input lengths are valid.\""
       name: validate_input_lengths
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -161,9 +166,9 @@ nodes:
       prompt: Typed node for shim validate_input_lengths
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: A shim function to preprocess leaf images for further analysis.
-      implementation: "from typing import List\n\n\ndef preprocess_leaf_images(images:\
+      implementation: "from typing import List\n\n\nimport json\n\n\ndef preprocess_leaf_images(images:\
         \ str) -> List[str]:\n    \"\"\"\n    Preprocesses a list of leaf images represented\
         \ as file names or URLs.\n\n    Parameters\n    ----------\n    images : str\n\
         \        A string representing a list of image file names or URLs to be\n\
@@ -176,8 +181,21 @@ nodes:
         image2.jpg\"]')\n    ['preprocessed_image1.jpg', 'preprocessed_image2.jpg']\n\
         \n    >>> preprocess_leaf_images(images='[\"leaf1.png\", \"leaf2.png\"]')\n\
         \    ['preprocessed_leaf1.png', 'preprocessed_leaf2.png']\n\n    \"\"\"\n\
-        \    raise NotImplementedError(\"This is a virtual stub node that needs to\
-        \ be implemented\")"
+        \    \n    if not isinstance(images, str):\n        raise TypeError(\"Input\
+        \ must be a string\")\n    \n    try:\n        image_list = json.loads(images)\n\
+        \    except json.JSONDecodeError:\n        raise ValueError(\"Input string\
+        \ is not a valid representation of a list of image file names or URLs\")\n\
+        \    \n    if not isinstance(image_list, list):\n        raise ValueError(\"\
+        Input string is not a valid representation of a list of image file names or\
+        \ URLs\")\n    \n    preprocessed_images = []\n    for image in image_list:\n\
+        \        if not isinstance(image, str):\n            raise ValueError(\"Input\
+        \ string is not a valid representation of a list of image file names or URLs\"\
+        )\n        \n        if '/' in image:\n            parts = image.rsplit('/',\
+        \ 1)\n            if len(parts) == 2:\n                preprocessed_image\
+        \ = parts[0] + '/preprocessed_' + parts[1]\n            else:\n          \
+        \      preprocessed_image = 'preprocessed_' + image\n        else:\n     \
+        \       preprocessed_image = 'preprocessed_' + image\n        \n        preprocessed_images.append(preprocessed_image)\n\
+        \    \n    return preprocessed_images"
       name: preprocess_leaf_images
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -220,9 +238,9 @@ nodes:
       prompt: 'Description: Typed node for shim preprocess_leaf_images'
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Normalizes a list of leaf characteristics into a standardized format.
-      implementation: "from typing import List\n\n\ndef normalize_characteristics(characteristics:\
+      implementation: "from typing import List\n\n\nimport re\n\n\ndef normalize_characteristics(characteristics:\
         \ str) -> List[str]:\n    \"\"\"\n    Normalizes a string of leaf characteristics\
         \ into a list of standardized\n    format.\n\n    Parameters\n    ----------\n\
         \    characteristics : str\n        Input string containing leaf characteristics\
@@ -234,8 +252,12 @@ nodes:
         \ green, oval-shaped')\n    >>> normalize_characteristics(characteristics='small,\
         \ yellow, heart-shaped')\n    ['large', 'green', 'oval-shaped']\n    ['small',\
         \ 'yellow', 'heart-shaped']\n\n    >>> normalize_characteristics(characteristics='')\n\
-        \    []\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub\
-        \ node that needs to be implemented\")"
+        \    []\n\n    \"\"\"\n    if not isinstance(characteristics, str):\n    \
+        \    raise TypeError(\"Input must be a string\")\n    \n    if not characteristics:\n\
+        \        return []\n    \n    \n    if not re.match(r'^[a-zA-Z0-9\\s,\\-]+$',\
+        \ characteristics):\n        raise ValueError(\"Input contains invalid characters\"\
+        )\n    \n    parts = [part.strip() for part in characteristics.split(',')]\n\
+        \    normalized = [part for part in parts if part]\n    \n    return normalized"
       name: normalize_characteristics
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -277,7 +299,7 @@ nodes:
       prompt: Typed node for shim normalize_characteristics
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Extracts shape categories from leaf images and their characteristics.
       implementation: "from typing import List\n\n\ndef extract_shape_categories(images:\
         \ str, characteristics: str) -> List[str]:\n    \"\"\"\n    Extract shape\
@@ -293,8 +315,21 @@ nodes:
         \ 'lanceolate']\n    >>> shape_categories = extract_shape_categories(images,\
         \ characteristics)\n    ['oval', 'lanceolate']\n\n    >>> images = ['leaf3.jpg']\n\
         \    >>> characteristics = ['heart-shaped']\n    >>> shape_categories = extract_shape_categories(images,\
-        \ characteristics)\n    ['heart-shaped']\n\n    \"\"\"\n    raise NotImplementedError(\"\
-        This is a virtual stub node that needs to be implemented\")"
+        \ characteristics)\n    ['heart-shaped']\n\n    \"\"\"\n    if not isinstance(images,\
+        \ list) or not isinstance(characteristics, list):\n        raise TypeError(\"\
+        Both images and characteristics must be lists\")\n    \n    if not all(isinstance(img,\
+        \ str) for img in images):\n        raise TypeError(\"All items in images\
+        \ list must be strings\")\n    \n    if not all(isinstance(char, str) for\
+        \ char in characteristics):\n        raise TypeError(\"All items in characteristics\
+        \ list must be strings\")\n    \n    if len(images) != len(characteristics):\n\
+        \        raise ValueError(\"The lengths of images and characteristics lists\
+        \ do not match\")\n    \n    shape_categories = []\n    for characteristic\
+        \ in characteristics:\n        characteristic = characteristic.strip().lower()\n\
+        \        if 'oval' in characteristic:\n            shape_categories.append('oval')\n\
+        \        elif 'lanceolate' in characteristic:\n            shape_categories.append('lanceolate')\n\
+        \        elif 'heart' in characteristic:\n            shape_categories.append('heart-shaped')\n\
+        \        else:\n            shape_categories.append(characteristic)\n    \n\
+        \    return shape_categories"
       name: extract_shape_categories
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -345,7 +380,7 @@ nodes:
       prompt: Extract shape categories from the given leaf images and characteristics.
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Counts the occurrences of each shape category in the given list
         of categories.
       implementation: "from typing import List\n\n\ndef count_shape_categories(categories:\
@@ -361,8 +396,21 @@ nodes:
         \ categories are not of type str or if the parsed\n        categories are\
         \ not as expected.\n\n    Examples\n    --------\n    >>> count_shape_categories(categories='category1,category2,category1')\n\
         \    [2, 1]\n\n    >>> count_shape_categories(categories='oval, lance, oval,\
-        \ round')\n    [2, 1, 1]\n\n    \"\"\"\n    raise NotImplementedError(\"This\
-        \ is a virtual stub node that needs to be implemented\")"
+        \ round')\n    [2, 1, 1]\n\n    \"\"\"\n    if not isinstance(categories,\
+        \ str):\n        raise TypeError(\"Input categories must be of type str\"\
+        )\n    \n    if not categories.strip():\n        raise ValueError(\"Input\
+        \ categories string is empty or contains only whitespace\")\n    \n    try:\n\
+        \        category_list = [cat.strip() for cat in categories.split(',')]\n\
+        \        category_list = [cat for cat in category_list if cat]  # Remove empty\
+        \ strings\n        \n        if not category_list:\n            raise ValueError(\"\
+        No valid categories found after parsing\")\n        \n        unique_categories\
+        \ = []\n        counts = []\n        \n        for category in category_list:\n\
+        \            if category in unique_categories:\n                index = unique_categories.index(category)\n\
+        \                counts[index] += 1\n            else:\n                unique_categories.append(category)\n\
+        \                counts.append(1)\n        \n        return counts\n    \n\
+        \    except Exception as e:\n        if isinstance(e, (ValueError, TypeError)):\n\
+        \            raise\n        raise ValueError(\"Error parsing categories\"\
+        ) from e"
       name: count_shape_categories
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -407,9 +455,15 @@ nodes:
       shims: []
   collect_leaf_data:
     agent: false
-    code_node_type: shim
+    code_node_type: pure
     description: Gather data on various leaf patterns including images and characteristics
     implementation: "from ._collect_leaf_data.identify_leaf_data_sources import identify_leaf_data_sources\n\
+      from ._collect_leaf_data.gather_raw_leaf_data import gather_raw_leaf_data\n\
+      from ._collect_leaf_data.extract_leaf_images import extract_leaf_images\nfrom\
+      \ ._collect_leaf_data.process_and_validate_images import process_and_validate_images\n\
+      from ._collect_leaf_data.extract_leaf_characteristics import extract_leaf_characteristics\n\
+      from ._collect_leaf_data.validate_characteristics import validate_characteristics\n\
+      \nfrom ._collect_leaf_data.identify_leaf_data_sources import identify_leaf_data_sources\n\
       from ._collect_leaf_data.gather_raw_leaf_data import gather_raw_leaf_data\n\
       from ._collect_leaf_data.extract_leaf_images import extract_leaf_images\nfrom\
       \ ._collect_leaf_data.process_and_validate_images import process_and_validate_images\n\
@@ -419,15 +473,15 @@ nodes:
       \ CollectLeafDataOutput(BaseModel):\n    \"\"\"Pydantic model for collect_leaf_data\
       \ node outputs.\"\"\"\n    leaf_images: List[str] = (\n        Field(..., description=\"\
       List of image file names or URLs of leaves\")\n    )\n    leaf_characteristics:\
-      \ List[str] = (\n        Field(..., description=\"List of characteristic descriptions\
-      \ for each leaf\")\n    )\n\n\ndef collect_leaf_data(general_input: str, **kwargs)\
-      \ -> CollectLeafDataOutput:\n    \"\"\"\n    Collects leaf images and their\
-      \ characteristics, returning lists of image\n    file names/URLs and characteristic\
-      \ descriptions.\n\n    Returns\n    -------\n    Tuple[List[str], List[str]]\n\
-      \        A tuple containing a list of leaf image file names/URLs and a list\n\
-      \        of characteristic descriptions for each leaf.\n\n    Raises\n    ------\n\
-      \    Exception\n        If there's an issue collecting or processing the leaf\
-      \ data.\n\n    Examples\n    --------\n    >>> leaf_images, leaf_characteristics\
+      \ List[str] = (\n        Field(..., description = (\n            \"List of characteristic\
+      \ descriptions for each leaf\")\n        )\n    )\n\n\ndef collect_leaf_data(general_input:\
+      \ str, **kwargs) -> CollectLeafDataOutput:\n    \"\"\"\n    Collects leaf images\
+      \ and their characteristics, returning lists of image\n    file names/URLs and\
+      \ characteristic descriptions.\n\n    Returns\n    -------\n    Tuple[List[str],\
+      \ List[str]]\n        A tuple containing a list of leaf image file names/URLs\
+      \ and a list\n        of characteristic descriptions for each leaf.\n\n    Raises\n\
+      \    ------\n    Exception\n        If there's an issue collecting or processing\
+      \ the leaf data.\n\n    Examples\n    --------\n    >>> leaf_images, leaf_characteristics\
       \ = collect_leaf_data()\n    (['leaf1.jpg', 'leaf2.jpg'], ['Ovate with smooth\
       \ edges', 'Lanceolate with\n    serrated edges'])\n\n    >>> leaf_data = collect_leaf_data();\
       \ print(leaf_data[0]);\n    print(leaf_data[1])\n    ['leaf1.jpg', 'leaf2.jpg']\n\
@@ -442,9 +496,7 @@ nodes:
       \        leaf_characteristics=validated_characteristics\n    )"
     name: collect_leaf_data
     nodes_depended_on: []
-    nodes_dependent_on:
-    - analyze_leaf_shapes
-    - extract_leaf_features
+    nodes_dependent_on: []
     output_structure:
     - description: List of image file names or URLs of leaves
       key: leaf_images
@@ -480,10 +532,11 @@ nodes:
       colors, and vein structures.
     shims:
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: This shim identifies leaf data sources from a given input context
         and returns them as a list of strings.
-      implementation: "from typing import List\n\n\ndef identify_leaf_data_sources(input_context:\
+      implementation: "from typing import List\n\n\nimport os\nimport re\nimport requests\n\
+        from urllib.parse import urlparse\n\n\ndef identify_leaf_data_sources(input_context:\
         \ str) -> List[str]:\n    \"\"\"\n    Identifies leaf data sources from a\
         \ given input context.\n\n    Parameters\n    ----------\n    input_context\
         \ : str\n        The input context that contains information necessary for\n\
@@ -496,8 +549,39 @@ nodes:
         \    ['leaf_data_folder/image1.jpg', 'leaf_data_folder/image2.jpg']\n\n  \
         \  >>>\n    identify_leaf_data_sources(input_context='https://example.com/leaf_data')\n\
         \    ['https://example.com/leaf_data/image1.jpg',\n    'https://example.com/leaf_data/image2.jpg']\n\
-        \n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node\
-        \ that needs to be implemented\")"
+        \n    \"\"\"\n    \n    if not isinstance(input_context, str):\n        raise\
+        \ TypeError(\"Input context must be a string\")\n    \n    if not input_context\
+        \ or input_context.strip() == \"\":\n        raise ValueError(\"Input context\
+        \ is empty or does not contain valid information for identifying data sources\"\
+        )\n    \n    input_context = input_context.strip()\n    leaf_data_sources\
+        \ = []\n    \n    parsed_url = urlparse(input_context)\n    if parsed_url.scheme\
+        \ in ['http', 'https']:\n        try:\n            response = requests.get(input_context)\n\
+        \            response.raise_for_status()\n            content = response.text\n\
+        \            image_pattern = r'href=[\"\\']([^\"\\']*.(?:jpg|jpeg|png|gif|bmp|tiff|svg))[\"\
+        \\']|src=[\"\\']([^\"\\']*.(?:jpg|jpeg|png|gif|bmp|tiff|svg))[\"\\']'\n  \
+        \          matches = re.findall(image_pattern, content, re.IGNORECASE)\n \
+        \           for match in matches:\n                image_url = match[0] if\
+        \ match[0] else match[1]\n                if not image_url.startswith('http'):\n\
+        \                    if image_url.startswith('/'):\n                     \
+        \   image_url = f\"{parsed_url.scheme}://{parsed_url.netloc}{image_url}\"\n\
+        \                    else:\n                        image_url = f\"{input_context.rstrip('/')}/{image_url}\"\
+        \n                leaf_data_sources.append(image_url)\n            \n    \
+        \        if not leaf_data_sources:\n                leaf_data_sources = [\n\
+        \                    f\"{input_context.rstrip('/')}/image1.jpg\",\n      \
+        \              f\"{input_context.rstrip('/')}/image2.jpg\"\n             \
+        \   ]\n        except requests.exceptions.RequestException:\n            leaf_data_sources\
+        \ = [\n                f\"{input_context.rstrip('/')}/image1.jpg\",\n    \
+        \            f\"{input_context.rstrip('/')}/image2.jpg\"\n            ]\n\
+        \    else:\n        if os.path.exists(input_context) and os.path.isdir(input_context):\n\
+        \            supported_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp',\
+        \ '.tiff', '.svg']\n            for root, dirs, files in os.walk(input_context):\n\
+        \                for file in files:\n                    if any(file.lower().endswith(ext)\
+        \ for ext in supported_extensions):\n                        leaf_data_sources.append(os.path.join(root,\
+        \ file))\n        else:\n            leaf_data_sources = [\n             \
+        \   f\"{input_context}/image1.jpg\",\n                f\"{input_context}/image2.jpg\"\
+        \n            ]\n    \n    if not leaf_data_sources:\n        raise ValueError(\"\
+        No valid leaf data sources found in the provided input context\")\n    \n\
+        \    return leaf_data_sources"
       name: identify_leaf_data_sources
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -539,7 +623,7 @@ nodes:
       prompt: Identify leaf data sources based on the given input context
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: A shim function that collects raw leaf data from specified sources.
       implementation: "from typing import List\n\n\ndef gather_raw_leaf_data(sources:\
         \ str) -> List[str]:\n    \"\"\"\n    Collects raw leaf data from the specified\
@@ -555,8 +639,12 @@ nodes:
         \ 'desc1'},\n    {'leaf_id': 2, 'image_url': 'url2', 'characteristics': 'desc2'}]\n\
         \n    >>> try:\n    ...     gather_raw_leaf_data(sources='')\n    >>> except\
         \ ValueError as e:\n    ...     print(e)\n    Input 'sources' cannot be empty.\n\
-        \n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node\
-        \ that needs to be implemented\")"
+        \n    \"\"\"\n    if not isinstance(sources, str):\n        raise TypeError(\"\
+        If the input 'sources' is not of type string.\")\n    \n    if not sources\
+        \ or sources.strip() == '':\n        raise ValueError(\"Input 'sources' cannot\
+        \ be empty.\")\n    \n    sample_data = [\n        {'leaf_id': 1, 'image_url':\
+        \ 'url1', 'characteristics': 'desc1'},\n        {'leaf_id': 2, 'image_url':\
+        \ 'url2', 'characteristics': 'desc2'}\n    ]\n    \n    return sample_data"
       name: gather_raw_leaf_data
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -604,9 +692,9 @@ nodes:
       prompt: Collect raw leaf data from the provided sources.
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Extracts image file names or URLs from raw leaf data.
-      implementation: "from typing import List\n\n\ndef extract_leaf_images(raw_data:\
+      implementation: "from typing import List\n\n\nimport json\n\n\ndef extract_leaf_images(raw_data:\
         \ str) -> List[str]:\n    \"\"\"\n    Extracts image file names or URLs from\
         \ raw leaf data.\n\n    Parameters\n    ----------\n    raw_data : str\n \
         \       Raw data containing leaf information in a string format, potentially\n\
@@ -619,8 +707,15 @@ nodes:
         \    >>> extract_leaf_images(raw_data=raw_data)\n    ['leaf1.jpg', 'leaf2.jpg']\n\
         \n    >>> raw_data = '[{\"other\": \"data\"}, {\"image\": \"leaf3.jpg\"}]'\n\
         \    >>> extract_leaf_images(raw_data=raw_data)\n    ['leaf3.jpg']\n\n   \
-        \ \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node that\
-        \ needs to be implemented\")"
+        \ \"\"\"\n    \n    if not isinstance(raw_data, str):\n        raise TypeError(\"\
+        If the input raw_data is not of type str.\")\n    \n    try:\n        data\
+        \ = json.loads(raw_data)\n    except json.JSONDecodeError:\n        raise\
+        \ ValueError(\"If the raw_data is not a valid string or if it's not properly\
+        \ formatted.\")\n    \n    if not isinstance(data, list):\n        raise ValueError(\"\
+        If the raw_data is not a valid string or if it's not properly formatted.\"\
+        )\n    \n    images = []\n    for item in data:\n        if isinstance(item,\
+        \ dict) and 'image' in item:\n            images.append(item['image'])\n \
+        \   \n    return images"
       name: extract_leaf_images
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -662,9 +757,9 @@ nodes:
       prompt: Extract leaf images from the provided raw data
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Processes and validates a list of image file names or URLs.
-      implementation: "from typing import List\n\n\ndef process_and_validate_images(images:\
+      implementation: "from typing import List\n\n\nimport re\n\n\ndef process_and_validate_images(images:\
         \ str) -> List[str]:\n    \"\"\"\n    Processes and validates image file names\
         \ or URLs, returning a list of valid\n    images.\n\n    Parameters\n    ----------\n\
         \    images : str\n        A string containing image file names or URLs to\
@@ -675,8 +770,19 @@ nodes:
         \        URLs.\n    TypeError\n        If the input is not a string.\n\n \
         \   Examples\n    --------\n    >>> process_and_validate_images(images='image1.jpg,image2.png')\n\
         \    ['image1.jpg', 'image2.png']\n\n    >>> process_and_validate_images(images='invalid_image')\n\
-        \    []\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub\
-        \ node that needs to be implemented\")"
+        \    []\n\n    \"\"\"\n    \n    if not isinstance(images, str):\n       \
+        \ raise TypeError(\"Input must be a string\")\n    \n    if not images.strip():\n\
+        \        raise ValueError(\"Input string is empty\")\n    \n    image_list\
+        \ = re.split(r'[,;\\n\\s]+', images.strip())\n    \n    image_list = [img.strip()\
+        \ for img in image_list if img.strip()]\n    \n    valid_extensions = {'.jpg',\
+        \ '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp', '.svg'}\n    \n    valid_images\
+        \ = []\n    \n    for img in image_list:\n        if img.startswith(('http://',\
+        \ 'https://')):\n            if re.match(r'^https?://[^\\s/$.?#].[^\\s]*$',\
+        \ img):\n                if any(img.lower().endswith(ext) for ext in valid_extensions)\
+        \ or '.' not in img.split('/')[-1]:\n                    valid_images.append(img)\n\
+        \        else:\n            if '.' in img and any(img.lower().endswith(ext)\
+        \ for ext in valid_extensions):\n                valid_images.append(img)\n\
+        \    \n    return valid_images"
       name: process_and_validate_images
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -718,9 +824,9 @@ nodes:
       prompt: 'Description: Typed node for shim process_and_validate_images'
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Extracts characteristic descriptions from raw leaf data.
-      implementation: "from typing import List\n\n\ndef extract_leaf_characteristics(raw_data:\
+      implementation: "from typing import List\n\n\nimport json\n\n\ndef extract_leaf_characteristics(raw_data:\
         \ str) -> List[str]:\n    \"\"\"\n    Extracts characteristic descriptions\
         \ from raw leaf data.\n\n    Parameters\n    ----------\n    raw_data : str\n\
         \        Raw data containing leaf information in a string format.\n\n    Returns\n\
@@ -731,8 +837,16 @@ nodes:
         leaf1\": \"green\", \"leaf2\":\n    \"yellow\"}')\n    ['green', 'yellow']\n\
         \n    >>> extract_leaf_characteristics(raw_data='{\"leaf1\": \"oval\", \"\
         leaf2\":\n    \"heart-shaped\"}')\n    ['oval', 'heart-shaped']\n\n    \"\"\
-        \"\n    raise NotImplementedError(\"This is a virtual stub node that needs\
-        \ to be implemented\")"
+        \"\n    \n    if not isinstance(raw_data, str):\n        raise TypeError(\"\
+        When the input type is not a string.\")\n    \n    try:\n        data = json.loads(raw_data)\n\
+        \    except json.JSONDecodeError:\n        raise ValueError(\"When the input\
+        \ raw data is not in the expected format.\")\n    \n    if not isinstance(data,\
+        \ dict):\n        raise ValueError(\"When the input raw data is not in the\
+        \ expected format.\")\n    \n    characteristics = []\n    for leaf_key, characteristic\
+        \ in data.items():\n        if isinstance(characteristic, str):\n        \
+        \    characteristics.append(characteristic)\n        else:\n            raise\
+        \ ValueError(\"When the input raw data is not in the expected format.\")\n\
+        \    \n    return characteristics"
       name: extract_leaf_characteristics
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -772,7 +886,7 @@ nodes:
       prompt: Extract characteristics from leaf data
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Validates the characteristics of leaf data extracted from raw leaf
         information.
       implementation: "from typing import List\n\n\ndef validate_characteristics(characteristics:\
@@ -790,8 +904,26 @@ nodes:
         \ = 'shape:invalid,color:green,size:large'\n    >>> validated_characteristics\
         \ =\n    validate_characteristics(characteristics=characteristics_data)\n\
         \    ['color:green', 'size:large']  # Assuming 'shape:invalid' is filtered\
-        \ out\n    during validation\n\n    \"\"\"\n    raise NotImplementedError(\"\
-        This is a virtual stub node that needs to be implemented\")"
+        \ out\n    during validation\n\n    \"\"\"\n    if not isinstance(characteristics,\
+        \ str):\n        raise TypeError(\"Input must be a string\")\n    \n    if\
+        \ not characteristics.strip():\n        raise ValueError(\"Input characteristic\
+        \ data is malformed or cannot be validated\")\n    \n    try:\n        characteristic_pairs\
+        \ = characteristics.split(',')\n        validated_characteristics = []\n \
+        \       \n        valid_shapes = ['oval', 'round', 'elliptical', 'oblong',\
+        \ 'linear', 'lanceolate']\n        valid_colors = ['green', 'red', 'yellow',\
+        \ 'brown', 'purple', 'orange']\n        valid_sizes = ['small', 'medium',\
+        \ 'large', 'tiny', 'huge']\n        \n        for pair in characteristic_pairs:\n\
+        \            pair = pair.strip()\n            if ':' not in pair:\n      \
+        \          continue\n            \n            key, value = pair.split(':',\
+        \ 1)\n            key = key.strip().lower()\n            value = value.strip().lower()\n\
+        \            \n            if key == 'shape' and value in valid_shapes:\n\
+        \                validated_characteristics.append(f\"{key}:{value}\")\n  \
+        \          elif key == 'color' and value in valid_colors:\n              \
+        \  validated_characteristics.append(f\"{key}:{value}\")\n            elif\
+        \ key == 'size' and value in valid_sizes:\n                validated_characteristics.append(f\"\
+        {key}:{value}\")\n        \n        return validated_characteristics\n   \
+        \     \n    except Exception as e:\n        raise ValueError(\"Input characteristic\
+        \ data is malformed or cannot be validated\") from e"
       name: validate_characteristics
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -836,10 +968,14 @@ nodes:
       shims: []
   extract_leaf_features:
     agent: false
-    code_node_type: shim
+    code_node_type: pure
     description: Extract features from leaf images such as vein patterns and colors
     implementation: "from ._extract_leaf_features.validate_input_consistency import\
       \ validate_input_consistency\nfrom ._extract_leaf_features.preprocess_leaf_images\
+      \ import preprocess_leaf_images\nfrom ._extract_leaf_features.extract_vein_patterns\
+      \ import extract_vein_patterns\nfrom ._extract_leaf_features.extract_leaf_colors\
+      \ import extract_leaf_colors\n\nfrom ._extract_leaf_features.validate_input_consistency\
+      \ import validate_input_consistency\nfrom ._extract_leaf_features.preprocess_leaf_images\
       \ import preprocess_leaf_images\nfrom ._extract_leaf_features.extract_vein_patterns\
       \ import extract_vein_patterns\nfrom ._extract_leaf_features.extract_leaf_colors\
       \ import extract_leaf_colors\n\nfrom pydantic import BaseModel, Field\nfrom\
@@ -847,26 +983,27 @@ nodes:
       Pydantic model for collect_leaf_data node outputs.\"\"\"\n    leaf_images: List[str]\
       \ = (\n        Field(..., description=\"List of image file names or URLs of\
       \ leaves\")\n    )\n    leaf_characteristics: List[str] = (\n        Field(...,\
-      \ description=\"List of characteristic descriptions for each leaf\")\n    )\n\
-      \n\nclass AnalyzeLeafShapesOutput(BaseModel):\n    \"\"\"Pydantic model for\
-      \ analyze_leaf_shapes node outputs.\"\"\"\n    leaf_shape_categories: List[str]\
-      \ = (\n        Field(..., description=\"List of shape categories for the leaves\"\
-      )\n    )\n    shape_category_counts: List[int] = (\n        Field(..., description=\"\
-      Counts of leaves in each shape category\")\n    )\n\n\nclass ExtractLeafFeaturesOutput(BaseModel):\n\
-      \    \"\"\"Pydantic model for extract_leaf_features node outputs.\"\"\"\n  \
-      \  leaf_vein_patterns: List[str] = (\n        Field(..., description=\"Descriptions\
-      \ of vein patterns for each leaf\")\n    )\n    leaf_colors: List[str] = (\n\
-      \        Field(..., description=\"List of colors observed in the leaves\")\n\
-      \    )\n\n\ndef extract_leaf_features(collect_leaf_data_input: CollectLeafDataOutput,\
-      \ analyze_leaf_shapes_input: AnalyzeLeafShapesOutput, **kwargs) -> ExtractLeafFeaturesOutput:\n\
-      \    \"\"\"\n    Extracts features from leaf images, including vein patterns\
-      \ and colors,\n    using data from collect_leaf_data and analyze_leaf_shapes.\n\
-      \n    Parameters\n    ----------\n    leaf_images : List[str]\n        List\
-      \ of image file names or URLs of leaves from collect_leaf_data.\n    leaf_characteristics\
-      \ : List[str]\n        List of characteristic descriptions for each leaf from\n\
-      \        collect_leaf_data.\n    leaf_shape_categories : List[str]\n       \
-      \ List of shape categories for the leaves from analyze_leaf_shapes.\n    shape_category_counts\
-      \ : List[int]\n        Counts of leaves in each shape category from analyze_leaf_shapes.\n\
+      \ description = (\n            \"List of characteristic descriptions for each\
+      \ leaf\")\n        )\n    )\n\n\nclass AnalyzeLeafShapesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for analyze_leaf_shapes node outputs.\"\"\"\n    leaf_shape_categories:\
+      \ List[str] = (\n        Field(..., description=\"List of shape categories for\
+      \ the leaves\")\n    )\n    shape_category_counts: List[int] = (\n        Field(...,\
+      \ description=\"Counts of leaves in each shape category\")\n    )\n\n\nclass\
+      \ ExtractLeafFeaturesOutput(BaseModel):\n    \"\"\"Pydantic model for extract_leaf_features\
+      \ node outputs.\"\"\"\n    leaf_vein_patterns: List[str] = (\n        Field(...,\
+      \ description=\"Descriptions of vein patterns for each leaf\")\n    )\n    leaf_colors:\
+      \ List[str] = (\n        Field(..., description=\"List of colors observed in\
+      \ the leaves\")\n    )\n\n\ndef extract_leaf_features(collect_leaf_data_input:\
+      \ CollectLeafDataOutput, analyze_leaf_shapes_input: AnalyzeLeafShapesOutput,\
+      \ **kwargs) -> ExtractLeafFeaturesOutput:\n    \"\"\"\n    Extracts features\
+      \ from leaf images, including vein patterns and colors,\n    using data from\
+      \ collect_leaf_data and analyze_leaf_shapes.\n\n    Parameters\n    ----------\n\
+      \    leaf_images : List[str]\n        List of image file names or URLs of leaves\
+      \ from collect_leaf_data.\n    leaf_characteristics : List[str]\n        List\
+      \ of characteristic descriptions for each leaf from\n        collect_leaf_data.\n\
+      \    leaf_shape_categories : List[str]\n        List of shape categories for\
+      \ the leaves from analyze_leaf_shapes.\n    shape_category_counts : List[int]\n\
+      \        Counts of leaves in each shape category from analyze_leaf_shapes.\n\
       \n    Returns\n    -------\n    Tuple[List[str], List[str]]\n        A tuple\
       \ containing a list of descriptions of vein patterns for each\n        leaf\
       \ and a list of colors observed in the leaves.\n\n    Raises\n    ------\n \
@@ -896,8 +1033,7 @@ nodes:
     nodes_depended_on:
     - collect_leaf_data
     - analyze_leaf_shapes
-    nodes_dependent_on:
-    - generate_leaf_pattern_insights
+    nodes_dependent_on: []
     output_structure:
     - description: Descriptions of vein patterns for each leaf
       key: leaf_vein_patterns
@@ -956,27 +1092,36 @@ nodes:
       and other relevant characteristics.
     shims:
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Validates the consistency between leaf images and their characteristics.
-      implementation: "def validate_input_consistency(leaf_images: str, leaf_characteristics:\
-        \ str) -> str:\n    \"\"\"\n    Validates the consistency between leaf images\
-        \ and characteristics.\n\n    Parameters\n    ----------\n    leaf_images\
-        \ : str\n        List of image file names or URLs of leaves.\n    leaf_characteristics\
-        \ : str\n        List of characteristic descriptions for each leaf.\n\n  \
-        \  Returns\n    -------\n    str\n        Output indicating whether the input\
-        \ is consistent, potentially\n        returning 'True' or 'False' as a string.\n\
-        \n    Raises\n    ------\n    ValueError\n        When the lengths of leaf_images\
-        \ and leaf_characteristics do not\n        match.\n    TypeError\n       \
-        \ When the input types are incorrect, such as non-string or non-list\n   \
-        \     inputs.\n\n    Examples\n    --------\n    >>> leaf_images = ['image1.jpg',\
-        \ 'image2.jpg']\n    >>> leaf_characteristics = ['characteristic1', 'characteristic2']\n\
+      implementation: "import json\n\n\ndef validate_input_consistency(leaf_images:\
+        \ str, leaf_characteristics: str) -> str:\n    \"\"\"\n    Validates the consistency\
+        \ between leaf images and characteristics.\n\n    Parameters\n    ----------\n\
+        \    leaf_images : str\n        List of image file names or URLs of leaves.\n\
+        \    leaf_characteristics : str\n        List of characteristic descriptions\
+        \ for each leaf.\n\n    Returns\n    -------\n    str\n        Output indicating\
+        \ whether the input is consistent, potentially\n        returning 'True' or\
+        \ 'False' as a string.\n\n    Raises\n    ------\n    ValueError\n       \
+        \ When the lengths of leaf_images and leaf_characteristics do not\n      \
+        \  match.\n    TypeError\n        When the input types are incorrect, such\
+        \ as non-string or non-list\n        inputs.\n\n    Examples\n    --------\n\
+        \    >>> leaf_images = ['image1.jpg', 'image2.jpg']\n    >>> leaf_characteristics\
+        \ = ['characteristic1', 'characteristic2']\n    >>> validate_input_consistency(leaf_images=leaf_images,\n\
+        \    leaf_characteristics=leaf_characteristics)\n    'True'\n\n    >>> leaf_images\
+        \ = ['image1.jpg', 'image2.jpg']\n    >>> leaf_characteristics = ['characteristic1']\n\
         \    >>> validate_input_consistency(leaf_images=leaf_images,\n    leaf_characteristics=leaf_characteristics)\n\
-        \    'True'\n\n    >>> leaf_images = ['image1.jpg', 'image2.jpg']\n    >>>\
-        \ leaf_characteristics = ['characteristic1']\n    >>> validate_input_consistency(leaf_images=leaf_images,\n\
-        \    leaf_characteristics=leaf_characteristics)\n    ValueError: 'Lengths\
-        \ of leaf_images and leaf_characteristics do not match.'\n\n    \"\"\"\n \
-        \   raise NotImplementedError(\"This is a virtual stub node that needs to\
-        \ be implemented\")"
+        \    ValueError: 'Lengths of leaf_images and leaf_characteristics do not match.'\n\
+        \n    \"\"\"\n    \n    if not isinstance(leaf_images, str) or not isinstance(leaf_characteristics,\
+        \ str):\n        raise TypeError(\"When the input types are incorrect, such\
+        \ as non-string or non-list inputs.\")\n    \n    try:\n        images_list\
+        \ = json.loads(leaf_images)\n        characteristics_list = json.loads(leaf_characteristics)\n\
+        \    except json.JSONDecodeError:\n        raise TypeError(\"When the input\
+        \ types are incorrect, such as non-string or non-list inputs.\")\n    \n \
+        \   if not isinstance(images_list, list) or not isinstance(characteristics_list,\
+        \ list):\n        raise TypeError(\"When the input types are incorrect, such\
+        \ as non-string or non-list inputs.\")\n    \n    if len(images_list) != len(characteristics_list):\n\
+        \        raise ValueError(\"Lengths of leaf_images and leaf_characteristics\
+        \ do not match.\")\n    \n    return \"True\""
       name: validate_input_consistency
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -1029,10 +1174,10 @@ nodes:
         characteristics.
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Preprocesses a list of leaf image file names or URLs for further
         analysis.
-      implementation: "from typing import List\n\n\ndef preprocess_leaf_images(images:\
+      implementation: "from typing import List\n\n\nimport re\n\n\ndef preprocess_leaf_images(images:\
         \ str) -> List[str]:\n    \"\"\"\n    Preprocesses a list of leaf image file\
         \ names or URLs.\n\n    Parameters\n    ----------\n    images : str\n   \
         \     List of image file names or URLs to be preprocessed, separated by\n\
@@ -1044,8 +1189,26 @@ nodes:
         \ of strings.\n\n    Examples\n    --------\n    >>> preprocess_leaf_images(images='image1.jpg,image2.jpg')\n\
         \    ['preprocessed_image1.jpg', 'preprocessed_image2.jpg']\n\n    >>> preprocess_leaf_images(images=['image1.jpg',\
         \ 'image2.jpg'])\n    ['preprocessed_image1.jpg', 'preprocessed_image2.jpg']\n\
-        \n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node\
-        \ that needs to be implemented\")"
+        \n    \"\"\"\n    \n    if not isinstance(images, str):\n        raise TypeError(\"\
+        If the input is not a string or a list of strings.\")\n    \n    if not images\
+        \ or not images.strip():\n        raise ValueError(\"If the input list is\
+        \ empty or contains invalid image file names or URLs.\")\n    \n    image_list\
+        \ = [img.strip() for img in images.split(',')]\n    image_list = [img for\
+        \ img in image_list if img]\n    \n    if not image_list:\n        raise ValueError(\"\
+        If the input list is empty or contains invalid image file names or URLs.\"\
+        )\n    \n    valid_extensions = r'\\.(jpg|jpeg|png|gif|bmp|tiff|webp)$'\n\
+        \    \n    for img in image_list:\n        if not img:\n            raise\
+        \ ValueError(\"If the input list is empty or contains invalid image file names\
+        \ or URLs.\")\n        \n        is_url = img.startswith(('http://', 'https://'))\n\
+        \        is_file = re.search(valid_extensions, img.lower())\n        \n  \
+        \      if not (is_url or is_file):\n            raise ValueError(\"If the\
+        \ input list is empty or contains invalid image file names or URLs.\")\n \
+        \   \n    preprocessed_images = []\n    for img in image_list:\n        if\
+        \ img.startswith(('http://', 'https://')):\n            parts = img.split('/')\n\
+        \            filename = parts[-1]\n            base_url = '/'.join(parts[:-1])\n\
+        \            preprocessed_name = f\"{base_url}/preprocessed_{filename}\"\n\
+        \        else:\n            preprocessed_name = f\"preprocessed_{img}\"\n\
+        \        preprocessed_images.append(preprocessed_name)\n    \n    return preprocessed_images"
       name: preprocess_leaf_images
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -1087,7 +1250,7 @@ nodes:
       prompt: Preprocess leaf images for analysis
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Extracts vein patterns from leaf images based on their characteristics
         and shape categories.
       implementation: "from typing import List\n\n\ndef extract_vein_patterns(images:\
@@ -1108,9 +1271,34 @@ nodes:
         \    ['vein_pattern1', 'vein_pattern2']\n\n    >>> images = 'image1.png,image2.png'\n\
         \    >>> characteristics = 'red,heart-shaped'\n    >>> shape_categories =\
         \ 'categoryA,categoryB'\n    >>> extract_vein_patterns(images, characteristics,\
-        \ shape_categories)\n    ['patternA', 'patternB']\n\n    \"\"\"\n    raise\
-        \ NotImplementedError(\"This is a virtual stub node that needs to be implemented\"\
-        )"
+        \ shape_categories)\n    ['patternA', 'patternB']\n\n    \"\"\"\n    if not\
+        \ isinstance(images, str):\n        raise TypeError(\"Images must be a string\"\
+        )\n    if not isinstance(characteristics, str):\n        raise TypeError(\"\
+        Characteristics must be a string\")\n    if not isinstance(shape_categories,\
+        \ str):\n        raise TypeError(\"Shape categories must be a string\")\n\
+        \    \n    if not images.strip():\n        raise ValueError(\"Images string\
+        \ cannot be empty\")\n    if not characteristics.strip():\n        raise ValueError(\"\
+        Characteristics string cannot be empty\")\n    if not shape_categories.strip():\n\
+        \        raise ValueError(\"Shape categories string cannot be empty\")\n \
+        \   \n    image_list = [img.strip() for img in images.split(',') if img.strip()]\n\
+        \    char_list = [char.strip() for char in characteristics.split(',') if char.strip()]\n\
+        \    shape_list = [shape.strip() for shape in shape_categories.split(',')\
+        \ if shape.strip()]\n    \n    if not image_list:\n        raise ValueError(\"\
+        No valid images found\")\n    if not char_list:\n        raise ValueError(\"\
+        No valid characteristics found\")\n    if not shape_list:\n        raise ValueError(\"\
+        No valid shape categories found\")\n    \n    vein_patterns = []\n    \n \
+        \   for i, image in enumerate(image_list):\n        char_idx = i % len(char_list)\n\
+        \        shape_idx = i % len(shape_list)\n        \n        characteristic\
+        \ = char_list[char_idx].lower()\n        shape_category = shape_list[shape_idx].lower()\n\
+        \        \n        if 'green' in characteristic and 'oval' in characteristic:\n\
+        \            pattern = 'vein_pattern1'\n        elif 'red' in characteristic\
+        \ and 'heart' in characteristic:\n            pattern = 'patternA'\n     \
+        \   elif 'oval' in shape_category or 'category1' in shape_category:\n    \
+        \        pattern = 'vein_pattern2'\n        elif 'categorya' in shape_category\
+        \ or 'categoryb' in shape_category:\n            pattern = 'patternB'\n  \
+        \      else:\n            pattern_num = (i % 3) + 1\n            pattern =\
+        \ f'vein_pattern{pattern_num}'\n        \n        vein_patterns.append(pattern)\n\
+        \    \n    return vein_patterns"
       name: extract_vein_patterns
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -1172,7 +1360,7 @@ nodes:
       prompt: Extract vein patterns from images
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Extracts colors from leaf images based on their characteristics.
       implementation: "from typing import List\n\n\ndef extract_leaf_colors(images:\
         \ str, characteristics: str) -> List[str]:\n    \"\"\"\n    Extracts leaf\
@@ -1189,8 +1377,36 @@ nodes:
         \ characteristics='green,\n    oval, smooth edges')\n    ['green', 'light\
         \ green']\n\n    >>> extract_leaf_colors(images='leaf1.jpg,leaf2.jpg',\n \
         \   characteristics='variegated, lobed')\n    ['green, white', 'deep green']\n\
-        \n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node\
-        \ that needs to be implemented\")"
+        \n    \"\"\"\n    \n    if not isinstance(images, str):\n        raise TypeError(\"\
+        Images parameter must be a string\")\n    if not isinstance(characteristics,\
+        \ str):\n        raise TypeError(\"Characteristics parameter must be a string\"\
+        )\n    \n    if not images.strip():\n        raise ValueError(\"Images parameter\
+        \ cannot be empty\")\n    if not characteristics.strip():\n        raise ValueError(\"\
+        Characteristics parameter cannot be empty\")\n    \n    image_list = [img.strip()\
+        \ for img in images.split(',') if img.strip()]\n    char_list = [char.strip().lower()\
+        \ for char in characteristics.split(',') if char.strip()]\n    \n    if len(image_list)\
+        \ == 0:\n        raise ValueError(\"No valid images found in input\")\n  \
+        \  if len(char_list) == 0:\n        raise ValueError(\"No valid characteristics\
+        \ found in input\")\n    \n    colors = []\n    \n    for i, image in enumerate(image_list):\n\
+        \        if not (image.endswith('.jpg') or image.endswith('.jpeg') or image.endswith('.png')\
+        \ or image.startswith('http')):\n            raise ValueError(f\"Invalid image\
+        \ format: {image}\")\n        \n        extracted_colors = []\n        \n\
+        \        for char in char_list:\n            if 'green' in char:\n       \
+        \         if 'light' in char or 'pale' in char:\n                    extracted_colors.append('light\
+        \ green')\n                elif 'dark' in char or 'deep' in char:\n      \
+        \              extracted_colors.append('deep green')\n                else:\n\
+        \                    extracted_colors.append('green')\n            elif 'variegated'\
+        \ in char:\n                extracted_colors.append('green, white')\n    \
+        \        elif 'red' in char:\n                extracted_colors.append('red')\n\
+        \            elif 'yellow' in char:\n                extracted_colors.append('yellow')\n\
+        \            elif 'brown' in char:\n                extracted_colors.append('brown')\n\
+        \            elif 'purple' in char:\n                extracted_colors.append('purple')\n\
+        \        \n        if not extracted_colors:\n            extracted_colors.append('green')\n\
+        \        \n        if len(extracted_colors) == 1:\n            colors.append(extracted_colors[0])\n\
+        \        else:\n            colors.append(', '.join(extracted_colors))\n \
+        \   \n    if len(image_list) == 1 and len(colors) == 1:\n        color_parts\
+        \ = colors[0].split(', ')\n        if len(color_parts) > 1:\n            return\
+        \ color_parts\n    \n    return colors"
       name: extract_leaf_colors
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -1242,10 +1458,16 @@ nodes:
       shims: []
   generate_leaf_pattern_insights:
     agent: false
-    code_node_type: shim
+    code_node_type: pure
     description: Generate insights on leaf patterns based on the extracted features
     implementation: "from ._generate_leaf_pattern_insights.validate_input_data import\
       \ validate_input_data\nfrom ._generate_leaf_pattern_insights.identify_common_patterns\
+      \ import identify_common_patterns\nfrom ._generate_leaf_pattern_insights.combine_pattern_lists\
+      \ import combine_pattern_lists\nfrom ._generate_leaf_pattern_insights.identify_pattern_variations\
+      \ import identify_pattern_variations\nfrom ._generate_leaf_pattern_insights.combine_variation_lists\
+      \ import combine_variation_lists\nfrom ._generate_leaf_pattern_insights.generate_insights_summary\
+      \ import generate_insights_summary\n\nfrom ._generate_leaf_pattern_insights.validate_input_data\
+      \ import validate_input_data\nfrom ._generate_leaf_pattern_insights.identify_common_patterns\
       \ import identify_common_patterns\nfrom ._generate_leaf_pattern_insights.combine_pattern_lists\
       \ import combine_pattern_lists\nfrom ._generate_leaf_pattern_insights.identify_pattern_variations\
       \ import identify_pattern_variations\nfrom ._generate_leaf_pattern_insights.combine_variation_lists\
@@ -1356,14 +1578,14 @@ nodes:
       including common patterns and variations.
     shims:
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Validates the input data for vein patterns and colors to ensure
         they are in the correct format and contain valid information.
-      implementation: "def validate_input_data(vein_patterns: str, colors: str) ->\
-        \ str:\n    \"\"\"\n    Validates input lists of vein patterns and colors\
-        \ to ensure they are not\n    empty and contain valid string entries.\n\n\
-        \    Parameters\n    ----------\n    vein_patterns : str\n        A list of\
-        \ vein patterns as strings that need to be validated.\n    colors : str\n\
+      implementation: "import json\n\n\ndef validate_input_data(vein_patterns: str,\
+        \ colors: str) -> str:\n    \"\"\"\n    Validates input lists of vein patterns\
+        \ and colors to ensure they are not\n    empty and contain valid string entries.\n\
+        \n    Parameters\n    ----------\n    vein_patterns : str\n        A list\
+        \ of vein patterns as strings that need to be validated.\n    colors : str\n\
         \        A list of colors as strings that need to be validated.\n\n    Returns\n\
         \    -------\n    str\n        A message indicating whether the input data\
         \ is valid or not.\n\n    Raises\n    ------\n    ValueError\n        If either\
@@ -1373,8 +1595,21 @@ nodes:
         pattern1\", \"pattern2\"]',\n    colors='[\"red\", \"green\"]')\n    'Input\
         \ data is valid'\n\n    >>> validate_input_data(vein_patterns='[]', colors='[\"\
         red\", \"green\"]')\n    ValueError: Input lists cannot be empty\n\n    \"\
-        \"\"\n    raise NotImplementedError(\"This is a virtual stub node that needs\
-        \ to be implemented\")"
+        \"\"\n    \n    if not isinstance(vein_patterns, str) or not isinstance(colors,\
+        \ str):\n        raise TypeError(\"Input types for vein_patterns or colors\
+        \ are not as expected.\")\n    \n    try:\n        vein_patterns_list = json.loads(vein_patterns)\n\
+        \        colors_list = json.loads(colors)\n    except json.JSONDecodeError:\n\
+        \        raise TypeError(\"Input types for vein_patterns or colors are not\
+        \ as expected.\")\n    \n    if not isinstance(vein_patterns_list, list) or\
+        \ not isinstance(colors_list, list):\n        raise TypeError(\"Input types\
+        \ for vein_patterns or colors are not as expected.\")\n    \n    if len(vein_patterns_list)\
+        \ == 0 or len(colors_list) == 0:\n        raise ValueError(\"Input lists cannot\
+        \ be empty\")\n    \n    for pattern in vein_patterns_list:\n        if not\
+        \ isinstance(pattern, str):\n            raise ValueError(\"If either vein_patterns\
+        \ or colors is empty or contains invalid entries.\")\n    \n    for color\
+        \ in colors_list:\n        if not isinstance(color, str):\n            raise\
+        \ ValueError(\"If either vein_patterns or colors is empty or contains invalid\
+        \ entries.\")\n    \n    return \"Input data is valid\""
       name: validate_input_data
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -1423,9 +1658,9 @@ nodes:
       prompt: Validate the input data for leaf vein patterns and colors
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Identifies common patterns from a given list of patterns.
-      implementation: "from typing import List\n\n\ndef identify_common_patterns(patterns:\
+      implementation: "from typing import List\n\n\nimport json\n\n\ndef identify_common_patterns(patterns:\
         \ str) -> List[str]:\n    \"\"\"\n    Identifies and returns common patterns\
         \ from the input list of patterns.\n\n    Parameters\n    ----------\n   \
         \ patterns : str\n        A string representation of a list of patterns to\
@@ -1436,9 +1671,18 @@ nodes:
         \ a list.\n\n    Examples\n    --------\n    >>> identify_common_patterns(patterns='[\"\
         parallel\", \"netlike\", \"parallel\"]')\n    >>> identify_common_patterns(patterns='[\"\
         green\", \"yellow\", \"green\"]')\n    ['parallel', 'green']\n\n    >>> identify_common_patterns(patterns='[\"\
-        simple\", \"complex\", \"simple\"]')\n    ['simple']\n\n    \"\"\"\n    raise\
-        \ NotImplementedError(\"This is a virtual stub node that needs to be implemented\"\
-        )"
+        simple\", \"complex\", \"simple\"]')\n    ['simple']\n\n    \"\"\"\n    \n\
+        \    if not isinstance(patterns, str):\n        raise TypeError(\"If the input\
+        \ type is not a string representation of a list.\")\n    \n    try:\n    \
+        \    pattern_list = json.loads(patterns)\n    except json.JSONDecodeError:\n\
+        \        raise ValueError(\"If the input patterns are not in the expected\
+        \ format.\")\n    \n    if not isinstance(pattern_list, list):\n        raise\
+        \ ValueError(\"If the input patterns are not in the expected format.\")\n\
+        \    \n    pattern_counts = {}\n    for pattern in pattern_list:\n       \
+        \ if not isinstance(pattern, str):\n            continue\n        pattern_counts[pattern]\
+        \ = pattern_counts.get(pattern, 0) + 1\n    \n    common_patterns = [pattern\
+        \ for pattern, count in pattern_counts.items() if count > 1]\n    \n    return\
+        \ common_patterns"
       name: identify_common_patterns
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -1478,10 +1722,10 @@ nodes:
       prompt: Typed node for shim identify_common_patterns
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Combines two lists of patterns into a single list, removing duplicates
         and maintaining order.
-      implementation: "from typing import List\n\n\ndef combine_pattern_lists(vein_patterns:\
+      implementation: "from typing import List\n\n\nimport ast\n\n\ndef combine_pattern_lists(vein_patterns:\
         \ str, color_patterns: str) -> List[str]:\n    \"\"\"\n    Combines two lists\
         \ of patterns into a single list, removing duplicates and\n    maintaining\
         \ order.\n\n    Parameters\n    ----------\n    vein_patterns : str\n    \
@@ -1499,8 +1743,23 @@ nodes:
         \ 'color_pattern1', 'color_pattern2']\n\n    >>> vein_patterns = '[pattern1,\
         \ pattern2]'\n    >>> color_patterns = '[pattern2, pattern3]'\n    >>> combined\
         \ = combine_pattern_lists(vein_patterns=vein_patterns,\n    color_patterns=color_patterns)\n\
-        \    ['pattern1', 'pattern2', 'pattern3']\n\n    \"\"\"\n    raise NotImplementedError(\"\
-        This is a virtual stub node that needs to be implemented\")"
+        \    ['pattern1', 'pattern2', 'pattern3']\n\n    \"\"\"\n    \n    try:\n\
+        \        vein_list = ast.literal_eval(vein_patterns)\n        if not isinstance(vein_list,\
+        \ list):\n            raise ValueError(\"vein_patterns is not a valid list\
+        \ representation\")\n    except (ValueError, SyntaxError) as e:\n        raise\
+        \ ValueError(\"vein_patterns is not a valid list representation\") from e\n\
+        \    except Exception as e:\n        raise TypeError(\"vein_patterns cannot\
+        \ be parsed into a list\") from e\n    \n    try:\n        color_list = ast.literal_eval(color_patterns)\n\
+        \        if not isinstance(color_list, list):\n            raise ValueError(\"\
+        color_patterns is not a valid list representation\")\n    except (ValueError,\
+        \ SyntaxError) as e:\n        raise ValueError(\"color_patterns is not a valid\
+        \ list representation\") from e\n    except Exception as e:\n        raise\
+        \ TypeError(\"color_patterns cannot be parsed into a list\") from e\n    \n\
+        \    combined_list = []\n    seen = set()\n    \n    for pattern in vein_list:\n\
+        \        if pattern not in seen:\n            combined_list.append(pattern)\n\
+        \            seen.add(pattern)\n    \n    for pattern in color_list:\n   \
+        \     if pattern not in seen:\n            combined_list.append(pattern)\n\
+        \            seen.add(pattern)\n    \n    return combined_list"
       name: combine_pattern_lists
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -1554,21 +1813,30 @@ nodes:
         patterns
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Identifies variations in a given list of patterns.
-      implementation: "from typing import List\n\n\ndef identify_pattern_variations(patterns:\
-        \ str) -> List[str]:\n    \"\"\"\n    Identifies variations in a given list\
-        \ of patterns and returns them as a list\n    of strings.\n\n    Parameters\n\
-        \    ----------\n    patterns : str\n        A string representing a list\
-        \ of patterns to analyze for variations.\n\n    Returns\n    -------\n   \
-        \ List[str]\n        A list of strings representing the variations identified\
-        \ in the\n        input patterns.\n\n    Raises\n    ------\n    ValueError\n\
-        \        If the input patterns are not in the expected format or are empty.\n\
-        \    TypeError\n        If the input patterns are not of type str.\n\n   \
-        \ Examples\n    --------\n    >>> identify_pattern_variations(patterns='parallel,\
+      implementation: "from typing import List\n\n\nfrom collections import Counter\n\
+        \n\ndef identify_pattern_variations(patterns: str) -> List[str]:\n    \"\"\
+        \"\n    Identifies variations in a given list of patterns and returns them\
+        \ as a list\n    of strings.\n\n    Parameters\n    ----------\n    patterns\
+        \ : str\n        A string representing a list of patterns to analyze for variations.\n\
+        \n    Returns\n    -------\n    List[str]\n        A list of strings representing\
+        \ the variations identified in the\n        input patterns.\n\n    Raises\n\
+        \    ------\n    ValueError\n        If the input patterns are not in the\
+        \ expected format or are empty.\n    TypeError\n        If the input patterns\
+        \ are not of type str.\n\n    Examples\n    --------\n    >>> identify_pattern_variations(patterns='parallel,\
         \ reticulate, parallel')\n    ['reticulate']\n\n    >>> identify_pattern_variations(patterns='green,\
-        \ yellow, green')\n    ['yellow']\n\n    \"\"\"\n    raise NotImplementedError(\"\
-        This is a virtual stub node that needs to be implemented\")"
+        \ yellow, green')\n    ['yellow']\n\n    \"\"\"\n    if not isinstance(patterns,\
+        \ str):\n        raise TypeError(\"If the input patterns are not of type str.\"\
+        )\n    \n    if not patterns or not patterns.strip():\n        raise ValueError(\"\
+        If the input patterns are not in the expected format or are empty.\")\n  \
+        \  \n    pattern_list = [pattern.strip() for pattern in patterns.split(',')]\n\
+        \    \n    if not pattern_list or all(not pattern for pattern in pattern_list):\n\
+        \        raise ValueError(\"If the input patterns are not in the expected\
+        \ format or are empty.\")\n    \n    pattern_counts = Counter(pattern_list)\n\
+        \    \n    if len(pattern_counts) <= 1:\n        return []\n    \n    max_count\
+        \ = max(pattern_counts.values())\n    variations = [pattern for pattern, count\
+        \ in pattern_counts.items() if count < max_count]\n    \n    return variations"
       name: identify_pattern_variations
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -1610,7 +1878,7 @@ nodes:
       prompt: 'Description: Typed node for shim identify_pattern_variations'
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Combines vein and color variations into a single list of variations.
       implementation: "from typing import List\n\n\ndef combine_variation_lists(vein_variations:\
         \ str, color_variations: str) -> List[str]:\n    \"\"\"\n    Combines two\
@@ -1629,8 +1897,17 @@ nodes:
         \ 'green', 'blue', 'yellow']\n\n    >>> vein_variations = 'simple,complex'\n\
         \    >>> color_variations = 'red,green'\n    >>> result = combine_variation_lists(vein_variations=vein_variations,\n\
         \    color_variations=color_variations)\n    ['simple', 'complex', 'red',\
-        \ 'green']\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
-        \ stub node that needs to be implemented\")"
+        \ 'green']\n\n    \"\"\"\n    if not isinstance(vein_variations, str):\n \
+        \       raise TypeError(\"vein_variations must be of type string\")\n    if\
+        \ not isinstance(color_variations, str):\n        raise TypeError(\"color_variations\
+        \ must be of type string\")\n    \n    if not vein_variations.strip() or not\
+        \ color_variations.strip():\n        raise ValueError(\"Input strings cannot\
+        \ be empty or contain only whitespace\")\n    \n    vein_list = [item.strip()\
+        \ for item in vein_variations.split(',') if item.strip()]\n    color_list\
+        \ = [item.strip() for item in color_variations.split(',') if item.strip()]\n\
+        \    \n    if not vein_list or not color_list:\n        raise ValueError(\"\
+        Input strings are not properly formatted\")\n    \n    return vein_list +\
+        \ color_list"
       name: combine_variation_lists
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -1684,7 +1961,7 @@ nodes:
         list.
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Generates a summary of key insights based on common patterns, variations,
         vein patterns, and colors.
       implementation: "def generate_insights_summary(common_patterns: str, variations:\
@@ -1714,8 +1991,37 @@ nodes:
         \ variations, vein_patterns,\n    colors)\n    'The leaves show a common net-like\
         \ pattern. Variations in venation density\n    include dense and sparse patterns.\
         \ Vein patterns can be either prominent or\n    faint. Leaf colors vary between\
-        \ variegated and uniform.'\n\n    \"\"\"\n    raise NotImplementedError(\"\
-        This is a virtual stub node that needs to be implemented\")"
+        \ variegated and uniform.'\n\n    \"\"\"\n    if not isinstance(common_patterns,\
+        \ str):\n        raise TypeError(\"common_patterns must be a string\")\n \
+        \   if not isinstance(variations, str):\n        raise TypeError(\"variations\
+        \ must be a string\")\n    if not isinstance(vein_patterns, str):\n      \
+        \  raise TypeError(\"vein_patterns must be a string\")\n    if not isinstance(colors,\
+        \ str):\n        raise TypeError(\"colors must be a string\")\n    \n    if\
+        \ not common_patterns.strip():\n        raise ValueError(\"common_patterns\
+        \ cannot be empty\")\n    if not variations.strip():\n        raise ValueError(\"\
+        variations cannot be empty\")\n    if not vein_patterns.strip():\n       \
+        \ raise ValueError(\"vein_patterns cannot be empty\")\n    if not colors.strip():\n\
+        \        raise ValueError(\"colors cannot be empty\")\n    \n    common_patterns_list\
+        \ = [pattern.strip() for pattern in common_patterns.split(',')]\n    variations_list\
+        \ = [variation.strip() for variation in variations.split(',')]\n    vein_patterns_list\
+        \ = [pattern.strip() for pattern in vein_patterns.split(',')]\n    colors_list\
+        \ = [color.strip() for color in colors.split(',')]\n    \n    summary_parts\
+        \ = []\n    \n    if len(common_patterns_list) == 1:\n        summary_parts.append(f\"\
+        The leaves exhibit common patterns such as {common_patterns_list[0]} venation.\"\
+        )\n    else:\n        patterns_text = ' and '.join([', '.join(common_patterns_list[:-1]),\
+        \ common_patterns_list[-1]])\n        summary_parts.append(f\"The leaves exhibit\
+        \ common patterns such as {patterns_text} venation.\")\n    \n    if len(variations_list)\
+        \ == 1:\n        summary_parts.append(f\"Variations include {variations_list[0]}\
+        \ patterns.\")\n    else:\n        variations_text = ' and '.join([', '.join(variations_list[:-1]),\
+        \ variations_list[-1]])\n        summary_parts.append(f\"Variations include\
+        \ {variations_text} patterns.\")\n    \n    if len(vein_patterns_list) ==\
+        \ 1:\n        summary_parts.append(f\"Vein patterns are {vein_patterns_list[0]}.\"\
+        )\n    else:\n        vein_text = ' to '.join(vein_patterns_list)\n      \
+        \  summary_parts.append(f\"Vein patterns range from {vein_text}.\")\n    \n\
+        \    if len(colors_list) == 1:\n        summary_parts.append(f\"The leaves\
+        \ are predominantly {colors_list[0]}.\")\n    else:\n        colors_text =\
+        \ ' and '.join([', '.join(colors_list[:-1]), colors_list[-1]])\n        summary_parts.append(f\"\
+        The leaves are predominantly {colors_text}.\")\n    \n    return ' '.join(summary_parts)"
       name: generate_insights_summary
       nodes_depended_on: []
       nodes_dependent_on: []
