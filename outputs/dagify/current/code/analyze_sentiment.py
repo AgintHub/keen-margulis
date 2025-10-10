@@ -1,3 +1,9 @@
+from ._analyze_sentiment.validate_summaries_input import validate_summaries_input
+from ._analyze_sentiment.generate_article_indices import generate_article_indices
+from ._analyze_sentiment.analyze_sentiment_batch import analyze_sentiment_batch
+from ._analyze_sentiment.extract_sentiment_categories import extract_sentiment_categories
+from ._analyze_sentiment.extract_confidence_scores import extract_confidence_scores
+
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -8,20 +14,28 @@ class SummarizeNewsArticlesOutput(BaseModel):
         Field(..., description="Number of article summaries generated")
     )
     summaries: List[str] = (
-        Field(..., description="Concise summaries for each news article, ordered as input")
+        Field(..., description = (
+            "Concise summaries for each news article, ordered as input")
+        )
     )
 
 
 class AnalyzeSentimentOutput(BaseModel):
     """Pydantic model for analyze_sentiment node outputs."""
     article_index: List[int] = (
-        Field(..., description="The sequential index of each article in the input list.")
+        Field(..., description = (
+            "The sequential index of each article in the input list.")
+        )
     )
     sentiment_category: List[str] = (
-        Field(..., description="Sentiment category for each article, one of 'positive', 'negative', or 'neutral'.")
+        Field(..., description = (
+            "Sentiment category for each article, one of 'positive', 'negative', or 'neutral'.")
+        )
     )
     sentiment_confidence: List[float] = (
-        Field(..., description="Confidence score (0.0 to 1.0) for the assigned sentiment.")
+        Field(..., description = (
+            "Confidence score (0.0 to 1.0) for the assigned sentiment.")
+        )
     )
 
 
@@ -53,8 +67,20 @@ def analyze_sentiment(summarize_news_articles_input: SummarizeNewsArticlesOutput
     'sentiment_confidence': [0.65]}
 
     """
+    summaries: List[str] = summarize_news_articles_input.summaries
+    
+    validate_summaries_input(summaries=summaries)
+    
+    article_indices: List[int] = generate_article_indices(summaries_count=len(summaries))
+    
+    sentiment_results: List[dict] = analyze_sentiment_batch(summaries=summaries)
+    
+    sentiment_categories: List[str] = extract_sentiment_categories(results=sentiment_results)
+    
+    confidence_scores: List[float] = extract_confidence_scores(results=sentiment_results)
+    
     return AnalyzeSentimentOutput(
-        article_index=[],
-        sentiment_category=[],
-        sentiment_confidence=[],
+        article_index=article_indices,
+        sentiment_category=sentiment_categories,
+        sentiment_confidence=confidence_scores
     )

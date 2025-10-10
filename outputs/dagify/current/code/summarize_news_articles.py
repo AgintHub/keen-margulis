@@ -1,3 +1,8 @@
+from ._summarize_news_articles.get_article_texts import get_article_texts
+from ._summarize_news_articles.validate_input_lists import validate_input_lists
+from ._summarize_news_articles.preprocess_article_text import preprocess_article_text
+from ._summarize_news_articles.generate_concise_summary import generate_concise_summary
+
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -5,19 +10,29 @@ from typing import List
 class CategorizeNewsArticlesOutput(BaseModel):
     """Pydantic model for categorize_news_articles node outputs."""
     article_titles: List[str] = (
-        Field(..., description="List of article titles that were filtered and are now categorized.")
+        Field(..., description = (
+            "List of article titles that were filtered and are now categorized.")
+        )
     )
     categories: List[str] = (
-        Field(..., description="List of category labels corresponding to each article in `article_titles`; indices match.")
+        Field(..., description = (
+            "List of category labels corresponding to each article in `article_titles`; indices match.")
+        )
     )
     unique_category_count: int = (
-        Field(..., description="Total number of distinct categories identified.")
+        Field(..., description = (
+            "Total number of distinct categories identified.")
+        )
     )
     article_count: int = (
-        Field(..., description="Total number of articles processed by this node.")
+        Field(..., description = (
+            "Total number of articles processed by this node.")
+        )
     )
     is_successful: bool = (
-        Field(..., description="Indicates whether the categorization succeeded without errors.")
+        Field(..., description = (
+            "Indicates whether the categorization succeeded without errors.")
+        )
     )
 
 
@@ -27,7 +42,9 @@ class SummarizeNewsArticlesOutput(BaseModel):
         Field(..., description="Number of article summaries generated")
     )
     summaries: List[str] = (
-        Field(..., description="Concise summaries for each news article, ordered as input")
+        Field(..., description = (
+            "Concise summaries for each news article, ordered as input")
+        )
     )
 
 
@@ -78,7 +95,20 @@ def summarize_news_articles(categorize_news_articles_input: CategorizeNewsArticl
     ValueError: No articles provided.
 
     """
+    article_titles: List[str] = categorize_news_articles_input.article_titles
+    article_texts: List[str] = get_article_texts(titles=article_titles)
+    
+    validate_input_lists(titles=article_titles, texts=article_texts)
+    
+    summaries: List[str] = []
+    for i, (title, text) in enumerate(zip(article_titles, article_texts)):
+        processed_text: str = preprocess_article_text(text=text)
+        summary: str = generate_concise_summary(title=title, text=processed_text)
+        summaries.append(summary)
+    
+    summary_count: int = len(summaries)
+    
     return SummarizeNewsArticlesOutput(
-        summary_count=0,
-        summaries=[],
+        summary_count=summary_count,
+        summaries=summaries
     )
