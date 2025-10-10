@@ -2,55 +2,63 @@ dag_type: plain_text
 description: Generated workflow from UI.
 name: Generated Workflow
 nodes:
-  analyze_market_trends:
+  construct_dag:
     agent: false
-    description: Analyze market trends based on historical data to predict future
-      movements.
-    name: analyze_market_trends
+    description: Construct the workflow DAG using the decomposed tasks and their dependencies
+    name: construct_dag
     nodes_depended_on:
-    - gather_market_data
+    - identify_dependencies
+    - define_node_outputs
     nodes_dependent_on: []
-    prompt: Analyze historical market data to identify trends.
-  evaluate_trading_strategies:
+    prompt: Use the task list, dependency map, and node outputs to construct the workflow
+      DAG
+  decompose_objective:
     agent: false
-    description: Evaluate different trading strategies based on market analysis and
-      risk assessment.
-    name: evaluate_trading_strategies
+    description: Decompose the objective into smaller, manageable tasks or steps
+    name: decompose_objective
     nodes_depended_on:
-    - analyze_market_trends
+    - define_objective
     nodes_dependent_on: []
-    prompt: Evaluate trading strategies based on market trends and risk.
-  execute_trades:
+    prompt: Break down the objective into fundamental steps or tasks
+  define_node_outputs:
     agent: false
-    description: Execute trades based on the selected optimal strategy.
-    name: execute_trades
+    description: Define the output structure for each node or task
+    name: define_node_outputs
     nodes_depended_on:
-    - select_optimal_strategy
+    - decompose_objective
     nodes_dependent_on: []
-    prompt: Execute trades according to the chosen strategy.
-  gather_market_data:
+    prompt: Determine the output fields, their types, and descriptions for each task
+  define_objective:
     agent: false
-    description: Collect current market data including stock prices, trading volumes,
-      and other relevant metrics.
-    name: gather_market_data
+    description: Clearly define the objective or task description that the workflow
+      needs to achieve
+    name: define_objective
     nodes_depended_on: []
     nodes_dependent_on: []
-    prompt: Collect current market data from reliable sources.
-  monitor_trade_performance:
+    prompt: Define the objective or task description for the workflow
+  finalize_workflow:
     agent: false
-    description: Monitor the performance of executed trades and adjust strategies
-      as needed.
-    name: monitor_trade_performance
+    description: Finalize the workflow by ensuring all nodes are connected and the
+      DAG is valid
+    name: finalize_workflow
     nodes_depended_on:
-    - execute_trades
+    - validate_dag
     nodes_dependent_on: []
-    prompt: Monitor trade performance and adjust strategies.
-  select_optimal_strategy:
+    prompt: Make any necessary adjustments to ensure the workflow DAG is complete
+      and valid
+  identify_dependencies:
     agent: false
-    description: Select the optimal trading strategy based on evaluations and risk
-      assessments.
-    name: select_optimal_strategy
+    description: Identify dependencies between the decomposed tasks
+    name: identify_dependencies
     nodes_depended_on:
-    - evaluate_trading_strategies
+    - decompose_objective
     nodes_dependent_on: []
-    prompt: Choose the best trading strategy based on evaluations.
+    prompt: Analyze the decomposed tasks to identify dependencies between them
+  validate_dag:
+    agent: false
+    description: Validate the constructed workflow DAG for correctness and acyclicity
+    name: validate_dag
+    nodes_depended_on:
+    - construct_dag
+    nodes_dependent_on: []
+    prompt: Check the DAG for any cycles or inconsistencies
