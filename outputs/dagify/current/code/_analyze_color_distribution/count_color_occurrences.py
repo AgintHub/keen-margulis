@@ -39,4 +39,21 @@ def count_color_occurrences(colors: str, unique_colors: str) -> List[int]:
     [2, 3]
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    if not isinstance(colors, str) or not isinstance(unique_colors, str):
+        raise TypeError("Input is not of type string")
+    
+    try:
+        colors_list = [color.strip() for color in colors.split(',') if color.strip()]
+        unique_colors_list = [color.strip() for color in unique_colors.split(',') if color.strip()]
+    except Exception as e:
+        raise ValueError("Input strings cannot be properly parsed into lists of colors") from e
+    
+    if not all(isinstance(color, str) for color in colors_list + unique_colors_list):
+        raise TypeError("Parsing results in incorrect types")
+    
+    counts = []
+    for unique_color in unique_colors_list:
+        count = colors_list.count(unique_color)
+        counts.append(count)
+    
+    return counts

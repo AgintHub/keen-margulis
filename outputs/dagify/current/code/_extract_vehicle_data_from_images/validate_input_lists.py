@@ -1,3 +1,6 @@
+import json
+
+
 def validate_input_lists(image_paths: str, image_timestamps: str) -> str:
     """
     Validates input lists for image paths and timestamps, checking for
@@ -40,4 +43,25 @@ def validate_input_lists(image_paths: str, image_timestamps: str) -> str:
     'Error: Input lists are not of the same length.'
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    
+    try:
+        if not isinstance(image_paths, str) or not isinstance(image_timestamps, str):
+            raise TypeError("Input types are not as expected (e.g., not strings that can be parsed into lists).")
+        
+        parsed_image_paths = json.loads(image_paths)
+        parsed_image_timestamps = json.loads(image_timestamps)
+        
+        if not isinstance(parsed_image_paths, list) or not isinstance(parsed_image_timestamps, list):
+            raise ValueError("Input strings are not correctly formatted as lists.")
+        
+        if len(parsed_image_paths) != len(parsed_image_timestamps):
+            raise ValueError("Input lists are not of the same length.")
+        
+        return "valid"
+        
+    except json.JSONDecodeError:
+        raise ValueError("Input strings are not correctly formatted as lists.")
+    except ValueError as e:
+        return f"Error: {str(e)}"
+    except TypeError as e:
+        raise TypeError(str(e))

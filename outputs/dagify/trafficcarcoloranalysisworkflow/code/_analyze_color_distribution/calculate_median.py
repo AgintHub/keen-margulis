@@ -1,3 +1,7 @@
+import ast
+import statistics
+
+
 def calculate_median(scores: str) -> float:
     """
     Calculates the median of a list of confidence scores.
@@ -29,4 +33,23 @@ def calculate_median(scores: str) -> float:
     0.55
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    
+    if not isinstance(scores, str):
+        raise TypeError("Input must be a string")
+    
+    try:
+        scores_list = ast.literal_eval(scores)
+    except (ValueError, SyntaxError) as e:
+        raise ValueError("Input string cannot be converted to a list of numbers") from e
+    
+    if not isinstance(scores_list, list):
+        raise ValueError("Input string must represent a list")
+    
+    for score in scores_list:
+        if not isinstance(score, (int, float)):
+            raise TypeError("List contains non-numeric values")
+    
+    if len(scores_list) == 0:
+        raise ValueError("Cannot calculate median of empty list")
+    
+    return statistics.median(scores_list)

@@ -1,6 +1,9 @@
 from typing import List
 
 
+import ast
+
+
 def calculate_frequencies(counts: str, total: str) -> List[float]:
     """
     Calculates frequencies of occurrences based on input counts and total,
@@ -43,4 +46,24 @@ def calculate_frequencies(counts: str, total: str) -> List[float]:
     [0.26666666666666666, 0.3333333333333333, 0.4]
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    
+    if not isinstance(counts, str) or not isinstance(total, str):
+        raise TypeError("Input counts and total must be strings")
+    
+    try:
+        counts_list = ast.literal_eval(counts)
+        if not isinstance(counts_list, list) or not all(isinstance(x, int) for x in counts_list):
+            raise ValueError("Counts must be a string representation of a list of integers")
+    except (ValueError, SyntaxError) as e:
+        raise ValueError("Input counts cannot be properly parsed into a list of integers") from e
+    
+    try:
+        total_int = int(total)
+    except ValueError as e:
+        raise ValueError("Input total cannot be properly parsed into an integer") from e
+    
+    if total_int == 0:
+        raise ValueError("Total cannot be zero")
+    
+    frequencies = [count / total_int for count in counts_list]
+    return frequencies

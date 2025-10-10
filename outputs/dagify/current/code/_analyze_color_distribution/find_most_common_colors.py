@@ -1,6 +1,9 @@
 from typing import List
 
 
+import ast
+
+
 def find_most_common_colors(unique_colors: str, counts: str) -> List[str]:
     """
     Finds the most common colors from the given unique colors and their counts.
@@ -41,4 +44,30 @@ def find_most_common_colors(unique_colors: str, counts: str) -> List[str]:
     ['yellow', 'blue', 'red']
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    
+    if not isinstance(unique_colors, str) or not isinstance(counts, str):
+        raise TypeError("Input types must be strings")
+    
+    try:
+        colors_list = ast.literal_eval(unique_colors)
+        counts_list = ast.literal_eval(counts)
+    except (ValueError, SyntaxError) as e:
+        raise ValueError("Input strings cannot be parsed into lists") from e
+    
+    if not isinstance(colors_list, list) or not isinstance(counts_list, list):
+        raise ValueError("Input strings must represent lists")
+    
+    if len(colors_list) != len(counts_list):
+        raise ValueError("The lengths of the parsed lists do not match")
+    
+    for count in counts_list:
+        if not isinstance(count, (int, float)):
+            raise TypeError("The parsed lists contain non-numeric counts")
+    
+    if not counts_list:
+        return []
+    
+    max_count = max(counts_list)
+    most_common_colors = [colors_list[i] for i, count in enumerate(counts_list) if count == max_count]
+    
+    return most_common_colors

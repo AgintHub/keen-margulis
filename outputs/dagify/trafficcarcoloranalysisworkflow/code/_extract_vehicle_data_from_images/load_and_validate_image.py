@@ -1,3 +1,8 @@
+import os
+import base64
+from PIL import Image
+
+
 def load_and_validate_image(image_path: str) -> str:
     """
     Loads an image from a file path and validates it.
@@ -31,4 +36,20 @@ def load_and_validate_image(image_path: str) -> str:
     FileNotFoundError: Image file not found at path/to/nonexistent/image.jpg
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    
+    if not isinstance(image_path, str):
+        raise TypeError("image_path must be a string")
+    
+    if not os.path.exists(image_path):
+        raise FileNotFoundError(f"Image file not found at {image_path}")
+    
+    try:
+        with Image.open(image_path) as img:
+            img.verify()
+        
+        with open(image_path, 'rb') as image_file:
+            image_data = image_file.read()
+            encoded_string = base64.b64encode(image_data).decode('utf-8')
+            return encoded_string
+    except Exception as e:
+        raise ValueError(f"Image file is corrupted or cannot be validated: {str(e)}")

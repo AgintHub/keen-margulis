@@ -6,9 +6,9 @@ import json
 import sys
 from typing import Dict, Any, List, Callable, Coroutine, Union, Optional
 
+from code.analyze_color_distribution import analyze_color_distribution
 from code.capture_rush_hour_traffic_images import capture_rush_hour_traffic_images
 from code.extract_vehicle_data_from_images import extract_vehicle_data_from_images
-from code.analyze_color_distribution import analyze_color_distribution
 from code.generate_color_analysis_report import generate_color_analysis_report
 
 # Get async mode from environment variable or default to False
@@ -31,9 +31,9 @@ def make_async(func):
 
     return async_wrapper
 
+analyze_color_distribution_async = make_async(analyze_color_distribution)
 capture_rush_hour_traffic_images_async = make_async(capture_rush_hour_traffic_images)
 extract_vehicle_data_from_images_async = make_async(extract_vehicle_data_from_images)
-analyze_color_distribution_async = make_async(analyze_color_distribution)
 generate_color_analysis_report_async = make_async(generate_color_analysis_report)
 
 async def run_workflow(user_input: str) -> Dict[str, Any]:

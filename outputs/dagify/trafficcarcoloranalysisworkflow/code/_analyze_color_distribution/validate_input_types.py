@@ -34,4 +34,19 @@ def validate_input_types(colors: str, scores: str) -> str:
     TypeError: 'colors' must be a list of strings.
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    
+    if not isinstance(colors, list):
+        raise TypeError("'colors' must be a list of strings.")
+    
+    for color in colors:
+        if not isinstance(color, str):
+            raise TypeError("'colors' must be a list of strings.")
+    
+    if not isinstance(scores, list):
+        raise TypeError("'scores' must be a list of floats.")
+    
+    for score in scores:
+        if not isinstance(score, (float, int)):
+            raise TypeError("'scores' must be a list of floats.")
+    
+    return "Input types are valid."

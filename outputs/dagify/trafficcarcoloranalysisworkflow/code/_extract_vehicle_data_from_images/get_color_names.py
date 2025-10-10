@@ -34,4 +34,39 @@ def get_color_names(colors_and_scores: str) -> List[str]:
     ['green', 'yellow']
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    if not isinstance(colors_and_scores, str):
+        raise TypeError("Input must be a string")
+    
+    if not colors_and_scores.strip():
+        raise ValueError("Input string cannot be empty")
+    
+    color_names = []
+    
+    pairs = colors_and_scores.split(',')
+    
+    for pair in pairs:
+        pair = pair.strip()
+        if not pair:
+            continue
+            
+        if ':' not in pair:
+            raise ValueError(f"Invalid format: '{pair}' - expected 'color:score' format")
+            
+        parts = pair.split(':', 1)
+        if len(parts) != 2:
+            raise ValueError(f"Invalid format: '{pair}' - expected 'color:score' format")
+            
+        color_name = parts[0].strip()
+        score_str = parts[1].strip()
+        
+        if not color_name:
+            raise ValueError(f"Empty color name in pair: '{pair}'")
+            
+        try:
+            float(score_str)
+        except ValueError:
+            raise ValueError(f"Invalid score '{score_str}' in pair: '{pair}' - score must be a number")
+            
+        color_names.append(color_name)
+    
+    return color_names

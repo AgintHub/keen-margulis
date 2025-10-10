@@ -4,6 +4,12 @@ from ._generate_color_analysis_report.generate_report_summary import generate_re
 from ._generate_color_analysis_report.create_color_distribution_chart import create_color_distribution_chart
 from ._generate_color_analysis_report.validate_report_quality import validate_report_quality
 
+from ._generate_color_analysis_report.validate_input_data import validate_input_data
+from ._generate_color_analysis_report.analyze_color_patterns import analyze_color_patterns
+from ._generate_color_analysis_report.generate_report_summary import generate_report_summary
+from ._generate_color_analysis_report.create_color_distribution_chart import create_color_distribution_chart
+from ._generate_color_analysis_report.validate_report_quality import validate_report_quality
+
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -17,20 +23,28 @@ class AnalyzeColorDistributionOutput(BaseModel):
         Field(..., description="List of most common vehicle colors observed")
     )
     color_distribution_stats: List[float] = (
-        Field(..., description="Statistical measures (mean, median, std dev) of color distribution")
+        Field(..., description = (
+            "Statistical measures (mean, median, std dev) of color distribution")
+        )
     )
 
 
 class GenerateColorAnalysisReportOutput(BaseModel):
     """Pydantic model for generate_color_analysis_report node outputs."""
     report_summary: str = (
-        Field(..., description="Summary of key findings from the color analysis")
+        Field(..., description = (
+            "Summary of key findings from the color analysis")
+        )
     )
     color_distribution_visualization: str = (
-        Field(..., description="Path to visualization file showing color distribution")
+        Field(..., description = (
+            "Path to visualization file showing color distribution")
+        )
     )
     is_report_valid: bool = (
-        Field(..., description="Whether the generated report is valid and accurate")
+        Field(..., description = (
+            "Whether the generated report is valid and accurate")
+        )
     )
 
 

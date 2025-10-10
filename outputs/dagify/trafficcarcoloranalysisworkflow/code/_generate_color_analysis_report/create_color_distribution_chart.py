@@ -1,3 +1,10 @@
+import json
+import matplotlib.pyplot as plt
+import os
+import tempfile
+import uuid
+
+
 def create_color_distribution_chart(color_frequencies: str, color_names: str) -> str:
     """
     Creates a color distribution chart based on the provided color frequencies
@@ -39,4 +46,38 @@ def create_color_distribution_chart(color_frequencies: str, color_names: str) ->
     '/path/to/another/visualization/file.png'
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    
+    try:
+        frequencies = json.loads(color_frequencies)
+        names = json.loads(color_names)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON format in input strings: {e}")
+    
+    if not isinstance(frequencies, list) or not isinstance(names, list):
+        raise ValueError("Color frequencies and names must be lists")
+    
+    if len(frequencies) != len(names):
+        raise ValueError("Color frequencies and names must have the same length")
+    
+    if not all(isinstance(f, (int, float)) for f in frequencies):
+        raise ValueError("All color frequencies must be numeric")
+    
+    if not all(isinstance(n, str) for n in names):
+        raise ValueError("All color names must be strings")
+    
+    try:
+        plt.figure(figsize=(10, 6))
+        plt.pie(frequencies, labels=names, autopct='%1.1f%%', startangle=90)
+        plt.title('Color Distribution Chart')
+        plt.axis('equal')
+        
+        temp_dir = tempfile.gettempdir()
+        filename = f"color_distribution_{uuid.uuid4().hex}.png"
+        filepath = os.path.join(temp_dir, filename)
+        
+        plt.savefig(filepath, dpi=300, bbox_inches='tight')
+        plt.close()
+        
+        return filepath
+    except Exception as e:
+        raise RuntimeError(f"Failed to generate visualization: {e}")

@@ -1,3 +1,6 @@
+import re
+
+
 def generate_report_summary(insights: str, most_common_colors: str, distribution_stats: str) -> str:
     """
     Generates a summary text for the color analysis report based on the given
@@ -50,4 +53,40 @@ def generate_report_summary(insights: str, most_common_colors: str, distribution
     standard deviation of 0.2.'
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    if not isinstance(insights, str):
+        raise TypeError("insights must be a string")
+    if not isinstance(most_common_colors, str):
+        raise TypeError("most_common_colors must be a string")
+    if not isinstance(distribution_stats, str):
+        raise TypeError("distribution_stats must be a string")
+    
+    if not insights.strip():
+        raise ValueError("insights cannot be empty")
+    if not most_common_colors.strip():
+        raise ValueError("most_common_colors cannot be empty")
+    if not distribution_stats.strip():
+        raise ValueError("distribution_stats cannot be empty")
+    
+    
+    colors = [color.strip() for color in most_common_colors.split(',')]
+    colors_text = ', '.join(colors[:-1]) + ', and ' + colors[-1] if len(colors) > 1 else colors[0]
+    
+    mean_match = re.search(r'mean=([0-9.]+)', distribution_stats)
+    median_match = re.search(r'median=([0-9.]+)', distribution_stats)
+    std_dev_match = re.search(r'std_dev=([0-9.]+)', distribution_stats)
+    
+    if not mean_match or not median_match or not std_dev_match:
+        raise ValueError("distribution_stats must contain mean, median, and std_dev values")
+    
+    mean_val = mean_match.group(1)
+    median_val = median_match.group(1)
+    std_dev_val = std_dev_match.group(1)
+    
+    if 'diverse' in insights.lower():
+        summary = f"The color analysis report indicates a diverse color distribution with {colors_text} being prominent, having mean and median of {mean_val} and a standard deviation of {std_dev_val}."
+    elif 'neutral' in insights.lower() or 'predominance' in insights.lower():
+        summary = f"The color analysis report highlights a prevalence of {colors_text} colors, with mean, median, and standard deviation of color distribution being {mean_val}, {median_val}, and {std_dev_val} respectively."
+    else:
+        summary = f"The color analysis report shows {colors_text} as the most common colors, with statistical measures of mean={mean_val}, median={median_val}, and standard deviation={std_dev_val}."
+    
+    return summary

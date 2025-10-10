@@ -1,3 +1,6 @@
+import os
+
+
 def verify_image_files_exist(image_paths: str) -> str:
     """
     Verifies the existence of image files based on provided paths.
@@ -31,4 +34,24 @@ def verify_image_files_exist(image_paths: str) -> str:
     'Error: One or more image files do not exist.'
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    
+    if not isinstance(image_paths, str):
+        raise TypeError("Input must be a string containing file paths")
+    
+    if not image_paths.strip():
+        raise TypeError("Input does not contain valid file paths")
+    
+    paths = [path.strip() for path in image_paths.split(',') if path.strip()]
+    
+    if not paths:
+        raise TypeError("Input does not contain valid file paths")
+    
+    missing_files = []
+    for path in paths:
+        if not os.path.isfile(path):
+            missing_files.append(path)
+    
+    if missing_files:
+        raise FileNotFoundError(f"One or more image files do not exist: {', '.join(missing_files)}")
+    
+    return "All image files exist."

@@ -38,4 +38,36 @@ def get_confidence_values(colors_and_scores: str) -> List[float]:
     [0.95, 0.85]
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    if not isinstance(colors_and_scores, str):
+        raise TypeError("Input must be a string")
+    
+    if not colors_and_scores.strip():
+        raise ValueError("Input string cannot be empty")
+    
+    confidence_scores = []
+    
+    try:
+        color_pairs = colors_and_scores.split(',')
+        
+        for pair in color_pairs:
+            pair = pair.strip()
+            if ':' not in pair:
+                raise ValueError(f"Invalid format in pair: {pair}")
+            
+            color, score_str = pair.split(':', 1)
+            
+            if not color.strip() or not score_str.strip():
+                raise ValueError(f"Empty color or score in pair: {pair}")
+            
+            try:
+                score = float(score_str.strip())
+                confidence_scores.append(score)
+            except ValueError:
+                raise ValueError(f"Invalid confidence score format: {score_str}")
+                
+    except Exception as e:
+        if isinstance(e, (ValueError, TypeError)):
+            raise
+        raise ValueError("Input string is not in the expected format")
+    
+    return confidence_scores

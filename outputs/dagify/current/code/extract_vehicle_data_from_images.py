@@ -6,6 +6,14 @@ from ._extract_vehicle_data_from_images.extract_colors_from_vehicles import extr
 from ._extract_vehicle_data_from_images.get_color_names import get_color_names
 from ._extract_vehicle_data_from_images.get_confidence_values import get_confidence_values
 
+from ._extract_vehicle_data_from_images.validate_input_lists import validate_input_lists
+from ._extract_vehicle_data_from_images.verify_image_files_exist import verify_image_files_exist
+from ._extract_vehicle_data_from_images.load_and_validate_image import load_and_validate_image
+from ._extract_vehicle_data_from_images.detect_vehicles_in_image import detect_vehicles_in_image
+from ._extract_vehicle_data_from_images.extract_colors_from_vehicles import extract_colors_from_vehicles
+from ._extract_vehicle_data_from_images.get_color_names import get_color_names
+from ._extract_vehicle_data_from_images.get_confidence_values import get_confidence_values
+
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -16,7 +24,9 @@ class CaptureRushHourTrafficImagesOutput(BaseModel):
         Field(..., description="List of file paths to captured traffic images")
     )
     image_timestamps: List[str] = (
-        Field(..., description="Timestamps for when each image was captured (same order as image_paths)")
+        Field(..., description = (
+            "Timestamps for when each image was captured (same order as image_paths)")
+        )
     )
 
 
@@ -26,7 +36,9 @@ class ExtractVehicleDataFromImagesOutput(BaseModel):
         Field(..., description="List of detected vehicle colors")
     )
     vehicle_confidence_scores: List[float] = (
-        Field(..., description="Confidence scores for the detected vehicle colors (same order as vehicle_colors)")
+        Field(..., description = (
+            "Confidence scores for the detected vehicle colors (same order as vehicle_colors)")
+        )
     )
 
 

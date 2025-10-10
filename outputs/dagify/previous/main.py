@@ -6,15 +6,10 @@ import json
 import sys
 from typing import Dict, Any, List, Callable, Coroutine, Union, Optional
 
-from code.analyze_cultural_influences import analyze_cultural_influences
-from code.analyze_economic_influences import analyze_economic_influences
-from code.analyze_political_influences import analyze_political_influences
-from code.analyze_social_influences import analyze_social_influences
-from code.compile_historical_narrative import compile_historical_narrative
-from code.define_historical_context import define_historical_context
-from code.draw_conclusions import draw_conclusions
-from code.identify_key_factors import identify_key_factors
-from code.synthesize_influences import synthesize_influences
+from code.capture_rush_hour_traffic_images import capture_rush_hour_traffic_images
+from code.extract_vehicle_data_from_images import extract_vehicle_data_from_images
+from code.analyze_color_distribution import analyze_color_distribution
+from code.generate_color_analysis_report import generate_color_analysis_report
 
 # Get async mode from environment variable or default to False
 ASYNC_MODE = os.environ.get('ASYNC_MODE', '').lower() in ('true', '1', 'yes', 'y')
@@ -36,15 +31,10 @@ def make_async(func):
 
     return async_wrapper
 
-analyze_cultural_influences_async = make_async(analyze_cultural_influences)
-analyze_economic_influences_async = make_async(analyze_economic_influences)
-analyze_political_influences_async = make_async(analyze_political_influences)
-analyze_social_influences_async = make_async(analyze_social_influences)
-compile_historical_narrative_async = make_async(compile_historical_narrative)
-define_historical_context_async = make_async(define_historical_context)
-draw_conclusions_async = make_async(draw_conclusions)
-identify_key_factors_async = make_async(identify_key_factors)
-synthesize_influences_async = make_async(synthesize_influences)
+capture_rush_hour_traffic_images_async = make_async(capture_rush_hour_traffic_images)
+extract_vehicle_data_from_images_async = make_async(extract_vehicle_data_from_images)
+analyze_color_distribution_async = make_async(analyze_color_distribution)
+generate_color_analysis_report_async = make_async(generate_color_analysis_report)
 
 async def run_workflow(user_input: str) -> Dict[str, Any]:
     """Execute the workflow by running each level in the topological sort.
@@ -58,69 +48,37 @@ async def run_workflow(user_input: str) -> Dict[str, Any]:
     # Store results for each node
     results = {}
 
-    # Level 0: define_historical_context
-    async def run_define_historical_context():
-        # Call the async version of define_historical_context with results from dependencies
-        return await define_historical_context_async(user_input)
+    # Level 0: capture_rush_hour_traffic_images
+    async def run_capture_rush_hour_traffic_images():
+        # Call the async version of capture_rush_hour_traffic_images with results from dependencies
+        return await capture_rush_hour_traffic_images_async(user_input)
 
     # Run level 0 nodes in parallel
-    results['define_historical_context'] = await run_define_historical_context()
+    results['capture_rush_hour_traffic_images'] = await run_capture_rush_hour_traffic_images()
 
-    # Level 1: identify_key_factors
-    async def run_identify_key_factors():
-        # Call the async version of identify_key_factors with results from dependencies
-        return await identify_key_factors_async(results['define_historical_context'])
+    # Level 1: extract_vehicle_data_from_images
+    async def run_extract_vehicle_data_from_images():
+        # Call the async version of extract_vehicle_data_from_images with results from dependencies
+        return await extract_vehicle_data_from_images_async(results['capture_rush_hour_traffic_images'])
 
     # Run level 1 nodes in parallel
-    results['identify_key_factors'] = await run_identify_key_factors()
+    results['extract_vehicle_data_from_images'] = await run_extract_vehicle_data_from_images()
 
-    # Level 2: analyze_cultural_influences, analyze_social_influences, analyze_economic_influences, analyze_political_influences
-    async def run_analyze_cultural_influences():
-        # Call the async version of analyze_cultural_influences with results from dependencies
-        return await analyze_cultural_influences_async(results['identify_key_factors'])
-
-    async def run_analyze_social_influences():
-        # Call the async version of analyze_social_influences with results from dependencies
-        return await analyze_social_influences_async(results['identify_key_factors'])
-
-    async def run_analyze_economic_influences():
-        # Call the async version of analyze_economic_influences with results from dependencies
-        return await analyze_economic_influences_async(results['identify_key_factors'])
-
-    async def run_analyze_political_influences():
-        # Call the async version of analyze_political_influences with results from dependencies
-        return await analyze_political_influences_async(results['identify_key_factors'])
+    # Level 2: analyze_color_distribution
+    async def run_analyze_color_distribution():
+        # Call the async version of analyze_color_distribution with results from dependencies
+        return await analyze_color_distribution_async(results['extract_vehicle_data_from_images'])
 
     # Run level 2 nodes in parallel
-    level_2_results = await asyncio.gather(run_analyze_cultural_influences(), run_analyze_social_influences(), run_analyze_economic_influences(), run_analyze_political_influences())
-    results['analyze_cultural_influences'] = level_2_results[0]
-    results['analyze_social_influences'] = level_2_results[1]
-    results['analyze_economic_influences'] = level_2_results[2]
-    results['analyze_political_influences'] = level_2_results[3]
+    results['analyze_color_distribution'] = await run_analyze_color_distribution()
 
-    # Level 3: synthesize_influences
-    async def run_synthesize_influences():
-        # Call the async version of synthesize_influences with results from dependencies
-        return await synthesize_influences_async(results['analyze_social_influences'], results['analyze_political_influences'], results['analyze_economic_influences'], results['analyze_cultural_influences'])
+    # Level 3: generate_color_analysis_report
+    async def run_generate_color_analysis_report():
+        # Call the async version of generate_color_analysis_report with results from dependencies
+        return await generate_color_analysis_report_async(results['analyze_color_distribution'])
 
     # Run level 3 nodes in parallel
-    results['synthesize_influences'] = await run_synthesize_influences()
-
-    # Level 4: draw_conclusions
-    async def run_draw_conclusions():
-        # Call the async version of draw_conclusions with results from dependencies
-        return await draw_conclusions_async(results['synthesize_influences'])
-
-    # Run level 4 nodes in parallel
-    results['draw_conclusions'] = await run_draw_conclusions()
-
-    # Level 5: compile_historical_narrative
-    async def run_compile_historical_narrative():
-        # Call the async version of compile_historical_narrative with results from dependencies
-        return await compile_historical_narrative_async(results['draw_conclusions'])
-
-    # Run level 5 nodes in parallel
-    results['compile_historical_narrative'] = await run_compile_historical_narrative()
+    results['generate_color_analysis_report'] = await run_generate_color_analysis_report()
 
     # Return all results
     return results

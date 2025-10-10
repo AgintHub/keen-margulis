@@ -32,4 +32,6 @@ def validate_input_lengths(colors: str, scores: str) -> str:
     ValueError: Input lists 'colors' and 'scores' must have the same length.
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    if len(colors) != len(scores):
+        raise ValueError("Input lists 'colors' and 'scores' must have the same length.")
+    return 'valid'
