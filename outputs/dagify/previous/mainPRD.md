@@ -1,254 +1,280 @@
-# createsupercoolworkflow - Complete PRD Documentation
+# trading_workflow - Complete PRD Documentation
 
 ## Overview
-PRDs for nodes in the 'createsupercoolworkflow' module.
+PRDs for nodes in the 'trading_workflow' module.
 
 ## Table of Contents
 
-- [initializeworkflow](#initializeworkflow)
+- [gather_market_data](#gather_market_data)
 
-- [definenode1](#definenode1)
+- [analyze_market_trends](#analyze_market_trends)
 
-- [definenode2](#definenode2)
+- [evaluate_trading_strategies](#evaluate_trading_strategies)
 
-- [connectnodes](#connectnodes)
+- [generate_trading_signals](#generate_trading_signals)
 
-- [validateworkflow](#validateworkflow)
+- [execute_trades](#execute_trades)
 
-- [finalizeworkflow](#finalizeworkflow)
-
-
-
----
-
-## initializeworkflow
-
-### Description
-Initialize the workflow with the required inputs and settings.
-
-### Conceptual Info
-
-The initializeworkflow node is responsible for setting up the initial parameters and variables required for creating a workflow. It generates a unique identifier and name for the workflow.
-
-### Docstring
-
-**Summary:** Initialize the workflow with the required inputs and settings.
-
-**Returns:** dict[str, str] - A dictionary containing the workflow_id and workflow_name.
-
-**Raises:**
-
-- RuntimeError: If the workflow initialization fails.
-**Examples:**
-
-```python
->>> initialize_workflow()
-{'workflow_id': 'wf_123', 'workflow_name': 'Super Cool Workflow'}
-```
+- [monitor_trade_performance](#monitor_trade_performance)
 
 
 
 ---
 
-## definenode1
+## gather_market_data
 
 ### Description
-Create the first node with the required details.
+Collect relevant market data including prices, volumes, and other indicators
 
 ### Conceptual Info
 
-This node is responsible for defining the first node in a workflow, including its name, description, and output structure, based on the initialization provided by its parent node.
+The gather_market_data node is responsible for collecting relevant market data, including current and historical prices, as well as trading volumes for specified assets or instruments.
 
 ### Docstring
 
-**Summary:** Defines the first node in the workflow with the required details.
+**Summary:** Gathers current and historical market data for the specified assets or instruments, returning current prices, historical prices, and trading volumes.
 
 **Parameters:**
 
-- workflow_id (str): Unique identifier for the workflow obtained from the parent node 'initializeworkflow'.
-- workflow_name (str): Name of the workflow obtained from the parent node 'initializeworkflow'.
-**Returns:** Tuple[str, str, List[str]] - A tuple containing the name, description, and output structure of the first node.
+- assets (List[str]): List of asset symbols or identifiers to gather data for.
+- start_date (str): Start date for historical data in 'YYYY-MM-DD' format.
+- end_date (str): End date for historical data in 'YYYY-MM-DD' format.
+**Returns:** Tuple[List[float], List[float], List[float]] - A tuple containing three lists: current prices, historical prices, and trading volumes for the specified assets.
 
 **Raises:**
 
-- ValueError: If the workflow_id or workflow_name is empty or not provided.
+- ValueError: If the assets list is empty or if the start_date is later than end_date.
+- ConnectionError: If there's a failure in connecting to the data source.
 **Examples:**
 
 ```python
->>> definenode1(workflow_id='wf_123', workflow_name='My Workflow')
-...   node1_name = 'Node 1'
-...   node1_description = 'This is the first node.'
-...   node1_output_structure = ['output1', 'output2']
-...   return node1_name, node1_description, node1_output_structure
-('Node 1', 'This is the first node.', ['output1', 'output2'])
+>>> assets = ['AAPL', 'GOOG']
+>>> start_date = '2022-01-01'
+>>> end_date = '2022-12-31'
+>>> result = gather_market_data(assets, start_date, end_date)
+([150.0, 2800.0], [120.0, 130.0, ...], [1000.0, 2000.0])
+```
+
+```python
+>>> assets = ['MSFT']
+>>> start_date = '2023-01-01'
+>>> end_date = '2023-01-31'
+>>> result = gather_market_data(assets, start_date, end_date)
+([250.0], [240.0, 245.0, ...], [500.0])
 ```
 
 
 
 ---
 
-## definenode2
+## analyze_market_trends
 
 ### Description
-Create the second node with the required details.
+Analyze market trends based on the gathered data
 
 ### Conceptual Info
 
-This node defines the second node in the workflow, specifying its name, description, and output structure based on the initialized workflow.
+This node analyzes market trends by processing the gathered market data, including current prices, historical prices, and trading volumes, to identify trend indicators and recognize patterns.
 
 ### Docstring
 
-**Summary:** Defines the second node in the workflow with required details.
+**Summary:** Analyzes market trends based on gathered data.
 
 **Parameters:**
 
-- workflow_id (str): Unique identifier for the workflow from the parent node 'initializeworkflow'.
-- workflow_name (str): Name of the workflow from the parent node 'initializeworkflow'.
-**Returns:** Tuple[str, str, List[str]] - A tuple containing the name, description, and output structure of the second node.
+- current_prices (List[float]): Current prices of the assets gathered by the gather_market_data node.
+- historical_prices (List[float]): Historical price data for the assets over a specified period gathered by the gather_market_data node.
+- trading_volumes (List[float]): Trading volumes for the assets gathered by the gather_market_data node.
+**Returns:** Tuple[List[str], List[str]] - A tuple containing a list of trend indicators and a list of recognized patterns in the market data.
 
 **Raises:**
 
-- ValueError: If the workflow_id or workflow_name is invalid or missing.
+- ValueError: If any of the input lists (current_prices, historical_prices, trading_volumes) are empty or of different lengths.
 **Examples:**
 
 ```python
->>> workflow_id = 'wf_123'
->>> workflow_name = 'Super Cool Workflow'
->>> node2_name = 'Node 2'
->>> node2_description = 'This is the second node.'
->>> node2_output_structure = ['output1', 'output2']
->>> definenode2(workflow_id, workflow_name, node2_name, node2_description, node2_output_structure)
-('Node 2', 'This is the second node.', ['output1', 'output2'])
+>>> current_prices = [100.0, 120.0, 110.0]
+>>> historical_prices = [90.0, 100.0, 110.0, 120.0]
+>>> trading_volumes = [1000.0, 1200.0, 1100.0]
+>>> trend_indicators, pattern_recognition = analyze_market_trends(current_prices, historical_prices, trading_volumes)
+(['bullish'], ['ascending triangle'])
+```
+
+```python
+>>> current_prices = [100.0, 80.0, 90.0]
+>>> historical_prices = [110.0, 100.0, 90.0, 80.0]
+>>> trading_volumes = [1000.0, 800.0, 900.0]
+>>> trend_indicators, pattern_recognition = analyze_market_trends(current_prices, historical_prices, trading_volumes)
+(['bearish'], ['descending triangle'])
 ```
 
 
 
 ---
 
-## connectnodes
+## evaluate_trading_strategies
 
 ### Description
-Establish the connections between the nodes.
+Evaluate different trading strategies based on the analyzed trends
 
 ### Conceptual Info
 
-This node establishes the connections between the defined nodes to create a workflow Directed Acyclic Graph (DAG).
+This node evaluates various trading strategies based on the analyzed market trends provided by its parent node, analyze_market_trends.
 
 ### Docstring
 
-**Summary:** Connects the defined nodes in the workflow.
+**Summary:** Evaluate trading strategies based on market trend analysis.
 
 **Parameters:**
 
-- node1_name (str): Name of the first node from definenode1 output.
-- node2_name (str): Name of the second node from definenode2 output.
-**Returns:** List[str] - A list containing the names of the connected nodes.
+- trend_indicators (List[str]): Indicators of market trends (e.g., bullish, bearish) from analyze_market_trends.
+- pattern_recognition (List[str]): Patterns recognized in the market data from analyze_market_trends.
+**Returns:** Tuple[List[str], List[str]] - A tuple containing the evaluations of different trading strategies and the recommended trading strategies.
 
 **Raises:**
 
-- ValueError: If either node1_name or node2_name is empty or not a string.
-- ConnectionError: If the nodes cannot be connected due to a cyclic dependency.
+- ValueError: If trend_indicators or pattern_recognition are empty or not provided.
 **Examples:**
 
 ```python
->>> node1 = 'node_a'
->>> node2 = 'node_b'
->>> connect_nodes(node1, node2)
-['node_a', 'node_b']
+>>> trend_indicators = ['bullish', 'bearish']
+>>> pattern_recognition = ['ascending triangle', 'descending triangle']
+>>> strategy_evaluations, recommended_strategies = evaluate_trading_strategies(trend_indicators, pattern_recognition)
+(['Strategy 1: Buy', 'Strategy 2: Sell'], ['Strategy 1', 'Strategy 3'])
 ```
 
 ```python
->>> node1 = 'data_processing'
->>> node2 = 'data_analysis'
->>> connect_nodes(node1, node2)
-['data_processing', 'data_analysis']
+>>> trend_indicators = ['neutral']
+>>> pattern_recognition = ['symmetrical triangle']
+>>> strategy_evaluations, recommended_strategies = evaluate_trading_strategies(trend_indicators, pattern_recognition)
+(['Strategy 3: Hold'], ['Strategy 3'])
 ```
 
 
 
 ---
 
-## validateworkflow
+## generate_trading_signals
 
 ### Description
-Check the workflow for any errors or inconsistencies.
+Generate trading signals based on the recommended strategies
 
 ### Conceptual Info
 
-This node validates the workflow created by the connected nodes, checking for any errors or inconsistencies.
+This node generates trading signals (buy/sell/hold) based on the recommended trading strategies evaluated by its parent node.
 
 ### Docstring
 
-**Summary:** Validate the workflow to ensure it is correct and functional.
+**Summary:** Generate trading signals and their confidence levels based on recommended strategies.
 
 **Parameters:**
 
-- connected_nodes (List[str]): List of connected node names from the 'connectnodes' node.
-**Returns:** Tuple[bool, str] - A tuple containing the validation result (bool) and a message indicating the outcome of the validation (str).
+- strategy_evaluations (List[str]): Evaluations of different trading strategies from the parent node 'evaluate_trading_strategies'.
+- recommended_strategies (List[str]): Recommended trading strategies based on the evaluations from the parent node 'evaluate_trading_strategies'.
+**Returns:** Tuple[List[str], List[float]] - A tuple containing a list of generated trading signals and a list of their corresponding confidence levels.
 
 **Raises:**
 
-- ValueError: If the input 'connected_nodes' is not a list or is empty.
-- TypeError: If the 'connected_nodes' list contains non-string values.
+- ValueError: If the input lists 'strategy_evaluations' and 'recommended_strategies' are of different lengths.
+- TypeError: If the input lists contain elements of incorrect types.
 **Examples:**
 
 ```python
->>> connected_nodes = ['node1', 'node2']
->>> validation_result, validation_message = validateworkflow(connected_nodes)
-(True, 'Workflow is valid.')
+>>> strategy_evaluations = ['good', 'bad', 'neutral']
+>>> recommended_strategies = ['buy', 'sell', 'hold']
+>>> trading_signals, signal_confidence = generate_trading_signals(strategy_evaluations, recommended_strategies)
+(['buy', 'sell', 'hold'], [0.8, 0.7, 0.9])
 ```
 
 ```python
->>> connected_nodes = []
->>> try:
-...     validation_result, validation_message = validateworkflow(connected_nodes)
->>> except ValueError as e:
-...     print(e)
-'connected_nodes' cannot be empty.
+>>> strategy_evaluations = ['excellent', 'poor']
+>>> recommended_strategies = ['buy', 'sell']
+>>> trading_signals, signal_confidence = generate_trading_signals(strategy_evaluations, recommended_strategies)
+(['buy', 'sell'], [0.9, 0.6])
 ```
 
 
 
 ---
 
-## finalizeworkflow
+## execute_trades
 
 ### Description
-Complete the workflow creation process.
+Execute trades based on the generated signals
 
 ### Conceptual Info
 
-The finalizeworkflow node completes the workflow creation process by confirming its creation and functionality based on the validation result from the validateworkflow node.
+This node executes trades based on the generated trading signals, providing results and status of the trades.
 
 ### Docstring
 
-**Summary:** Finalize the workflow creation process based on the validation result.
+**Summary:** Execute trades according to the generated trading signals and return the results and status of the trades.
 
 **Parameters:**
 
-- validation_result (bool): Result of the workflow validation from the validateworkflow node.
-- validation_message (str): Message indicating the outcome of the validation from the validateworkflow node.
-**Returns:** Tuple[str, str] - A tuple containing the status of the workflow and the URL or identifier for accessing the workflow.
+- trading_signals (List[str]): Generated trading signals (buy/sell/hold) from the parent node 'generate_trading_signals'.
+- signal_confidence (List[float]): Confidence levels for the generated trading signals from the parent node 'generate_trading_signals'.
+**Returns:** Tuple[List[str], List[str]] - A tuple containing two lists: the first list contains the results of the executed trades, and the second list contains the status of the executed trades.
 
 **Raises:**
 
-- ValueError: If the validation result is False, indicating the workflow is not valid.
+- ValueError: If the lengths of 'trading_signals' and 'signal_confidence' do not match.
+- RuntimeError: If there is an issue executing the trades.
 **Examples:**
 
 ```python
->>> validation_result = True
->>> validation_message = 'Workflow is valid and functional.'
->>> workflow_status, workflow_url = finalizeworkflow(validation_result, validation_message)
-('success', 'https://example.com/workflow/123')
+>>> trading_signals = ['buy', 'sell', 'hold']
+>>> signal_confidence = [0.8, 0.7, 0.9]
+>>> trade_results, trade_status = execute_trades(trading_signals, signal_confidence)
+(['trade executed', 'trade executed', 'no action'], ['success', 'success', 'held'])
 ```
 
 ```python
->>> validation_result = False
->>> validation_message = 'Workflow contains errors.'
->>> try:
-...     workflow_status, workflow_url = finalizeworkflow(validation_result, validation_message)
->>> except ValueError as e:
-...     print(e)
-'Workflow is not valid.'
+>>> trading_signals = ['buy', 'sell']
+>>> signal_confidence = [0.85, 0.65]
+>>> trade_results, trade_status = execute_trades(trading_signals, signal_confidence)
+(['trade executed', 'trade executed'], ['success', 'success'])
+```
+
+
+
+---
+
+## monitor_trade_performance
+
+### Description
+Monitor the performance of executed trades
+
+### Conceptual Info
+
+The node analyzes the performance of trades executed by the 'execute_trades' node, providing metrics and a summary.
+
+### Docstring
+
+**Summary:** Monitors and analyzes the performance of executed trades based on the trade results and status from the 'execute_trades' node.
+
+**Parameters:**
+
+- trade_results (List[str]): Results of the executed trades from the 'execute_trades' node.
+- trade_status (List[str]): Status of the executed trades (e.g., success, failure) from the 'execute_trades' node.
+**Returns:** Tuple[List[float], str] - A tuple containing performance metrics as a list of floats and a summary of the trade performance as a string.
+
+**Raises:**
+
+- ValueError: If trade results or status are not provided or are invalid.
+**Examples:**
+
+```python
+>>> trade_results = ['profit:100', 'loss:50']
+>>> trade_status = ['success', 'failure']
+>>> performance_metrics, performance_summary = monitor_trade_performance(trade_results, trade_status)
+[0.5, 100.0], 'Overall performance: 50% success rate, average profit: 100.0'
+```
+
+```python
+>>> trade_results = ['profit:200', 'profit:150']
+>>> trade_status = ['success', 'success']
+>>> performance_metrics, performance_summary = monitor_trade_performance(trade_results, trade_status)
+[1.0, 175.0], 'Overall performance: 100% success rate, average profit: 175.0'
 ```
 
