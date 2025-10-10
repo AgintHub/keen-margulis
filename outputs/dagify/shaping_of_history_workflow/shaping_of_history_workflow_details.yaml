@@ -1,11 +1,53 @@
-dag_type: spec
+dag_type: stub
 description: Generated workflow from UI.
 name: shaping_of_history_workflow
 nodes:
   analyze_cultural_influences:
     agent: false
+    code_node_type: stub
     description: Investigate the cultural factors that shaped the historical event
       or period.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass IdentifyKeyFactorsOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ identify_key_factors node outputs.\"\"\"\n    social_factors: List[str] =\
+      \ (\n        Field(..., description=\"List of primary social factors that influenced\
+      \ the event or period.\")\n    )\n    political_factors: List[str] = (\n   \
+      \     Field(..., description=\"List of primary political factors that influenced\
+      \ the event or period.\")\n    )\n    economic_factors: List[str] = (\n    \
+      \    Field(..., description=\"List of primary economic factors that influenced\
+      \ the event or period.\")\n    )\n    cultural_factors: List[str] = (\n    \
+      \    Field(..., description=\"List of primary cultural factors that influenced\
+      \ the event or period.\")\n    )\n\n\nclass AnalyzeCulturalInfluencesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for analyze_cultural_influences node outputs.\"\"\"\
+      \n    cultural_factors: List[str] = (\n        Field(..., description=\"Names\
+      \ of cultural factors identified\")\n    )\n    factor_categories: List[str]\
+      \ = (\n        Field(..., description=\"Category of each cultural factor (e.g.,\
+      \ norm, value, artistic movement, religious belief, linguistic trend)\")\n \
+      \   )\n    factor_descriptions: List[str] = (\n        Field(..., description=\"\
+      Brief description of each cultural factor\")\n    )\n    influence_scores: List[float]\
+      \ = (\n        Field(..., description=\"Estimated influence score of each factor\
+      \ on the historical event or period (0 to 1)\")\n    )\n    is_significant:\
+      \ List[bool] = (\n        Field(..., description=\"Whether each factor is considered\
+      \ significant (True = significant, False = not significant)\")\n    )\n\n\n\
+      def analyze_cultural_influences(identify_key_factors_input: IdentifyKeyFactorsOutput,\
+      \ **kwargs) -> AnalyzeCulturalInfluencesOutput:\n    \"\"\"\n    Analyze cultural\
+      \ influences for a historical event and return detailed\n    scores and descriptors.\n\
+      \n    Parameters\n    ----------\n    cultural_factors : List[str]\n       \
+      \ List of cultural factor names produced by the identify_key_factors\n     \
+      \   node.\n\n    Returns\n    -------\n    dict\n        Dictionary containing\
+      \ the keys 'cultural_factors',\n        'factor_categories', 'factor_descriptions',\
+      \ 'influence_scores', and\n        'is_significant', each mapping to a list\
+      \ of equal length.\n\n    Raises\n    ------\n    ValueError\n        Raised\
+      \ if the input list is empty or contains non-string elements.\n\n    Examples\n\
+      \    --------\n    >>> result = analyze_cultural_influences(['Romanticism',\
+      \ 'Buddhism'])\n    >>> print(result['cultural_factors'])\n    >>> print(result['factor_categories'])\n\
+      \    >>> print(result['influence_scores'])\n    >>> print(result['is_significant'])\n\
+      \    [\"Romanticism\", \"Buddhism\"]\n    [\"Artistic movement\", \"Religious\
+      \ belief\"]\n    [0.8, 0.6]\n    [True, True]\n\n    >>> try:\n    ...     analyze_cultural_influences([])\n\
+      \    >>> except ValueError as e:\n    ...     print(e)\n    \"No cultural factors\
+      \ provided. At least one is required.\"\n\n    \"\"\"\n    return AnalyzeCulturalInfluencesOutput(\n\
+      \        cultural_factors=[],\n        factor_categories=[],\n        factor_descriptions=[],\n\
+      \        influence_scores=[],\n        is_significant=[],\n    )"
     name: analyze_cultural_influences
     nodes_depended_on:
     - identify_key_factors
@@ -71,10 +113,61 @@ nodes:
           scores and descriptors.
     prompt: Analyze how cultural norms, values, or artistic movements influenced the
       historical event or period.
+    shims: []
   analyze_economic_influences:
     agent: false
+    code_node_type: stub
     description: Assess the economic factors that contributed to the historical event
       or period.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass IdentifyKeyFactorsOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ identify_key_factors node outputs.\"\"\"\n    social_factors: List[str] =\
+      \ (\n        Field(..., description=\"List of primary social factors that influenced\
+      \ the event or period.\")\n    )\n    political_factors: List[str] = (\n   \
+      \     Field(..., description=\"List of primary political factors that influenced\
+      \ the event or period.\")\n    )\n    economic_factors: List[str] = (\n    \
+      \    Field(..., description=\"List of primary economic factors that influenced\
+      \ the event or period.\")\n    )\n    cultural_factors: List[str] = (\n    \
+      \    Field(..., description=\"List of primary cultural factors that influenced\
+      \ the event or period.\")\n    )\n\n\nclass AnalyzeEconomicInfluencesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for analyze_economic_influences node outputs.\"\"\"\
+      \n    economic_factor_name: str = (\n        Field(..., description=\"Name of\
+      \ the economic factor considered.\")\n    )\n    impact_summary: str = (\n \
+      \       Field(..., description=\"Brief description of how this factor impacted\
+      \ the event.\")\n    )\n    evidence_sources: str = (\n        Field(..., description=\"\
+      List of primary source references or data points supporting the analysis.\"\
+      )\n    )\n    impact_strength: float = (\n        Field(..., description=\"\
+      Rating of the factor's impact strength on a scale from 0 to 1.\")\n    )\n \
+      \   time_period_affected: str = (\n        Field(..., description=\"Time period\
+      \ during which the factor was most influential.\")\n    )\n    is_consensus:\
+      \ bool = (\n        Field(..., description=\"Whether there is scholarly consensus\
+      \ on the factor's significance.\")\n    )\n\n\ndef analyze_economic_influences(identify_key_factors_input:\
+      \ IdentifyKeyFactorsOutput, **kwargs) -> AnalyzeEconomicInfluencesOutput:\n\
+      \    \"\"\"\n    Analyzes each economic factor from the input list and returns\
+      \ a structured\n    assessment of its impact on the historical event or period.\n\
+      \n    Parameters\n    ----------\n    economic_factors : List[str]\n       \
+      \ List of economic factors identified by the `identify_key_factors`\n      \
+      \  node.\n\n    Returns\n    -------\n    List[Dict[str, Any]]\n        A list\
+      \ of dictionaries, each containing structured information about\n        an\
+      \ economic factor.\n\n    Raises\n    ------\n    ValueError\n        Raised\
+      \ when the `economic_factors` list is empty.\n    TypeError\n        Raised\
+      \ when `economic_factors` is not a list of strings.\n\n    Examples\n    --------\n\
+      \    >>> analyze_economic_influences(['Inflation', 'Trade Embargo'])\n    [{'economic_factor_name':\
+      \ 'Inflation', 'impact_summary': 'High inflation\n    reduced purchasing power\
+      \ and disrupted domestic markets.',\n    'evidence_sources': ['Economic Report\
+      \ 1931', 'Historical GDP Data'],\n    'impact_strength': 0.85, 'time_period_affected':\
+      \ '1931-1933',\n    'is_consensus': True}, {'economic_factor_name': 'Trade Embargo',\n\
+      \    'impact_summary': 'The embargo limited exports, weakening the national\n\
+      \    economy.', 'evidence_sources': ['Trade Records 1940', 'Diplomatic\n   \
+      \ Correspondence'], 'impact_strength': 0.70, 'time_period_affected':\n    '1940-1945',\
+      \ 'is_consensus': False}]\n\n    >>> analyze_economic_influences(['Industrial\
+      \ Production Growth'])\n    [{'economic_factor_name': 'Industrial Production\
+      \ Growth', 'impact_summary':\n    'Rapid industrial growth fueled wartime manufacturing.',\
+      \ 'evidence_sources':\n    ['Industrial Production Index 1944'], 'impact_strength':\
+      \ 0.90,\n    'time_period_affected': '1942-1945', 'is_consensus': True}]\n\n\
+      \    \"\"\"\n    return AnalyzeEconomicInfluencesOutput(\n        economic_factor_name=\"\
+      \",\n        impact_summary=\"\",\n        evidence_sources=\"\",\n        impact_strength=0.0,\n\
+      \        time_period_affected=\"\",\n        is_consensus=False,\n    )"
     name: analyze_economic_influences
     nodes_depended_on:
     - identify_key_factors
@@ -139,10 +232,55 @@ nodes:
           assessment of its impact on the historical event or period.
     prompt: Evaluate the economic conditions, trade, or financial events that impacted
       the historical event or period.
+    shims: []
   analyze_political_influences:
     agent: false
+    code_node_type: stub
     description: Investigate the political factors that shaped the historical event
       or period.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass IdentifyKeyFactorsOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ identify_key_factors node outputs.\"\"\"\n    social_factors: List[str] =\
+      \ (\n        Field(..., description=\"List of primary social factors that influenced\
+      \ the event or period.\")\n    )\n    political_factors: List[str] = (\n   \
+      \     Field(..., description=\"List of primary political factors that influenced\
+      \ the event or period.\")\n    )\n    economic_factors: List[str] = (\n    \
+      \    Field(..., description=\"List of primary economic factors that influenced\
+      \ the event or period.\")\n    )\n    cultural_factors: List[str] = (\n    \
+      \    Field(..., description=\"List of primary cultural factors that influenced\
+      \ the event or period.\")\n    )\n\n\nclass AnalyzePoliticalInfluencesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for analyze_political_influences node outputs.\"\"\
+      \"\n    political_decisions: List[str] = (\n        Field(..., description=\"\
+      Key political decisions that influenced the historical event or period.\")\n\
+      \    )\n    policies_influenced: List[str] = (\n        Field(..., description=\"\
+      Policies enacted that had an impact on the event or period.\")\n    )\n    leadership_figures:\
+      \ List[str] = (\n        Field(..., description=\"Principal political leaders\
+      \ or figures involved in shaping the event.\")\n    )\n    summary: str = (\n\
+      \        Field(..., description=\"Concise summary of political influence on\
+      \ the event.\")\n    )\n\n\ndef analyze_political_influences(identify_key_factors_input:\
+      \ IdentifyKeyFactorsOutput, **kwargs) -> AnalyzePoliticalInfluencesOutput:\n\
+      \    \"\"\"\n    Generates a structured summary of the political influences\
+      \ affecting a\n    historical event, based on primary political factors identified\
+      \ by the\n    previous node.\n\n    Parameters\n    ----------\n    political_factors\
+      \ : List[str]\n        List of primary political factors (e.g., treaties, revolutions,\n\
+      \        wars) supplied by the identify_key_factors node.\n\n    Returns\n \
+      \   -------\n    Dict[str, Any]\n        A dictionary containing four keys:\
+      \ - political_decisions: List of\n        key decisions. - policies_influenced:\
+      \ List of policies that were\n        enacted. - leadership_figures: List of\
+      \ main political leaders. -\n        summary: A concise narrative describing\
+      \ the political influence.\n\n    Raises\n    ------\n    ValueError\n     \
+      \   Raised if political_factors is empty or None.\n    TypeError\n        Raised\
+      \ if political_factors is not a list.\n\n    Examples\n    --------\n    >>>\
+      \ result = analyze_political_influences([\n    ...     'Treaty of Versailles',\n\
+      \    ...     'French Revolution',\n    ...     'Napoleonic Wars'\n    >>> ])\n\
+      \    >>> print(result['summary'])\n    \"The Treaty of Versailles, the French\
+      \ Revolution, and the Napoleonic Wars\n    collectively redefined European borders,\
+      \ governance structures, and\n    international law, setting the stage for the\
+      \ modern nation-state system.\"\n\n    >>> result = analyze_political_influences(['Industrial\
+      \ Revolution'])\n    >>> print(result['political_decisions'])\n    \"['Industrial\
+      \ Revolution']\"\n\n    \"\"\"\n    return AnalyzePoliticalInfluencesOutput(\n\
+      \        political_decisions=[],\n        policies_influenced=[],\n        leadership_figures=[],\n\
+      \        summary=\"\",\n    )"
     name: analyze_political_influences
     nodes_depended_on:
     - identify_key_factors
@@ -207,10 +345,53 @@ nodes:
           previous node.
     prompt: Examine the political decisions, policies, or leadership that influenced
       the historical event or period.
+    shims: []
   analyze_social_influences:
     agent: false
+    code_node_type: stub
     description: Examine the social influences that contributed to the historical
       event or period.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass IdentifyKeyFactorsOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ identify_key_factors node outputs.\"\"\"\n    social_factors: List[str] =\
+      \ (\n        Field(..., description=\"List of primary social factors that influenced\
+      \ the event or period.\")\n    )\n    political_factors: List[str] = (\n   \
+      \     Field(..., description=\"List of primary political factors that influenced\
+      \ the event or period.\")\n    )\n    economic_factors: List[str] = (\n    \
+      \    Field(..., description=\"List of primary economic factors that influenced\
+      \ the event or period.\")\n    )\n    cultural_factors: List[str] = (\n    \
+      \    Field(..., description=\"List of primary cultural factors that influenced\
+      \ the event or period.\")\n    )\n\n\nclass AnalyzeSocialInfluencesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for analyze_social_influences node outputs.\"\"\"\n\
+      \    number_of_factors: int = (\n        Field(..., description=\"Total number\
+      \ of distinct social factors identified.\")\n    )\n    social_factors: str\
+      \ = (\n        Field(..., description=\"List of names or brief descriptions\
+      \ of each social factor that influenced the event.\")\n    )\n    impact_scores:\
+      \ float = (\n        Field(..., description=\"Impact rating for each social\
+      \ factor on a scale from 0.0 (minimal) to 1.0 (major). Order corresponds to\
+      \ the social_factors list.\")\n    )\n    summary: str = (\n        Field(...,\
+      \ description=\"A concise narrative summarizing how the identified social factors\
+      \ interacted to shape the historical event.\")\n    )\n\n\ndef analyze_social_influences(identify_key_factors_input:\
+      \ IdentifyKeyFactorsOutput, **kwargs) -> AnalyzeSocialInfluencesOutput:\n  \
+      \  \"\"\"\n    Analyze the social influences on a historical event, assigning\
+      \ impact scores\n    and summarizing their combined effect.\n\n    Parameters\n\
+      \    ----------\n    input_social_factors : List[str]\n        List of primary\
+      \ social factors returned by the parent node\n        `identify_key_factors`.\n\
+      \n    Returns\n    -------\n    Dict[str, Any]\n        A dictionary containing\
+      \ the number of factors, the list of social\n        factors, their impact scores,\
+      \ and a summary narrative.\n\n    Raises\n    ------\n    ValueError\n     \
+      \   Raised when `input_social_factors` is empty or None.\n\n    Examples\n \
+      \   --------\n    >>> result = analyze_social_influences([\"Women’s suffrage\"\
+      , \"Urbanization\"])\n    {\"number_of_factors\": 2, \"social_factors\": [\"\
+      Women’s suffrage\",\n    \"Urbanization\"], \"impact_scores\": [0.8, 0.6], \"\
+      summary\": \"Women’s suffrage\n    and urbanization combined accelerated democratic\
+      \ reforms.\"}\n\n    >>> result = analyze_social_influences([\"Industrial labor\
+      \ strikes\"])\n    {\"number_of_factors\": 1, \"social_factors\": [\"Industrial\
+      \ labor strikes\"],\n    \"impact_scores\": [0.7], \"summary\": \"Industrial\
+      \ labor strikes pressured\n    governments to enact labor protections.\"}\n\n\
+      \    \"\"\"\n    return AnalyzeSocialInfluencesOutput(\n        number_of_factors=0,\n\
+      \        social_factors=\"\",\n        impact_scores=0.0,\n        summary=\"\
+      \",\n    )"
     name: analyze_social_influences
     nodes_depended_on:
     - identify_key_factors
@@ -263,10 +444,91 @@ nodes:
           scores and summarizing their combined effect.
     prompt: Analyze how social structures, movements, or changes impacted the historical
       event or period.
+    shims: []
   compile_historical_narrative:
     agent: false
+    code_node_type: stub
     description: Construct a narrative that encapsulates the historical event or period
       and its shaping factors.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DrawConclusionsOutput(BaseModel):\n    \"\"\"Pydantic model for draw_conclusions\
+      \ node outputs.\"\"\"\n    conclusion_summary: str = (\n        Field(..., description=\"\
+      Concise summary of the main conclusions about the key drivers and outcomes.\"\
+      )\n    )\n    key_factors: List[str] = (\n        Field(..., description=\"\
+      List of primary factors identified as key drivers.\")\n    )\n    impact_assessment:\
+      \ List[str] = (\n        Field(..., description=\"Assessment of each factor's\
+      \ impact level (e.g., high, medium, low).\")\n    )\n    confidence_score: float\
+      \ = (\n        Field(..., description=\"Overall confidence level (0-1) in the\
+      \ conclusions.\")\n    )\n    recommendations: List[str] = (\n        Field(...,\
+      \ description=\"Actionable recommendations or implications derived from the\
+      \ conclusions.\")\n    )\n\n\nclass CompileHistoricalNarrativeOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for compile_historical_narrative node outputs.\"\"\
+      \"\n    narrative_title: str = (\n        Field(..., description=\"Title of\
+      \ the historical narrative.\")\n    )\n    introduction: str = (\n        Field(...,\
+      \ description=\"Introductory paragraph setting the scene.\")\n    )\n    historical_context:\
+      \ str = (\n        Field(..., description=\"Summary of the historical context.\"\
+      )\n    )\n    key_factors: List[str] = (\n        Field(..., description=\"\
+      List of key factors (cultural, economic, political, social) influencing the\
+      \ event.\")\n    )\n    impact_summary: str = (\n        Field(..., description=\"\
+      Summary of how these factors impacted the event.\")\n    )\n    conclusion:\
+      \ str = (\n        Field(..., description=\"Concluding remarks linking narrative\
+      \ to the conclusions drawn.\")\n    )\n    overall_narrative: str = (\n    \
+      \    Field(..., description=\"Full cohesive narrative string combining all parts.\"\
+      )\n    )\n\n\ndef compile_historical_narrative(draw_conclusions_input: DrawConclusionsOutput,\
+      \ **kwargs) -> CompileHistoricalNarrativeOutput:\n    \"\"\"\n    Generate a\
+      \ full historical narrative from analysis outputs.\n\n    Parameters\n    ----------\n\
+      \    conclusion_summary : str\n        Concise summary of the main conclusions\
+      \ about the key drivers and\n        outcomes.\n    key_factors : List[str]\n\
+      \        List of primary factors identified as key drivers.\n    impact_assessment\
+      \ : List[str]\n        Assessment of each factor's impact level (e.g., 'high',\
+      \ 'medium',\n        'low').\n    confidence_score : float\n        Overall\
+      \ confidence level (0‑1) in the conclusions.\n    recommendations : List[str]\n\
+      \        Actionable recommendations or implications derived from the\n     \
+      \   conclusions.\n    historical_event : str\n        Name or title of the historical\
+      \ event or period being studied.\n    time_frame : str\n        Approximate\
+      \ time range (e.g., years) of the event or period.\n\n    Returns\n    -------\n\
+      \    Dict[str, Any]\n        Dictionary containing narrative_title, introduction,\n\
+      \        historical_context, key_factors, impact_summary, conclusion, and\n\
+      \        overall_narrative.\n\n    Raises\n    ------\n    ValueError\n    \
+      \    Raised when any required input is empty or missing.\n\n    Examples\n \
+      \   --------\n    >>> output = compile_historical_narrative(\n    ...     conclusion_summary='The\
+      \ Industrial Revolution transformed labor and\n    technology.',\n    ...  \
+      \   key_factors=['Technological Innovation', 'Urbanization', 'Capital\n    Accumulation'],\n\
+      \    ...     impact_assessment=['high', 'medium', 'high'],\n    ...     confidence_score=0.92,\n\
+      \    ...     recommendations=['Study early factory labor laws.', 'Examine urban\n\
+      \    planning impact.'],\n    ...     historical_event='Industrial Revolution',\n\
+      \    ...     time_frame='18th–19th centuries'\"\n                \")\n    >>>\
+      \ print(output['overall_narrative'])\n    \"The Industrial Revolution: A Transformational\
+      \ Epoch\\n\\nThe Industrial\n    Revolution, spanning the 18th–19th centuries,\
+      \ marked a profound shift in\n    societal structure, fueled by Technological\
+      \ Innovation, Urbanization, and\n    Capital Accumulation. These key drivers—each\
+      \ assessed as either high or\n    medium impact—redefined labor, production,\
+      \ and urban life.\\n\\nThe analysis\n    concludes that technological progress\
+      \ and capital flows were the dominant\n    forces, with urbanization acting\
+      \ as a catalyst that accelerated change. The\n    high confidence score of 0.92\
+      \ underscores the robustness of these\n    findings.\\n\\nImplications include\
+      \ a deeper study of early factory labor laws\n    and the long-term effects\
+      \ of urban planning during this era.\\n\"\n\n    >>> output = compile_historical_narrative(\n\
+      \    ...     conclusion_summary='The Fall of the Berlin Wall symbolized the\
+      \ end\n    of the Cold War.',\n    ...     key_factors=['Political Reform',\
+      \ 'Economic Strain', 'Public\n    Protest'],\n    ...     impact_assessment=['high',\
+      \ 'medium', 'high'],\n    ...     confidence_score=0.88,\n    ...     recommendations=['Investigate\
+      \ policy shifts post-1989.', 'Assess\n    economic integration effects.'],\n\
+      \    ...     historical_event='Fall of the Berlin Wall',\n    ...     time_frame='1989'\"\
+      \n                \")\n    >>> print(output['overall_narrative'])\n    \"Fall\
+      \ of the Berlin Wall: The Collapse of Cold War Ideologies\\n\\nSet against\n\
+      \    the backdrop of 1989, the fall of the Berlin Wall marked the culmination\
+      \ of\n    political reform, economic strain, and public protest in the Eastern\
+      \ Bloc.\n    These key drivers—particularly the high-impact political reform\
+      \ and public\n    protest—collectively accelerated the collapse of the Soviet\
+      \ sphere.\\n\\nThe\n    narrative concludes that the political and social forces\
+      \ outweighed economic\n    pressures, a finding reflected in the 0.88 confidence\n\
+      \    score.\\n\\nRecommendations for further study include a detailed examination\n\
+      \    of the policy shifts after 1989 and the economic integration outcomes that\n\
+      \    followed.\\n\"\n\n    \"\"\"\n    return CompileHistoricalNarrativeOutput(\n\
+      \        narrative_title=\"\",\n        introduction=\"\",\n        historical_context=\"\
+      \",\n        key_factors=[],\n        impact_summary=\"\",\n        conclusion=\"\
+      \",\n        overall_narrative=\"\",\n    )"
     name: compile_historical_narrative
     nodes_depended_on:
     - draw_conclusions
@@ -383,9 +645,30 @@ nodes:
         summary: Generate a full historical narrative from analysis outputs.
     prompt: Create a comprehensive narrative that weaves together the historical context,
       key factors, and their impacts.
+    shims: []
   define_historical_context:
     agent: false
+    code_node_type: stub
     description: Establish the historical period or event to be analyzed.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass DefineHistoricalContextOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for define_historical_context node outputs.\"\"\"\n\
+      \    historical_event: str = (\n        Field(..., description=\"The name or\
+      \ title of the historical event or period being studied\")\n    )\n    time_frame:\
+      \ str = (\n        Field(..., description=\"The approximate time range (e.g.,\
+      \ years or dates) of the event or period\")\n    )\n\n\ndef define_historical_context(general_input:\
+      \ str, **kwargs) -> DefineHistoricalContextOutput:\n    \"\"\"\n    Determines\
+      \ the historical event or period to be examined and returns its\n    name and\
+      \ time frame.\n\n    Returns\n    -------\n    Tuple[str, str]\n        A tuple\
+      \ containing the historical event name and its approximate\n        time frame.\n\
+      \n    Raises\n    ------\n    ValueError\n        Raised if the user fails to\
+      \ provide a valid event name or time\n        frame.\n\n    Examples\n    --------\n\
+      \    >>> event, timeframe = define_historical_context()\n    >>> print(event)\n\
+      \    >>> print(timeframe)\n    \"Renaissance\"\n    \"14th–17th centuries\"\n\
+      \n    >>> event, timeframe = define_historical_context()\n    >>> assert event\
+      \ == \"Industrial Revolution\"\n    >>> assert timeframe == \"late 18th–19th\
+      \ centuries\"\n    \"No output, assertions passed.\"\n\n    \"\"\"\n    return\
+      \ DefineHistoricalContextOutput(\n        historical_event=\"\",\n        time_frame=\"\
+      \",\n    )"
     name: define_historical_context
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -427,11 +710,80 @@ nodes:
           its name and time frame.
     prompt: Identify the specific historical period or event that will be the focus
       of the analysis.
+    shims: []
   draw_conclusions:
     agent: false
+    code_node_type: stub
     description: Derive concise conclusions about how various social, economic, political,
       and cultural factors jointly shaped the historical event, including assessment
       of each factor’s impact, confidence level, and actionable recommendations.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass SynthesizeInfluencesOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ synthesize_influences node outputs.\"\"\"\n    social_insights: str = (\n\
+      \        Field(..., description=\"Key findings distilled from the social influence\
+      \ analysis.\")\n    )\n    economic_insights: str = (\n        Field(..., description=\"\
+      Key findings distilled from the economic influence analysis.\")\n    )\n   \
+      \ political_insights: str = (\n        Field(..., description=\"Key findings\
+      \ distilled from the political influence analysis.\")\n    )\n    cultural_insights:\
+      \ str = (\n        Field(..., description=\"Key findings distilled from the\
+      \ cultural influence analysis.\")\n    )\n    synthesis_summary: str = (\n \
+      \       Field(..., description=\"Overall synthesis describing how the identified\
+      \ influences interacted.\")\n    )\n    interaction_points: List[str] = (\n\
+      \        Field(..., description=\"List of key interaction points where multiple\
+      \ influences converged.\")\n    )\n    importance_scores: List[float] = (\n\
+      \        Field(..., description=\"Relative importance (0.0\\u20131.0) assigned\
+      \ to each influence category (social, economic, political, cultural).\")\n \
+      \   )\n\n\nclass DrawConclusionsOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for draw_conclusions node outputs.\"\"\"\n    conclusion_summary: str = (\n\
+      \        Field(..., description=\"Concise summary of the main conclusions about\
+      \ the key drivers and outcomes.\")\n    )\n    key_factors: List[str] = (\n\
+      \        Field(..., description=\"List of primary factors identified as key\
+      \ drivers.\")\n    )\n    impact_assessment: List[str] = (\n        Field(...,\
+      \ description=\"Assessment of each factor's impact level (e.g., high, medium,\
+      \ low).\")\n    )\n    confidence_score: float = (\n        Field(..., description=\"\
+      Overall confidence level (0-1) in the conclusions.\")\n    )\n    recommendations:\
+      \ List[str] = (\n        Field(..., description=\"Actionable recommendations\
+      \ or implications derived from the conclusions.\")\n    )\n\n\ndef draw_conclusions(synthesize_influences_input:\
+      \ SynthesizeInfluencesOutput, **kwargs) -> DrawConclusionsOutput:\n    \"\"\"\
+      \n    Generate a structured set of conclusions about a historical event based\
+      \ on\n    synthesized influence data.\n\n    Parameters\n    ----------\n  \
+      \  synthesis : dict\n        Dictionary containing the outputs of `synthesize_influences`,\n\
+      \        including key insights and interaction points.\n\n    Returns\n   \
+      \ -------\n    dict\n        Dictionary matching the `draw_conclusions` output\
+      \ structure.\n\n    Raises\n    ------\n    ValueError\n        If `synthesis`\
+      \ is missing required keys or contains invalid data.\n\n    Examples\n    --------\n\
+      \    >>> synth = {\n    ...     'social_insights': 'Social unrest spurred reforms.',\n\
+      \    ...     'economic_insights': 'Industrial growth fueled capital\n    accumulation.',\n\
+      \    ...     'political_insights': 'New constitution centralized authority.',\n\
+      \    ...     'cultural_insights': 'Romanticism challenged traditional norms.',\n\
+      \    ...     'synthesis_summary': 'Multiple fronts converged to reshape\n  \
+      \  governance.',\n    ...     'interaction_points': ['Economic growth ↔ Political\
+      \ reform',\n    'Cultural shifts ↔ Social movements'],\n    ...     'importance_scores':\
+      \ [0.8, 0.9, 0.7, 0.6]\n    >>> }\n    {\n      'conclusion_summary': 'The era\
+      \ was driven by intertwined social, economic,\n    political, and cultural forces\
+      \ that collectively accelerated institutional\n    change.',\n      'key_factors':\
+      \ ['Economic Growth', 'Political Reform', 'Social Unrest',\n    'Cultural Shifts'],\n\
+      \      'impact_assessment': ['high', 'high', 'medium', 'medium'],\n      'confidence_score':\
+      \ 0.88,\n      'recommendations': ['Focus on sustaining economic diversification',\n\
+      \    'Encourage inclusive political dialogues', 'Support cultural initiatives\n\
+      \    that bridge tradition and innovation']\n    }\n\n    >>> synth = {\n  \
+      \  ...     'social_insights': 'Demographic shifts altered labor markets.',\n\
+      \    ...     'economic_insights': 'Trade embargoes disrupted supply chains.',\n\
+      \    ...     'political_insights': 'Leadership turnover destabilized\n    governance.',\n\
+      \    ...     'cultural_insights': 'Artistic movements reflected societal\n \
+      \   tensions.',\n    ...     'synthesis_summary': 'A fragile equilibrium existed\
+      \ between\n    competing pressures.',\n    ...     'interaction_points': ['Economic\
+      \ disruption ↔ Political\n    instability'],\n    ...     'importance_scores':\
+      \ [0.6, 0.7, 0.5, 0.4]\n    >>> }\n    {\n      'conclusion_summary': 'Instability\
+      \ arose from the interplay of economic\n    shocks, political turbulence, and\
+      \ cultural expression.',\n      'key_factors': ['Trade Embargoes', 'Leadership\
+      \ Turnover', 'Demographic\n    Shifts', 'Artistic Movements'],\n      'impact_assessment':\
+      \ ['high', 'medium', 'medium', 'low'],\n      'confidence_score': 0.72,\n  \
+      \    'recommendations': ['Reform trade policies', 'Promote political stability\n\
+      \    mechanisms', 'Invest in social cohesion programs']\n    }\n\n    \"\"\"\
+      \n    return DrawConclusionsOutput(\n        conclusion_summary=\"\",\n    \
+      \    key_factors=[],\n        impact_assessment=[],\n        confidence_score=0.0,\n\
+      \        recommendations=[],\n    )"
     name: draw_conclusions
     nodes_depended_on:
     - synthesize_influences
@@ -512,10 +864,48 @@ nodes:
           based on synthesized influence data.
     prompt: Based on the synthesized analysis, draw conclusions about the key drivers
       and outcomes of the historical event or period.
+    shims: []
   identify_key_factors:
     agent: false
+    code_node_type: stub
     description: Determine the key factors that influenced the historical event or
       period.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DefineHistoricalContextOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for define_historical_context node outputs.\"\"\"\n    historical_event: str\
+      \ = (\n        Field(..., description=\"The name or title of the historical\
+      \ event or period being studied\")\n    )\n    time_frame: str = (\n       \
+      \ Field(..., description=\"The approximate time range (e.g., years or dates)\
+      \ of the event or period\")\n    )\n\n\nclass IdentifyKeyFactorsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for identify_key_factors node outputs.\"\"\"\n   \
+      \ social_factors: List[str] = (\n        Field(..., description=\"List of primary\
+      \ social factors that influenced the event or period.\")\n    )\n    political_factors:\
+      \ List[str] = (\n        Field(..., description=\"List of primary political\
+      \ factors that influenced the event or period.\")\n    )\n    economic_factors:\
+      \ List[str] = (\n        Field(..., description=\"List of primary economic factors\
+      \ that influenced the event or period.\")\n    )\n    cultural_factors: List[str]\
+      \ = (\n        Field(..., description=\"List of primary cultural factors that\
+      \ influenced the event or period.\")\n    )\n\n\ndef identify_key_factors(define_historical_context_input:\
+      \ DefineHistoricalContextOutput, **kwargs) -> IdentifyKeyFactorsOutput:\n  \
+      \  \"\"\"\n    Identify the primary social, political, economic, and cultural\
+      \ factors that\n    shaped a specific historical event or period.\n\n    Parameters\n\
+      \    ----------\n    historical_event : str\n        The name or title of the\
+      \ historical event or period being studied.\n    time_frame : str\n        Approximate\
+      \ time range of the event (e.g., years or dates).\n\n    Returns\n    -------\n\
+      \    Dict[str, List[str]]\n        A dictionary containing four lists of factor\
+      \ names, one for each\n        domain: social, political, economic, and cultural.\n\
+      \n    Raises\n    ------\n    ValueError\n        Raised when either `historical_event`\
+      \ or `time_frame` is empty or\n        None.\n\n    Examples\n    --------\n\
+      \    >>> social_factors, political_factors, economic_factors, cultural_factors\
+      \ =\n    identify_key_factors('French Revolution', '1789-1799')\n    >>> print('Social:',\
+      \ social_factors)\n    >>> print('Political:', political_factors)\n    Social:\
+      \ ['Monarchy', 'Social Inequality', 'Enlightenment Ideas']\n    Political: ['Absolute\
+      \ Monarchy', 'Reign of Terror', 'Constitutional\n    Reforms']\n\n    >>> factors\
+      \ = identify_key_factors('Renaissance', '1400-1600')\n    >>> print(factors['cultural_factors'])\n\
+      \    ['Humanism', 'Artistic Patronage', 'Scientific Curiosity']\n\n    \"\"\"\
+      \n    return IdentifyKeyFactorsOutput(\n        social_factors=[],\n       \
+      \ political_factors=[],\n        economic_factors=[],\n        cultural_factors=[],\n\
+      \    )"
     name: identify_key_factors
     nodes_depended_on:
     - define_historical_context
@@ -573,11 +963,137 @@ nodes:
           that shaped a specific historical event or period.
     prompt: List the primary factors (social, political, economic, cultural) that
       shaped the identified historical event or period.
+    shims: []
   synthesize_influences:
     agent: false
+    code_node_type: stub
     description: Combine the analyses of various social, political, economic, and
       cultural influences to produce a comprehensive synthesis, identifying how these
       factors interacted, where they converged, and their relative importance.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass AnalyzeSocialInfluencesOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for analyze_social_influences node outputs.\"\"\"\n    number_of_factors:\
+      \ int = (\n        Field(..., description=\"Total number of distinct social\
+      \ factors identified.\")\n    )\n    social_factors: str = (\n        Field(...,\
+      \ description=\"List of names or brief descriptions of each social factor that\
+      \ influenced the event.\")\n    )\n    impact_scores: float = (\n        Field(...,\
+      \ description=\"Impact rating for each social factor on a scale from 0.0 (minimal)\
+      \ to 1.0 (major). Order corresponds to the social_factors list.\")\n    )\n\
+      \    summary: str = (\n        Field(..., description=\"A concise narrative\
+      \ summarizing how the identified social factors interacted to shape the historical\
+      \ event.\")\n    )\n\n\nclass AnalyzePoliticalInfluencesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for analyze_political_influences node outputs.\"\"\
+      \"\n    political_decisions: List[str] = (\n        Field(..., description=\"\
+      Key political decisions that influenced the historical event or period.\")\n\
+      \    )\n    policies_influenced: List[str] = (\n        Field(..., description=\"\
+      Policies enacted that had an impact on the event or period.\")\n    )\n    leadership_figures:\
+      \ List[str] = (\n        Field(..., description=\"Principal political leaders\
+      \ or figures involved in shaping the event.\")\n    )\n    summary: str = (\n\
+      \        Field(..., description=\"Concise summary of political influence on\
+      \ the event.\")\n    )\n\n\nclass AnalyzeEconomicInfluencesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for analyze_economic_influences node outputs.\"\"\"\
+      \n    economic_factor_name: str = (\n        Field(..., description=\"Name of\
+      \ the economic factor considered.\")\n    )\n    impact_summary: str = (\n \
+      \       Field(..., description=\"Brief description of how this factor impacted\
+      \ the event.\")\n    )\n    evidence_sources: str = (\n        Field(..., description=\"\
+      List of primary source references or data points supporting the analysis.\"\
+      )\n    )\n    impact_strength: float = (\n        Field(..., description=\"\
+      Rating of the factor's impact strength on a scale from 0 to 1.\")\n    )\n \
+      \   time_period_affected: str = (\n        Field(..., description=\"Time period\
+      \ during which the factor was most influential.\")\n    )\n    is_consensus:\
+      \ bool = (\n        Field(..., description=\"Whether there is scholarly consensus\
+      \ on the factor's significance.\")\n    )\n\n\nclass AnalyzeCulturalInfluencesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for analyze_cultural_influences node outputs.\"\"\"\
+      \n    cultural_factors: List[str] = (\n        Field(..., description=\"Names\
+      \ of cultural factors identified\")\n    )\n    factor_categories: List[str]\
+      \ = (\n        Field(..., description=\"Category of each cultural factor (e.g.,\
+      \ norm, value, artistic movement, religious belief, linguistic trend)\")\n \
+      \   )\n    factor_descriptions: List[str] = (\n        Field(..., description=\"\
+      Brief description of each cultural factor\")\n    )\n    influence_scores: List[float]\
+      \ = (\n        Field(..., description=\"Estimated influence score of each factor\
+      \ on the historical event or period (0 to 1)\")\n    )\n    is_significant:\
+      \ List[bool] = (\n        Field(..., description=\"Whether each factor is considered\
+      \ significant (True = significant, False = not significant)\")\n    )\n\n\n\
+      class SynthesizeInfluencesOutput(BaseModel):\n    \"\"\"Pydantic model for synthesize_influences\
+      \ node outputs.\"\"\"\n    social_insights: str = (\n        Field(..., description=\"\
+      Key findings distilled from the social influence analysis.\")\n    )\n    economic_insights:\
+      \ str = (\n        Field(..., description=\"Key findings distilled from the\
+      \ economic influence analysis.\")\n    )\n    political_insights: str = (\n\
+      \        Field(..., description=\"Key findings distilled from the political\
+      \ influence analysis.\")\n    )\n    cultural_insights: str = (\n        Field(...,\
+      \ description=\"Key findings distilled from the cultural influence analysis.\"\
+      )\n    )\n    synthesis_summary: str = (\n        Field(..., description=\"\
+      Overall synthesis describing how the identified influences interacted.\")\n\
+      \    )\n    interaction_points: List[str] = (\n        Field(..., description=\"\
+      List of key interaction points where multiple influences converged.\")\n   \
+      \ )\n    importance_scores: List[float] = (\n        Field(..., description=\"\
+      Relative importance (0.0\\u20131.0) assigned to each influence category (social,\
+      \ economic, political, cultural).\")\n    )\n\n\ndef synthesize_influences(analyze_social_influences_input:\
+      \ AnalyzeSocialInfluencesOutput, analyze_political_influences_input: AnalyzePoliticalInfluencesOutput,\
+      \ analyze_economic_influences_input: AnalyzeEconomicInfluencesOutput, analyze_cultural_influences_input:\
+      \ AnalyzeCulturalInfluencesOutput, **kwargs) -> SynthesizeInfluencesOutput:\n\
+      \    \"\"\"\n    Synthesize social, political, economic, and cultural analyses\
+      \ into a\n    coherent set of insights.\n\n    Parameters\n    ----------\n\
+      \    social_analysis : dict\n        Dictionary containing outputs from `analyze_social_influences`.\n\
+      \        Expected keys: `number_of_factors`, `social_factors`,\n        `impact_scores`,\
+      \ `summary`.\n    political_analysis : dict\n        Dictionary containing outputs\
+      \ from `analyze_political_influences`.\n        Expected keys: `political_decisions`,\
+      \ `policies_influenced`,\n        `leadership_figures`, `summary`.\n    economic_analysis\
+      \ : dict\n        Dictionary containing outputs from `analyze_economic_influences`.\n\
+      \        Expected keys: `economic_factor_name`, `impact_summary`,\n        `evidence_sources`,\
+      \ `impact_strength`, `time_period_affected`,\n        `is_consensus`.\n    cultural_analysis\
+      \ : dict\n        Dictionary containing outputs from `analyze_cultural_influences`.\n\
+      \        Expected keys: `cultural_factors`, `factor_categories`,\n        `factor_descriptions`,\
+      \ `influence_scores`, `is_significant`.\n\n    Returns\n    -------\n    dict\n\
+      \        A dictionary with keys `social_insights`, `economic_insights`,\n  \
+      \      `political_insights`, `cultural_insights`, `synthesis_summary`,\n   \
+      \     `interaction_points`, and `importance_scores`.\n\n    Raises\n    ------\n\
+      \    ValueError\n        Raised if any required key is missing from one of the\
+      \ input analysis\n        dictionaries.\n\n    Examples\n    --------\n    >>>\
+      \ social_analysis = {\n    ...     \"number_of_factors\": 3,\n    ...     \"\
+      social_factors\": [\"Urbanization\", \"Labor Movements\", \"Education\n    Reform\"\
+      ],\n    ...     \"impact_scores\": [0.8, 0.6, 0.5],\n    ...     \"summary\"\
+      : \"Rapid urban growth spurred labor activism and\n    educational reforms that\
+      \ reshaped social norms.\"\n    >>> }\n    >>> political_analysis = {\n    ...\
+      \     \"political_decisions\": [\"Industrial Policy Act 1920\", \"Labor Law\n\
+      \    Reform 1935\"],\n    ...     \"policies_influenced\": [\"Minimum Wage\"\
+      , \"Workplace Safety\n    Regulations\"],\n    ...     \"leadership_figures\"\
+      : [\"Prime Minister A\", \"Senator B\"],\n    ...     \"summary\": \"Government\
+      \ policies institutionalized labor rights and\n    industrial oversight.\"\n\
+      \    >>> }\n    >>> economic_analysis = {\n    ...     \"economic_factor_name\"\
+      : \"Post‑War Reconstruction\",\n    ...     \"impact_summary\": \"Reconstruction\
+      \ spending accelerated industrial\n    output and urban migration.\",\n    ...\
+      \     \"evidence_sources\": [\"Census 1941\", \"Trade Reports 1945\"],\n   \
+      \ ...     \"impact_strength\": 0.9,\n    ...     \"time_period_affected\": \"\
+      1945–1955\",\n    ...     \"is_consensus\": true\n    >>> }\n    >>> cultural_analysis\
+      \ = {\n    ...     \"cultural_factors\": [\"Modernist Art Movement\", \"Literary\
+      \ Boom\"],\n    ...     \"factor_categories\": [\"Art\", \"Literature\"],\n\
+      \    ...     \"factor_descriptions\": [\"Challenged traditional aesthetics\"\
+      ,\n    \"Explored new narrative forms\"],\n    ...     \"influence_scores\"\
+      : [0.4, 0.3],\n    ...     \"is_significant\": [true, true]\n    >>> }\n   \
+      \ >>> from synthesize_influences import synthesize_influences\n    >>> result\
+      \ = synthesize_influences(social_analysis, political_analysis,\n    economic_analysis,\
+      \ cultural_analysis)\n    >>> print(result[\"synthesis_summary\"])\n    \"The\
+      \ post‑war reconstruction boom fueled urbanization, creating a labor pool\n\
+      \    that empowered social movements. Government policies codified labor rights,\n\
+      \    while modernist art and literature reflected and reinforced the era’s\n\
+      \    transformative ethos. Together, these intertwined forces accelerated\n\
+      \    industrial growth and reshaped societal structures.\n    \"\n\n    >>>\
+      \ # Minimal example focusing on relative importance scoring\n    >>> social_analysis\
+      \ = {\"number_of_factors\":1,\"social_factors\":[\"Migration\"],\n    \"impact_scores\"\
+      :[0.7],\"summary\":\"Population shifts reshaped communities.\"}\n    >>> political_analysis\
+      \ = {\"political_decisions\":[],\"policies_influenced\":[],\n    \"leadership_figures\"\
+      :[],\"summary\":\"Political stability maintained.\"}\n    >>> economic_analysis\
+      \ = {\"economic_factor_name\":\"Export\n    Boom\",\"impact_summary\":\"Exports\
+      \ surged, boosting GDP.\",\"evidence_sources\":[]\n    ,\"impact_strength\"\
+      :0.8,\"time_period_affected\":\"1980s\",\"is_consensus\":true}\n    >>> cultural_analysis\
+      \ = {\"cultural_factors\":[],\"factor_categories\":[],\"facto\n    r_descriptions\"\
+      :[],\"influence_scores\":[],\"is_significant\":[]}\n    >>> result = synthesize_influences(social_analysis,\
+      \ political_analysis,\n    economic_analysis, cultural_analysis)\n    >>> print(result[\"\
+      importance_scores\"])\n    [0.7, 0.1, 0.8, 0.0]\n\n    \"\"\"\n    return SynthesizeInfluencesOutput(\n\
+      \        social_insights=\"\",\n        economic_insights=\"\",\n        political_insights=\"\
+      \",\n        cultural_insights=\"\",\n        synthesis_summary=\"\",\n    \
+      \    interaction_points=[],\n        importance_scores=[],\n    )"
     name: synthesize_influences
     nodes_depended_on:
     - analyze_social_influences
@@ -708,3 +1224,4 @@ nodes:
           a coherent set of insights.
     prompt: Synthesize the findings from the various analyses to understand how different
       factors interacted to shape the historical event or period.
+    shims: []

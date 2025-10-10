@@ -1,4 +1,4 @@
-dag_type: typed
+dag_type: spec
 description: Generated workflow from UI.
 name: shaping_of_history_workflow
 nodes:
@@ -29,6 +29,46 @@ nodes:
         False = not significant)
       key: is_significant
       type: List[bool]
+    prd:
+      conceptual_info: This node transforms the list of cultural factors identified
+        by its parent into a structured, scored representation that highlights each
+        factor's category, description, influence magnitude, and overall significance.
+      docstring:
+        examples:
+        - lines:
+          - result = analyze_cultural_influences(['Romanticism', 'Buddhism'])
+          - print(result['cultural_factors'])
+          - print(result['factor_categories'])
+          - print(result['influence_scores'])
+          - print(result['is_significant'])
+          output: '["Romanticism", "Buddhism"]
+
+            ["Artistic movement", "Religious belief"]
+
+            [0.8, 0.6]
+
+            [True, True]'
+        - lines:
+          - 'try:'
+          - '    analyze_cultural_influences([])'
+          - 'except ValueError as e:'
+          - '    print(e)'
+          output: '"No cultural factors provided. At least one is required."'
+        parameters:
+        - description: List of cultural factor names produced by the identify_key_factors
+            node.
+          name: cultural_factors
+          type: List[str]
+        raises:
+        - description: Raised if the input list is empty or contains non-string elements.
+          type: ValueError
+        returns:
+          description: Dictionary containing the keys 'cultural_factors', 'factor_categories',
+            'factor_descriptions', 'influence_scores', and 'is_significant', each
+            mapping to a list of equal length.
+          type: dict
+        summary: Analyze cultural influences for a historical event and return detailed
+          scores and descriptors.
     prompt: Analyze how cultural norms, values, or artistic movements influenced the
       historical event or period.
   analyze_economic_influences:
@@ -40,25 +80,63 @@ nodes:
     - identify_key_factors
     nodes_dependent_on: []
     output_structure:
-    - description: Name of the economic factor considered
+    - description: Name of the economic factor considered.
       key: economic_factor_name
       type: str
-    - description: Brief description of how this factor impacted the event
+    - description: Brief description of how this factor impacted the event.
       key: impact_summary
       type: str
     - description: List of primary source references or data points supporting the
-        analysis
+        analysis.
       key: evidence_sources
-      type: List[str]
-    - description: Rating of the factor's impact strength on a scale from 0 to 1
+      type: str
+    - description: Rating of the factor's impact strength on a scale from 0 to 1.
       key: impact_strength
       type: float
-    - description: Time period during which the factor was most influential
+    - description: Time period during which the factor was most influential.
       key: time_period_affected
       type: str
-    - description: Whether there is scholarly consensus on the factor's significance
+    - description: Whether there is scholarly consensus on the factor's significance.
       key: is_consensus
       type: bool
+    prd:
+      conceptual_info: Transforms a list of economic factors identified by the parent
+        node into a structured assessment that quantifies each factor's influence
+        on the historical event.
+      docstring:
+        examples:
+        - lines:
+          - analyze_economic_influences(['Inflation', 'Trade Embargo'])
+          output: '[{''economic_factor_name'': ''Inflation'', ''impact_summary'':
+            ''High inflation reduced purchasing power and disrupted domestic markets.'',
+            ''evidence_sources'': [''Economic Report 1931'', ''Historical GDP Data''],
+            ''impact_strength'': 0.85, ''time_period_affected'': ''1931-1933'', ''is_consensus'':
+            True}, {''economic_factor_name'': ''Trade Embargo'', ''impact_summary'':
+            ''The embargo limited exports, weakening the national economy.'', ''evidence_sources'':
+            [''Trade Records 1940'', ''Diplomatic Correspondence''], ''impact_strength'':
+            0.70, ''time_period_affected'': ''1940-1945'', ''is_consensus'': False}]'
+        - lines:
+          - analyze_economic_influences(['Industrial Production Growth'])
+          output: '[{''economic_factor_name'': ''Industrial Production Growth'', ''impact_summary'':
+            ''Rapid industrial growth fueled wartime manufacturing.'', ''evidence_sources'':
+            [''Industrial Production Index 1944''], ''impact_strength'': 0.90, ''time_period_affected'':
+            ''1942-1945'', ''is_consensus'': True}]'
+        parameters:
+        - description: List of economic factors identified by the `identify_key_factors`
+            node.
+          name: economic_factors
+          type: List[str]
+        raises:
+        - description: Raised when the `economic_factors` list is empty.
+          type: ValueError
+        - description: Raised when `economic_factors` is not a list of strings.
+          type: TypeError
+        returns:
+          description: A list of dictionaries, each containing structured information
+            about an economic factor.
+          type: List[Dict[str, Any]]
+        summary: Analyzes each economic factor from the input list and returns a structured
+          assessment of its impact on the historical event or period.
     prompt: Evaluate the economic conditions, trade, or financial events that impacted
       the historical event or period.
   analyze_political_influences:
@@ -84,6 +162,49 @@ nodes:
     - description: Concise summary of political influence on the event.
       key: summary
       type: str
+    prd:
+      conceptual_info: The node extracts and synthesizes the political dimensions—decisions,
+        policies, and leadership—that directed the course of a historical event.
+      docstring:
+        examples:
+        - lines:
+          - result = analyze_political_influences([
+          - '    ''Treaty of Versailles'','
+          - '    ''French Revolution'','
+          - '    ''Napoleonic Wars'''
+          - '])'
+          - print(result['summary'])
+          output: '"The Treaty of Versailles, the French Revolution, and the Napoleonic
+            Wars collectively redefined European borders, governance structures, and
+            international law, setting the stage for the modern nation-state system."'
+        - lines:
+          - result = analyze_political_influences(['Industrial Revolution'])
+          - print(result['political_decisions'])
+          output: '"[''Industrial Revolution'']"'
+        parameters:
+        - description: List of primary political factors (e.g., treaties, revolutions,
+            wars) supplied by the identify_key_factors node.
+          name: political_factors
+          type: List[str]
+        raises:
+        - description: Raised if political_factors is empty or None.
+          type: ValueError
+        - description: Raised if political_factors is not a list.
+          type: TypeError
+        returns:
+          description: 'A dictionary containing four keys:
+
+            - political_decisions: List of key decisions.
+
+            - policies_influenced: List of policies that were enacted.
+
+            - leadership_figures: List of main political leaders.
+
+            - summary: A concise narrative describing the political influence.'
+          type: Dict[str, Any]
+        summary: Generates a structured summary of the political influences affecting
+          a historical event, based on primary political factors identified by the
+          previous node.
     prompt: Examine the political decisions, policies, or leadership that influenced
       the historical event or period.
   analyze_social_influences:
@@ -101,15 +222,45 @@ nodes:
     - description: List of names or brief descriptions of each social factor that
         influenced the event.
       key: social_factors
-      type: List[str]
+      type: str
     - description: Impact rating for each social factor on a scale from 0.0 (minimal)
         to 1.0 (major). Order corresponds to the social_factors list.
       key: impact_scores
-      type: List[float]
+      type: float
     - description: A concise narrative summarizing how the identified social factors
         interacted to shape the historical event.
       key: summary
       type: str
+    prd:
+      conceptual_info: This node takes the social factors identified by its parent
+        and assigns quantitative impact scores, counts them, and produces a narrative
+        summary of their interaction in the context of the historical event.
+      docstring:
+        examples:
+        - lines:
+          - result = analyze_social_influences(["Women’s suffrage", "Urbanization"])
+          output: '{"number_of_factors": 2, "social_factors": ["Women’s suffrage",
+            "Urbanization"], "impact_scores": [0.8, 0.6], "summary": "Women’s suffrage
+            and urbanization combined accelerated democratic reforms."}'
+        - lines:
+          - result = analyze_social_influences(["Industrial labor strikes"])
+          output: '{"number_of_factors": 1, "social_factors": ["Industrial labor strikes"],
+            "impact_scores": [0.7], "summary": "Industrial labor strikes pressured
+            governments to enact labor protections."}'
+        parameters:
+        - description: List of primary social factors returned by the parent node
+            `identify_key_factors`.
+          name: input_social_factors
+          type: List[str]
+        raises:
+        - description: Raised when `input_social_factors` is empty or None.
+          type: ValueError
+        returns:
+          description: A dictionary containing the number of factors, the list of
+            social factors, their impact scores, and a summary narrative.
+          type: Dict[str, Any]
+        summary: Analyze the social influences on a historical event, assigning impact
+          scores and summarizing their combined effect.
     prompt: Analyze how social structures, movements, or changes impacted the historical
       event or period.
   compile_historical_narrative:
@@ -143,6 +294,93 @@ nodes:
     - description: Full cohesive narrative string combining all parts.
       key: overall_narrative
       type: str
+    prd:
+      conceptual_info: This node synthesizes the analysis produced by the prior workflow
+        stages into a single, coherent historical narrative. It takes the distilled
+        conclusions, key factors, and impact assessments from the `draw_conclusions`
+        node, and combines them with contextual details (e.g., event name, time frame)
+        to produce a polished story that can be presented to end‑users.
+      docstring:
+        examples:
+        - lines:
+          - output = compile_historical_narrative(
+          - '    conclusion_summary=''The Industrial Revolution transformed labor
+            and technology.'','
+          - '    key_factors=[''Technological Innovation'', ''Urbanization'', ''Capital
+            Accumulation''],'
+          - '    impact_assessment=[''high'', ''medium'', ''high''],'
+          - '    confidence_score=0.92,'
+          - '    recommendations=[''Study early factory labor laws.'', ''Examine urban
+            planning impact.''],'
+          - '    historical_event=''Industrial Revolution'','
+          - "    time_frame='18th–19th centuries'\"\n                \")"
+          - print(output['overall_narrative'])
+          output: '"The Industrial Revolution: A Transformational Epoch\n\nThe Industrial
+            Revolution, spanning the 18th–19th centuries, marked a profound shift
+            in societal structure, fueled by Technological Innovation, Urbanization,
+            and Capital Accumulation. These key drivers—each assessed as either high
+            or medium impact—redefined labor, production, and urban life.\n\nThe analysis
+            concludes that technological progress and capital flows were the dominant
+            forces, with urbanization acting as a catalyst that accelerated change.
+            The high confidence score of 0.92 underscores the robustness of these
+            findings.\n\nImplications include a deeper study of early factory labor
+            laws and the long-term effects of urban planning during this era.\n"'
+        - lines:
+          - output = compile_historical_narrative(
+          - '    conclusion_summary=''The Fall of the Berlin Wall symbolized the end
+            of the Cold War.'','
+          - '    key_factors=[''Political Reform'', ''Economic Strain'', ''Public
+            Protest''],'
+          - '    impact_assessment=[''high'', ''medium'', ''high''],'
+          - '    confidence_score=0.88,'
+          - '    recommendations=[''Investigate policy shifts post-1989.'', ''Assess
+            economic integration effects.''],'
+          - '    historical_event=''Fall of the Berlin Wall'','
+          - "    time_frame='1989'\"\n                \")"
+          - print(output['overall_narrative'])
+          output: '"Fall of the Berlin Wall: The Collapse of Cold War Ideologies\n\nSet
+            against the backdrop of 1989, the fall of the Berlin Wall marked the culmination
+            of political reform, economic strain, and public protest in the Eastern
+            Bloc. These key drivers—particularly the high-impact political reform
+            and public protest—collectively accelerated the collapse of the Soviet
+            sphere.\n\nThe narrative concludes that the political and social forces
+            outweighed economic pressures, a finding reflected in the 0.88 confidence
+            score.\n\nRecommendations for further study include a detailed examination
+            of the policy shifts after 1989 and the economic integration outcomes
+            that followed.\n"'
+        parameters:
+        - description: Concise summary of the main conclusions about the key drivers
+            and outcomes.
+          name: conclusion_summary
+          type: str
+        - description: List of primary factors identified as key drivers.
+          name: key_factors
+          type: List[str]
+        - description: Assessment of each factor's impact level (e.g., 'high', 'medium',
+            'low').
+          name: impact_assessment
+          type: List[str]
+        - description: Overall confidence level (0‑1) in the conclusions.
+          name: confidence_score
+          type: float
+        - description: Actionable recommendations or implications derived from the
+            conclusions.
+          name: recommendations
+          type: List[str]
+        - description: Name or title of the historical event or period being studied.
+          name: historical_event
+          type: str
+        - description: Approximate time range (e.g., years) of the event or period.
+          name: time_frame
+          type: str
+        raises:
+        - description: Raised when any required input is empty or missing.
+          type: ValueError
+        returns:
+          description: Dictionary containing narrative_title, introduction, historical_context,
+            key_factors, impact_summary, conclusion, and overall_narrative.
+          type: Dict[str, Any]
+        summary: Generate a full historical narrative from analysis outputs.
     prompt: Create a comprehensive narrative that weaves together the historical context,
       key factors, and their impacts.
   define_historical_context:
@@ -159,11 +397,41 @@ nodes:
         or period
       key: time_frame
       type: str
+    prd:
+      conceptual_info: Provides the foundational historical context needed for subsequent
+        analyses.
+      docstring:
+        examples:
+        - lines:
+          - event, timeframe = define_historical_context()
+          - print(event)
+          - print(timeframe)
+          output: '"Renaissance"
+
+            "14th–17th centuries"'
+        - lines:
+          - event, timeframe = define_historical_context()
+          - assert event == "Industrial Revolution"
+          - assert timeframe == "late 18th–19th centuries"
+          output: '"No output, assertions passed."'
+        parameters: []
+        raises:
+        - description: Raised if the user fails to provide a valid event name or time
+            frame.
+          type: ValueError
+        returns:
+          description: A tuple containing the historical event name and its approximate
+            time frame.
+          type: Tuple[str, str]
+        summary: Determines the historical event or period to be examined and returns
+          its name and time frame.
     prompt: Identify the specific historical period or event that will be the focus
       of the analysis.
   draw_conclusions:
     agent: false
-    description: Derive conclusions about the shaping of history based on the analysis.
+    description: Derive concise conclusions about how various social, economic, political,
+      and cultural factors jointly shaped the historical event, including assessment
+      of each factor’s impact, confidence level, and actionable recommendations.
     name: draw_conclusions
     nodes_depended_on:
     - synthesize_influences
@@ -185,6 +453,63 @@ nodes:
     - description: Actionable recommendations or implications derived from the conclusions.
       key: recommendations
       type: List[str]
+    prd:
+      conceptual_info: The node synthesizes the collective insights from social, economic,
+        political, and cultural analyses into a coherent set of conclusions, providing
+        a high‑level evaluation of drivers, impacts, confidence, and recommendations.
+      docstring:
+        examples:
+        - lines:
+          - synth = {
+          - '    ''social_insights'': ''Social unrest spurred reforms.'','
+          - '    ''economic_insights'': ''Industrial growth fueled capital accumulation.'','
+          - '    ''political_insights'': ''New constitution centralized authority.'','
+          - '    ''cultural_insights'': ''Romanticism challenged traditional norms.'','
+          - '    ''synthesis_summary'': ''Multiple fronts converged to reshape governance.'','
+          - '    ''interaction_points'': [''Economic growth ↔ Political reform'',
+            ''Cultural shifts ↔ Social movements''],'
+          - '    ''importance_scores'': [0.8, 0.9, 0.7, 0.6]'
+          - '}'
+          output: "{\n  'conclusion_summary': 'The era was driven by intertwined social,\
+            \ economic, political, and cultural forces that collectively accelerated\
+            \ institutional change.',\n  'key_factors': ['Economic Growth', 'Political\
+            \ Reform', 'Social Unrest', 'Cultural Shifts'],\n  'impact_assessment':\
+            \ ['high', 'high', 'medium', 'medium'],\n  'confidence_score': 0.88,\n\
+            \  'recommendations': ['Focus on sustaining economic diversification',\
+            \ 'Encourage inclusive political dialogues', 'Support cultural initiatives\
+            \ that bridge tradition and innovation']\n}"
+        - lines:
+          - synth = {
+          - '    ''social_insights'': ''Demographic shifts altered labor markets.'','
+          - '    ''economic_insights'': ''Trade embargoes disrupted supply chains.'','
+          - '    ''political_insights'': ''Leadership turnover destabilized governance.'','
+          - '    ''cultural_insights'': ''Artistic movements reflected societal tensions.'','
+          - '    ''synthesis_summary'': ''A fragile equilibrium existed between competing
+            pressures.'','
+          - '    ''interaction_points'': [''Economic disruption ↔ Political instability''],'
+          - '    ''importance_scores'': [0.6, 0.7, 0.5, 0.4]'
+          - '}'
+          output: "{\n  'conclusion_summary': 'Instability arose from the interplay\
+            \ of economic shocks, political turbulence, and cultural expression.',\n\
+            \  'key_factors': ['Trade Embargoes', 'Leadership Turnover', 'Demographic\
+            \ Shifts', 'Artistic Movements'],\n  'impact_assessment': ['high', 'medium',\
+            \ 'medium', 'low'],\n  'confidence_score': 0.72,\n  'recommendations':\
+            \ ['Reform trade policies', 'Promote political stability mechanisms',\
+            \ 'Invest in social cohesion programs']\n}"
+        parameters:
+        - description: Dictionary containing the outputs of `synthesize_influences`,
+            including key insights and interaction points.
+          name: synthesis
+          type: dict
+        raises:
+        - description: If `synthesis` is missing required keys or contains invalid
+            data.
+          type: ValueError
+        returns:
+          description: Dictionary matching the `draw_conclusions` output structure.
+          type: dict
+        summary: Generate a structured set of conclusions about a historical event
+          based on synthesized influence data.
     prompt: Based on the synthesized analysis, draw conclusions about the key drivers
       and outcomes of the historical event or period.
   identify_key_factors:
@@ -209,12 +534,50 @@ nodes:
     - description: List of primary cultural factors that influenced the event or period.
       key: cultural_factors
       type: List[str]
+    prd:
+      conceptual_info: The node aggregates high-level drivers—social, political, economic,
+        and cultural—by synthesizing contextual data from the parent node. It produces
+        a concise list of key factors that set the stage for subsequent influence
+        analyses.
+      docstring:
+        examples:
+        - lines:
+          - social_factors, political_factors, economic_factors, cultural_factors
+            = identify_key_factors('French Revolution', '1789-1799')
+          - print('Social:', social_factors)
+          - print('Political:', political_factors)
+          output: 'Social: [''Monarchy'', ''Social Inequality'', ''Enlightenment Ideas'']
+
+            Political: [''Absolute Monarchy'', ''Reign of Terror'', ''Constitutional
+            Reforms'']'
+        - lines:
+          - factors = identify_key_factors('Renaissance', '1400-1600')
+          - print(factors['cultural_factors'])
+          output: '[''Humanism'', ''Artistic Patronage'', ''Scientific Curiosity'']'
+        parameters:
+        - description: The name or title of the historical event or period being studied.
+          name: historical_event
+          type: str
+        - description: Approximate time range of the event (e.g., years or dates).
+          name: time_frame
+          type: str
+        raises:
+        - description: Raised when either `historical_event` or `time_frame` is empty
+            or None.
+          type: ValueError
+        returns:
+          description: 'A dictionary containing four lists of factor names, one for
+            each domain: social, political, economic, and cultural.'
+          type: Dict[str, List[str]]
+        summary: Identify the primary social, political, economic, and cultural factors
+          that shaped a specific historical event or period.
     prompt: List the primary factors (social, political, economic, cultural) that
       shaped the identified historical event or period.
   synthesize_influences:
     agent: false
-    description: Combine the analyses of various influences to understand their collective
-      impact.
+    description: Combine the analyses of various social, political, economic, and
+      cultural influences to produce a comprehensive synthesis, identifying how these
+      factors interacted, where they converged, and their relative importance.
     name: synthesize_influences
     nodes_depended_on:
     - analyze_social_influences
@@ -223,27 +586,125 @@ nodes:
     - analyze_cultural_influences
     nodes_dependent_on: []
     output_structure:
-    - description: Key findings from the social influence analysis.
+    - description: Key findings distilled from the social influence analysis.
       key: social_insights
       type: str
-    - description: Key findings from the economic influence analysis.
+    - description: Key findings distilled from the economic influence analysis.
       key: economic_insights
       type: str
-    - description: Key findings from the political influence analysis.
+    - description: Key findings distilled from the political influence analysis.
       key: political_insights
       type: str
-    - description: Key findings from the cultural influence analysis.
+    - description: Key findings distilled from the cultural influence analysis.
       key: cultural_insights
       type: str
-    - description: Overall synthesis of how the identified influences interacted.
+    - description: Overall synthesis describing how the identified influences interacted.
       key: synthesis_summary
       type: str
     - description: List of key interaction points where multiple influences converged.
       key: interaction_points
       type: List[str]
     - description: Relative importance (0.0–1.0) assigned to each influence category
-        in shaping the event.
+        (social, economic, political, cultural).
       key: importance_scores
       type: List[float]
+    prd:
+      conceptual_info: This node aggregates the detailed findings from four distinct
+        analytical modules—social, political, economic, and cultural—to produce a
+        unified narrative of influence. It extracts salient themes, highlights cross‑sector
+        interactions, and quantifies the relative weight of each sector in shaping
+        the historical event.
+      docstring:
+        examples:
+        - lines:
+          - social_analysis = {
+          - '    "number_of_factors": 3,'
+          - '    "social_factors": ["Urbanization", "Labor Movements", "Education
+            Reform"],'
+          - '    "impact_scores": [0.8, 0.6, 0.5],'
+          - '    "summary": "Rapid urban growth spurred labor activism and educational
+            reforms that reshaped social norms."'
+          - '}'
+          - political_analysis = {
+          - '    "political_decisions": ["Industrial Policy Act 1920", "Labor Law
+            Reform 1935"],'
+          - '    "policies_influenced": ["Minimum Wage", "Workplace Safety Regulations"],'
+          - '    "leadership_figures": ["Prime Minister A", "Senator B"],'
+          - '    "summary": "Government policies institutionalized labor rights and
+            industrial oversight."'
+          - '}'
+          - economic_analysis = {
+          - '    "economic_factor_name": "Post‑War Reconstruction",'
+          - '    "impact_summary": "Reconstruction spending accelerated industrial
+            output and urban migration.",'
+          - '    "evidence_sources": ["Census 1941", "Trade Reports 1945"],'
+          - '    "impact_strength": 0.9,'
+          - '    "time_period_affected": "1945–1955",'
+          - '    "is_consensus": true'
+          - '}'
+          - cultural_analysis = {
+          - '    "cultural_factors": ["Modernist Art Movement", "Literary Boom"],'
+          - '    "factor_categories": ["Art", "Literature"],'
+          - '    "factor_descriptions": ["Challenged traditional aesthetics", "Explored
+            new narrative forms"],'
+          - '    "influence_scores": [0.4, 0.3],'
+          - '    "is_significant": [true, true]'
+          - '}'
+          - from synthesize_influences import synthesize_influences
+          - result = synthesize_influences(social_analysis, political_analysis, economic_analysis,
+            cultural_analysis)
+          - print(result["synthesis_summary"])
+          output: '"The post‑war reconstruction boom fueled urbanization, creating
+            a labor pool that empowered social movements. Government policies codified
+            labor rights, while modernist art and literature reflected and reinforced
+            the era’s transformative ethos. Together, these intertwined forces accelerated
+            industrial growth and reshaped societal structures.
+
+            "'
+        - lines:
+          - '# Minimal example focusing on relative importance scoring'
+          - social_analysis = {"number_of_factors":1,"social_factors":["Migration"],"impact_scores":[0.7],"summary":"Population
+            shifts reshaped communities."}
+          - political_analysis = {"political_decisions":[],"policies_influenced":[],"leadership_figures":[],"summary":"Political
+            stability maintained."}
+          - economic_analysis = {"economic_factor_name":"Export Boom","impact_summary":"Exports
+            surged, boosting GDP.","evidence_sources":[],"impact_strength":0.8,"time_period_affected":"1980s","is_consensus":true}
+          - cultural_analysis = {"cultural_factors":[],"factor_categories":[],"factor_descriptions":[],"influence_scores":[],"is_significant":[]}
+          - result = synthesize_influences(social_analysis, political_analysis, economic_analysis,
+            cultural_analysis)
+          - print(result["importance_scores"])
+          output: '[0.7, 0.1, 0.8, 0.0]'
+        parameters:
+        - description: 'Dictionary containing outputs from `analyze_social_influences`.
+            Expected keys: `number_of_factors`, `social_factors`, `impact_scores`,
+            `summary`.'
+          name: social_analysis
+          type: dict
+        - description: 'Dictionary containing outputs from `analyze_political_influences`.
+            Expected keys: `political_decisions`, `policies_influenced`, `leadership_figures`,
+            `summary`.'
+          name: political_analysis
+          type: dict
+        - description: 'Dictionary containing outputs from `analyze_economic_influences`.
+            Expected keys: `economic_factor_name`, `impact_summary`, `evidence_sources`,
+            `impact_strength`, `time_period_affected`, `is_consensus`.'
+          name: economic_analysis
+          type: dict
+        - description: 'Dictionary containing outputs from `analyze_cultural_influences`.
+            Expected keys: `cultural_factors`, `factor_categories`, `factor_descriptions`,
+            `influence_scores`, `is_significant`.'
+          name: cultural_analysis
+          type: dict
+        raises:
+        - description: Raised if any required key is missing from one of the input
+            analysis dictionaries.
+          type: ValueError
+        returns:
+          description: A dictionary with keys `social_insights`, `economic_insights`,
+            `political_insights`, `cultural_insights`, `synthesis_summary`, `interaction_points`,
+            and `importance_scores`.
+          type: dict
+        summary: Synthesize social, political, economic, and cultural analyses into
+          a coherent set of insights.
     prompt: Synthesize the findings from the various analyses to understand how different
       factors interacted to shape the historical event or period.
