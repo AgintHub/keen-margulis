@@ -1,5 +1,5 @@
-dag_type: plain_text
-description: A simple workflow DAG with fundamental steps
+dag_type: typed
+description: Generated workflow from UI.
 name: simple_workflow
 nodes:
   end_node:
@@ -9,15 +9,37 @@ nodes:
     nodes_depended_on:
     - step_3
     nodes_dependent_on: []
+    output_structure:
+    - description: Indicates whether the entire workflow has completed successfully
+      key: workflow_completed
+      type: bool
+    - description: Short textual summary of the workflow outcomes and any key observations
+      key: summary
+      type: str
+    - description: Concise report detailing the results from step_3 and any aggregated
+        data
+      key: final_report
+      type: str
+    - description: Timestamp of when the workflow was finalized
+      key: completion_time
+      type: str
     prompt: Finalize the workflow
   start_node:
     agent: false
     description: The starting point of the workflow
     name: start_node
     nodes_depended_on: []
-    nodes_dependent_on:
-    - step_1
-    - step_2
+    nodes_dependent_on: []
+    output_structure:
+    - description: Indicates the current status of the workflow initialization
+      key: status
+      type: str
+    - description: ISO 8601 timestamp of when the workflow was initialized
+      key: timestamp
+      type: str
+    - description: Human‑readable confirmation message that the workflow has started
+      key: message
+      type: str
     prompt: Initialize the workflow
   step_1:
     agent: false
@@ -25,8 +47,17 @@ nodes:
     name: step_1
     nodes_depended_on:
     - start_node
-    nodes_dependent_on:
-    - step_3
+    nodes_dependent_on: []
+    output_structure:
+    - description: Whether the first task was completed successfully
+      key: task_status
+      type: bool
+    - description: Textual output or result of the first task
+      key: task_output
+      type: str
+    - description: Time taken to perform the task in seconds
+      key: processing_time
+      type: float
     prompt: Perform the first task
   step_2:
     agent: false
@@ -34,8 +65,17 @@ nodes:
     name: step_2
     nodes_depended_on:
     - start_node
-    nodes_dependent_on:
-    - step_3
+    nodes_dependent_on: []
+    output_structure:
+    - description: Numeric result from step 2
+      key: step_2_result
+      type: float
+    - description: Success status of step 2
+      key: step_2_status
+      type: bool
+    - description: Additional notes from step 2
+      key: step_2_note
+      type: str
     prompt: Perform the second task
   step_3:
     agent: false
@@ -44,6 +84,18 @@ nodes:
     nodes_depended_on:
     - step_1
     - step_2
-    nodes_dependent_on:
-    - end_node
+    nodes_dependent_on: []
+    output_structure:
+    - description: Numeric result produced by step 1.
+      key: step1_result
+      type: float
+    - description: Numeric result produced by step 2.
+      key: step2_result
+      type: float
+    - description: Aggregated numeric result combining step 1 and step 2 outputs.
+      key: combined_result
+      type: float
+    - description: Indicates whether the third task completed successfully.
+      key: success
+      type: bool
     prompt: Perform the third task using outputs from step 1 and step 2
