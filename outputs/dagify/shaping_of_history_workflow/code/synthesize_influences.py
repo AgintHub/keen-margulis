@@ -1,3 +1,12 @@
+from ._synthesize_influences.validate_required_keys import validate_required_keys
+from ._synthesize_influences.extract_social_insights import extract_social_insights
+from ._synthesize_influences.extract_political_insights import extract_political_insights
+from ._synthesize_influences.extract_economic_insights import extract_economic_insights
+from ._synthesize_influences.extract_cultural_insights import extract_cultural_insights
+from ._synthesize_influences.identify_cross_sector_interactions import identify_cross_sector_interactions
+from ._synthesize_influences.calculate_relative_importance import calculate_relative_importance
+from ._synthesize_influences.generate_unified_narrative import generate_unified_narrative
+
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -5,32 +14,48 @@ from typing import List
 class AnalyzeSocialInfluencesOutput(BaseModel):
     """Pydantic model for analyze_social_influences node outputs."""
     number_of_factors: int = (
-        Field(..., description="Total number of distinct social factors identified.")
+        Field(..., description = (
+            "Total number of distinct social factors identified.")
+        )
     )
     social_factors: str = (
-        Field(..., description="List of names or brief descriptions of each social factor that influenced the event.")
+        Field(..., description = (
+            "List of names or brief descriptions of each social factor that influenced the event.")
+        )
     )
     impact_scores: float = (
-        Field(..., description="Impact rating for each social factor on a scale from 0.0 (minimal) to 1.0 (major). Order corresponds to the social_factors list.")
+        Field(..., description = (
+            "Impact rating for each social factor on a scale from 0.0 (minimal) to 1.0 (major). Order corresponds to the social_factors list.")
+        )
     )
     summary: str = (
-        Field(..., description="A concise narrative summarizing how the identified social factors interacted to shape the historical event.")
+        Field(..., description = (
+            "A concise narrative summarizing how the identified social factors interacted to shape the historical event.")
+        )
     )
 
 
 class AnalyzePoliticalInfluencesOutput(BaseModel):
     """Pydantic model for analyze_political_influences node outputs."""
     political_decisions: List[str] = (
-        Field(..., description="Key political decisions that influenced the historical event or period.")
+        Field(..., description = (
+            "Key political decisions that influenced the historical event or period.")
+        )
     )
     policies_influenced: List[str] = (
-        Field(..., description="Policies enacted that had an impact on the event or period.")
+        Field(..., description = (
+            "Policies enacted that had an impact on the event or period.")
+        )
     )
     leadership_figures: List[str] = (
-        Field(..., description="Principal political leaders or figures involved in shaping the event.")
+        Field(..., description = (
+            "Principal political leaders or figures involved in shaping the event.")
+        )
     )
     summary: str = (
-        Field(..., description="Concise summary of political influence on the event.")
+        Field(..., description = (
+            "Concise summary of political influence on the event.")
+        )
     )
 
 
@@ -40,19 +65,29 @@ class AnalyzeEconomicInfluencesOutput(BaseModel):
         Field(..., description="Name of the economic factor considered.")
     )
     impact_summary: str = (
-        Field(..., description="Brief description of how this factor impacted the event.")
+        Field(..., description = (
+            "Brief description of how this factor impacted the event.")
+        )
     )
     evidence_sources: str = (
-        Field(..., description="List of primary source references or data points supporting the analysis.")
+        Field(..., description = (
+            "List of primary source references or data points supporting the analysis.")
+        )
     )
     impact_strength: float = (
-        Field(..., description="Rating of the factor's impact strength on a scale from 0 to 1.")
+        Field(..., description = (
+            "Rating of the factor's impact strength on a scale from 0 to 1.")
+        )
     )
     time_period_affected: str = (
-        Field(..., description="Time period during which the factor was most influential.")
+        Field(..., description = (
+            "Time period during which the factor was most influential.")
+        )
     )
     is_consensus: bool = (
-        Field(..., description="Whether there is scholarly consensus on the factor's significance.")
+        Field(..., description = (
+            "Whether there is scholarly consensus on the factor's significance.")
+        )
     )
 
 
@@ -62,41 +97,61 @@ class AnalyzeCulturalInfluencesOutput(BaseModel):
         Field(..., description="Names of cultural factors identified")
     )
     factor_categories: List[str] = (
-        Field(..., description="Category of each cultural factor (e.g., norm, value, artistic movement, religious belief, linguistic trend)")
+        Field(..., description = (
+            "Category of each cultural factor (e.g., norm, value, artistic movement, religious belief, linguistic trend)")
+        )
     )
     factor_descriptions: List[str] = (
         Field(..., description="Brief description of each cultural factor")
     )
     influence_scores: List[float] = (
-        Field(..., description="Estimated influence score of each factor on the historical event or period (0 to 1)")
+        Field(..., description = (
+            "Estimated influence score of each factor on the historical event or period (0 to 1)")
+        )
     )
     is_significant: List[bool] = (
-        Field(..., description="Whether each factor is considered significant (True = significant, False = not significant)")
+        Field(..., description = (
+            "Whether each factor is considered significant (True = significant, False = not significant)")
+        )
     )
 
 
 class SynthesizeInfluencesOutput(BaseModel):
     """Pydantic model for synthesize_influences node outputs."""
     social_insights: str = (
-        Field(..., description="Key findings distilled from the social influence analysis.")
+        Field(..., description = (
+            "Key findings distilled from the social influence analysis.")
+        )
     )
     economic_insights: str = (
-        Field(..., description="Key findings distilled from the economic influence analysis.")
+        Field(..., description = (
+            "Key findings distilled from the economic influence analysis.")
+        )
     )
     political_insights: str = (
-        Field(..., description="Key findings distilled from the political influence analysis.")
+        Field(..., description = (
+            "Key findings distilled from the political influence analysis.")
+        )
     )
     cultural_insights: str = (
-        Field(..., description="Key findings distilled from the cultural influence analysis.")
+        Field(..., description = (
+            "Key findings distilled from the cultural influence analysis.")
+        )
     )
     synthesis_summary: str = (
-        Field(..., description="Overall synthesis describing how the identified influences interacted.")
+        Field(..., description = (
+            "Overall synthesis describing how the identified influences interacted.")
+        )
     )
     interaction_points: List[str] = (
-        Field(..., description="List of key interaction points where multiple influences converged.")
+        Field(..., description = (
+            "List of key interaction points where multiple influences converged.")
+        )
     )
     importance_scores: List[float] = (
-        Field(..., description="Relative importance (0.0\u20131.0) assigned to each influence category (social, economic, political, cultural).")
+        Field(..., description = (
+            "Relative importance (0.0\u20131.0) assigned to each influence category (social, economic, political, cultural).")
+        )
     )
 
 
@@ -201,12 +256,25 @@ def synthesize_influences(analyze_social_influences_input: AnalyzeSocialInfluenc
     [0.7, 0.1, 0.8, 0.0]
 
     """
+    validate_required_keys(social_input=analyze_social_influences_input, political_input=analyze_political_influences_input, economic_input=analyze_economic_influences_input, cultural_input=analyze_cultural_influences_input)
+    
+    social_insights: str = extract_social_insights(social_analysis=analyze_social_influences_input)
+    political_insights: str = extract_political_insights(political_analysis=analyze_political_influences_input)
+    economic_insights: str = extract_economic_insights(economic_analysis=analyze_economic_influences_input)
+    cultural_insights: str = extract_cultural_insights(cultural_analysis=analyze_cultural_influences_input)
+    
+    interaction_points: List[str] = identify_cross_sector_interactions(social_data=analyze_social_influences_input, political_data=analyze_political_influences_input, economic_data=analyze_economic_influences_input, cultural_data=analyze_cultural_influences_input)
+    
+    importance_scores: List[float] = calculate_relative_importance(social_input=analyze_social_influences_input, political_input=analyze_political_influences_input, economic_input=analyze_economic_influences_input, cultural_input=analyze_cultural_influences_input)
+    
+    synthesis_summary: str = generate_unified_narrative(social_insights=social_insights, political_insights=political_insights, economic_insights=economic_insights, cultural_insights=cultural_insights, interactions=interaction_points)
+    
     return SynthesizeInfluencesOutput(
-        social_insights="",
-        economic_insights="",
-        political_insights="",
-        cultural_insights="",
-        synthesis_summary="",
-        interaction_points=[],
-        importance_scores=[],
+        social_insights=social_insights,
+        economic_insights=economic_insights,
+        political_insights=political_insights,
+        cultural_insights=cultural_insights,
+        synthesis_summary=synthesis_summary,
+        interaction_points=interaction_points,
+        importance_scores=importance_scores
     )

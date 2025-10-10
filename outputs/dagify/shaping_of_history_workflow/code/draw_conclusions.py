@@ -5,44 +5,68 @@ from typing import List
 class SynthesizeInfluencesOutput(BaseModel):
     """Pydantic model for synthesize_influences node outputs."""
     social_insights: str = (
-        Field(..., description="Key findings distilled from the social influence analysis.")
+        Field(..., description = (
+            "Key findings distilled from the social influence analysis.")
+        )
     )
     economic_insights: str = (
-        Field(..., description="Key findings distilled from the economic influence analysis.")
+        Field(..., description = (
+            "Key findings distilled from the economic influence analysis.")
+        )
     )
     political_insights: str = (
-        Field(..., description="Key findings distilled from the political influence analysis.")
+        Field(..., description = (
+            "Key findings distilled from the political influence analysis.")
+        )
     )
     cultural_insights: str = (
-        Field(..., description="Key findings distilled from the cultural influence analysis.")
+        Field(..., description = (
+            "Key findings distilled from the cultural influence analysis.")
+        )
     )
     synthesis_summary: str = (
-        Field(..., description="Overall synthesis describing how the identified influences interacted.")
+        Field(..., description = (
+            "Overall synthesis describing how the identified influences interacted.")
+        )
     )
     interaction_points: List[str] = (
-        Field(..., description="List of key interaction points where multiple influences converged.")
+        Field(..., description = (
+            "List of key interaction points where multiple influences converged.")
+        )
     )
     importance_scores: List[float] = (
-        Field(..., description="Relative importance (0.0\u20131.0) assigned to each influence category (social, economic, political, cultural).")
+        Field(..., description = (
+            "Relative importance (0.0\u20131.0) assigned to each influence category (social, economic, political, cultural).")
+        )
     )
 
 
 class DrawConclusionsOutput(BaseModel):
     """Pydantic model for draw_conclusions node outputs."""
     conclusion_summary: str = (
-        Field(..., description="Concise summary of the main conclusions about the key drivers and outcomes.")
+        Field(..., description = (
+            "Concise summary of the main conclusions about the key drivers and outcomes.")
+        )
     )
     key_factors: List[str] = (
-        Field(..., description="List of primary factors identified as key drivers.")
+        Field(..., description = (
+            "List of primary factors identified as key drivers.")
+        )
     )
     impact_assessment: List[str] = (
-        Field(..., description="Assessment of each factor's impact level (e.g., high, medium, low).")
+        Field(..., description = (
+            "Assessment of each factor's impact level (e.g., high, medium, low).")
+        )
     )
     confidence_score: float = (
-        Field(..., description="Overall confidence level (0-1) in the conclusions.")
+        Field(..., description = (
+            "Overall confidence level (0-1) in the conclusions.")
+        )
     )
     recommendations: List[str] = (
-        Field(..., description="Actionable recommendations or implications derived from the conclusions.")
+        Field(..., description = (
+            "Actionable recommendations or implications derived from the conclusions.")
+        )
     )
 
 

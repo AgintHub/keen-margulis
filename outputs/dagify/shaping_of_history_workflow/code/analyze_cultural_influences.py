@@ -1,3 +1,9 @@
+from ._analyze_cultural_influences.validate_cultural_factors import validate_cultural_factors
+from ._analyze_cultural_influences.categorize_cultural_factors import categorize_cultural_factors
+from ._analyze_cultural_influences.generate_factor_descriptions import generate_factor_descriptions
+from ._analyze_cultural_influences.calculate_influence_scores import calculate_influence_scores
+from ._analyze_cultural_influences.determine_significance import determine_significance
+
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -5,16 +11,24 @@ from typing import List
 class IdentifyKeyFactorsOutput(BaseModel):
     """Pydantic model for identify_key_factors node outputs."""
     social_factors: List[str] = (
-        Field(..., description="List of primary social factors that influenced the event or period.")
+        Field(..., description = (
+            "List of primary social factors that influenced the event or period.")
+        )
     )
     political_factors: List[str] = (
-        Field(..., description="List of primary political factors that influenced the event or period.")
+        Field(..., description = (
+            "List of primary political factors that influenced the event or period.")
+        )
     )
     economic_factors: List[str] = (
-        Field(..., description="List of primary economic factors that influenced the event or period.")
+        Field(..., description = (
+            "List of primary economic factors that influenced the event or period.")
+        )
     )
     cultural_factors: List[str] = (
-        Field(..., description="List of primary cultural factors that influenced the event or period.")
+        Field(..., description = (
+            "List of primary cultural factors that influenced the event or period.")
+        )
     )
 
 
@@ -24,16 +38,22 @@ class AnalyzeCulturalInfluencesOutput(BaseModel):
         Field(..., description="Names of cultural factors identified")
     )
     factor_categories: List[str] = (
-        Field(..., description="Category of each cultural factor (e.g., norm, value, artistic movement, religious belief, linguistic trend)")
+        Field(..., description = (
+            "Category of each cultural factor (e.g., norm, value, artistic movement, religious belief, linguistic trend)")
+        )
     )
     factor_descriptions: List[str] = (
         Field(..., description="Brief description of each cultural factor")
     )
     influence_scores: List[float] = (
-        Field(..., description="Estimated influence score of each factor on the historical event or period (0 to 1)")
+        Field(..., description = (
+            "Estimated influence score of each factor on the historical event or period (0 to 1)")
+        )
     )
     is_significant: List[bool] = (
-        Field(..., description="Whether each factor is considered significant (True = significant, False = not significant)")
+        Field(..., description = (
+            "Whether each factor is considered significant (True = significant, False = not significant)")
+        )
     )
 
 
@@ -79,10 +99,22 @@ def analyze_cultural_influences(identify_key_factors_input: IdentifyKeyFactorsOu
     "No cultural factors provided. At least one is required."
 
     """
+    cultural_factors: List[str] = identify_key_factors_input.cultural_factors
+    
+    validated_factors: List[str] = validate_cultural_factors(factors=cultural_factors)
+    
+    factor_categories: List[str] = categorize_cultural_factors(factors=validated_factors)
+    
+    factor_descriptions: List[str] = generate_factor_descriptions(factors=validated_factors)
+    
+    influence_scores: List[float] = calculate_influence_scores(factors=validated_factors)
+    
+    is_significant: List[bool] = determine_significance(scores=influence_scores)
+    
     return AnalyzeCulturalInfluencesOutput(
-        cultural_factors=[],
-        factor_categories=[],
-        factor_descriptions=[],
-        influence_scores=[],
-        is_significant=[],
+        cultural_factors=validated_factors,
+        factor_categories=factor_categories,
+        factor_descriptions=factor_descriptions,
+        influence_scores=influence_scores,
+        is_significant=is_significant,
     )
