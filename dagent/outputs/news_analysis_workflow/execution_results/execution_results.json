@@ -1,31 +1,31 @@
 {
   "analyze_sentiment": {
     "output": {
-      "output": "The overall sentiment of the news articles is positive."
+      "output": "{\"sentiment_analysis\": {\"politics\": {\"article1\": \"neutral\", \"article2\": \"positive\"}, \"economics\": {\"article3\": \"positive\"}, \"social issues\": {\"article4\": \"positive\"}}}"
     },
     "description": "Analyze the sentiment of the news articles."
   },
   "categorize_news_articles": {
     "output": {
-      "output": "{\"politics\": [\"Government announces new policy on climate change.\"], \"economics\": [\"Stock market sees significant gains today.\"], \"social issues\": [\"Community rallies for social justice.\"]}"
+      "output": "{\"politics\": [\"article1\", \"article2\"], \"economics\": [\"article3\"], \"social issues\": [\"article4\"]}"
     },
     "description": "Categorize news articles by topic or theme."
   },
   "compile_analysis_report": {
     "output": {
-      "output": "The overall sentiment of the news articles is positive. The trends or patterns in the news articles are as follows: The government has announced a new policy on climate change, indicating a significant development in politics. The stock market has seen significant gains, suggesting a positive trend in economics. The community has rallied for social justice, highlighting ongoing activism in social issues."
+      "output": "The sentiment analysis revealed the following insights: \n- Politics: article1 had a neutral sentiment, while article2 had a positive sentiment.\n- Economics: article3 had a positive sentiment.\n- Social issues: article4 had a positive sentiment.\n\nThe trend identification highlighted the following key areas:\n- Government and policy: A focus on governmental actions and policy changes.\n- Economic optimism: Positive economic growth indicators.\n- Social advocacy: Advocacy for educational reform."
     },
     "description": "Compile the sentiment and trend data produced by the preceding analysis nodes into a single, coherent textual report and concise summaries."
   },
   "filter_news_articles": {
     "output": {
-      "output": "Filtered news articles after removing irrelevant or redundant ones."
+      "output": "Filtered news articles, removing irrelevant or redundant content from the collection."
     },
     "description": "Filter out irrelevant or redundant news articles."
   },
   "identify_trends": {
     "output": {
-      "output": "The trends or patterns in the news articles are as follows: The government has announced a new policy on climate change, indicating a significant development in politics. The stock market has seen significant gains, suggesting a positive trend in economics. The community has rallied for social justice, highlighting ongoing activism in social issues."
+      "output": "{\"trends\": {\"government_and_policy\": \"A focus on governmental actions and policy changes.\", \"economic_optimism\": \"Positive economic growth indicators.\", \"social_advocacy\": \"Advocacy for educational reform.\"}}"
     },
     "description": "Identify trends or patterns in the news articles."
   },
@@ -37,7 +37,7 @@
   },
   "summarize_news_articles": {
     "output": {
-      "output": "The key points of the news articles are as follows: In politics, the government has announced a new policy on climate change. In economics, the stock market has seen significant gains today. In social issues, the community has rallied for social justice."
+      "output": "{\"politics\": {\"article1\": \"Discussions on budget allocations for the upcoming fiscal year.\", \"article2\": \"New legislation proposed to enhance public transportation systems.\"}, \"economics\": {\"article3\": \"Economic growth rates exceed expectations, leading to market optimism.\"}, \"social issues\": {\"article4\": \"Community leaders advocate for educational reform.\"}}"
     },
     "description": "Summarize the key points of the news articles."
   }
