@@ -1,6 +1,5 @@
-dag_type: plain_text
-description: A workflow for analyzing and understanding the shaping of history through
-  various factors and events.
+dag_type: typed
+description: Generated workflow from UI.
 name: shaping_of_history_workflow
 nodes:
   analyze_cultural_influences:
@@ -11,6 +10,25 @@ nodes:
     nodes_depended_on:
     - identify_key_factors
     nodes_dependent_on: []
+    output_structure:
+    - description: Names of cultural factors identified
+      key: cultural_factors
+      type: List[str]
+    - description: Category of each cultural factor (e.g., norm, value, artistic movement,
+        religious belief, linguistic trend)
+      key: factor_categories
+      type: List[str]
+    - description: Brief description of each cultural factor
+      key: factor_descriptions
+      type: List[str]
+    - description: Estimated influence score of each factor on the historical event
+        or period (0 to 1)
+      key: influence_scores
+      type: List[float]
+    - description: Whether each factor is considered significant (True = significant,
+        False = not significant)
+      key: is_significant
+      type: List[bool]
     prompt: Analyze how cultural norms, values, or artistic movements influenced the
       historical event or period.
   analyze_economic_influences:
@@ -21,6 +39,26 @@ nodes:
     nodes_depended_on:
     - identify_key_factors
     nodes_dependent_on: []
+    output_structure:
+    - description: Name of the economic factor considered
+      key: economic_factor_name
+      type: str
+    - description: Brief description of how this factor impacted the event
+      key: impact_summary
+      type: str
+    - description: List of primary source references or data points supporting the
+        analysis
+      key: evidence_sources
+      type: List[str]
+    - description: Rating of the factor's impact strength on a scale from 0 to 1
+      key: impact_strength
+      type: float
+    - description: Time period during which the factor was most influential
+      key: time_period_affected
+      type: str
+    - description: Whether there is scholarly consensus on the factor's significance
+      key: is_consensus
+      type: bool
     prompt: Evaluate the economic conditions, trade, or financial events that impacted
       the historical event or period.
   analyze_political_influences:
@@ -31,6 +69,21 @@ nodes:
     nodes_depended_on:
     - identify_key_factors
     nodes_dependent_on: []
+    output_structure:
+    - description: Key political decisions that influenced the historical event or
+        period.
+      key: political_decisions
+      type: List[str]
+    - description: Policies enacted that had an impact on the event or period.
+      key: policies_influenced
+      type: List[str]
+    - description: Principal political leaders or figures involved in shaping the
+        event.
+      key: leadership_figures
+      type: List[str]
+    - description: Concise summary of political influence on the event.
+      key: summary
+      type: str
     prompt: Examine the political decisions, policies, or leadership that influenced
       the historical event or period.
   analyze_social_influences:
@@ -41,6 +94,22 @@ nodes:
     nodes_depended_on:
     - identify_key_factors
     nodes_dependent_on: []
+    output_structure:
+    - description: Total number of distinct social factors identified.
+      key: number_of_factors
+      type: int
+    - description: List of names or brief descriptions of each social factor that
+        influenced the event.
+      key: social_factors
+      type: List[str]
+    - description: Impact rating for each social factor on a scale from 0.0 (minimal)
+        to 1.0 (major). Order corresponds to the social_factors list.
+      key: impact_scores
+      type: List[float]
+    - description: A concise narrative summarizing how the identified social factors
+        interacted to shape the historical event.
+      key: summary
+      type: str
     prompt: Analyze how social structures, movements, or changes impacted the historical
       event or period.
   compile_historical_narrative:
@@ -51,6 +120,29 @@ nodes:
     nodes_depended_on:
     - draw_conclusions
     nodes_dependent_on: []
+    output_structure:
+    - description: Title of the historical narrative.
+      key: narrative_title
+      type: str
+    - description: Introductory paragraph setting the scene.
+      key: introduction
+      type: str
+    - description: Summary of the historical context.
+      key: historical_context
+      type: str
+    - description: List of key factors (cultural, economic, political, social) influencing
+        the event.
+      key: key_factors
+      type: List[str]
+    - description: Summary of how these factors impacted the event.
+      key: impact_summary
+      type: str
+    - description: Concluding remarks linking narrative to the conclusions drawn.
+      key: conclusion
+      type: str
+    - description: Full cohesive narrative string combining all parts.
+      key: overall_narrative
+      type: str
     prompt: Create a comprehensive narrative that weaves together the historical context,
       key factors, and their impacts.
   define_historical_context:
@@ -59,6 +151,14 @@ nodes:
     name: define_historical_context
     nodes_depended_on: []
     nodes_dependent_on: []
+    output_structure:
+    - description: The name or title of the historical event or period being studied
+      key: historical_event
+      type: str
+    - description: The approximate time range (e.g., years or dates) of the event
+        or period
+      key: time_frame
+      type: str
     prompt: Identify the specific historical period or event that will be the focus
       of the analysis.
   draw_conclusions:
@@ -68,6 +168,23 @@ nodes:
     nodes_depended_on:
     - synthesize_influences
     nodes_dependent_on: []
+    output_structure:
+    - description: Concise summary of the main conclusions about the key drivers and
+        outcomes.
+      key: conclusion_summary
+      type: str
+    - description: List of primary factors identified as key drivers.
+      key: key_factors
+      type: List[str]
+    - description: Assessment of each factor's impact level (e.g., high, medium, low).
+      key: impact_assessment
+      type: List[str]
+    - description: Overall confidence level (0-1) in the conclusions.
+      key: confidence_score
+      type: float
+    - description: Actionable recommendations or implications derived from the conclusions.
+      key: recommendations
+      type: List[str]
     prompt: Based on the synthesized analysis, draw conclusions about the key drivers
       and outcomes of the historical event or period.
   identify_key_factors:
@@ -78,6 +195,20 @@ nodes:
     nodes_depended_on:
     - define_historical_context
     nodes_dependent_on: []
+    output_structure:
+    - description: List of primary social factors that influenced the event or period.
+      key: social_factors
+      type: List[str]
+    - description: List of primary political factors that influenced the event or
+        period.
+      key: political_factors
+      type: List[str]
+    - description: List of primary economic factors that influenced the event or period.
+      key: economic_factors
+      type: List[str]
+    - description: List of primary cultural factors that influenced the event or period.
+      key: cultural_factors
+      type: List[str]
     prompt: List the primary factors (social, political, economic, cultural) that
       shaped the identified historical event or period.
   synthesize_influences:
@@ -91,5 +222,28 @@ nodes:
     - analyze_economic_influences
     - analyze_cultural_influences
     nodes_dependent_on: []
+    output_structure:
+    - description: Key findings from the social influence analysis.
+      key: social_insights
+      type: str
+    - description: Key findings from the economic influence analysis.
+      key: economic_insights
+      type: str
+    - description: Key findings from the political influence analysis.
+      key: political_insights
+      type: str
+    - description: Key findings from the cultural influence analysis.
+      key: cultural_insights
+      type: str
+    - description: Overall synthesis of how the identified influences interacted.
+      key: synthesis_summary
+      type: str
+    - description: List of key interaction points where multiple influences converged.
+      key: interaction_points
+      type: List[str]
+    - description: Relative importance (0.0–1.0) assigned to each influence category
+        in shaping the event.
+      key: importance_scores
+      type: List[float]
     prompt: Synthesize the findings from the various analyses to understand how different
       factors interacted to shape the historical event or period.
