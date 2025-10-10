@@ -5,6 +5,13 @@ from ._define_workflow_objective.generate_objective_statement import generate_ob
 from ._define_workflow_objective.validate_objective_length import validate_objective_length
 from ._define_workflow_objective.refine_objective_clarity import refine_objective_clarity
 
+from ._define_workflow_objective.parse_user_input import parse_user_input
+from ._define_workflow_objective.extract_requirements import extract_requirements
+from ._define_workflow_objective.identify_domain import identify_domain
+from ._define_workflow_objective.generate_objective_statement import generate_objective_statement
+from ._define_workflow_objective.validate_objective_length import validate_objective_length
+from ._define_workflow_objective.refine_objective_clarity import refine_objective_clarity
+
 from pydantic import BaseModel, Field
 
 

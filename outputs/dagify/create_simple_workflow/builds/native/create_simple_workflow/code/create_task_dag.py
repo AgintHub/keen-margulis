@@ -6,6 +6,14 @@ from ._create_task_dag.check_dag_acyclicity import check_dag_acyclicity
 from ._create_task_dag.format_task_list import format_task_list
 from ._create_task_dag.format_edge_list import format_edge_list
 
+from ._create_task_dag.parse_dependency_strings import parse_dependency_strings
+from ._create_task_dag.validate_task_references import validate_task_references
+from ._create_task_dag.extract_edge_sources import extract_edge_sources
+from ._create_task_dag.extract_edge_destinations import extract_edge_destinations
+from ._create_task_dag.check_dag_acyclicity import check_dag_acyclicity
+from ._create_task_dag.format_task_list import format_task_list
+from ._create_task_dag.format_edge_list import format_edge_list
+
 from pydantic import BaseModel, Field
 from typing import List
 

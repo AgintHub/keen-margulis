@@ -3,6 +3,11 @@ from ._decompose_objective_into_tasks.parse_objective_components import parse_ob
 from ._decompose_objective_into_tasks.generate_task_sequence import generate_task_sequence
 from ._decompose_objective_into_tasks.refine_task_descriptions import refine_task_descriptions
 
+from ._decompose_objective_into_tasks.validate_workflow_objective import validate_workflow_objective
+from ._decompose_objective_into_tasks.parse_objective_components import parse_objective_components
+from ._decompose_objective_into_tasks.generate_task_sequence import generate_task_sequence
+from ._decompose_objective_into_tasks.refine_task_descriptions import refine_task_descriptions
+
 from pydantic import BaseModel, Field
 from typing import List
 
