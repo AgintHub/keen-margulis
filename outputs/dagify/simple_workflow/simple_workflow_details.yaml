@@ -1,41 +1,49 @@
 dag_type: plain_text
-description: A workflow that consists of atomic, self-contained tasks that are executed
-  concurrently
+description: A simple workflow DAG with fundamental steps
 name: simple_workflow
 nodes:
-  task_1:
+  end_node:
     agent: false
-    description: Perform the first task
-    name: task_1
+    description: The ending point of the workflow
+    name: end_node
+    nodes_depended_on:
+    - step_3
+    nodes_dependent_on: []
+    prompt: Finalize the workflow
+  start_node:
+    agent: false
+    description: The starting point of the workflow
+    name: start_node
     nodes_depended_on: []
     nodes_dependent_on:
-    - task_2
-    - task_3
-    prompt: Execute task 1
-  task_2:
+    - step_1
+    - step_2
+    prompt: Initialize the workflow
+  step_1:
     agent: false
-    description: Perform the second task
-    name: task_2
+    description: The first step in the workflow
+    name: step_1
     nodes_depended_on:
-    - task_1
+    - start_node
     nodes_dependent_on:
-    - task_4
-    prompt: Execute task 2
-  task_3:
+    - step_3
+    prompt: Perform the first task
+  step_2:
     agent: false
-    description: Perform the third task
-    name: task_3
+    description: The second step in the workflow
+    name: step_2
     nodes_depended_on:
-    - task_1
+    - start_node
     nodes_dependent_on:
-    - task_4
-    prompt: Execute task 3
-  task_4:
+    - step_3
+    prompt: Perform the second task
+  step_3:
     agent: false
-    description: Perform the fourth task
-    name: task_4
+    description: The third step in the workflow, dependent on step 1 and step 2
+    name: step_3
     nodes_depended_on:
-    - task_2
-    - task_3
-    nodes_dependent_on: []
-    prompt: Execute task 4
+    - step_1
+    - step_2
+    nodes_dependent_on:
+    - end_node
+    prompt: Perform the third task using outputs from step 1 and step 2

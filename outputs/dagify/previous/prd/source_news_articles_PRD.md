@@ -1,43 +1,35 @@
 # source_news_articles PRD
 
 ## Description
-Gather news articles from various sources.
+Collects a curated set of news articles from multiple online sources, returning URLs, titles, texts, and source names for each article. The function is designed for robustness, logging, and graceful error handling, producing a Pydantic model for downstream processing.
 
 
 ## Conceptual Info
 
-The `source_news_articles` node fetches a curated set of news articles from multiple online sources, ensuring coverage of a broad spectrum of topics and viewpoints. It outputs the raw data needed for downstream filtering, categorization, summarization, sentiment analysis, and trend identification.
+The source_news_articles node fetches a diversified set of news articles from a curated list of online media outlets. It normalizes the data into a consistent structure, logs key events for observability, and gracefully handles source‑specific failures while ensuring that downstream nodes receive a complete, validated payload.
 
 ## Docstring
 
 ### Summary
-Collects news articles from a predefined list of sources, returning metadata and content for each article.
+Retrieve news articles from a set of predefined sources, returning structured metadata and content.
+
+### Parameters
+
+- **general_input** (str | None): Optional textual input that can be used to influence source selection or filtering. Currently unused but kept for compatibility.
+- **kwargs** (dict): Additional keyword arguments forwarded to downstream helpers.
 
 ### Returns
 
-dict: A dictionary containing the following keys:
-- `article_urls`: List[str]
-- `article_titles`: List[str]
-- `article_texts`: List[str]
-- `article_sources`: List[str]
-- `article_count`: int
-- `fetch_successful`: bool
+SourceNewsArticlesOutput: Model containing article URLs, titles, texts, source names, count, and a success flag.
 
 ### Raises
 
-- ConnectionError: Raised when the network connection to a news source fails.
-- ValueError: Raised if the fetched data is empty or cannot be parsed.
+- ValueError: Raised when an unexpected type is passed or collected data cannot be validated.
 
 ### Examples
 
 ```python
 >>> result = source_news_articles()
->>> print(result['article_count'])
-5
-```
-
-```python
->>> result = source_news_articles()
->>> print(result['article_urls'])
-['https://example.com/article1', 'https://example.org/news/2', 'https://news.com/story3']
+>>> print(result.article_count)
+7
 ```

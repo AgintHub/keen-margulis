@@ -1,7 +1,7 @@
 # filter_news_articles PRD
 
 ## Description
-Filter out irrelevant or redundant news articles.
+Enhances the original filtering logic by adding comprehensive input validation, detailed logging, and fallback handling to ensure reliability in downstream analyses.
 
 
 ## Conceptual Info
@@ -11,49 +11,50 @@ The filter_news_articles node cleanses a batch of fetched news articles by remov
 ## Docstring
 
 ### Summary
-Filter out irrelevant or duplicate news articles from a collected set.
+Filter news articles to remove irrelevant or duplicate entries.
 
 ### Parameters
 
-- **article_titles** (List[str]): Headlines of the news articles collected by the source_news_articles node.
-- **article_texts** (List[str]): Full text content of each news article.
-- **article_count** (int): Total number of articles provided. Used to validate that titles and texts lists are consistent.
+- **source_news_articles_input** (SourceNewsArticlesOutput): Validated output from the source_news_articles node.
 
 ### Returns
 
-Tuple[List[str], List[str], bool]: A tuple containing (filtered_article_ids, removed_article_ids, filter_success).
+FilterNewsArticlesOutput: Output containing filtered and removed article ids, and a success flag.
 
 ### Raises
 
-- ValueError: Raised if the lengths of article_titles and article_texts do not match article_count, indicating malformed input.
-- RuntimeError: Raised if an internal filtering error occurs, such as failure to compute similarity scores.
+- ValueError: Raised when input validation fails.
+- RuntimeError: Raised when internal filtering logic encounters an unexpected error.
 
 ### Examples
 
 ```python
->>> filtered, removed, success = filter_news_articles(
-
-...     article_titles=['A', 'B', 'C'],
-
+>>> from filter_news_articles import filter_news_articles, SourceNewsArticlesOutput, FilterNewsArticlesOutput
+>>> # Sample input with three articles
+>>> input_data = SourceNewsArticlesOutput(
+...     article_urls=['url1', 'url2', 'url3'],
+...     article_titles=['Title A', 'Title B', 'Title C'],
 ...     article_texts=['text A', 'text B', 'text C'],
-
-...     article_count=3
-
+...     article_sources=['Source X', 'Source Y', 'Source Z'],
+...     article_count=3,
+...     fetch_successful=True
 >>> )
->>> print(filtered, removed, success)
-(['A', 'B', 'C'], [], True)
+>>> output = filter_news_articles(input_data)
+>>> print(output)
+FilterNewsArticlesOutput(filtered_article_ids=['Title A', 'Title B', 'Title C'], removed_article_ids=[], filter_success=True)
 ```
 
 ```python
->>> filtered, removed, success = filter_news_articles(
-
-...     article_titles=['A', 'B', 'C', 'B'],
-
-...     article_texts=['text A', 'text B', 'text C', 'text B'],
-
-...     article_count=4
-
+>>> # Sample input with a duplicate title
+>>> input_data = SourceNewsArticlesOutput(
+...     article_urls=['url1', 'url2', 'url3'],
+...     article_titles=['Title A', 'Title B', 'Title B'],
+...     article_texts=['text A', 'text B', 'text B'],
+...     article_sources=['Source X', 'Source Y', 'Source Y'],
+...     article_count=3,
+...     fetch_successful=True
 >>> )
->>> print(filtered, removed, success)
-(['A', 'B', 'C'], ['B'], True)
+>>> output = filter_news_articles(input_data)
+>>> print(output)
+FilterNewsArticlesOutput(filtered_article_ids=['Title A', 'Title B'], removed_article_ids=['Title B'], filter_success=True)
 ```
