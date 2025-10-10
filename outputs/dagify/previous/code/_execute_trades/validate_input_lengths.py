@@ -1,3 +1,6 @@
+import json
+
+
 def validate_input_lengths(signals: str, confidence: str) -> str:
     """
     Validates that the input lists 'signals' and 'confidence' have the same
@@ -33,4 +36,14 @@ def validate_input_lengths(signals: str, confidence: str) -> str:
     ValueError: 'Lengths of signals and confidence do not match'
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    
+    try:
+        signals_list = json.loads(signals)
+        confidence_list = json.loads(confidence)
+    except json.JSONDecodeError:
+        raise ValueError("Invalid JSON format for input parameters")
+    
+    if len(signals_list) != len(confidence_list):
+        raise ValueError("Lengths of signals and confidence do not match")
+    
+    return "Input lengths are valid"

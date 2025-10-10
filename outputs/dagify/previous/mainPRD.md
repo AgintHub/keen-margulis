@@ -1,67 +1,21 @@
-# trading_workflow - Complete PRD Documentation
+# evaluate_strategies_against_trends - Complete PRD Documentation
 
 ## Overview
-PRDs for nodes in the 'trading_workflow' module.
+PRDs for nodes in the 'evaluate_strategies_against_trends' module.
 
 ## Table of Contents
-
-- [gather_market_data](#gather_market_data)
 
 - [analyze_market_trends](#analyze_market_trends)
 
 - [evaluate_trading_strategies](#evaluate_trading_strategies)
 
-- [generate_trading_signals](#generate_trading_signals)
-
 - [execute_trades](#execute_trades)
 
+- [gather_market_data](#gather_market_data)
+
+- [generate_trading_signals](#generate_trading_signals)
+
 - [monitor_trade_performance](#monitor_trade_performance)
-
-
-
----
-
-## gather_market_data
-
-### Description
-Collect relevant market data including prices, volumes, and other indicators
-
-### Conceptual Info
-
-The gather_market_data node is responsible for collecting relevant market data, including current and historical prices, as well as trading volumes for specified assets or instruments.
-
-### Docstring
-
-**Summary:** Gathers current and historical market data for the specified assets or instruments, returning current prices, historical prices, and trading volumes.
-
-**Parameters:**
-
-- assets (List[str]): List of asset symbols or identifiers to gather data for.
-- start_date (str): Start date for historical data in 'YYYY-MM-DD' format.
-- end_date (str): End date for historical data in 'YYYY-MM-DD' format.
-**Returns:** Tuple[List[float], List[float], List[float]] - A tuple containing three lists: current prices, historical prices, and trading volumes for the specified assets.
-
-**Raises:**
-
-- ValueError: If the assets list is empty or if the start_date is later than end_date.
-- ConnectionError: If there's a failure in connecting to the data source.
-**Examples:**
-
-```python
->>> assets = ['AAPL', 'GOOG']
->>> start_date = '2022-01-01'
->>> end_date = '2022-12-31'
->>> result = gather_market_data(assets, start_date, end_date)
-([150.0, 2800.0], [120.0, 130.0, ...], [1000.0, 2000.0])
-```
-
-```python
->>> assets = ['MSFT']
->>> start_date = '2023-01-01'
->>> end_date = '2023-01-31'
->>> result = gather_market_data(assets, start_date, end_date)
-([250.0], [240.0, 245.0, ...], [500.0])
-```
 
 
 
@@ -154,49 +108,6 @@ This node evaluates various trading strategies based on the analyzed market tren
 
 ---
 
-## generate_trading_signals
-
-### Description
-Generate trading signals based on the recommended strategies
-
-### Conceptual Info
-
-This node generates trading signals (buy/sell/hold) based on the recommended trading strategies evaluated by its parent node.
-
-### Docstring
-
-**Summary:** Generate trading signals and their confidence levels based on recommended strategies.
-
-**Parameters:**
-
-- strategy_evaluations (List[str]): Evaluations of different trading strategies from the parent node 'evaluate_trading_strategies'.
-- recommended_strategies (List[str]): Recommended trading strategies based on the evaluations from the parent node 'evaluate_trading_strategies'.
-**Returns:** Tuple[List[str], List[float]] - A tuple containing a list of generated trading signals and a list of their corresponding confidence levels.
-
-**Raises:**
-
-- ValueError: If the input lists 'strategy_evaluations' and 'recommended_strategies' are of different lengths.
-- TypeError: If the input lists contain elements of incorrect types.
-**Examples:**
-
-```python
->>> strategy_evaluations = ['good', 'bad', 'neutral']
->>> recommended_strategies = ['buy', 'sell', 'hold']
->>> trading_signals, signal_confidence = generate_trading_signals(strategy_evaluations, recommended_strategies)
-(['buy', 'sell', 'hold'], [0.8, 0.7, 0.9])
-```
-
-```python
->>> strategy_evaluations = ['excellent', 'poor']
->>> recommended_strategies = ['buy', 'sell']
->>> trading_signals, signal_confidence = generate_trading_signals(strategy_evaluations, recommended_strategies)
-(['buy', 'sell'], [0.9, 0.6])
-```
-
-
-
----
-
 ## execute_trades
 
 ### Description
@@ -234,6 +145,95 @@ This node executes trades based on the generated trading signals, providing resu
 >>> signal_confidence = [0.85, 0.65]
 >>> trade_results, trade_status = execute_trades(trading_signals, signal_confidence)
 (['trade executed', 'trade executed'], ['success', 'success'])
+```
+
+
+
+---
+
+## gather_market_data
+
+### Description
+Collect relevant market data including prices, volumes, and other indicators
+
+### Conceptual Info
+
+The gather_market_data node is responsible for collecting relevant market data, including current and historical prices, as well as trading volumes for specified assets or instruments.
+
+### Docstring
+
+**Summary:** Gathers current and historical market data for the specified assets or instruments, returning current prices, historical prices, and trading volumes.
+
+**Parameters:**
+
+- assets (List[str]): List of asset symbols or identifiers to gather data for.
+- start_date (str): Start date for historical data in 'YYYY-MM-DD' format.
+- end_date (str): End date for historical data in 'YYYY-MM-DD' format.
+**Returns:** Tuple[List[float], List[float], List[float]] - A tuple containing three lists: current prices, historical prices, and trading volumes for the specified assets.
+
+**Raises:**
+
+- ValueError: If the assets list is empty or if the start_date is later than end_date.
+- ConnectionError: If there's a failure in connecting to the data source.
+**Examples:**
+
+```python
+>>> assets = ['AAPL', 'GOOG']
+>>> start_date = '2022-01-01'
+>>> end_date = '2022-12-31'
+>>> result = gather_market_data(assets, start_date, end_date)
+([150.0, 2800.0], [120.0, 130.0, ...], [1000.0, 2000.0])
+```
+
+```python
+>>> assets = ['MSFT']
+>>> start_date = '2023-01-01'
+>>> end_date = '2023-01-31'
+>>> result = gather_market_data(assets, start_date, end_date)
+([250.0], [240.0, 245.0, ...], [500.0])
+```
+
+
+
+---
+
+## generate_trading_signals
+
+### Description
+Generate trading signals based on the recommended strategies
+
+### Conceptual Info
+
+This node generates trading signals (buy/sell/hold) based on the recommended trading strategies evaluated by its parent node.
+
+### Docstring
+
+**Summary:** Generate trading signals and their confidence levels based on recommended strategies.
+
+**Parameters:**
+
+- strategy_evaluations (List[str]): Evaluations of different trading strategies from the parent node 'evaluate_trading_strategies'.
+- recommended_strategies (List[str]): Recommended trading strategies based on the evaluations from the parent node 'evaluate_trading_strategies'.
+**Returns:** Tuple[List[str], List[float]] - A tuple containing a list of generated trading signals and a list of their corresponding confidence levels.
+
+**Raises:**
+
+- ValueError: If the input lists 'strategy_evaluations' and 'recommended_strategies' are of different lengths.
+- TypeError: If the input lists contain elements of incorrect types.
+**Examples:**
+
+```python
+>>> strategy_evaluations = ['good', 'bad', 'neutral']
+>>> recommended_strategies = ['buy', 'sell', 'hold']
+>>> trading_signals, signal_confidence = generate_trading_signals(strategy_evaluations, recommended_strategies)
+(['buy', 'sell', 'hold'], [0.8, 0.7, 0.9])
+```
+
+```python
+>>> strategy_evaluations = ['excellent', 'poor']
+>>> recommended_strategies = ['buy', 'sell']
+>>> trading_signals, signal_confidence = generate_trading_signals(strategy_evaluations, recommended_strategies)
+(['buy', 'sell'], [0.9, 0.6])
 ```
 
 

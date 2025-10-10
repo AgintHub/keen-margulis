@@ -32,4 +32,19 @@ def calculate_success_rate(trade_status: str) -> float:
     1.0
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    if not isinstance(trade_status, list):
+        raise TypeError("Input must be a list")
+    
+    if len(trade_status) == 0:
+        raise ValueError("Input list cannot be empty")
+    
+    for status in trade_status:
+        if not isinstance(status, str):
+            raise TypeError("All elements in the list must be strings")
+        if status not in ['success', 'failure']:
+            raise ValueError("Invalid status value. Must be 'success' or 'failure'")
+    
+    success_count = trade_status.count('success')
+    total_count = len(trade_status)
+    
+    return success_count / total_count

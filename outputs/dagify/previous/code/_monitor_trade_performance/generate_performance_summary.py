@@ -34,4 +34,21 @@ def generate_performance_summary(success_rate: str, average_profit: str) -> str:
     'Trade performance summary: 90.0% success rate, average profit: $200.75'
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    if not isinstance(success_rate, str):
+        raise TypeError("success_rate must be a string")
+    if not isinstance(average_profit, str):
+        raise TypeError("average_profit must be a string")
+    
+    try:
+        success_rate_float = float(success_rate)
+    except ValueError:
+        raise ValueError("success_rate cannot be converted to a float")
+    
+    try:
+        average_profit_float = float(average_profit)
+    except ValueError:
+        raise ValueError("average_profit cannot be converted to a float")
+    
+    success_rate_percentage = success_rate_float * 100
+    
+    return f"Trade performance summary: {success_rate_percentage}% success rate, average profit: ${average_profit_float:.2f}"

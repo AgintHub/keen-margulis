@@ -21,4 +21,19 @@ def get_available_trading_strategies() -> List[str]:
     ['Strategy1', 'Strategy2', 'Strategy3']
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    try:
+        strategies = [
+            "MovingAverageCrossover",
+            "RSIStrategy",
+            "BollingerBands",
+            "MACDStrategy",
+            "MeanReversion",
+            "MomentumStrategy",
+            "PairsTradingStrategy",
+            "ArbitrageStrategy",
+            "TrendFollowing",
+            "GridTradingStrategy"
+        ]
+        return strategies
+    except Exception as e:
+        raise RuntimeError("If the list of available trading strategies cannot be retrieved.") from e

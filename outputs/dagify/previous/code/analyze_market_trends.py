@@ -5,6 +5,13 @@ from ._analyze_market_trends.analyze_volume_indicators import analyze_volume_ind
 from ._analyze_market_trends.combine_trend_indicators import combine_trend_indicators
 from ._analyze_market_trends.identify_chart_patterns import identify_chart_patterns
 
+from ._analyze_market_trends.validate_input_data import validate_input_data
+from ._analyze_market_trends.normalize_market_data import normalize_market_data
+from ._analyze_market_trends.analyze_price_trends import analyze_price_trends
+from ._analyze_market_trends.analyze_volume_indicators import analyze_volume_indicators
+from ._analyze_market_trends.combine_trend_indicators import combine_trend_indicators
+from ._analyze_market_trends.identify_chart_patterns import identify_chart_patterns
+
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -15,7 +22,9 @@ class GatherMarketDataOutput(BaseModel):
         Field(..., description="Current prices of the assets")
     )
     historical_prices: List[float] = (
-        Field(..., description="Historical price data for the assets over a specified period")
+        Field(..., description = (
+            "Historical price data for the assets over a specified period")
+        )
     )
     trading_volumes: List[float] = (
         Field(..., description="Trading volumes for the assets")
@@ -25,7 +34,9 @@ class GatherMarketDataOutput(BaseModel):
 class AnalyzeMarketTrendsOutput(BaseModel):
     """Pydantic model for analyze_market_trends node outputs."""
     trend_indicators: List[str] = (
-        Field(..., description="Indicators of market trends (e.g., bullish, bearish)")
+        Field(..., description = (
+            "Indicators of market trends (e.g., bullish, bearish)")
+        )
     )
     pattern_recognition: List[str] = (
         Field(..., description="Patterns recognized in the market data")

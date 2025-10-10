@@ -1,13 +1,18 @@
-dag_type: shim
-description: A comprehensive trading workflow that includes data gathering, analysis,
-  and decision-making
-name: trading_workflow
+dag_type: pure
+description: Generated workflow from UI.
+name: evaluate_strategies_against_trends
 nodes:
   analyze_market_trends:
     agent: false
-    code_node_type: shim
+    code_node_type: pure
     description: Analyze market trends based on the gathered data
     implementation: "from ._analyze_market_trends.validate_input_data import validate_input_data\n\
+      from ._analyze_market_trends.normalize_market_data import normalize_market_data\n\
+      from ._analyze_market_trends.analyze_price_trends import analyze_price_trends\n\
+      from ._analyze_market_trends.analyze_volume_indicators import analyze_volume_indicators\n\
+      from ._analyze_market_trends.combine_trend_indicators import combine_trend_indicators\n\
+      from ._analyze_market_trends.identify_chart_patterns import identify_chart_patterns\n\
+      \nfrom ._analyze_market_trends.validate_input_data import validate_input_data\n\
       from ._analyze_market_trends.normalize_market_data import normalize_market_data\n\
       from ._analyze_market_trends.analyze_price_trends import analyze_price_trends\n\
       from ._analyze_market_trends.analyze_volume_indicators import analyze_volume_indicators\n\
@@ -17,30 +22,30 @@ nodes:
       \ GatherMarketDataOutput(BaseModel):\n    \"\"\"Pydantic model for gather_market_data\
       \ node outputs.\"\"\"\n    current_prices: List[float] = (\n        Field(...,\
       \ description=\"Current prices of the assets\")\n    )\n    historical_prices:\
-      \ List[float] = (\n        Field(..., description=\"Historical price data for\
-      \ the assets over a specified period\")\n    )\n    trading_volumes: List[float]\
-      \ = (\n        Field(..., description=\"Trading volumes for the assets\")\n\
-      \    )\n\n\nclass AnalyzeMarketTrendsOutput(BaseModel):\n    \"\"\"Pydantic\
-      \ model for analyze_market_trends node outputs.\"\"\"\n    trend_indicators:\
-      \ List[str] = (\n        Field(..., description=\"Indicators of market trends\
-      \ (e.g., bullish, bearish)\")\n    )\n    pattern_recognition: List[str] = (\n\
-      \        Field(..., description=\"Patterns recognized in the market data\")\n\
-      \    )\n\n\ndef analyze_market_trends(gather_market_data_input: GatherMarketDataOutput,\
-      \ **kwargs) -> AnalyzeMarketTrendsOutput:\n    \"\"\"\n    Analyzes market trends\
-      \ based on gathered data.\n\n    Parameters\n    ----------\n    current_prices\
-      \ : List[float]\n        Current prices of the assets gathered by the gather_market_data\n\
-      \        node.\n    historical_prices : List[float]\n        Historical price\
-      \ data for the assets over a specified period\n        gathered by the gather_market_data\
-      \ node.\n    trading_volumes : List[float]\n        Trading volumes for the\
-      \ assets gathered by the gather_market_data\n        node.\n\n    Returns\n\
-      \    -------\n    Tuple[List[str], List[str]]\n        A tuple containing a\
-      \ list of trend indicators and a list of\n        recognized patterns in the\
-      \ market data.\n\n    Raises\n    ------\n    ValueError\n        If any of\
-      \ the input lists (current_prices, historical_prices,\n        trading_volumes)\
-      \ are empty or of different lengths.\n\n    Examples\n    --------\n    >>>\
-      \ current_prices = [100.0, 120.0, 110.0]\n    >>> historical_prices = [90.0,\
-      \ 100.0, 110.0, 120.0]\n    >>> trading_volumes = [1000.0, 1200.0, 1100.0]\n\
-      \    >>> trend_indicators, pattern_recognition =\n    analyze_market_trends(current_prices,\
+      \ List[float] = (\n        Field(..., description = (\n            \"Historical\
+      \ price data for the assets over a specified period\")\n        )\n    )\n \
+      \   trading_volumes: List[float] = (\n        Field(..., description=\"Trading\
+      \ volumes for the assets\")\n    )\n\n\nclass AnalyzeMarketTrendsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for analyze_market_trends node outputs.\"\"\"\n  \
+      \  trend_indicators: List[str] = (\n        Field(..., description = (\n   \
+      \         \"Indicators of market trends (e.g., bullish, bearish)\")\n      \
+      \  )\n    )\n    pattern_recognition: List[str] = (\n        Field(..., description=\"\
+      Patterns recognized in the market data\")\n    )\n\n\ndef analyze_market_trends(gather_market_data_input:\
+      \ GatherMarketDataOutput, **kwargs) -> AnalyzeMarketTrendsOutput:\n    \"\"\"\
+      \n    Analyzes market trends based on gathered data.\n\n    Parameters\n   \
+      \ ----------\n    current_prices : List[float]\n        Current prices of the\
+      \ assets gathered by the gather_market_data\n        node.\n    historical_prices\
+      \ : List[float]\n        Historical price data for the assets over a specified\
+      \ period\n        gathered by the gather_market_data node.\n    trading_volumes\
+      \ : List[float]\n        Trading volumes for the assets gathered by the gather_market_data\n\
+      \        node.\n\n    Returns\n    -------\n    Tuple[List[str], List[str]]\n\
+      \        A tuple containing a list of trend indicators and a list of\n     \
+      \   recognized patterns in the market data.\n\n    Raises\n    ------\n    ValueError\n\
+      \        If any of the input lists (current_prices, historical_prices,\n   \
+      \     trading_volumes) are empty or of different lengths.\n\n    Examples\n\
+      \    --------\n    >>> current_prices = [100.0, 120.0, 110.0]\n    >>> historical_prices\
+      \ = [90.0, 100.0, 110.0, 120.0]\n    >>> trading_volumes = [1000.0, 1200.0,\
+      \ 1100.0]\n    >>> trend_indicators, pattern_recognition =\n    analyze_market_trends(current_prices,\
       \ historical_prices, trading_volumes)\n    (['bullish'], ['ascending triangle'])\n\
       \n    >>> current_prices = [100.0, 80.0, 90.0]\n    >>> historical_prices =\
       \ [110.0, 100.0, 90.0, 80.0]\n    >>> trading_volumes = [1000.0, 800.0, 900.0]\n\
@@ -119,30 +124,52 @@ nodes:
     prompt: Analyze the gathered market data to identify trends and patterns.
     shims:
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Validates input data for market analysis to ensure it conforms
         to expected formats and ranges.
-      implementation: "def validate_input_data(current_prices: str, historical_prices:\
-        \ str, trading_volumes: str) -> str:\n    \"\"\"\n    Validates input market\
-        \ data including current prices, historical prices, and\n    trading volumes.\n\
-        \n    Parameters\n    ----------\n    current_prices : str\n        Current\
-        \ prices of the assets in string format, expected to be\n        convertible\
-        \ to a list of floats.\n    historical_prices : str\n        Historical price\
-        \ data for the assets over a specified period in\n        string format, expected\
-        \ to be convertible to a list of floats.\n    trading_volumes : str\n    \
-        \    Trading volumes for the assets in string format, expected to be\n   \
-        \     convertible to a list of floats.\n\n    Returns\n    -------\n    str\n\
-        \        A string indicating whether the input data is valid ('valid') or\
-        \ not\n        ('invalid').\n\n    Raises\n    ------\n    ValueError\n  \
-        \      Raised when the input strings cannot be converted to the expected\n\
-        \        numerical formats or are out of expected ranges.\n    TypeError\n\
-        \        Raised when the input parameters are not strings.\n\n    Examples\n\
-        \    --------\n    >>> validate_input_data(current_prices='[1.0, 2.0, 3.0]',\n\
-        \    historical_prices='[4.0, 5.0, 6.0]', trading_volumes='[7.0, 8.0, 9.0]')\n\
-        \    'valid'\n\n    >>> validate_input_data(current_prices='invalid', historical_prices='[4.0,\n\
-        \    5.0, 6.0]', trading_volumes='[7.0, 8.0, 9.0]')\n    'invalid'\n\n   \
-        \ \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node that\
-        \ needs to be implemented\")"
+      implementation: "import ast\n\n\ndef validate_input_data(current_prices: str,\
+        \ historical_prices: str, trading_volumes: str) -> str:\n    \"\"\"\n    Validates\
+        \ input market data including current prices, historical prices, and\n   \
+        \ trading volumes.\n\n    Parameters\n    ----------\n    current_prices :\
+        \ str\n        Current prices of the assets in string format, expected to\
+        \ be\n        convertible to a list of floats.\n    historical_prices : str\n\
+        \        Historical price data for the assets over a specified period in\n\
+        \        string format, expected to be convertible to a list of floats.\n\
+        \    trading_volumes : str\n        Trading volumes for the assets in string\
+        \ format, expected to be\n        convertible to a list of floats.\n\n   \
+        \ Returns\n    -------\n    str\n        A string indicating whether the input\
+        \ data is valid ('valid') or not\n        ('invalid').\n\n    Raises\n   \
+        \ ------\n    ValueError\n        Raised when the input strings cannot be\
+        \ converted to the expected\n        numerical formats or are out of expected\
+        \ ranges.\n    TypeError\n        Raised when the input parameters are not\
+        \ strings.\n\n    Examples\n    --------\n    >>> validate_input_data(current_prices='[1.0,\
+        \ 2.0, 3.0]',\n    historical_prices='[4.0, 5.0, 6.0]', trading_volumes='[7.0,\
+        \ 8.0, 9.0]')\n    'valid'\n\n    >>> validate_input_data(current_prices='invalid',\
+        \ historical_prices='[4.0,\n    5.0, 6.0]', trading_volumes='[7.0, 8.0, 9.0]')\n\
+        \    'invalid'\n\n    \"\"\"\n    \n    try:\n        if not isinstance(current_prices,\
+        \ str):\n            raise TypeError(\"current_prices must be a string\")\n\
+        \        if not isinstance(historical_prices, str):\n            raise TypeError(\"\
+        historical_prices must be a string\")\n        if not isinstance(trading_volumes,\
+        \ str):\n            raise TypeError(\"trading_volumes must be a string\"\
+        )\n        \n        try:\n            current_prices_list = ast.literal_eval(current_prices)\n\
+        \            historical_prices_list = ast.literal_eval(historical_prices)\n\
+        \            trading_volumes_list = ast.literal_eval(trading_volumes)\n  \
+        \      except (ValueError, SyntaxError):\n            return 'invalid'\n \
+        \       \n        if not isinstance(current_prices_list, list):\n        \
+        \    return 'invalid'\n        if not isinstance(historical_prices_list, list):\n\
+        \            return 'invalid'\n        if not isinstance(trading_volumes_list,\
+        \ list):\n            return 'invalid'\n        \n        for price in current_prices_list:\n\
+        \            if not isinstance(price, (int, float)):\n                return\
+        \ 'invalid'\n            if price < 0:\n                raise ValueError(\"\
+        Current prices must be non-negative\")\n        \n        for price in historical_prices_list:\n\
+        \            if not isinstance(price, (int, float)):\n                return\
+        \ 'invalid'\n            if price < 0:\n                raise ValueError(\"\
+        Historical prices must be non-negative\")\n        \n        for volume in\
+        \ trading_volumes_list:\n            if not isinstance(volume, (int, float)):\n\
+        \                return 'invalid'\n            if volume < 0:\n          \
+        \      raise ValueError(\"Trading volumes must be non-negative\")\n      \
+        \  \n        return 'valid'\n    \n    except (TypeError, ValueError):\n \
+        \       raise"
       name: validate_input_data
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -201,28 +228,48 @@ nodes:
         within expected ranges.
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Normalizes market data by processing current prices, historical
         prices, and trading volumes into a standardized format.
-      implementation: "def normalize_market_data(current_prices: str, historical_prices:\
-        \ str, trading_volumes: str) -> str:\n    \"\"\"\n    Normalizes market data\
-        \ inputs into a standardized dictionary format.\n\n    Parameters\n    ----------\n\
-        \    current_prices : str\n        A string representation of a list of current\
-        \ prices of assets.\n    historical_prices : str\n        A string representation\
-        \ of a list of historical prices of assets.\n    trading_volumes : str\n \
-        \       A string representation of a list of trading volumes of assets.\n\n\
-        \    Returns\n    -------\n    str\n        A string representation of a dictionary\
-        \ containing the normalized\n        market data.\n\n    Raises\n    ------\n\
-        \    ValueError\n        If the input strings cannot be parsed into lists\
-        \ of floats.\n    TypeError\n        If the input parameters are not strings.\n\
-        \n    Examples\n    --------\n    >>> normalize_market_data('[100.0, 200.0]',\
-        \ '[50.0, 150.0, 250.0]',\n    '[1000.0, 2000.0]')\n    '{\"current_prices\"\
-        : [100.0, 200.0], \"historical_prices\": [50.0, 150.0,\n    250.0], \"trading_volumes\"\
-        : [1000.0, 2000.0]}'\n\n    >>> normalize_market_data('[150.0, 250.0]', '[75.0,\
-        \ 175.0, 275.0]',\n    '[1500.0, 2500.0]')\n    '{\"current_prices\": [150.0,\
-        \ 250.0], \"historical_prices\": [75.0, 175.0,\n    275.0], \"trading_volumes\"\
-        : [1500.0, 2500.0]}'\n\n    \"\"\"\n    raise NotImplementedError(\"This is\
-        \ a virtual stub node that needs to be implemented\")"
+      implementation: "import json\n\n\ndef normalize_market_data(current_prices:\
+        \ str, historical_prices: str, trading_volumes: str) -> str:\n    \"\"\"\n\
+        \    Normalizes market data inputs into a standardized dictionary format.\n\
+        \n    Parameters\n    ----------\n    current_prices : str\n        A string\
+        \ representation of a list of current prices of assets.\n    historical_prices\
+        \ : str\n        A string representation of a list of historical prices of\
+        \ assets.\n    trading_volumes : str\n        A string representation of a\
+        \ list of trading volumes of assets.\n\n    Returns\n    -------\n    str\n\
+        \        A string representation of a dictionary containing the normalized\n\
+        \        market data.\n\n    Raises\n    ------\n    ValueError\n        If\
+        \ the input strings cannot be parsed into lists of floats.\n    TypeError\n\
+        \        If the input parameters are not strings.\n\n    Examples\n    --------\n\
+        \    >>> normalize_market_data('[100.0, 200.0]', '[50.0, 150.0, 250.0]',\n\
+        \    '[1000.0, 2000.0]')\n    '{\"current_prices\": [100.0, 200.0], \"historical_prices\"\
+        : [50.0, 150.0,\n    250.0], \"trading_volumes\": [1000.0, 2000.0]}'\n\n \
+        \   >>> normalize_market_data('[150.0, 250.0]', '[75.0, 175.0, 275.0]',\n\
+        \    '[1500.0, 2500.0]')\n    '{\"current_prices\": [150.0, 250.0], \"historical_prices\"\
+        : [75.0, 175.0,\n    275.0], \"trading_volumes\": [1500.0, 2500.0]}'\n\n \
+        \   \"\"\"\n    \n    if not isinstance(current_prices, str):\n        raise\
+        \ TypeError(\"current_prices must be a string\")\n    if not isinstance(historical_prices,\
+        \ str):\n        raise TypeError(\"historical_prices must be a string\")\n\
+        \    if not isinstance(trading_volumes, str):\n        raise TypeError(\"\
+        trading_volumes must be a string\")\n    \n    try:\n        current_prices_list\
+        \ = json.loads(current_prices)\n        historical_prices_list = json.loads(historical_prices)\n\
+        \        trading_volumes_list = json.loads(trading_volumes)\n    except json.JSONDecodeError\
+        \ as e:\n        raise ValueError(\"Input strings cannot be parsed into lists\"\
+        ) from e\n    \n    if not isinstance(current_prices_list, list):\n      \
+        \  raise ValueError(\"current_prices must represent a list\")\n    if not\
+        \ isinstance(historical_prices_list, list):\n        raise ValueError(\"historical_prices\
+        \ must represent a list\")\n    if not isinstance(trading_volumes_list, list):\n\
+        \        raise ValueError(\"trading_volumes must represent a list\")\n   \
+        \ \n    try:\n        current_prices_floats = [float(x) for x in current_prices_list]\n\
+        \        historical_prices_floats = [float(x) for x in historical_prices_list]\n\
+        \        trading_volumes_floats = [float(x) for x in trading_volumes_list]\n\
+        \    except (ValueError, TypeError) as e:\n        raise ValueError(\"Input\
+        \ lists must contain values that can be converted to floats\") from e\n  \
+        \  \n    normalized_data = {\n        \"current_prices\": current_prices_floats,\n\
+        \        \"historical_prices\": historical_prices_floats,\n        \"trading_volumes\"\
+        : trading_volumes_floats\n    }\n    \n    return json.dumps(normalized_data)"
       name: normalize_market_data
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -280,7 +327,7 @@ nodes:
         inputs.
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Analyzes current and historical price data to identify trends and
         patterns.
       implementation: "from typing import List\n\n\ndef analyze_price_trends(current_prices:\
@@ -300,8 +347,36 @@ nodes:
         \    historical_prices='90.0,100.0,110.0,120.0,130.0')\n    >>> output = ['bullish']\n\
         \    ['bullish']\n\n    >>> analyze_price_trends(current_prices='80.0,70.0,60.0',\n\
         \    historical_prices='100.0,90.0,80.0,70.0,60.0')\n    >>> output = ['bearish']\n\
-        \    ['bearish']\n\n    \"\"\"\n    raise NotImplementedError(\"This is a\
-        \ virtual stub node that needs to be implemented\")"
+        \    ['bearish']\n\n    \"\"\"\n    if not isinstance(current_prices, str):\n\
+        \        raise TypeError(\"current_prices must be a string\")\n    if not\
+        \ isinstance(historical_prices, str):\n        raise TypeError(\"historical_prices\
+        \ must be a string\")\n    \n    try:\n        current_price_list = [float(price.strip())\
+        \ for price in current_prices.split(',') if price.strip()]\n        historical_price_list\
+        \ = [float(price.strip()) for price in historical_prices.split(',') if price.strip()]\n\
+        \    except ValueError:\n        raise ValueError(\"Input strings contain\
+        \ invalid data that cannot be converted to float\")\n    \n    if not current_price_list\
+        \ or not historical_price_list:\n        raise ValueError(\"Input strings\
+        \ are not properly formatted or are empty\")\n    \n    trends = []\n    \n\
+        \    if len(current_price_list) > 1:\n        current_trend = 0\n        for\
+        \ i in range(1, len(current_price_list)):\n            if current_price_list[i]\
+        \ > current_price_list[i-1]:\n                current_trend += 1\n       \
+        \     elif current_price_list[i] < current_price_list[i-1]:\n            \
+        \    current_trend -= 1\n        \n        if current_trend > 0:\n       \
+        \     trends.append('bullish')\n        elif current_trend < 0:\n        \
+        \    trends.append('bearish')\n    \n    if len(historical_price_list) > 1:\n\
+        \        historical_trend = 0\n        for i in range(1, len(historical_price_list)):\n\
+        \            if historical_price_list[i] > historical_price_list[i-1]:\n \
+        \               historical_trend += 1\n            elif historical_price_list[i]\
+        \ < historical_price_list[i-1]:\n                historical_trend -= 1\n \
+        \       \n        if historical_trend > 0 and 'bullish' not in trends:\n \
+        \           trends.append('bullish')\n        elif historical_trend < 0 and\
+        \ 'bearish' not in trends:\n            trends.append('bearish')\n    \n \
+        \   current_avg = sum(current_price_list) / len(current_price_list)\n    historical_avg\
+        \ = sum(historical_price_list) / len(historical_price_list)\n    \n    if\
+        \ current_avg > historical_avg and 'bullish' not in trends:\n        trends.append('bullish')\n\
+        \    elif current_avg < historical_avg and 'bearish' not in trends:\n    \
+        \    trends.append('bearish')\n    \n    if not trends:\n        trends.append('sideways')\n\
+        \    \n    return trends"
       name: analyze_price_trends
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -354,7 +429,7 @@ nodes:
         trends.
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Analyzes trading volume indicators in relation to price data to
         identify market trends.
       implementation: "from typing import List\n\n\ndef analyze_volume_indicators(trading_volumes:\
@@ -373,8 +448,28 @@ nodes:
         \ (i.e., not strings).\n\n    Examples\n    --------\n    >>> analyze_volume_indicators(trading_volumes='100,200,300',\n\
         \    price_data='10.0,20.0,30.0')\n    ['Bullish', 'Bearish', 'Neutral']\n\
         \n    >>> analyze_volume_indicators(trading_volumes='500,400,600',\n    price_data='5.0,4.0,6.0')\n\
-        \    ['Increasing', 'Decreasing', 'Stable']\n\n    \"\"\"\n    raise NotImplementedError(\"\
-        This is a virtual stub node that needs to be implemented\")"
+        \    ['Increasing', 'Decreasing', 'Stable']\n\n    \"\"\"\n    if not isinstance(trading_volumes,\
+        \ str) or not isinstance(price_data, str):\n        raise TypeError(\"Both\
+        \ trading_volumes and price_data must be strings\")\n    \n    try:\n    \
+        \    volumes = [float(v.strip()) for v in trading_volumes.split(',') if v.strip()]\n\
+        \        prices = [float(p.strip()) for p in price_data.split(',') if p.strip()]\n\
+        \    except ValueError as e:\n        raise ValueError(\"Input strings contain\
+        \ invalid data that cannot be converted to numbers\") from e\n    \n    if\
+        \ len(volumes) != len(prices):\n        raise ValueError(\"Trading volumes\
+        \ and price data must have the same number of elements\")\n    \n    if len(volumes)\
+        \ == 0:\n        raise ValueError(\"Input strings are empty or do not contain\
+        \ valid data\")\n    \n    indicators = []\n    \n    for i in range(len(volumes)):\n\
+        \        if i == 0:\n            indicators.append('Neutral')\n        else:\n\
+        \            volume_change = volumes[i] - volumes[i-1]\n            price_change\
+        \ = prices[i] - prices[i-1]\n            \n            if price_change > 0\
+        \ and volume_change > 0:\n                indicators.append('Bullish')\n \
+        \           elif price_change < 0 and volume_change > 0:\n               \
+        \ indicators.append('Bearish')\n            elif abs(volume_change) < 0.01:\n\
+        \                indicators.append('Stable')\n            elif volume_change\
+        \ > 0:\n                indicators.append('Increasing')\n            elif\
+        \ volume_change < 0:\n                indicators.append('Decreasing')\n  \
+        \          else:\n                indicators.append('Neutral')\n    \n   \
+        \ return indicators"
       name: analyze_volume_indicators
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -426,7 +521,7 @@ nodes:
         price data.
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Combines price and volume trend indicators into a unified list
         of trend indicators.
       implementation: "from typing import List\n\n\ndef combine_trend_indicators(price_trends:\
@@ -446,8 +541,20 @@ nodes:
         \n    >>> price_trends = 'bullish,bearish'\n    >>> volume_trends = 'increasing,decreasing'\n\
         \    >>> output = combine_trend_indicators(price_trends=price_trends,\n  \
         \  volume_trends=volume_trends)\n    ['bullish_increasing', 'bearish_decreasing']\n\
-        \n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node\
-        \ that needs to be implemented\")"
+        \n    \"\"\"\n    if not isinstance(price_trends, str):\n        raise TypeError(\"\
+        price_trends must be a string\")\n    if not isinstance(volume_trends, str):\n\
+        \        raise TypeError(\"volume_trends must be a string\")\n    \n    try:\n\
+        \        price_list = [trend.strip() for trend in price_trends.split(',')\
+        \ if trend.strip()]\n        volume_list = [trend.strip() for trend in volume_trends.split(',')\
+        \ if trend.strip()]\n    except Exception as e:\n        raise ValueError(\"\
+        Input strings cannot be parsed into valid trend indicators\") from e\n   \
+        \ \n    if len(price_list) != len(volume_list):\n        raise ValueError(\"\
+        Price trends and volume trends must have the same number of elements\")\n\
+        \    \n    if not price_list or not volume_list:\n        raise ValueError(\"\
+        Input strings cannot be parsed into valid trend indicators\")\n    \n    combined_trends\
+        \ = []\n    for price_trend, volume_trend in zip(price_list, volume_list):\n\
+        \        combined_trends.append(f\"{price_trend}_{volume_trend}\")\n    \n\
+        \    return combined_trends"
       name: combine_trend_indicators
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -499,10 +606,10 @@ nodes:
         of trend indicators.
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Identifies chart patterns in financial data based on current prices,
         historical prices, and trading volumes.
-      implementation: "from typing import List\n\n\ndef identify_chart_patterns(current_prices:\
+      implementation: "from typing import List\n\n\nimport ast\n\n\ndef identify_chart_patterns(current_prices:\
         \ str, historical_prices: str, volumes: str) -> List[str]:\n    \"\"\"\n \
         \   Identifies chart patterns in financial data based on the provided current\n\
         \    prices, historical prices, and trading volumes.\n\n    Parameters\n \
@@ -523,8 +630,42 @@ nodes:
         \ = '[50.0, 60.0, 55.0]'\n    >>> historical_prices = '[40.0, 50.0, 60.0,\
         \ 55.0, 65.0]'\n    >>> volumes = '[500, 600, 550]'\n    >>> output = identify_chart_patterns(current_prices,\
         \ historical_prices,\n    volumes)\n    ['Bearish Divergence', 'Support Level']\n\
-        \n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node\
-        \ that needs to be implemented\")"
+        \n    \"\"\"\n    \n    if not isinstance(current_prices, str) or not isinstance(historical_prices,\
+        \ str) or not isinstance(volumes, str):\n        raise TypeError(\"All inputs\
+        \ must be strings\")\n    \n    try:\n        current_prices_list = ast.literal_eval(current_prices)\n\
+        \        historical_prices_list = ast.literal_eval(historical_prices)\n  \
+        \      volumes_list = ast.literal_eval(volumes)\n    except (ValueError, SyntaxError)\
+        \ as e:\n        raise ValueError(\"Input strings cannot be parsed into lists\
+        \ of floats\") from e\n    \n    if not all(isinstance(x, (int, float)) for\
+        \ x in current_prices_list):\n        raise ValueError(\"Current prices must\
+        \ be a list of numbers\")\n    if not all(isinstance(x, (int, float)) for\
+        \ x in historical_prices_list):\n        raise ValueError(\"Historical prices\
+        \ must be a list of numbers\")\n    if not all(isinstance(x, (int, float))\
+        \ for x in volumes_list):\n        raise ValueError(\"Volumes must be a list\
+        \ of numbers\")\n    \n    patterns = []\n    \n    if len(current_prices_list)\
+        \ >= 2 and len(historical_prices_list) >= 2:\n        current_trend = current_prices_list[-1]\
+        \ - current_prices_list[0]\n        historical_trend = historical_prices_list[-1]\
+        \ - historical_prices_list[0]\n        \n        if current_trend > 0 and\
+        \ historical_trend > 0:\n            patterns.append('Bullish Trend')\n  \
+        \      elif current_trend < 0 and historical_trend < 0:\n            patterns.append('Bearish\
+        \ Trend')\n    \n    if len(historical_prices_list) >= 3:\n        recent_high\
+        \ = max(historical_prices_list[-3:])\n        if len(current_prices_list)\
+        \ > 0 and current_prices_list[-1] > recent_high:\n            patterns.append('Resistance\
+        \ Breakout')\n        \n        recent_low = min(historical_prices_list[-3:])\n\
+        \        if len(current_prices_list) > 0 and current_prices_list[-1] < recent_low:\n\
+        \            patterns.append('Support Breakdown')\n    \n    if len(current_prices_list)\
+        \ >= 2 and len(volumes_list) >= 2:\n        price_change = current_prices_list[-1]\
+        \ - current_prices_list[-2]\n        volume_change = volumes_list[-1] - volumes_list[-2]\n\
+        \        \n        if price_change < 0 and volume_change > 0:\n          \
+        \  patterns.append('Bearish Divergence')\n        elif price_change > 0 and\
+        \ volume_change < 0:\n            patterns.append('Bullish Divergence')\n\
+        \    \n    if len(historical_prices_list) >= 5:\n        support_level = min(historical_prices_list)\n\
+        \        resistance_level = max(historical_prices_list)\n        \n      \
+        \  if len(current_prices_list) > 0:\n            current_price = current_prices_list[-1]\n\
+        \            if abs(current_price - support_level) / support_level < 0.05:\n\
+        \                patterns.append('Support Level')\n            elif abs(current_price\
+        \ - resistance_level) / resistance_level < 0.05:\n                patterns.append('Resistance\
+        \ Level')\n    \n    return patterns"
       name: identify_chart_patterns
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -589,52 +730,57 @@ nodes:
       shims: []
   evaluate_trading_strategies:
     agent: false
-    code_node_type: shim
+    code_node_type: pure
     description: Evaluate different trading strategies based on the analyzed trends
     implementation: "from ._evaluate_trading_strategies.validate_inputs import validate_inputs\n\
       from ._evaluate_trading_strategies.get_available_trading_strategies import get_available_trading_strategies\n\
       from ._evaluate_trading_strategies.evaluate_strategies_against_trends import\
       \ evaluate_strategies_against_trends\nfrom ._evaluate_trading_strategies.select_recommended_strategies\
+      \ import select_recommended_strategies\n\nfrom ._evaluate_trading_strategies.validate_inputs\
+      \ import validate_inputs\nfrom ._evaluate_trading_strategies.get_available_trading_strategies\
+      \ import get_available_trading_strategies\nfrom ._evaluate_trading_strategies.evaluate_strategies_against_trends\
+      \ import evaluate_strategies_against_trends\nfrom ._evaluate_trading_strategies.select_recommended_strategies\
       \ import select_recommended_strategies\n\nfrom pydantic import BaseModel, Field\n\
       from typing import List\n\n\nclass AnalyzeMarketTrendsOutput(BaseModel):\n \
       \   \"\"\"Pydantic model for analyze_market_trends node outputs.\"\"\"\n   \
-      \ trend_indicators: List[str] = (\n        Field(..., description=\"Indicators\
-      \ of market trends (e.g., bullish, bearish)\")\n    )\n    pattern_recognition:\
-      \ List[str] = (\n        Field(..., description=\"Patterns recognized in the\
-      \ market data\")\n    )\n\n\nclass EvaluateTradingStrategiesOutput(BaseModel):\n\
+      \ trend_indicators: List[str] = (\n        Field(..., description = (\n    \
+      \        \"Indicators of market trends (e.g., bullish, bearish)\")\n       \
+      \ )\n    )\n    pattern_recognition: List[str] = (\n        Field(..., description=\"\
+      Patterns recognized in the market data\")\n    )\n\n\nclass EvaluateTradingStrategiesOutput(BaseModel):\n\
       \    \"\"\"Pydantic model for evaluate_trading_strategies node outputs.\"\"\"\
       \n    strategy_evaluations: List[str] = (\n        Field(..., description=\"\
       Evaluations of different trading strategies\")\n    )\n    recommended_strategies:\
-      \ List[str] = (\n        Field(..., description=\"Recommended trading strategies\
-      \ based on the evaluations\")\n    )\n\n\ndef evaluate_trading_strategies(analyze_market_trends_input:\
-      \ AnalyzeMarketTrendsOutput, **kwargs) -> EvaluateTradingStrategiesOutput:\n\
-      \    \"\"\"\n    Evaluate trading strategies based on market trend analysis.\n\
-      \n    Parameters\n    ----------\n    trend_indicators : List[str]\n       \
-      \ Indicators of market trends (e.g., bullish, bearish) from\n        analyze_market_trends.\n\
-      \    pattern_recognition : List[str]\n        Patterns recognized in the market\
-      \ data from analyze_market_trends.\n\n    Returns\n    -------\n    Tuple[List[str],\
-      \ List[str]]\n        A tuple containing the evaluations of different trading\
-      \ strategies\n        and the recommended trading strategies.\n\n    Raises\n\
-      \    ------\n    ValueError\n        If trend_indicators or pattern_recognition\
-      \ are empty or not\n        provided.\n\n    Examples\n    --------\n    >>>\
-      \ trend_indicators = ['bullish', 'bearish']\n    >>> pattern_recognition = ['ascending\
-      \ triangle', 'descending triangle']\n    >>> strategy_evaluations, recommended_strategies\
-      \ =\n    evaluate_trading_strategies(trend_indicators, pattern_recognition)\n\
-      \    (['Strategy 1: Buy', 'Strategy 2: Sell'], ['Strategy 1', 'Strategy 3'])\n\
-      \n    >>> trend_indicators = ['neutral']\n    >>> pattern_recognition = ['symmetrical\
+      \ List[str] = (\n        Field(..., description = (\n            \"Recommended\
+      \ trading strategies based on the evaluations\")\n        )\n    )\n\n\ndef\
+      \ evaluate_trading_strategies(analyze_market_trends_input: AnalyzeMarketTrendsOutput,\
+      \ **kwargs) -> EvaluateTradingStrategiesOutput:\n    \"\"\"\n    Evaluate trading\
+      \ strategies based on market trend analysis.\n\n    Parameters\n    ----------\n\
+      \    trend_indicators : List[str]\n        Indicators of market trends (e.g.,\
+      \ bullish, bearish) from\n        analyze_market_trends.\n    pattern_recognition\
+      \ : List[str]\n        Patterns recognized in the market data from analyze_market_trends.\n\
+      \n    Returns\n    -------\n    Tuple[List[str], List[str]]\n        A tuple\
+      \ containing the evaluations of different trading strategies\n        and the\
+      \ recommended trading strategies.\n\n    Raises\n    ------\n    ValueError\n\
+      \        If trend_indicators or pattern_recognition are empty or not\n     \
+      \   provided.\n\n    Examples\n    --------\n    >>> trend_indicators = ['bullish',\
+      \ 'bearish']\n    >>> pattern_recognition = ['ascending triangle', 'descending\
       \ triangle']\n    >>> strategy_evaluations, recommended_strategies =\n    evaluate_trading_strategies(trend_indicators,\
-      \ pattern_recognition)\n    (['Strategy 3: Hold'], ['Strategy 3'])\n\n    \"\
-      \"\"\n    trend_indicators = analyze_market_trends_input.trend_indicators\n\
-      \    pattern_recognition = analyze_market_trends_input.pattern_recognition\n\
-      \    \n    validate_inputs(trend_indicators=trend_indicators, pattern_recognition=pattern_recognition)\n\
-      \    \n    available_strategies: List[str] = get_available_trading_strategies()\n\
-      \    \n    strategy_evaluations: List[str] = evaluate_strategies_against_trends(\n\
-      \        strategies=available_strategies,\n        trend_indicators=trend_indicators,\n\
-      \        pattern_recognition=pattern_recognition\n    )\n    \n    recommended_strategies:\
-      \ List[str] = select_recommended_strategies(\n        evaluations=strategy_evaluations,\n\
+      \ pattern_recognition)\n    (['Strategy 1: Buy', 'Strategy 2: Sell'], ['Strategy\
+      \ 1', 'Strategy 3'])\n\n    >>> trend_indicators = ['neutral']\n    >>> pattern_recognition\
+      \ = ['symmetrical triangle']\n    >>> strategy_evaluations, recommended_strategies\
+      \ =\n    evaluate_trading_strategies(trend_indicators, pattern_recognition)\n\
+      \    (['Strategy 3: Hold'], ['Strategy 3'])\n\n    \"\"\"\n    trend_indicators\
+      \ = analyze_market_trends_input.trend_indicators\n    pattern_recognition =\
+      \ analyze_market_trends_input.pattern_recognition\n    \n    validate_inputs(trend_indicators=trend_indicators,\
+      \ pattern_recognition=pattern_recognition)\n    \n    available_strategies:\
+      \ List[str] = get_available_trading_strategies()\n    \n    strategy_evaluations:\
+      \ List[str] = evaluate_strategies_against_trends(\n        strategies=available_strategies,\n\
       \        trend_indicators=trend_indicators,\n        pattern_recognition=pattern_recognition\n\
-      \    )\n    \n    return EvaluateTradingStrategiesOutput(\n        strategy_evaluations=strategy_evaluations,\n\
-      \        recommended_strategies=recommended_strategies\n    )"
+      \    )\n    \n    recommended_strategies: List[str] = select_recommended_strategies(\n\
+      \        evaluations=strategy_evaluations,\n        trend_indicators=trend_indicators,\n\
+      \        pattern_recognition=pattern_recognition\n    )\n    \n    return EvaluateTradingStrategiesOutput(\n\
+      \        strategy_evaluations=strategy_evaluations,\n        recommended_strategies=recommended_strategies\n\
+      \    )"
     name: evaluate_trading_strategies
     nodes_depended_on:
     - analyze_market_trends
@@ -683,26 +829,44 @@ nodes:
     prompt: Evaluate various trading strategies based on the identified market trends.
     shims:
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Validates the input trend indicators and pattern recognition results
         for further processing.
-      implementation: "def validate_inputs(trend_indicators: str, pattern_recognition:\
-        \ str) -> str:\n    \"\"\"\n    Validates input trend indicators and pattern\
-        \ recognition results.\n\n    Parameters\n    ----------\n    trend_indicators\
-        \ : str\n        List of indicators of market trends (e.g., bullish, bearish)\
-        \ to be\n        validated.\n    pattern_recognition : str\n        List of\
-        \ patterns recognized in the market data to be validated.\n\n    Returns\n\
-        \    -------\n    str\n        Output indicating whether the inputs are valid.\n\
-        \n    Raises\n    ------\n    ValueError\n        When the input trend indicators\
-        \ or pattern recognition results are\n        invalid or inconsistent.\n \
-        \   TypeError\n        When the input types are incorrect (e.g., not lists\
-        \ of strings).\n\n    Examples\n    --------\n    >>> validate_inputs(trend_indicators='[\"\
+      implementation: "import json\n\n\ndef validate_inputs(trend_indicators: str,\
+        \ pattern_recognition: str) -> str:\n    \"\"\"\n    Validates input trend\
+        \ indicators and pattern recognition results.\n\n    Parameters\n    ----------\n\
+        \    trend_indicators : str\n        List of indicators of market trends (e.g.,\
+        \ bullish, bearish) to be\n        validated.\n    pattern_recognition : str\n\
+        \        List of patterns recognized in the market data to be validated.\n\
+        \n    Returns\n    -------\n    str\n        Output indicating whether the\
+        \ inputs are valid.\n\n    Raises\n    ------\n    ValueError\n        When\
+        \ the input trend indicators or pattern recognition results are\n        invalid\
+        \ or inconsistent.\n    TypeError\n        When the input types are incorrect\
+        \ (e.g., not lists of strings).\n\n    Examples\n    --------\n    >>> validate_inputs(trend_indicators='[\"\
         bullish\", \"bearish\"]',\n    pattern_recognition='[\"head_and_shoulders\"\
         , \"inverse_head_and_shoulders\"]')\n    'Inputs are valid'\n\n    >>> validate_inputs(trend_indicators='[]',\n\
         \    pattern_recognition='[\"invalid_pattern\"]')\n    'ValueError: Invalid\
-        \ trend indicators or pattern recognition results.'\n\n    \"\"\"\n    raise\
-        \ NotImplementedError(\"This is a virtual stub node that needs to be implemented\"\
-        )"
+        \ trend indicators or pattern recognition results.'\n\n    \"\"\"\n    \n\
+        \    if not isinstance(trend_indicators, str) or not isinstance(pattern_recognition,\
+        \ str):\n        raise TypeError(\"When the input types are incorrect (e.g.,\
+        \ not lists of strings).\")\n    \n    try:\n        trend_list = json.loads(trend_indicators)\n\
+        \        pattern_list = json.loads(pattern_recognition)\n    except json.JSONDecodeError:\n\
+        \        raise ValueError(\"Invalid trend indicators or pattern recognition\
+        \ results.\")\n    \n    if not isinstance(trend_list, list) or not isinstance(pattern_list,\
+        \ list):\n        raise TypeError(\"When the input types are incorrect (e.g.,\
+        \ not lists of strings).\")\n    \n    if not all(isinstance(item, str) for\
+        \ item in trend_list) or not all(isinstance(item, str) for item in pattern_list):\n\
+        \        raise TypeError(\"When the input types are incorrect (e.g., not lists\
+        \ of strings).\")\n    \n    valid_trends = {'bullish', 'bearish', 'neutral',\
+        \ 'sideways'}\n    valid_patterns = {'head_and_shoulders', 'inverse_head_and_shoulders',\
+        \ 'double_top', 'double_bottom', 'triangle', 'wedge', 'flag', 'pennant'}\n\
+        \    \n    for trend in trend_list:\n        if trend not in valid_trends:\n\
+        \            raise ValueError(\"Invalid trend indicators or pattern recognition\
+        \ results.\")\n    \n    for pattern in pattern_list:\n        if pattern\
+        \ not in valid_patterns:\n            raise ValueError(\"Invalid trend indicators\
+        \ or pattern recognition results.\")\n    \n    if len(trend_list) == 0 and\
+        \ len(pattern_list) > 0:\n        raise ValueError(\"Invalid trend indicators\
+        \ or pattern recognition results.\")\n    \n    return \"Inputs are valid\""
       name: validate_inputs
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -751,7 +915,7 @@ nodes:
       prompt: Validate the given trend indicators and pattern recognition results.
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Returns a list of available trading strategies for evaluation.
       implementation: "from typing import List\n\n\ndef get_available_trading_strategies()\
         \ -> List[str]:\n    \"\"\"\n    Retrieve a list of available trading strategies.\n\
@@ -759,8 +923,15 @@ nodes:
         \ strategies as strings.\n\n    Raises\n    ------\n    RuntimeError\n   \
         \     If the list of available trading strategies cannot be retrieved.\n\n\
         \    Examples\n    --------\n    >>> available_strategies = get_available_trading_strategies()\n\
-        \    ['Strategy1', 'Strategy2', 'Strategy3']\n\n    \"\"\"\n    raise NotImplementedError(\"\
-        This is a virtual stub node that needs to be implemented\")"
+        \    ['Strategy1', 'Strategy2', 'Strategy3']\n\n    \"\"\"\n    try:\n   \
+        \     strategies = [\n            \"MovingAverageCrossover\",\n          \
+        \  \"RSIStrategy\",\n            \"BollingerBands\",\n            \"MACDStrategy\"\
+        ,\n            \"MeanReversion\",\n            \"MomentumStrategy\",\n   \
+        \         \"PairsTradingStrategy\",\n            \"ArbitrageStrategy\",\n\
+        \            \"TrendFollowing\",\n            \"GridTradingStrategy\"\n  \
+        \      ]\n        return strategies\n    except Exception as e:\n        raise\
+        \ RuntimeError(\"If the list of available trading strategies cannot be retrieved.\"\
+        ) from e"
       name: get_available_trading_strategies
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -787,7 +958,7 @@ nodes:
       prompt: Retrieve the list of available trading strategies
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Evaluates trading strategies against market trends and pattern
         recognition to produce strategy evaluations.
       implementation: "from typing import List\n\n\ndef evaluate_strategies_against_trends(strategies:\
@@ -807,8 +978,38 @@ nodes:
         \    ['mean_reversion:strong_buy', 'trend_following:strong_sell']\n\n    >>>\
         \ evaluate_strategies_against_trends(strategies='statistical_arbitrage',\n\
         \    trend_indicators='neutral', pattern_recognition='ascending_triangle')\n\
-        \    ['statistical_arbitrage:buy']\n\n    \"\"\"\n    raise NotImplementedError(\"\
-        This is a virtual stub node that needs to be implemented\")"
+        \    ['statistical_arbitrage:buy']\n\n    \"\"\"\n    if not isinstance(strategies,\
+        \ str):\n        raise TypeError(\"strategies parameter must be a string\"\
+        )\n    if not isinstance(trend_indicators, str):\n        raise TypeError(\"\
+        trend_indicators parameter must be a string\")\n    if not isinstance(pattern_recognition,\
+        \ str):\n        raise TypeError(\"pattern_recognition parameter must be a\
+        \ string\")\n    \n    if not strategies.strip() or not trend_indicators.strip()\
+        \ or not pattern_recognition.strip():\n        raise ValueError(\"Input strings\
+        \ cannot be empty or malformed\")\n    \n    strategy_list = [s.strip() for\
+        \ s in strategies.split(',') if s.strip()]\n    trend_list = [t.strip() for\
+        \ t in trend_indicators.split(',') if t.strip()]\n    pattern_list = [p.strip()\
+        \ for p in pattern_recognition.split(',') if p.strip()]\n    \n    evaluations\
+        \ = []\n    \n    for strategy in strategy_list:\n        if strategy == 'mean_reversion':\n\
+        \            if 'bearish' in trend_list or 'head_and_shoulders' in pattern_list\
+        \ or 'double_bottom' in pattern_list:\n                evaluations.append(f'{strategy}:strong_buy')\n\
+        \            elif 'bullish' in trend_list:\n                evaluations.append(f'{strategy}:sell')\n\
+        \            elif 'neutral' in trend_list:\n                evaluations.append(f'{strategy}:hold')\n\
+        \            else:\n                evaluations.append(f'{strategy}:hold')\n\
+        \        elif strategy == 'trend_following':\n            if 'bullish' in\
+        \ trend_list or 'ascending_triangle' in pattern_list:\n                evaluations.append(f'{strategy}:strong_buy')\n\
+        \            elif 'bearish' in trend_list or 'head_and_shoulders' in pattern_list:\n\
+        \                evaluations.append(f'{strategy}:strong_sell')\n         \
+        \   elif 'neutral' in trend_list:\n                evaluations.append(f'{strategy}:hold')\n\
+        \            else:\n                evaluations.append(f'{strategy}:hold')\n\
+        \        elif strategy == 'statistical_arbitrage':\n            if 'neutral'\
+        \ in trend_list or 'ascending_triangle' in pattern_list:\n               \
+        \ evaluations.append(f'{strategy}:buy')\n            elif 'bullish' in trend_list\
+        \ or 'bearish' in trend_list:\n                evaluations.append(f'{strategy}:hold')\n\
+        \            else:\n                evaluations.append(f'{strategy}:hold')\n\
+        \        else:\n            if 'bullish' in trend_list:\n                evaluations.append(f'{strategy}:buy')\n\
+        \            elif 'bearish' in trend_list:\n                evaluations.append(f'{strategy}:sell')\n\
+        \            else:\n                evaluations.append(f'{strategy}:hold')\n\
+        \    \n    return evaluations"
       name: evaluate_strategies_against_trends
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -864,11 +1065,11 @@ nodes:
       prompt: Typed node for shim evaluate_strategies_against_trends
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Selects recommended trading strategies based on the evaluations
         of different strategies against market trend indicators and pattern recognition
         results.
-      implementation: "from typing import List\n\n\ndef select_recommended_strategies(evaluations:\
+      implementation: "from typing import List\n\n\nimport json\n\n\ndef select_recommended_strategies(evaluations:\
         \ str, trend_indicators: str, pattern_recognition: str) -> List[str]:\n  \
         \  \"\"\"\n    Selects recommended trading strategies based on the evaluations\
         \ of different\n    strategies against market trends and patterns.\n\n   \
@@ -887,8 +1088,36 @@ nodes:
         , \"bad\"]',\n    trend_indicators='[\"bullish\"]', pattern_recognition='[\"\
         continuation\"]')\n    ['strategy_1', 'strategy_3']\n\n    >>> select_recommended_strategies(evaluations='good,bad',\n\
         \    trend_indicators='bullish,bearish',\n    pattern_recognition='continuation,reversal')\n\
-        \    ['strategy_2', 'strategy_4']\n\n    \"\"\"\n    raise NotImplementedError(\"\
-        This is a virtual stub node that needs to be implemented\")"
+        \    ['strategy_2', 'strategy_4']\n\n    \"\"\"\n    \n    if not isinstance(evaluations,\
+        \ str) or not isinstance(trend_indicators, str) or not isinstance(pattern_recognition,\
+        \ str):\n        raise TypeError(\"All input parameters must be strings\"\
+        )\n    \n    if not evaluations.strip() or not trend_indicators.strip() or\
+        \ not pattern_recognition.strip():\n        raise ValueError(\"Input parameters\
+        \ cannot be empty\")\n    \n    try:\n        if evaluations.startswith('[')\
+        \ and evaluations.endswith(']'):\n            eval_list = json.loads(evaluations)\n\
+        \        else:\n            eval_list = [item.strip() for item in evaluations.split(',')]\n\
+        \        \n        if trend_indicators.startswith('[') and trend_indicators.endswith(']'):\n\
+        \            trend_list = json.loads(trend_indicators)\n        else:\n  \
+        \          trend_list = [item.strip() for item in trend_indicators.split(',')]\n\
+        \        \n        if pattern_recognition.startswith('[') and pattern_recognition.endswith(']'):\n\
+        \            pattern_list = json.loads(pattern_recognition)\n        else:\n\
+        \            pattern_list = [item.strip() for item in pattern_recognition.split(',')]\n\
+        \    except (json.JSONDecodeError, ValueError) as e:\n        raise ValueError(\"\
+        Input parameters are not in the expected format\") from e\n    \n    recommended_strategies\
+        \ = []\n    \n    for i, evaluation in enumerate(eval_list):\n        if evaluation.lower()\
+        \ == 'good':\n            if i < len(trend_list) and trend_list[i].lower()\
+        \ == 'bullish':\n                if i < len(pattern_list) and pattern_list[i].lower()\
+        \ == 'continuation':\n                    recommended_strategies.append('strategy_1')\n\
+        \                else:\n                    recommended_strategies.append('strategy_3')\n\
+        \            elif i < len(trend_list) and trend_list[i].lower() == 'bearish':\n\
+        \                if i < len(pattern_list) and pattern_list[i].lower() == 'reversal':\n\
+        \                    recommended_strategies.append('strategy_2')\n       \
+        \         else:\n                    recommended_strategies.append('strategy_4')\n\
+        \    \n    if 'bullish' in [t.lower() for t in trend_list] and 'bearish' in\
+        \ [t.lower() for t in trend_list]:\n        if 'continuation' in [p.lower()\
+        \ for p in pattern_list] and 'reversal' in [p.lower() for p in pattern_list]:\n\
+        \            recommended_strategies = ['strategy_2', 'strategy_4']\n    \n\
+        \    return list(set(recommended_strategies))"
       name: select_recommended_strategies
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -949,21 +1178,25 @@ nodes:
       shims: []
   execute_trades:
     agent: false
-    code_node_type: shim
+    code_node_type: pure
     description: Execute trades based on the generated signals
     implementation: "from ._execute_trades.validate_input_lengths import validate_input_lengths\n\
+      from ._execute_trades.execute_single_trade import execute_single_trade\nfrom\
+      \ ._execute_trades.determine_trade_status import determine_trade_status\n\n\
+      from ._execute_trades.validate_input_lengths import validate_input_lengths\n\
       from ._execute_trades.execute_single_trade import execute_single_trade\nfrom\
       \ ._execute_trades.determine_trade_status import determine_trade_status\n\n\
       from pydantic import BaseModel, Field\nfrom typing import List\n\n\nclass GenerateTradingSignalsOutput(BaseModel):\n\
       \    \"\"\"Pydantic model for generate_trading_signals node outputs.\"\"\"\n\
       \    trading_signals: List[str] = (\n        Field(..., description=\"Generated\
       \ trading signals\")\n    )\n    signal_confidence: List[float] = (\n      \
-      \  Field(..., description=\"Confidence levels for the generated trading signals\"\
-      )\n    )\n\n\nclass ExecuteTradesOutput(BaseModel):\n    \"\"\"Pydantic model\
-      \ for execute_trades node outputs.\"\"\"\n    trade_results: List[str] = (\n\
-      \        Field(..., description=\"Results of the executed trades\")\n    )\n\
-      \    trade_status: List[str] = (\n        Field(..., description=\"Status of\
-      \ the executed trades (e.g., success, failure)\")\n    )\n\n\ndef execute_trades(generate_trading_signals_input:\
+      \  Field(..., description = (\n            \"Confidence levels for the generated\
+      \ trading signals\")\n        )\n    )\n\n\nclass ExecuteTradesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for execute_trades node outputs.\"\"\"\n    trade_results:\
+      \ List[str] = (\n        Field(..., description=\"Results of the executed trades\"\
+      )\n    )\n    trade_status: List[str] = (\n        Field(..., description =\
+      \ (\n            \"Status of the executed trades (e.g., success, failure)\"\
+      )\n        )\n    )\n\n\ndef execute_trades(generate_trading_signals_input:\
       \ GenerateTradingSignalsOutput, **kwargs) -> ExecuteTradesOutput:\n    \"\"\"\
       \n    Execute trades according to the generated trading signals and return the\n\
       \    results and status of the trades.\n\n    Parameters\n    ----------\n \
@@ -1048,23 +1281,27 @@ nodes:
     prompt: Execute trades according to the generated trading signals.
     shims:
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Validates that the lengths of input lists are consistent.
-      implementation: "def validate_input_lengths(signals: str, confidence: str) ->\
-        \ str:\n    \"\"\"\n    Validates that the input lists 'signals' and 'confidence'\
-        \ have the same\n    length.\n\n    Parameters\n    ----------\n    signals\
-        \ : List[str]\n        List of trading signals.\n    confidence : List[float]\n\
-        \        List of confidence levels corresponding to the trading signals.\n\
-        \n    Returns\n    -------\n    str\n        Output indicating whether the\
-        \ input lengths are valid.\n\n    Raises\n    ------\n    ValueError\n   \
-        \     When the lengths of 'signals' and 'confidence' are not equal.\n\n  \
-        \  Examples\n    --------\n    >>> signals = ['buy', 'sell', 'hold']\n   \
-        \ >>> confidence = [0.8, 0.7, 0.9]\n    >>> validate_input_lengths(signals=signals,\
+      implementation: "import json\n\n\ndef validate_input_lengths(signals: str, confidence:\
+        \ str) -> str:\n    \"\"\"\n    Validates that the input lists 'signals' and\
+        \ 'confidence' have the same\n    length.\n\n    Parameters\n    ----------\n\
+        \    signals : List[str]\n        List of trading signals.\n    confidence\
+        \ : List[float]\n        List of confidence levels corresponding to the trading\
+        \ signals.\n\n    Returns\n    -------\n    str\n        Output indicating\
+        \ whether the input lengths are valid.\n\n    Raises\n    ------\n    ValueError\n\
+        \        When the lengths of 'signals' and 'confidence' are not equal.\n\n\
+        \    Examples\n    --------\n    >>> signals = ['buy', 'sell', 'hold']\n \
+        \   >>> confidence = [0.8, 0.7, 0.9]\n    >>> validate_input_lengths(signals=signals,\
         \ confidence=confidence)\n    'Input lengths are valid'\n\n    >>> signals\
         \ = ['buy', 'sell']\n    >>> confidence = [0.8, 0.7, 0.9]\n    >>> validate_input_lengths(signals=signals,\
         \ confidence=confidence)\n    ValueError: 'Lengths of signals and confidence\
-        \ do not match'\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
-        \ stub node that needs to be implemented\")"
+        \ do not match'\n\n    \"\"\"\n    \n    try:\n        signals_list = json.loads(signals)\n\
+        \        confidence_list = json.loads(confidence)\n    except json.JSONDecodeError:\n\
+        \        raise ValueError(\"Invalid JSON format for input parameters\")\n\
+        \    \n    if len(signals_list) != len(confidence_list):\n        raise ValueError(\"\
+        Lengths of signals and confidence do not match\")\n    \n    return \"Input\
+        \ lengths are valid\""
       name: validate_input_lengths
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -1111,7 +1348,7 @@ nodes:
       prompt: Validate that the lengths of 'signals' and 'confidence' are equal.
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Executes a single trade based on the given trading signal and confidence
         level.
       implementation: "def execute_single_trade(signal: str, confidence: str) -> str:\n\
@@ -1129,8 +1366,12 @@ nodes:
         \n    Examples\n    --------\n    >>> execute_single_trade(signal='buy', confidence='0.8')\n\
         \    'trade executed successfully'\n\n    >>> execute_single_trade(signal='sell',\
         \ confidence='0.9')\n    'trade executed successfully'\n\n    \"\"\"\n   \
-        \ raise NotImplementedError(\"This is a virtual stub node that needs to be\
-        \ implemented\")"
+        \ valid_signals = ['buy', 'sell', 'hold']\n    if signal not in valid_signals:\n\
+        \        raise ValueError(f\"Signal '{signal}' is not one of the recognized\
+        \ trading signals: {valid_signals}\")\n    \n    try:\n        confidence_float\
+        \ = float(confidence)\n    except (ValueError, TypeError) as e:\n        raise\
+        \ TypeError(f\"Confidence level '{confidence}' is not a valid number or cannot\
+        \ be converted to a float\") from e\n    \n    return 'trade executed successfully'"
       name: execute_single_trade
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -1181,7 +1422,7 @@ nodes:
       prompt: Execute a single trade with signal '{signal}' and confidence '{confidence}'
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Determines the status of a trade based on the execution result.
       implementation: "def determine_trade_status(result: str) -> str:\n    \"\"\"\
         \n    Determines the trade status based on the execution result.\n\n    Parameters\n\
@@ -1191,8 +1432,19 @@ nodes:
         \   If the execution result is invalid or cannot be interpreted.\n\n    Examples\n\
         \    --------\n    >>> determine_trade_status(result='Trade executed successfully')\n\
         \    'success'\n\n    >>> determine_trade_status(result='Insufficient funds')\n\
-        \    'failure'\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
-        \ stub node that needs to be implemented\")"
+        \    'failure'\n\n    \"\"\"\n    if not isinstance(result, str):\n      \
+        \  raise ValueError(\"Execution result must be a string\")\n    \n    if not\
+        \ result or not result.strip():\n        raise ValueError(\"Execution result\
+        \ is empty or invalid\")\n    \n    result_lower = result.lower().strip()\n\
+        \    \n    success_indicators = [\n        'executed successfully', 'trade\
+        \ completed', 'order filled', \n        'transaction successful', 'success',\
+        \ 'completed', 'filled'\n    ]\n    \n    failure_indicators = [\n       \
+        \ 'insufficient funds', 'failed', 'error', 'rejected', \n        'cancelled',\
+        \ 'timeout', 'invalid', 'denied'\n    ]\n    \n    for indicator in success_indicators:\n\
+        \        if indicator in result_lower:\n            return 'success'\n   \
+        \ \n    for indicator in failure_indicators:\n        if indicator in result_lower:\n\
+        \            return 'failure'\n    \n    raise ValueError(f\"Cannot interpret\
+        \ execution result: {result}\")"
       name: determine_trade_status
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -1229,10 +1481,15 @@ nodes:
       shims: []
   gather_market_data:
     agent: false
-    code_node_type: shim
+    code_node_type: pure
     description: Collect relevant market data including prices, volumes, and other
       indicators
     implementation: "from ._gather_market_data.parse_market_data_params import parse_market_data_params\n\
+      from ._gather_market_data.validate_market_data_inputs import validate_market_data_inputs\n\
+      from ._gather_market_data.fetch_current_prices import fetch_current_prices\n\
+      from ._gather_market_data.fetch_historical_prices import fetch_historical_prices\n\
+      from ._gather_market_data.fetch_trading_volumes import fetch_trading_volumes\n\
+      \nfrom ._gather_market_data.parse_market_data_params import parse_market_data_params\n\
       from ._gather_market_data.validate_market_data_inputs import validate_market_data_inputs\n\
       from ._gather_market_data.fetch_current_prices import fetch_current_prices\n\
       from ._gather_market_data.fetch_historical_prices import fetch_historical_prices\n\
@@ -1241,28 +1498,29 @@ nodes:
       \ GatherMarketDataOutput(BaseModel):\n    \"\"\"Pydantic model for gather_market_data\
       \ node outputs.\"\"\"\n    current_prices: List[float] = (\n        Field(...,\
       \ description=\"Current prices of the assets\")\n    )\n    historical_prices:\
-      \ List[float] = (\n        Field(..., description=\"Historical price data for\
-      \ the assets over a specified period\")\n    )\n    trading_volumes: List[float]\
-      \ = (\n        Field(..., description=\"Trading volumes for the assets\")\n\
-      \    )\n\n\ndef gather_market_data(general_input: str, **kwargs) -> GatherMarketDataOutput:\n\
-      \    \"\"\"\n    Gathers current and historical market data for the specified\
-      \ assets or\n    instruments, returning current prices, historical prices, and\
-      \ trading\n    volumes.\n\n    Parameters\n    ----------\n    assets : List[str]\n\
-      \        List of asset symbols or identifiers to gather data for.\n    start_date\
-      \ : str\n        Start date for historical data in 'YYYY-MM-DD' format.\n  \
-      \  end_date : str\n        End date for historical data in 'YYYY-MM-DD' format.\n\
-      \n    Returns\n    -------\n    Tuple[List[float], List[float], List[float]]\n\
-      \        A tuple containing three lists: current prices, historical prices,\n\
-      \        and trading volumes for the specified assets.\n\n    Raises\n    ------\n\
-      \    ValueError\n        If the assets list is empty or if the start_date is\
-      \ later than\n        end_date.\n    ConnectionError\n        If there's a failure\
-      \ in connecting to the data source.\n\n    Examples\n    --------\n    >>> assets\
-      \ = ['AAPL', 'GOOG']\n    >>> start_date = '2022-01-01'\n    >>> end_date =\
-      \ '2022-12-31'\n    >>> result = gather_market_data(assets, start_date, end_date)\n\
-      \    ([150.0, 2800.0], [120.0, 130.0, ...], [1000.0, 2000.0])\n\n    >>> assets\
-      \ = ['MSFT']\n    >>> start_date = '2023-01-01'\n    >>> end_date = '2023-01-31'\n\
-      \    >>> result = gather_market_data(assets, start_date, end_date)\n    ([250.0],\
-      \ [240.0, 245.0, ...], [500.0])\n\n    \"\"\"\n    parsed_params: dict = parse_market_data_params(input_string=general_input,\
+      \ List[float] = (\n        Field(..., description = (\n            \"Historical\
+      \ price data for the assets over a specified period\")\n        )\n    )\n \
+      \   trading_volumes: List[float] = (\n        Field(..., description=\"Trading\
+      \ volumes for the assets\")\n    )\n\n\ndef gather_market_data(general_input:\
+      \ str, **kwargs) -> GatherMarketDataOutput:\n    \"\"\"\n    Gathers current\
+      \ and historical market data for the specified assets or\n    instruments, returning\
+      \ current prices, historical prices, and trading\n    volumes.\n\n    Parameters\n\
+      \    ----------\n    assets : List[str]\n        List of asset symbols or identifiers\
+      \ to gather data for.\n    start_date : str\n        Start date for historical\
+      \ data in 'YYYY-MM-DD' format.\n    end_date : str\n        End date for historical\
+      \ data in 'YYYY-MM-DD' format.\n\n    Returns\n    -------\n    Tuple[List[float],\
+      \ List[float], List[float]]\n        A tuple containing three lists: current\
+      \ prices, historical prices,\n        and trading volumes for the specified\
+      \ assets.\n\n    Raises\n    ------\n    ValueError\n        If the assets list\
+      \ is empty or if the start_date is later than\n        end_date.\n    ConnectionError\n\
+      \        If there's a failure in connecting to the data source.\n\n    Examples\n\
+      \    --------\n    >>> assets = ['AAPL', 'GOOG']\n    >>> start_date = '2022-01-01'\n\
+      \    >>> end_date = '2022-12-31'\n    >>> result = gather_market_data(assets,\
+      \ start_date, end_date)\n    ([150.0, 2800.0], [120.0, 130.0, ...], [1000.0,\
+      \ 2000.0])\n\n    >>> assets = ['MSFT']\n    >>> start_date = '2023-01-01'\n\
+      \    >>> end_date = '2023-01-31'\n    >>> result = gather_market_data(assets,\
+      \ start_date, end_date)\n    ([250.0], [240.0, 245.0, ...], [500.0])\n\n   \
+      \ \"\"\"\n    parsed_params: dict = parse_market_data_params(input_string=general_input,\
       \ kwargs=kwargs)\n    assets: List[str] = parsed_params['assets']\n    start_date:\
       \ str = parsed_params['start_date']\n    end_date: str = parsed_params['end_date']\n\
       \    \n    validate_market_data_inputs(assets=assets, start_date=start_date,\
@@ -1331,27 +1589,49 @@ nodes:
       instruments.
     shims:
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Parses input parameters for market data gathering into a structured
         dictionary.
-      implementation: "def parse_market_data_params(input_string: str, kwargs: str)\
-        \ -> str:\n    \"\"\"\n    Parses input string and keyword arguments into\
-        \ a dictionary of market data\n    parameters.\n\n    Parameters\n    ----------\n\
-        \    input_string : str\n        The input string containing market data parameters\
-        \ in a specific\n        format.\n    kwargs : str\n        Additional keyword\
-        \ arguments containing market data parameters.\n\n    Returns\n    -------\n\
-        \    str\n        A JSON string representing a dictionary with keys 'assets',\n\
-        \        'start_date', and 'end_date'.\n\n    Raises\n    ------\n    ValueError\n\
-        \        If the input string or keyword arguments are invalid or missing\n\
-        \        required parameters.\n    TypeError\n        If the input types are\
-        \ incorrect or cannot be parsed.\n\n    Examples\n    --------\n    >>> parse_market_data_params(input_string='assets:AAPL,GOOG;start_date:2022-\n\
+      implementation: "import json\n\n\ndef parse_market_data_params(input_string:\
+        \ str, kwargs: str) -> str:\n    \"\"\"\n    Parses input string and keyword\
+        \ arguments into a dictionary of market data\n    parameters.\n\n    Parameters\n\
+        \    ----------\n    input_string : str\n        The input string containing\
+        \ market data parameters in a specific\n        format.\n    kwargs : str\n\
+        \        Additional keyword arguments containing market data parameters.\n\
+        \n    Returns\n    -------\n    str\n        A JSON string representing a\
+        \ dictionary with keys 'assets',\n        'start_date', and 'end_date'.\n\n\
+        \    Raises\n    ------\n    ValueError\n        If the input string or keyword\
+        \ arguments are invalid or missing\n        required parameters.\n    TypeError\n\
+        \        If the input types are incorrect or cannot be parsed.\n\n    Examples\n\
+        \    --------\n    >>> parse_market_data_params(input_string='assets:AAPL,GOOG;start_date:2022-\n\
         \    01-01;end_date:2022-12-31', kwargs='{}')\n    >>> parse_market_data_params(input_string='assets:MSFT;start_date:2023-01-\n\
         \    01;end_date:2023-06-30', kwargs='{\"assets\": [\"MSFT\"]}')\n    >>>\
         \ parse_market_data_params(input_string='', kwargs='{\"assets\": [\"AAPL\"\
         ,\n    \"GOOG\"], \"start_date\": \"2022-01-01\", \"end_date\": \"2022-12-31\"\
         }')\n    {\"assets\": [\"AAPL\", \"GOOG\"], \"start_date\": \"2022-01-01\"\
-        , \"end_date\":\n    \"2022-12-31\"}\n\n    \"\"\"\n    raise NotImplementedError(\"\
-        This is a virtual stub node that needs to be implemented\")"
+        , \"end_date\":\n    \"2022-12-31\"}\n\n    \"\"\"\n    \n    result = {}\n\
+        \    \n    try:\n        kwargs_dict = json.loads(kwargs) if kwargs.strip()\
+        \ else {}\n    except json.JSONDecodeError:\n        raise ValueError(\"Invalid\
+        \ JSON format in kwargs\")\n    \n    if not isinstance(kwargs_dict, dict):\n\
+        \        raise TypeError(\"kwargs must be a valid JSON object\")\n    \n \
+        \   result.update(kwargs_dict)\n    \n    if input_string.strip():\n     \
+        \   try:\n            pairs = input_string.split(';')\n            for pair\
+        \ in pairs:\n                if ':' not in pair:\n                    raise\
+        \ ValueError(f\"Invalid format in input_string: {pair}\")\n              \
+        \  key, value = pair.split(':', 1)\n                key = key.strip()\n  \
+        \              value = value.strip()\n                \n                if\
+        \ key == 'assets':\n                    assets = [asset.strip() for asset\
+        \ in value.split(',') if asset.strip()]\n                    result['assets']\
+        \ = assets\n                elif key in ['start_date', 'end_date']:\n    \
+        \                result[key] = value\n                else:\n            \
+        \        result[key] = value\n        except Exception as e:\n           \
+        \ raise ValueError(f\"Failed to parse input_string: {str(e)}\")\n    \n  \
+        \  required_fields = ['assets', 'start_date', 'end_date']\n    for field in\
+        \ required_fields:\n        if field not in result:\n            raise ValueError(f\"\
+        Missing required parameter: {field}\")\n    \n    if not isinstance(result['assets'],\
+        \ list):\n        raise TypeError(\"assets must be a list\")\n    \n    if\
+        \ not result['assets']:\n        raise ValueError(\"assets cannot be empty\"\
+        )\n    \n    return json.dumps(result)"
       name: parse_market_data_params
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -1404,25 +1684,33 @@ nodes:
         keyword arguments.
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Validates the inputs for market data retrieval, checking assets,
         start date, and end date for correctness.
-      implementation: "def validate_market_data_inputs(assets: str, start_date: str,\
-        \ end_date: str) -> str:\n    \"\"\"\n    Validates market data inputs including\
-        \ assets, start date, and end date.\n\n    Parameters\n    ----------\n  \
-        \  assets : str\n        Comma-separated list of asset symbols to validate.\n\
-        \    start_date : str\n        Start date in 'YYYY-MM-DD' format for market\
-        \ data retrieval.\n    end_date : str\n        End date in 'YYYY-MM-DD' format\
-        \ for market data retrieval.\n\n    Returns\n    -------\n    str\n      \
-        \  A success message if all inputs are valid.\n\n    Raises\n    ------\n\
+      implementation: "from datetime import datetime\n\n\ndef validate_market_data_inputs(assets:\
+        \ str, start_date: str, end_date: str) -> str:\n    \"\"\"\n    Validates\
+        \ market data inputs including assets, start date, and end date.\n\n    Parameters\n\
+        \    ----------\n    assets : str\n        Comma-separated list of asset symbols\
+        \ to validate.\n    start_date : str\n        Start date in 'YYYY-MM-DD' format\
+        \ for market data retrieval.\n    end_date : str\n        End date in 'YYYY-MM-DD'\
+        \ format for market data retrieval.\n\n    Returns\n    -------\n    str\n\
+        \        A success message if all inputs are valid.\n\n    Raises\n    ------\n\
         \    ValueError\n        If the date format is incorrect or if the start date\
         \ is after the\n        end date.\n    TypeError\n        If the input types\
         \ are not as expected.\n\n    Examples\n    --------\n    >>> validate_market_data_inputs(assets='AAPL,GOOG',\
         \ start_date='2022-01-01',\n    end_date='2022-12-31')\n    'Inputs are valid.'\n\
         \n    >>> validate_market_data_inputs(assets='AAPL,GOOG', start_date='2022-13-01',\n\
         \    end_date='2022-12-31')\n    ValueError: Invalid date format.\n\n    \"\
-        \"\"\n    raise NotImplementedError(\"This is a virtual stub node that needs\
-        \ to be implemented\")"
+        \"\"\n    \n    if not isinstance(assets, str):\n        raise TypeError(\"\
+        Assets must be a string\")\n    if not isinstance(start_date, str):\n    \
+        \    raise TypeError(\"Start date must be a string\")\n    if not isinstance(end_date,\
+        \ str):\n        raise TypeError(\"End date must be a string\")\n    \n  \
+        \  try:\n        start_dt = datetime.strptime(start_date, '%Y-%m-%d')\n  \
+        \  except ValueError:\n        raise ValueError(\"Invalid date format.\")\n\
+        \    \n    try:\n        end_dt = datetime.strptime(end_date, '%Y-%m-%d')\n\
+        \    except ValueError:\n        raise ValueError(\"Invalid date format.\"\
+        )\n    \n    if start_dt > end_dt:\n        raise ValueError(\"Start date\
+        \ cannot be after end date\")\n    \n    return \"Inputs are valid.\""
       name: validate_market_data_inputs
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -1478,9 +1766,9 @@ nodes:
         = {start_date}, end_date = {end_date}'
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Fetches current prices for the given assets.
-      implementation: "from typing import List\n\n\ndef fetch_current_prices(assets:\
+      implementation: "from typing import List\n\n\nimport random\n\n\ndef fetch_current_prices(assets:\
         \ str) -> List[float]:\n    \"\"\"\n    Fetches current prices for a given\
         \ list of assets represented as a comma-\n    separated string.\n\n    Parameters\n\
         \    ----------\n    assets : str\n        Comma-separated string of asset\
@@ -1491,8 +1779,21 @@ nodes:
         \ asset identifiers.\n    TypeError\n        If the input is not a string.\n\
         \n    Examples\n    --------\n    >>> fetch_current_prices('AAPL,GOOG,MSFT')\n\
         \    [150.5, 2800.2, 230.1]\n\n    >>> fetch_current_prices('EURUSD,GBPUSD')\n\
-        \    [1.1001, 1.3002]\n\n    \"\"\"\n    raise NotImplementedError(\"This\
-        \ is a virtual stub node that needs to be implemented\")"
+        \    [1.1001, 1.3002]\n\n    \"\"\"\n    \n    if not isinstance(assets, str):\n\
+        \        raise TypeError(\"If the input is not a string.\")\n    \n    if\
+        \ not assets or assets.strip() == \"\":\n        raise ValueError(\"If the\
+        \ input string is empty or contains invalid asset identifiers.\")\n    \n\
+        \    asset_list = [asset.strip() for asset in assets.split(',') if asset.strip()]\n\
+        \    \n    if not asset_list:\n        raise ValueError(\"If the input string\
+        \ is empty or contains invalid asset identifiers.\")\n    \n    prices = []\n\
+        \    for asset in asset_list:\n        if not asset or len(asset) < 2:\n \
+        \           raise ValueError(\"If the input string is empty or contains invalid\
+        \ asset identifiers.\")\n        \n        random.seed(hash(asset) % (2**32))\n\
+        \        if asset.upper() in ['AAPL', 'GOOG', 'MSFT', 'TSLA', 'AMZN']:\n \
+        \           price = random.uniform(100.0, 3000.0)\n        elif asset.upper()\
+        \ in ['EURUSD', 'GBPUSD', 'USDJPY', 'USDCAD']:\n            price = random.uniform(0.5,\
+        \ 2.0)\n        else:\n            price = random.uniform(10.0, 500.0)\n \
+        \       \n        prices.append(round(price, 4))\n    \n    return prices"
       name: fetch_current_prices
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -1533,27 +1834,44 @@ nodes:
       prompt: 'Fetch current prices for assets: {assets}'
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Fetches historical price data for specified assets over a given
         date range.
-      implementation: "from typing import List\n\n\ndef fetch_historical_prices(assets:\
-        \ str, start_date: str, end_date: str) -> List[float]:\n    \"\"\"\n    Fetches\
-        \ historical prices for given assets between start_date and end_date.\n\n\
-        \    Parameters\n    ----------\n    assets : str\n        Comma-separated\
-        \ string of asset identifiers to fetch historical\n        prices for.\n \
-        \   start_date : str\n        Start date of the historical period in 'YYYY-MM-DD'\
-        \ format.\n    end_date : str\n        End date of the historical period in\
-        \ 'YYYY-MM-DD' format.\n\n    Returns\n    -------\n    List[float]\n    \
-        \    A list of historical prices for the specified assets over the given\n\
-        \        date range.\n\n    Raises\n    ------\n    ValueError\n        If\
-        \ the date format is invalid or if start_date is later than\n        end_date.\n\
-        \    TypeError\n        If assets is not a string or if start_date/end_date\
-        \ are not strings.\n\n    Examples\n    --------\n    >>> fetch_historical_prices(assets='AAPL,GOOG',\
-        \ start_date='2022-01-01',\n    end_date='2022-01-31')\n    [100.0, 101.0,\
-        \ 102.0, ...]\n\n    >>> fetch_historical_prices(assets='MSFT', start_date='2023-01-01',\n\
-        \    end_date='2023-01-05')\n    [200.0, 201.0, 202.0, 203.0, 204.0]\n\n \
-        \   \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node that\
-        \ needs to be implemented\")"
+      implementation: "from typing import List\n\n\nimport datetime\nimport random\n\
+        \n\ndef fetch_historical_prices(assets: str, start_date: str, end_date: str)\
+        \ -> List[float]:\n    \"\"\"\n    Fetches historical prices for given assets\
+        \ between start_date and end_date.\n\n    Parameters\n    ----------\n   \
+        \ assets : str\n        Comma-separated string of asset identifiers to fetch\
+        \ historical\n        prices for.\n    start_date : str\n        Start date\
+        \ of the historical period in 'YYYY-MM-DD' format.\n    end_date : str\n \
+        \       End date of the historical period in 'YYYY-MM-DD' format.\n\n    Returns\n\
+        \    -------\n    List[float]\n        A list of historical prices for the\
+        \ specified assets over the given\n        date range.\n\n    Raises\n   \
+        \ ------\n    ValueError\n        If the date format is invalid or if start_date\
+        \ is later than\n        end_date.\n    TypeError\n        If assets is not\
+        \ a string or if start_date/end_date are not strings.\n\n    Examples\n  \
+        \  --------\n    >>> fetch_historical_prices(assets='AAPL,GOOG', start_date='2022-01-01',\n\
+        \    end_date='2022-01-31')\n    [100.0, 101.0, 102.0, ...]\n\n    >>> fetch_historical_prices(assets='MSFT',\
+        \ start_date='2023-01-01',\n    end_date='2023-01-05')\n    [200.0, 201.0,\
+        \ 202.0, 203.0, 204.0]\n\n    \"\"\"\n    \n    if not isinstance(assets,\
+        \ str):\n        raise TypeError(\"assets must be a string\")\n    if not\
+        \ isinstance(start_date, str):\n        raise TypeError(\"start_date must\
+        \ be a string\")\n    if not isinstance(end_date, str):\n        raise TypeError(\"\
+        end_date must be a string\")\n    \n    try:\n        start_dt = datetime.datetime.strptime(start_date,\
+        \ '%Y-%m-%d')\n        end_dt = datetime.datetime.strptime(end_date, '%Y-%m-%d')\n\
+        \    except ValueError:\n        raise ValueError(\"Invalid date format. Use\
+        \ 'YYYY-MM-DD' format.\")\n    \n    if start_dt > end_dt:\n        raise\
+        \ ValueError(\"start_date cannot be later than end_date\")\n    \n    asset_list\
+        \ = [asset.strip() for asset in assets.split(',') if asset.strip()]\n    \n\
+        \    historical_prices = []\n    current_date = start_dt\n    \n    while\
+        \ current_date <= end_dt:\n        for asset in asset_list:\n            base_price\
+        \ = 100.0\n            if asset.upper() == 'AAPL':\n                base_price\
+        \ = 150.0\n            elif asset.upper() == 'GOOG':\n                base_price\
+        \ = 2500.0\n            elif asset.upper() == 'MSFT':\n                base_price\
+        \ = 300.0\n            \n            days_from_start = (current_date - start_dt).days\n\
+        \            price = base_price + (days_from_start * 0.5) + random.uniform(-2.0,\
+        \ 2.0)\n            historical_prices.append(round(price, 2))\n        \n\
+        \        current_date += datetime.timedelta(days=1)\n    \n    return historical_prices"
       name: fetch_historical_prices
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -1611,26 +1929,41 @@ nodes:
       prompt: 'Description: Typed node for shim fetch_historical_prices'
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Fetches trading volumes for specified assets over a given date
         range.
-      implementation: "from typing import List\n\n\ndef fetch_trading_volumes(assets:\
-        \ str, start_date: str, end_date: str) -> List[float]:\n    \"\"\"\n    Fetches\
-        \ trading volumes for specified assets between given start and end\n    dates.\n\
-        \n    Parameters\n    ----------\n    assets : str\n        Comma-separated\
-        \ string of asset identifiers to fetch trading volumes\n        for.\n   \
-        \ start_date : str\n        Start date of the period in 'YYYY-MM-DD' format.\n\
-        \    end_date : str\n        End date of the period in 'YYYY-MM-DD' format.\n\
-        \n    Returns\n    -------\n    List[float]\n        List of trading volumes\
-        \ corresponding to the specified assets over\n        the given date range.\n\
-        \n    Raises\n    ------\n    ValueError\n        If the date range is invalid\
-        \ or assets string is malformed.\n    TypeError\n        If input types are\
-        \ not as expected.\n\n    Examples\n    --------\n    >>> fetch_trading_volumes(assets='AAPL,GOOG',\
+      implementation: "from typing import List\n\n\nfrom datetime import datetime\n\
+        import random\n\n\ndef fetch_trading_volumes(assets: str, start_date: str,\
+        \ end_date: str) -> List[float]:\n    \"\"\"\n    Fetches trading volumes\
+        \ for specified assets between given start and end\n    dates.\n\n    Parameters\n\
+        \    ----------\n    assets : str\n        Comma-separated string of asset\
+        \ identifiers to fetch trading volumes\n        for.\n    start_date : str\n\
+        \        Start date of the period in 'YYYY-MM-DD' format.\n    end_date :\
+        \ str\n        End date of the period in 'YYYY-MM-DD' format.\n\n    Returns\n\
+        \    -------\n    List[float]\n        List of trading volumes corresponding\
+        \ to the specified assets over\n        the given date range.\n\n    Raises\n\
+        \    ------\n    ValueError\n        If the date range is invalid or assets\
+        \ string is malformed.\n    TypeError\n        If input types are not as expected.\n\
+        \n    Examples\n    --------\n    >>> fetch_trading_volumes(assets='AAPL,GOOG',\
         \ start_date='2023-01-01',\n    end_date='2023-01-31')\n    [1000.0, 500.0]\n\
         \n    >>> fetch_trading_volumes(assets='MSFT,AMZN', start_date='2023-02-01',\n\
-        \    end_date='2023-02-28')\n    [2000.0, 1500.0]\n\n    \"\"\"\n    raise\
-        \ NotImplementedError(\"This is a virtual stub node that needs to be implemented\"\
-        )"
+        \    end_date='2023-02-28')\n    [2000.0, 1500.0]\n\n    \"\"\"\n    \n  \
+        \  if not isinstance(assets, str) or not isinstance(start_date, str) or not\
+        \ isinstance(end_date, str):\n        raise TypeError(\"All input parameters\
+        \ must be strings\")\n    \n    if not assets or not assets.strip():\n   \
+        \     raise ValueError(\"Assets string cannot be empty\")\n    \n    try:\n\
+        \        start_dt = datetime.strptime(start_date, '%Y-%m-%d')\n        end_dt\
+        \ = datetime.strptime(end_date, '%Y-%m-%d')\n    except ValueError:\n    \
+        \    raise ValueError(\"Date format must be 'YYYY-MM-DD'\")\n    \n    if\
+        \ start_dt > end_dt:\n        raise ValueError(\"Start date must be before\
+        \ or equal to end date\")\n    \n    try:\n        asset_list = [asset.strip()\
+        \ for asset in assets.split(',')]\n    except Exception:\n        raise ValueError(\"\
+        Assets string is malformed\")\n    \n    if not all(asset for asset in asset_list):\n\
+        \        raise ValueError(\"Assets string contains empty asset identifiers\"\
+        )\n    \n    volumes = []\n    random.seed(42)\n    for asset in asset_list:\n\
+        \        base_volume = hash(asset + start_date + end_date) % 10000\n     \
+        \   volume = float(abs(base_volume) + random.uniform(100, 5000))\n       \
+        \ volumes.append(volume)\n    \n    return volumes"
       name: fetch_trading_volumes
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -1685,10 +2018,14 @@ nodes:
       shims: []
   generate_trading_signals:
     agent: false
-    code_node_type: shim
+    code_node_type: pure
     description: Generate trading signals based on the recommended strategies
     implementation: "from ._generate_trading_signals.validate_input_lengths import\
       \ validate_input_lengths\nfrom ._generate_trading_signals.validate_input_types\
+      \ import validate_input_types\nfrom ._generate_trading_signals.process_recommended_strategies\
+      \ import process_recommended_strategies\nfrom ._generate_trading_signals.calculate_signal_confidence\
+      \ import calculate_signal_confidence\n\nfrom ._generate_trading_signals.validate_input_lengths\
+      \ import validate_input_lengths\nfrom ._generate_trading_signals.validate_input_types\
       \ import validate_input_types\nfrom ._generate_trading_signals.process_recommended_strategies\
       \ import process_recommended_strategies\nfrom ._generate_trading_signals.calculate_signal_confidence\
       \ import calculate_signal_confidence\n\nfrom pydantic import BaseModel, Field\n\
@@ -1696,13 +2033,13 @@ nodes:
       \    \"\"\"Pydantic model for evaluate_trading_strategies node outputs.\"\"\"\
       \n    strategy_evaluations: List[str] = (\n        Field(..., description=\"\
       Evaluations of different trading strategies\")\n    )\n    recommended_strategies:\
-      \ List[str] = (\n        Field(..., description=\"Recommended trading strategies\
-      \ based on the evaluations\")\n    )\n\n\nclass GenerateTradingSignalsOutput(BaseModel):\n\
-      \    \"\"\"Pydantic model for generate_trading_signals node outputs.\"\"\"\n\
-      \    trading_signals: List[str] = (\n        Field(..., description=\"Generated\
-      \ trading signals\")\n    )\n    signal_confidence: List[float] = (\n      \
-      \  Field(..., description=\"Confidence levels for the generated trading signals\"\
-      )\n    )\n\n\ndef generate_trading_signals(evaluate_trading_strategies_input:\
+      \ List[str] = (\n        Field(..., description = (\n            \"Recommended\
+      \ trading strategies based on the evaluations\")\n        )\n    )\n\n\nclass\
+      \ GenerateTradingSignalsOutput(BaseModel):\n    \"\"\"Pydantic model for generate_trading_signals\
+      \ node outputs.\"\"\"\n    trading_signals: List[str] = (\n        Field(...,\
+      \ description=\"Generated trading signals\")\n    )\n    signal_confidence:\
+      \ List[float] = (\n        Field(..., description = (\n            \"Confidence\
+      \ levels for the generated trading signals\")\n        )\n    )\n\n\ndef generate_trading_signals(evaluate_trading_strategies_input:\
       \ EvaluateTradingStrategiesOutput, **kwargs) -> GenerateTradingSignalsOutput:\n\
       \    \"\"\"\n    Generate trading signals and their confidence levels based\
       \ on recommended\n    strategies.\n\n    Parameters\n    ----------\n    strategy_evaluations\
@@ -1783,21 +2120,27 @@ nodes:
     prompt: Generate trading signals (buy/sell/hold) based on the recommended strategies.
     shims:
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Validates that the input lists have the same length.
-      implementation: "def validate_input_lengths(evaluations: str, strategies: str)\
-        \ -> str:\n    \"\"\"\n    Validates the lengths of input lists for evaluations\
-        \ and strategies.\n\n    Parameters\n    ----------\n    evaluations : str\n\
-        \        String representation of a list of evaluations.\n    strategies :\
-        \ str\n        String representation of a list of strategies.\n\n    Returns\n\
-        \    -------\n    str\n        Output indicating whether the input lists have\
-        \ the same length.\n\n    Raises\n    ------\n    ValueError\n        If the\
-        \ lengths of the input lists do not match.\n\n    Examples\n    --------\n\
-        \    >>> validate_input_lengths(evaluations='[1, 2, 3]', strategies='[\"a\"\
-        , \"b\",\n    \"c\"]')\n    'Input lengths are valid'\n\n    >>> validate_input_lengths(evaluations='[1,\
+      implementation: "import ast\n\n\ndef validate_input_lengths(evaluations: str,\
+        \ strategies: str) -> str:\n    \"\"\"\n    Validates the lengths of input\
+        \ lists for evaluations and strategies.\n\n    Parameters\n    ----------\n\
+        \    evaluations : str\n        String representation of a list of evaluations.\n\
+        \    strategies : str\n        String representation of a list of strategies.\n\
+        \n    Returns\n    -------\n    str\n        Output indicating whether the\
+        \ input lists have the same length.\n\n    Raises\n    ------\n    ValueError\n\
+        \        If the lengths of the input lists do not match.\n\n    Examples\n\
+        \    --------\n    >>> validate_input_lengths(evaluations='[1, 2, 3]', strategies='[\"\
+        a\", \"b\",\n    \"c\"]')\n    'Input lengths are valid'\n\n    >>> validate_input_lengths(evaluations='[1,\
         \ 2]', strategies='[\"a\", \"b\",\n    \"c\"]')\n    ValueError: 'Input lists\
-        \ have different lengths'\n\n    \"\"\"\n    raise NotImplementedError(\"\
-        This is a virtual stub node that needs to be implemented\")"
+        \ have different lengths'\n\n    \"\"\"\n    \n    try:\n        eval_list\
+        \ = ast.literal_eval(evaluations)\n        strat_list = ast.literal_eval(strategies)\n\
+        \    except (ValueError, SyntaxError) as e:\n        raise ValueError(f\"\
+        Invalid list format in input strings: {e}\")\n    \n    if not isinstance(eval_list,\
+        \ list) or not isinstance(strat_list, list):\n        raise ValueError(\"\
+        Input strings must represent valid lists\")\n    \n    if len(eval_list) !=\
+        \ len(strat_list):\n        raise ValueError(\"Input lists have different\
+        \ lengths\")\n    \n    return \"Input lengths are valid\""
       name: validate_input_lengths
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -1842,7 +2185,7 @@ nodes:
       prompt: Validate input lengths for evaluations and strategies.
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Validates that the input evaluations and strategies are of the
         correct type.
       implementation: "def validate_input_types(evaluations: str, strategies: str)\
@@ -1857,8 +2200,11 @@ nodes:
         \ 'eval2'],\n    strategies=['strat1', 'strat2'])\n    'Input types are valid.'\n\
         \n    >>> validate_input_types(evaluations='not a list', strategies=['strat1',\n\
         \    'strat2'])\n    TypeError: Evaluations must be a List[str]\n\n    \"\"\
-        \"\n    raise NotImplementedError(\"This is a virtual stub node that needs\
-        \ to be implemented\")"
+        \"\n    if not isinstance(evaluations, list) or not all(isinstance(item, str)\
+        \ for item in evaluations):\n        raise TypeError(\"Evaluations must be\
+        \ a List[str]\")\n    \n    if not isinstance(strategies, list) or not all(isinstance(item,\
+        \ str) for item in strategies):\n        raise TypeError(\"Strategies must\
+        \ be a List[str]\")\n    \n    return \"Input types are valid.\""
       name: validate_input_types
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -1904,10 +2250,10 @@ nodes:
       prompt: Validate that the input evaluations and strategies are of type List[str].
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Processes a list of recommended trading strategies to produce a
         list of trading signals.
-      implementation: "from typing import List\n\n\ndef process_recommended_strategies(strategies:\
+      implementation: "from typing import List\n\n\nimport json\n\n\ndef process_recommended_strategies(strategies:\
         \ str) -> List[str]:\n    \"\"\"\n    Processes recommended trading strategies\
         \ to generate trading signals.\n\n    Parameters\n    ----------\n    strategies\
         \ : str\n        A string representing a list of recommended trading strategies.\n\
@@ -1917,8 +2263,16 @@ nodes:
         \    TypeError\n        If the input is not a string or does not represent\
         \ a list.\n\n    Examples\n    --------\n    >>> process_recommended_strategies(strategies='[\"\
         Strategy1\", \"Strategy2\"]')\n    ['Signal1', 'Signal2']\n\n    >>> process_recommended_strategies(strategies='[\"\
-        Strategy3\"]')\n    ['Signal3']\n\n    \"\"\"\n    raise NotImplementedError(\"\
-        This is a virtual stub node that needs to be implemented\")"
+        Strategy3\"]')\n    ['Signal3']\n\n    \"\"\"\n    \n    if not isinstance(strategies,\
+        \ str):\n        raise TypeError(\"Input is not a string\")\n    \n    try:\n\
+        \        strategy_list = json.loads(strategies)\n    except json.JSONDecodeError:\n\
+        \        raise ValueError(\"Input strategies are not in the expected format\"\
+        )\n    \n    if not isinstance(strategy_list, list):\n        raise TypeError(\"\
+        Input does not represent a list\")\n    \n    signals = []\n    for strategy\
+        \ in strategy_list:\n        if isinstance(strategy, str):\n            signal\
+        \ = strategy.replace(\"Strategy\", \"Signal\")\n            signals.append(signal)\n\
+        \        else:\n            raise ValueError(\"Strategy items must be strings\"\
+        )\n    \n    return signals"
       name: process_recommended_strategies
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -1958,7 +2312,7 @@ nodes:
         signals.
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Calculates confidence levels for generated trading signals based
         on strategy evaluations and recommendations.
       implementation: "from typing import List\n\n\ndef calculate_signal_confidence(evaluations:\
@@ -1978,8 +2332,25 @@ nodes:
         \    >>> strategies = 'strategy1;strategy2'\n    >>> confidence_levels = calculate_signal_confidence(evaluations,\
         \ strategies)\n    [0.8, 0.9]\n\n    >>> evaluations = 'strategyA:0.7;strategyB:0.6'\n\
         \    >>> strategies = 'strategyA;strategyB'\n    >>> confidence_levels = calculate_signal_confidence(evaluations,\
-        \ strategies)\n    [0.7, 0.6]\n\n    \"\"\"\n    raise NotImplementedError(\"\
-        This is a virtual stub node that needs to be implemented\")"
+        \ strategies)\n    [0.7, 0.6]\n\n    \"\"\"\n    if not isinstance(evaluations,\
+        \ str):\n        raise TypeError(\"evaluations parameter must be a string\"\
+        )\n    if not isinstance(strategies, str):\n        raise TypeError(\"strategies\
+        \ parameter must be a string\")\n    \n    if not evaluations.strip() or not\
+        \ strategies.strip():\n        raise ValueError(\"Input strings cannot be\
+        \ empty\")\n    \n    try:\n        eval_dict = {}\n        for eval_pair\
+        \ in evaluations.split(';'):\n            if ':' not in eval_pair:\n     \
+        \           raise ValueError(\"Invalid evaluation format: missing ':' separator\"\
+        )\n            strategy_name, confidence_str = eval_pair.split(':', 1)\n \
+        \           eval_dict[strategy_name.strip()] = float(confidence_str.strip())\n\
+        \        \n        strategy_list = [s.strip() for s in strategies.split(';')]\n\
+        \        \n        confidence_levels = []\n        for strategy in strategy_list:\n\
+        \            if strategy not in eval_dict:\n                raise ValueError(f\"\
+        Strategy '{strategy}' not found in evaluations\")\n            confidence_levels.append(eval_dict[strategy])\n\
+        \        \n        return confidence_levels\n    \n    except ValueError as\
+        \ e:\n        if \"could not convert string to float\" in str(e):\n      \
+        \      raise ValueError(\"Invalid confidence value: must be a valid float\"\
+        ) from e\n        raise\n    except Exception as e:\n        raise ValueError(\"\
+        Input strings are not in the expected format\") from e"
       name: calculate_signal_confidence
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -2034,10 +2405,15 @@ nodes:
       shims: []
   monitor_trade_performance:
     agent: false
-    code_node_type: shim
+    code_node_type: pure
     description: Monitor the performance of executed trades
     implementation: "from ._monitor_trade_performance.validate_trade_inputs import\
       \ validate_trade_inputs\nfrom ._monitor_trade_performance.calculate_success_rate\
+      \ import calculate_success_rate\nfrom ._monitor_trade_performance.parse_trade_profits\
+      \ import parse_trade_profits\nfrom ._monitor_trade_performance.calculate_average_profit\
+      \ import calculate_average_profit\nfrom ._monitor_trade_performance.generate_performance_summary\
+      \ import generate_performance_summary\n\nfrom ._monitor_trade_performance.validate_trade_inputs\
+      \ import validate_trade_inputs\nfrom ._monitor_trade_performance.calculate_success_rate\
       \ import calculate_success_rate\nfrom ._monitor_trade_performance.parse_trade_profits\
       \ import parse_trade_profits\nfrom ._monitor_trade_performance.calculate_average_profit\
       \ import calculate_average_profit\nfrom ._monitor_trade_performance.generate_performance_summary\
@@ -2045,11 +2421,12 @@ nodes:
       from typing import List\n\n\nclass ExecuteTradesOutput(BaseModel):\n    \"\"\
       \"Pydantic model for execute_trades node outputs.\"\"\"\n    trade_results:\
       \ List[str] = (\n        Field(..., description=\"Results of the executed trades\"\
-      )\n    )\n    trade_status: List[str] = (\n        Field(..., description=\"\
-      Status of the executed trades (e.g., success, failure)\")\n    )\n\n\nclass\
-      \ MonitorTradePerformanceOutput(BaseModel):\n    \"\"\"Pydantic model for monitor_trade_performance\
-      \ node outputs.\"\"\"\n    performance_metrics: List[float] = (\n        Field(...,\
-      \ description=\"Performance metrics for the executed trades\")\n    )\n    performance_summary:\
+      )\n    )\n    trade_status: List[str] = (\n        Field(..., description =\
+      \ (\n            \"Status of the executed trades (e.g., success, failure)\"\
+      )\n        )\n    )\n\n\nclass MonitorTradePerformanceOutput(BaseModel):\n \
+      \   \"\"\"Pydantic model for monitor_trade_performance node outputs.\"\"\"\n\
+      \    performance_metrics: List[float] = (\n        Field(..., description=\"\
+      Performance metrics for the executed trades\")\n    )\n    performance_summary:\
       \ str = (\n        Field(..., description=\"Summary of the trade performance\"\
       )\n    )\n\n\ndef monitor_trade_performance(execute_trades_input: ExecuteTradesOutput,\
       \ **kwargs) -> MonitorTradePerformanceOutput:\n    \"\"\"\n    Monitors and\
@@ -2130,7 +2507,7 @@ nodes:
     prompt: Monitor and analyze the performance of the executed trades.
     shims:
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Validates trade inputs to ensure they meet the required format
         and criteria for further processing.
       implementation: "def validate_trade_inputs(trade_results: str, trade_status:\
@@ -2147,9 +2524,23 @@ nodes:
         \n    Examples\n    --------\n    >>> validate_trade_inputs(trade_results='success,100,buy',\n\
         \    trade_status='success')\n    >>> print(output)\n    'Validation successful'\n\
         \n    >>> validate_trade_inputs(trade_results='failure,0,sell',\n    trade_status='failure')\n\
-        \    >>> print(output)\n    'Validation successful'\n\n    \"\"\"\n    raise\
-        \ NotImplementedError(\"This is a virtual stub node that needs to be implemented\"\
-        )"
+        \    >>> print(output)\n    'Validation successful'\n\n    \"\"\"\n    if\
+        \ not isinstance(trade_results, str):\n        raise TypeError(\"trade_results\
+        \ must be a string\")\n    if not isinstance(trade_status, str):\n       \
+        \ raise TypeError(\"trade_status must be a string\")\n    \n    if trade_status\
+        \ not in ['success', 'failure']:\n        raise ValueError(\"trade_status\
+        \ must be 'success' or 'failure'\")\n    \n    if not trade_results:\n   \
+        \     raise ValueError(\"trade_results cannot be empty\")\n    \n    parts\
+        \ = trade_results.split(',')\n    if len(parts) != 3:\n        raise ValueError(\"\
+        trade_results must contain exactly 3 comma-separated values\")\n    \n   \
+        \ status, amount, action = parts\n    \n    if status not in ['success', 'failure']:\n\
+        \        raise ValueError(\"First part of trade_results must be 'success'\
+        \ or 'failure'\")\n    \n    try:\n        amount_val = int(amount)\n    \
+        \    if amount_val < 0:\n            raise ValueError(\"Amount must be non-negative\"\
+        )\n    except ValueError:\n        raise ValueError(\"Second part of trade_results\
+        \ must be a valid non-negative integer\")\n    \n    if action not in ['buy',\
+        \ 'sell']:\n        raise ValueError(\"Third part of trade_results must be\
+        \ 'buy' or 'sell'\")\n    \n    return 'Validation successful'"
       name: validate_trade_inputs
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -2201,7 +2592,7 @@ nodes:
         the necessary criteria.
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Calculates the success rate of trades based on their status.
       implementation: "def calculate_success_rate(trade_status: str) -> float:\n \
         \   \"\"\"\n    Calculates the success rate of trades based on their status.\n\
@@ -2216,8 +2607,14 @@ nodes:
         \ = calculate_success_rate(trade_status=trade_status)\n    0.6666666666666666\n\
         \n    >>> trade_status = ['success', 'success', 'success']\n    >>> success_rate\
         \ = calculate_success_rate(trade_status=trade_status)\n    1.0\n\n    \"\"\
-        \"\n    raise NotImplementedError(\"This is a virtual stub node that needs\
-        \ to be implemented\")"
+        \"\n    if not isinstance(trade_status, list):\n        raise TypeError(\"\
+        Input must be a list\")\n    \n    if len(trade_status) == 0:\n        raise\
+        \ ValueError(\"Input list cannot be empty\")\n    \n    for status in trade_status:\n\
+        \        if not isinstance(status, str):\n            raise TypeError(\"All\
+        \ elements in the list must be strings\")\n        if status not in ['success',\
+        \ 'failure']:\n            raise ValueError(\"Invalid status value. Must be\
+        \ 'success' or 'failure'\")\n    \n    success_count = trade_status.count('success')\n\
+        \    total_count = len(trade_status)\n    \n    return success_count / total_count"
       name: calculate_success_rate
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -2260,9 +2657,9 @@ nodes:
       prompt: 'Description: Typed node for shim calculate_success_rate'
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Parses trade results to extract profit values as a list of floats.
-      implementation: "from typing import List\n\n\ndef parse_trade_profits(trade_results:\
+      implementation: "from typing import List\n\n\nimport re\n\n\ndef parse_trade_profits(trade_results:\
         \ str) -> List[float]:\n    \"\"\"\n    Parses a string of trade results and\
         \ returns a list of profit values as\n    floats.\n\n    Parameters\n    ----------\n\
         \    trade_results : str\n        A string containing the results of executed\
@@ -2273,8 +2670,15 @@ nodes:
         \ not contain valid profit\n        information.\n    TypeError\n        If\
         \ the input is not a string.\n\n    Examples\n    --------\n    >>>\n    parse_trade_profits(trade_results='Trade1:Profit=100.5,Trade2:Profit=200.8')\n\
         \    [100.5, 200.8]\n\n    >>> parse_trade_profits(trade_results='Profit:150.2;Loss:50.1')\n\
-        \    [150.2]\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
-        \ stub node that needs to be implemented\")"
+        \    [150.2]\n\n    \"\"\"\n    \n    if not isinstance(trade_results, str):\n\
+        \        raise TypeError(\"Input must be a string\")\n    \n    if not trade_results.strip():\n\
+        \        raise ValueError(\"Input string is empty or malformed\")\n    \n\
+        \    profit_pattern = r'[Pp]rofit[=:]([0-9]+(?:\\.[0-9]+)?)'\n    matches\
+        \ = re.findall(profit_pattern, trade_results)\n    \n    if not matches:\n\
+        \        raise ValueError(\"No valid profit information found in the input\
+        \ string\")\n    \n    try:\n        profits = [float(match) for match in\
+        \ matches]\n    except ValueError as e:\n        raise ValueError(\"Invalid\
+        \ profit values found in the input string\") from e\n    \n    return profits"
       name: parse_trade_profits
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -2316,21 +2720,31 @@ nodes:
       prompt: Extract profit values from the given trade results string.
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Calculates the average profit from a list of trade profits.
-      implementation: "def calculate_average_profit(profits: str) -> float:\n    \"\
-        \"\"\n    Calculates the average profit from a list of trade profits.\n\n\
-        \    Parameters\n    ----------\n    profits : List[float]\n        A list\
-        \ of trade profits.\n\n    Returns\n    -------\n    float\n        The average\
-        \ profit calculated from the input profits. Returns 0 if\n        the input\
-        \ list is empty.\n\n    Raises\n    ------\n    TypeError\n        If the\
-        \ input is not a list or if the list contains non-numeric\n        values.\n\
-        \    ValueError\n        If the input list contains NaN or infinity values.\n\
-        \n    Examples\n    --------\n    >>> profits = [100.0, 200.0, 300.0]\n  \
-        \  >>> average_profit = calculate_average_profit(profits)\n    >>> print(average_profit)\n\
-        \    200.0\n\n    >>> profits = []\n    >>> average_profit = calculate_average_profit(profits)\n\
-        \    >>> print(average_profit)\n    0\n\n    \"\"\"\n    raise NotImplementedError(\"\
-        This is a virtual stub node that needs to be implemented\")"
+      implementation: "import math\nimport json\n\n\ndef calculate_average_profit(profits:\
+        \ str) -> float:\n    \"\"\"\n    Calculates the average profit from a list\
+        \ of trade profits.\n\n    Parameters\n    ----------\n    profits : List[float]\n\
+        \        A list of trade profits.\n\n    Returns\n    -------\n    float\n\
+        \        The average profit calculated from the input profits. Returns 0 if\n\
+        \        the input list is empty.\n\n    Raises\n    ------\n    TypeError\n\
+        \        If the input is not a list or if the list contains non-numeric\n\
+        \        values.\n    ValueError\n        If the input list contains NaN or\
+        \ infinity values.\n\n    Examples\n    --------\n    >>> profits = [100.0,\
+        \ 200.0, 300.0]\n    >>> average_profit = calculate_average_profit(profits)\n\
+        \    >>> print(average_profit)\n    200.0\n\n    >>> profits = []\n    >>>\
+        \ average_profit = calculate_average_profit(profits)\n    >>> print(average_profit)\n\
+        \    0\n\n    \"\"\"\n    \n    try:\n        profits_list = json.loads(profits)\n\
+        \    except (json.JSONDecodeError, TypeError):\n        raise TypeError(\"\
+        If the input is not a list or if the list contains non-numeric values.\")\n\
+        \    \n    if not isinstance(profits_list, list):\n        raise TypeError(\"\
+        If the input is not a list or if the list contains non-numeric values.\")\n\
+        \    \n    if len(profits_list) == 0:\n        return 0.0\n    \n    for profit\
+        \ in profits_list:\n        if not isinstance(profit, (int, float)):\n   \
+        \         raise TypeError(\"If the input is not a list or if the list contains\
+        \ non-numeric values.\")\n        if math.isnan(profit) or math.isinf(profit):\n\
+        \            raise ValueError(\"If the input list contains NaN or infinity\
+        \ values.\")\n    \n    return sum(profits_list) / len(profits_list)"
       name: calculate_average_profit
       nodes_depended_on: []
       nodes_dependent_on: []
@@ -2375,7 +2789,7 @@ nodes:
       prompt: 'Description: Typed node for shim calculate_average_profit'
       shims: []
     - agent: false
-      code_node_type: virtual-stub
+      code_node_type: virtual-pure
       description: Generates a performance summary string based on the provided success
         rate and average profit.
       implementation: "def generate_performance_summary(success_rate: str, average_profit:\
@@ -2393,8 +2807,16 @@ nodes:
         \    'Trade performance summary: 80.0% success rate, average profit: $100.50'\n\
         \n    >>> generate_performance_summary(success_rate='0.9',\n    average_profit='200.75')\n\
         \    'Trade performance summary: 90.0% success rate, average profit: $200.75'\n\
-        \n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node\
-        \ that needs to be implemented\")"
+        \n    \"\"\"\n    if not isinstance(success_rate, str):\n        raise TypeError(\"\
+        success_rate must be a string\")\n    if not isinstance(average_profit, str):\n\
+        \        raise TypeError(\"average_profit must be a string\")\n    \n    try:\n\
+        \        success_rate_float = float(success_rate)\n    except ValueError:\n\
+        \        raise ValueError(\"success_rate cannot be converted to a float\"\
+        )\n    \n    try:\n        average_profit_float = float(average_profit)\n\
+        \    except ValueError:\n        raise ValueError(\"average_profit cannot\
+        \ be converted to a float\")\n    \n    success_rate_percentage = success_rate_float\
+        \ * 100\n    \n    return f\"Trade performance summary: {success_rate_percentage}%\
+        \ success rate, average profit: ${average_profit_float:.2f}\""
       name: generate_performance_summary
       nodes_depended_on: []
       nodes_dependent_on: []

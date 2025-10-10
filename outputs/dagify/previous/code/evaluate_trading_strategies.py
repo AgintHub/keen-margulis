@@ -3,6 +3,11 @@ from ._evaluate_trading_strategies.get_available_trading_strategies import get_a
 from ._evaluate_trading_strategies.evaluate_strategies_against_trends import evaluate_strategies_against_trends
 from ._evaluate_trading_strategies.select_recommended_strategies import select_recommended_strategies
 
+from ._evaluate_trading_strategies.validate_inputs import validate_inputs
+from ._evaluate_trading_strategies.get_available_trading_strategies import get_available_trading_strategies
+from ._evaluate_trading_strategies.evaluate_strategies_against_trends import evaluate_strategies_against_trends
+from ._evaluate_trading_strategies.select_recommended_strategies import select_recommended_strategies
+
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -10,7 +15,9 @@ from typing import List
 class AnalyzeMarketTrendsOutput(BaseModel):
     """Pydantic model for analyze_market_trends node outputs."""
     trend_indicators: List[str] = (
-        Field(..., description="Indicators of market trends (e.g., bullish, bearish)")
+        Field(..., description = (
+            "Indicators of market trends (e.g., bullish, bearish)")
+        )
     )
     pattern_recognition: List[str] = (
         Field(..., description="Patterns recognized in the market data")
@@ -23,7 +30,9 @@ class EvaluateTradingStrategiesOutput(BaseModel):
         Field(..., description="Evaluations of different trading strategies")
     )
     recommended_strategies: List[str] = (
-        Field(..., description="Recommended trading strategies based on the evaluations")
+        Field(..., description = (
+            "Recommended trading strategies based on the evaluations")
+        )
     )
 
 

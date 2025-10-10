@@ -6,11 +6,11 @@ import json
 import sys
 from typing import Dict, Any, List, Callable, Coroutine, Union, Optional
 
-from code.gather_market_data import gather_market_data
 from code.analyze_market_trends import analyze_market_trends
 from code.evaluate_trading_strategies import evaluate_trading_strategies
-from code.generate_trading_signals import generate_trading_signals
 from code.execute_trades import execute_trades
+from code.gather_market_data import gather_market_data
+from code.generate_trading_signals import generate_trading_signals
 from code.monitor_trade_performance import monitor_trade_performance
 
 # Get async mode from environment variable or default to False
@@ -33,11 +33,11 @@ def make_async(func):
 
     return async_wrapper
 
-gather_market_data_async = make_async(gather_market_data)
 analyze_market_trends_async = make_async(analyze_market_trends)
 evaluate_trading_strategies_async = make_async(evaluate_trading_strategies)
-generate_trading_signals_async = make_async(generate_trading_signals)
 execute_trades_async = make_async(execute_trades)
+gather_market_data_async = make_async(gather_market_data)
+generate_trading_signals_async = make_async(generate_trading_signals)
 monitor_trade_performance_async = make_async(monitor_trade_performance)
 
 async def run_workflow(user_input: str) -> Dict[str, Any]:

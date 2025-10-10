@@ -1,6 +1,9 @@
 from typing import List
 
 
+import re
+
+
 def parse_trade_profits(trade_results: str) -> List[float]:
     """
     Parses a string of trade results and returns a list of profit values as
@@ -36,4 +39,22 @@ def parse_trade_profits(trade_results: str) -> List[float]:
     [150.2]
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    
+    if not isinstance(trade_results, str):
+        raise TypeError("Input must be a string")
+    
+    if not trade_results.strip():
+        raise ValueError("Input string is empty or malformed")
+    
+    profit_pattern = r'[Pp]rofit[=:]([0-9]+(?:\.[0-9]+)?)'
+    matches = re.findall(profit_pattern, trade_results)
+    
+    if not matches:
+        raise ValueError("No valid profit information found in the input string")
+    
+    try:
+        profits = [float(match) for match in matches]
+    except ValueError as e:
+        raise ValueError("Invalid profit values found in the input string") from e
+    
+    return profits

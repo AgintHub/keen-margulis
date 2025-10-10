@@ -2,6 +2,10 @@ from ._execute_trades.validate_input_lengths import validate_input_lengths
 from ._execute_trades.execute_single_trade import execute_single_trade
 from ._execute_trades.determine_trade_status import determine_trade_status
 
+from ._execute_trades.validate_input_lengths import validate_input_lengths
+from ._execute_trades.execute_single_trade import execute_single_trade
+from ._execute_trades.determine_trade_status import determine_trade_status
+
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -12,7 +16,9 @@ class GenerateTradingSignalsOutput(BaseModel):
         Field(..., description="Generated trading signals")
     )
     signal_confidence: List[float] = (
-        Field(..., description="Confidence levels for the generated trading signals")
+        Field(..., description = (
+            "Confidence levels for the generated trading signals")
+        )
     )
 
 
@@ -22,7 +28,9 @@ class ExecuteTradesOutput(BaseModel):
         Field(..., description="Results of the executed trades")
     )
     trade_status: List[str] = (
-        Field(..., description="Status of the executed trades (e.g., success, failure)")
+        Field(..., description = (
+            "Status of the executed trades (e.g., success, failure)")
+        )
     )
 
 

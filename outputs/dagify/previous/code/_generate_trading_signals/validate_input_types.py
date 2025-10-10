@@ -31,4 +31,10 @@ def validate_input_types(evaluations: str, strategies: str) -> str:
     TypeError: Evaluations must be a List[str]
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    if not isinstance(evaluations, list) or not all(isinstance(item, str) for item in evaluations):
+        raise TypeError("Evaluations must be a List[str]")
+    
+    if not isinstance(strategies, list) or not all(isinstance(item, str) for item in strategies):
+        raise TypeError("Strategies must be a List[str]")
+    
+    return "Input types are valid."

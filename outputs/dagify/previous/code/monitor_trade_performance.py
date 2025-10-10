@@ -4,6 +4,12 @@ from ._monitor_trade_performance.parse_trade_profits import parse_trade_profits
 from ._monitor_trade_performance.calculate_average_profit import calculate_average_profit
 from ._monitor_trade_performance.generate_performance_summary import generate_performance_summary
 
+from ._monitor_trade_performance.validate_trade_inputs import validate_trade_inputs
+from ._monitor_trade_performance.calculate_success_rate import calculate_success_rate
+from ._monitor_trade_performance.parse_trade_profits import parse_trade_profits
+from ._monitor_trade_performance.calculate_average_profit import calculate_average_profit
+from ._monitor_trade_performance.generate_performance_summary import generate_performance_summary
+
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -14,7 +20,9 @@ class ExecuteTradesOutput(BaseModel):
         Field(..., description="Results of the executed trades")
     )
     trade_status: List[str] = (
-        Field(..., description="Status of the executed trades (e.g., success, failure)")
+        Field(..., description = (
+            "Status of the executed trades (e.g., success, failure)")
+        )
     )
 
 

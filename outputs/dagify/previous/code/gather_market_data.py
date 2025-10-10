@@ -4,6 +4,12 @@ from ._gather_market_data.fetch_current_prices import fetch_current_prices
 from ._gather_market_data.fetch_historical_prices import fetch_historical_prices
 from ._gather_market_data.fetch_trading_volumes import fetch_trading_volumes
 
+from ._gather_market_data.parse_market_data_params import parse_market_data_params
+from ._gather_market_data.validate_market_data_inputs import validate_market_data_inputs
+from ._gather_market_data.fetch_current_prices import fetch_current_prices
+from ._gather_market_data.fetch_historical_prices import fetch_historical_prices
+from ._gather_market_data.fetch_trading_volumes import fetch_trading_volumes
+
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -14,7 +20,9 @@ class GatherMarketDataOutput(BaseModel):
         Field(..., description="Current prices of the assets")
     )
     historical_prices: List[float] = (
-        Field(..., description="Historical price data for the assets over a specified period")
+        Field(..., description = (
+            "Historical price data for the assets over a specified period")
+        )
     )
     trading_volumes: List[float] = (
         Field(..., description="Trading volumes for the assets")

@@ -1,3 +1,6 @@
+import json
+
+
 def parse_market_data_params(input_string: str, kwargs: str) -> str:
     """
     Parses input string and keyword arguments into a dictionary of market data
@@ -37,4 +40,48 @@ def parse_market_data_params(input_string: str, kwargs: str) -> str:
     "2022-12-31"}
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    
+    result = {}
+    
+    try:
+        kwargs_dict = json.loads(kwargs) if kwargs.strip() else {}
+    except json.JSONDecodeError:
+        raise ValueError("Invalid JSON format in kwargs")
+    
+    if not isinstance(kwargs_dict, dict):
+        raise TypeError("kwargs must be a valid JSON object")
+    
+    result.update(kwargs_dict)
+    
+    if input_string.strip():
+        try:
+            pairs = input_string.split(';')
+            for pair in pairs:
+                if ':' not in pair:
+                    raise ValueError(f"Invalid format in input_string: {pair}")
+                key, value = pair.split(':', 1)
+                key = key.strip()
+                value = value.strip()
+                
+                if key == 'assets':
+                    assets = [asset.strip() for asset in value.split(',') if asset.strip()]
+                    result['assets'] = assets
+                elif key in ['start_date', 'end_date']:
+                    result[key] = value
+                else:
+                    result[key] = value
+        except Exception as e:
+            raise ValueError(f"Failed to parse input_string: {str(e)}")
+    
+    required_fields = ['assets', 'start_date', 'end_date']
+    for field in required_fields:
+        if field not in result:
+            raise ValueError(f"Missing required parameter: {field}")
+    
+    if not isinstance(result['assets'], list):
+        raise TypeError("assets must be a list")
+    
+    if not result['assets']:
+        raise ValueError("assets cannot be empty")
+    
+    return json.dumps(result)

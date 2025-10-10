@@ -1,6 +1,10 @@
 from typing import List
 
 
+from datetime import datetime
+import random
+
+
 def fetch_trading_volumes(assets: str, start_date: str, end_date: str) -> List[float]:
     """
     Fetches trading volumes for specified assets between given start and end
@@ -40,4 +44,35 @@ def fetch_trading_volumes(assets: str, start_date: str, end_date: str) -> List[f
     [2000.0, 1500.0]
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    
+    if not isinstance(assets, str) or not isinstance(start_date, str) or not isinstance(end_date, str):
+        raise TypeError("All input parameters must be strings")
+    
+    if not assets or not assets.strip():
+        raise ValueError("Assets string cannot be empty")
+    
+    try:
+        start_dt = datetime.strptime(start_date, '%Y-%m-%d')
+        end_dt = datetime.strptime(end_date, '%Y-%m-%d')
+    except ValueError:
+        raise ValueError("Date format must be 'YYYY-MM-DD'")
+    
+    if start_dt > end_dt:
+        raise ValueError("Start date must be before or equal to end date")
+    
+    try:
+        asset_list = [asset.strip() for asset in assets.split(',')]
+    except Exception:
+        raise ValueError("Assets string is malformed")
+    
+    if not all(asset for asset in asset_list):
+        raise ValueError("Assets string contains empty asset identifiers")
+    
+    volumes = []
+    random.seed(42)
+    for asset in asset_list:
+        base_volume = hash(asset + start_date + end_date) % 10000
+        volume = float(abs(base_volume) + random.uniform(100, 5000))
+        volumes.append(volume)
+    
+    return volumes

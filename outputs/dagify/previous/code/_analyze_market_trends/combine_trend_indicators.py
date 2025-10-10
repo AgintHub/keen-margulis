@@ -41,4 +41,25 @@ def combine_trend_indicators(price_trends: str, volume_trends: str) -> List[str]
     ['bullish_increasing', 'bearish_decreasing']
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    if not isinstance(price_trends, str):
+        raise TypeError("price_trends must be a string")
+    if not isinstance(volume_trends, str):
+        raise TypeError("volume_trends must be a string")
+    
+    try:
+        price_list = [trend.strip() for trend in price_trends.split(',') if trend.strip()]
+        volume_list = [trend.strip() for trend in volume_trends.split(',') if trend.strip()]
+    except Exception as e:
+        raise ValueError("Input strings cannot be parsed into valid trend indicators") from e
+    
+    if len(price_list) != len(volume_list):
+        raise ValueError("Price trends and volume trends must have the same number of elements")
+    
+    if not price_list or not volume_list:
+        raise ValueError("Input strings cannot be parsed into valid trend indicators")
+    
+    combined_trends = []
+    for price_trend, volume_trend in zip(price_list, volume_list):
+        combined_trends.append(f"{price_trend}_{volume_trend}")
+    
+    return combined_trends

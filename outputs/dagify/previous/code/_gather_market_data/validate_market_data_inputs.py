@@ -1,3 +1,6 @@
+from datetime import datetime
+
+
 def validate_market_data_inputs(assets: str, start_date: str, end_date: str) -> str:
     """
     Validates market data inputs including assets, start date, and end date.
@@ -35,4 +38,25 @@ def validate_market_data_inputs(assets: str, start_date: str, end_date: str) -> 
     ValueError: Invalid date format.
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    
+    if not isinstance(assets, str):
+        raise TypeError("Assets must be a string")
+    if not isinstance(start_date, str):
+        raise TypeError("Start date must be a string")
+    if not isinstance(end_date, str):
+        raise TypeError("End date must be a string")
+    
+    try:
+        start_dt = datetime.strptime(start_date, '%Y-%m-%d')
+    except ValueError:
+        raise ValueError("Invalid date format.")
+    
+    try:
+        end_dt = datetime.strptime(end_date, '%Y-%m-%d')
+    except ValueError:
+        raise ValueError("Invalid date format.")
+    
+    if start_dt > end_dt:
+        raise ValueError("Start date cannot be after end date")
+    
+    return "Inputs are valid."

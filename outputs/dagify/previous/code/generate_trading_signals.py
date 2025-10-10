@@ -3,6 +3,11 @@ from ._generate_trading_signals.validate_input_types import validate_input_types
 from ._generate_trading_signals.process_recommended_strategies import process_recommended_strategies
 from ._generate_trading_signals.calculate_signal_confidence import calculate_signal_confidence
 
+from ._generate_trading_signals.validate_input_lengths import validate_input_lengths
+from ._generate_trading_signals.validate_input_types import validate_input_types
+from ._generate_trading_signals.process_recommended_strategies import process_recommended_strategies
+from ._generate_trading_signals.calculate_signal_confidence import calculate_signal_confidence
+
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -13,7 +18,9 @@ class EvaluateTradingStrategiesOutput(BaseModel):
         Field(..., description="Evaluations of different trading strategies")
     )
     recommended_strategies: List[str] = (
-        Field(..., description="Recommended trading strategies based on the evaluations")
+        Field(..., description = (
+            "Recommended trading strategies based on the evaluations")
+        )
     )
 
 
@@ -23,7 +30,9 @@ class GenerateTradingSignalsOutput(BaseModel):
         Field(..., description="Generated trading signals")
     )
     signal_confidence: List[float] = (
-        Field(..., description="Confidence levels for the generated trading signals")
+        Field(..., description = (
+            "Confidence levels for the generated trading signals")
+        )
     )
 
 
