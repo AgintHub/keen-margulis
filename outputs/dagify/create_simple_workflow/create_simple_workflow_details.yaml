@@ -10,25 +10,39 @@ nodes:
       \n\nclass IdentifyTaskDependenciesOutput(BaseModel):\n    \"\"\"Pydantic model\
       \ for identify_task_dependencies node outputs.\"\"\"\n    tasks: List[str] =\
       \ Field(..., description=\"List of identified task names.\")\n    dependencies:\
-      \ List[str] = Field(..., description=\"List of dependency relationships in the\
-      \ format 'TaskA depends on TaskB'.\")\n    dependency_exists: bool = Field(...,\
-      \ description=\"Indicates whether any dependencies were identified.\")\n\n\n\
-      class CreateTaskDagOutput(BaseModel):\n    \"\"\"Pydantic model for create_task_dag\
-      \ node outputs.\"\"\"\n    task_ids: str = Field(..., description=\"List of\
-      \ unique task identifiers used in the DAG\")\n    edge_sources: str = Field(...,\
-      \ description=\"List of source task identifiers for each directed edge in the\
-      \ DAG\")\n    edge_destinations: str = Field(..., description=\"List of destination\
-      \ task identifiers for each directed edge in the DAG\")\n    is_valid: bool\
-      \ = Field(..., description=\"Indicates whether the constructed DAG is acyclic\
-      \ and complete\")\n\n\ndef create_task_dag(identify_task_dependencies_input:\
+      \ List[str] = (\n        Field(..., description=\"List of dependency relationships\
+      \ in the format 'TaskA depends on TaskB'.\")\n    )\n    dependency_exists:\
+      \ bool = (\n        Field(..., description=\"Indicates whether any dependencies\
+      \ were identified.\")\n    )\n\n\nclass CreateTaskDagOutput(BaseModel):\n  \
+      \  \"\"\"Pydantic model for create_task_dag node outputs.\"\"\"\n    task_ids:\
+      \ str = (\n        Field(..., description=\"List of unique task identifiers\
+      \ used in the DAG\")\n    )\n    edge_sources: str = (\n        Field(..., description=\"\
+      List of source task identifiers for each directed edge in the DAG\")\n    )\n\
+      \    edge_destinations: str = (\n        Field(..., description=\"List of destination\
+      \ task identifiers for each directed edge in the DAG\")\n    )\n    is_valid:\
+      \ bool = (\n        Field(..., description=\"Indicates whether the constructed\
+      \ DAG is acyclic and complete\")\n    )\n\n\ndef create_task_dag(identify_task_dependencies_input:\
       \ IdentifyTaskDependenciesOutput, **kwargs) -> CreateTaskDagOutput:\n    \"\"\
-      \"Create a DAG representing the tasks and their dependencies\n\n    Args:\n\
-      \        identify_task_dependencies_input: Input from the 'identify_task_dependencies'\
-      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
-      \       CreateTaskDagOutput: Object containing outputs for this node.\n    \"\
-      \"\"\n    # TODO: Implement this function\n\n    # Return stub output with placeholder\
-      \ values\n    return CreateTaskDagOutput(\n        task_ids=\"\",\n        edge_sources=\"\
-      \",\n        edge_destinations=\"\",\n        is_valid=False,\n    )"
+      \"\n    Constructs a DAG from given tasks and dependency relations.\n\n    Parameters\n\
+      \    ----------\n    tasks : List[str]\n        A list of task identifiers that\
+      \ will become the DAG nodes.\n    dependencies : List[str]\n        Each string\
+      \ represents a dependency in the format 'TaskA depends on\n        TaskB'.\n\
+      \n    Returns\n    -------\n    dict\n        A dictionary with four keys: task_ids\
+      \ (List[str]), edge_sources\n        (List[str]), edge_destinations (List[str]),\
+      \ and is_valid (bool).\n\n    Raises\n    ------\n    ValueError\n        Raised\
+      \ when a dependency refers to a task not present in the `tasks`\n        list.\n\
+      \    ValueError\n        Raised when a dependency string does not match the\
+      \ expected 'TaskA\n        depends on TaskB' pattern.\n\n    Examples\n    --------\n\
+      \    >>> tasks = ['A', 'B', 'C']\n    >>> dependencies = ['B depends on A',\
+      \ 'C depends on B']\n    >>> result = create_task_dag(tasks, dependencies)\n\
+      \    >>> print(result)\n    {'task_ids': ['A', 'B', 'C'], 'edge_sources': ['A',\
+      \ 'B'],\n    'edge_destinations': ['B', 'C'], 'is_valid': True}\n\n    >>> tasks\
+      \ = ['A', 'B']\n    >>> dependencies = ['A depends on B', 'B depends on A']\n\
+      \    >>> result = create_task_dag(tasks, dependencies)\n    >>> print(result)\n\
+      \    {'task_ids': ['A', 'B'], 'edge_sources': ['B', 'A'], 'edge_destinations':\n\
+      \    ['A', 'B'], 'is_valid': False}\n\n    \"\"\"\n    return CreateTaskDagOutput(\n\
+      \        task_ids=\"\",\n        edge_sources=\"\",\n        edge_destinations=\"\
+      \",\n        is_valid=False,\n    )"
     name: create_task_dag
     nodes_depended_on:
     - identify_task_dependencies
@@ -97,21 +111,28 @@ nodes:
     implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
       \n\nclass DefineWorkflowObjectiveOutput(BaseModel):\n    \"\"\"Pydantic model\
       \ for define_workflow_objective node outputs.\"\"\"\n    workflow_objective:\
-      \ str = Field(..., description=\"The primary goal of the workflow expressed\
-      \ as a concise statement.\")\n\n\nclass DecomposeObjectiveIntoTasksOutput(BaseModel):\n\
+      \ str = (\n        Field(..., description=\"The primary goal of the workflow\
+      \ expressed as a concise statement.\")\n    )\n\n\nclass DecomposeObjectiveIntoTasksOutput(BaseModel):\n\
       \    \"\"\"Pydantic model for decompose_objective_into_tasks node outputs.\"\
-      \"\"\n    tasks: List[str] = Field(..., description=\"List of task descriptions\
-      \ that represent the decomposed workflow objective\")\n    task_count: int =\
-      \ Field(..., description=\"Number of tasks identified in the decomposition\"\
-      )\n\n\ndef decompose_objective_into_tasks(define_workflow_objective_input: DefineWorkflowObjectiveOutput,\
-      \ **kwargs) -> DecomposeObjectiveIntoTasksOutput:\n    \"\"\"Break down the\
-      \ workflow objective into individual tasks\n\n    Args:\n        define_workflow_objective_input:\
-      \ Input from the 'define_workflow_objective' node.\n        **kwargs: Additional\
-      \ keyword arguments.\n\n    Returns:\n        DecomposeObjectiveIntoTasksOutput:\
-      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
-      \ this function\n\n    # Return stub output with placeholder values\n    return\
-      \ DecomposeObjectiveIntoTasksOutput(\n        tasks=[],\n        task_count=0,\n\
-      \    )"
+      \"\"\n    tasks: List[str] = (\n        Field(..., description=\"List of task\
+      \ descriptions that represent the decomposed workflow objective\")\n    )\n\
+      \    task_count: int = (\n        Field(..., description=\"Number of tasks identified\
+      \ in the decomposition\")\n    )\n\n\ndef decompose_objective_into_tasks(define_workflow_objective_input:\
+      \ DefineWorkflowObjectiveOutput, **kwargs) -> DecomposeObjectiveIntoTasksOutput:\n\
+      \    \"\"\"\n    Breaks down a workflow objective into discrete tasks.\n\n \
+      \   Parameters\n    ----------\n    workflow_objective : str\n        A concise\
+      \ statement describing the primary goal of the workflow.\n\n    Returns\n  \
+      \  -------\n    Tuple[List[str], int]\n        A tuple containing (1) a list\
+      \ of task descriptions and (2) the count\n        of tasks.\n\n    Raises\n\
+      \    ------\n    ValueError\n        Raised when `workflow_objective` is empty\
+      \ or consists only of\n        whitespace.\n\n    Examples\n    --------\n \
+      \   >>> tasks, count = decompose_objective_into_tasks('Build a machine learning\n\
+      \    pipeline for predicting house prices')\n    (['Collect and clean data',\
+      \ 'Split dataset', 'Select model', 'Train model',\n    'Evaluate model', 'Deploy\
+      \ model'], 6)\n\n    >>> tasks, count = decompose_objective_into_tasks('Write\
+      \ a report')\n    (['Plan report structure', 'Collect data', 'Write draft',\
+      \ 'Revise',\n    'Finalize'], 5)\n\n    \"\"\"\n    return DecomposeObjectiveIntoTasksOutput(\n\
+      \        tasks=[],\n        task_count=0,\n    )"
     name: decompose_objective_into_tasks
     nodes_depended_on:
     - define_workflow_objective
@@ -160,14 +181,17 @@ nodes:
     description: Define the objective of the workflow
     implementation: "from pydantic import BaseModel, Field\n\n\nclass DefineWorkflowObjectiveOutput(BaseModel):\n\
       \    \"\"\"Pydantic model for define_workflow_objective node outputs.\"\"\"\n\
-      \    workflow_objective: str = Field(..., description=\"The primary goal of\
-      \ the workflow expressed as a concise statement.\")\n\n\ndef define_workflow_objective(general_input:\
-      \ str, **kwargs) -> DefineWorkflowObjectiveOutput:\n    \"\"\"Define the objective\
-      \ of the workflow\n\n    Args:\n        general_input: General input string\
-      \ for the root node.\n        **kwargs: Additional keyword arguments.\n\n  \
-      \  Returns:\n        DefineWorkflowObjectiveOutput: Object containing outputs\
-      \ for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return\
-      \ stub output with placeholder values\n    return DefineWorkflowObjectiveOutput(\n\
+      \    workflow_objective: str = (\n        Field(..., description=\"The primary\
+      \ goal of the workflow expressed as a concise statement.\")\n    )\n\n\ndef\
+      \ define_workflow_objective(general_input: str, **kwargs) -> DefineWorkflowObjectiveOutput:\n\
+      \    \"\"\"\n    Generate a concise objective statement for the workflow based\
+      \ on the user’s\n    intent.\n\n    Returns\n    -------\n    str\n        Concise\
+      \ objective of the workflow.\n\n    Raises\n    ------\n    ValueError\n   \
+      \     If the generated objective is empty or exceeds an acceptable length.\n\
+      \n    Examples\n    --------\n    >>> objective = define_workflow_objective()\n\
+      \    'Implement an automated data ingestion pipeline for real‑time analytics'\n\
+      \n    >>> objective = define_workflow_objective()\n    'Develop a user‑friendly\
+      \ mobile application for inventory management'\n\n    \"\"\"\n    return DefineWorkflowObjectiveOutput(\n\
       \        workflow_objective=\"\",\n    )"
     name: define_workflow_objective
     nodes_depended_on: []
@@ -208,38 +232,71 @@ nodes:
     description: Finalize the workflow DAG
     implementation: "from pydantic import BaseModel, Field\n\n\nclass ValidateDagOutput(BaseModel):\n\
       \    \"\"\"Pydantic model for validate_dag node outputs.\"\"\"\n    is_valid:\
-      \ bool = Field(..., description=\"Indicates whether the DAG passes all validation\
-      \ checks.\")\n    node_count: int = Field(..., description=\"Total number of\
-      \ nodes present in the DAG.\")\n    edge_count: int = Field(..., description=\"\
-      Total number of directed edges in the DAG.\")\n    cycles_detected: str = Field(...,\
-      \ description=\"List of cycle identifiers or descriptions found in the DAG (empty\
-      \ if none).\")\n    missing_dependencies: str = Field(..., description=\"List\
-      \ of node names that reference non\\u2011existent dependencies (empty if none).\"\
-      )\n    errors: str = Field(..., description=\"Detailed error messages for any\
-      \ validation failures.\")\n\n\nclass FinalizeWorkflowOutput(BaseModel):\n  \
-      \  \"\"\"Pydantic model for finalize_workflow node outputs.\"\"\"\n    dag_representation:\
-      \ str = Field(..., description=\"String representation of the finalized DAG,\
-      \ e.g., serialized adjacency list or other format.\")\n    is_valid: bool =\
-      \ Field(..., description=\"Whether the finalized DAG is valid and acyclic.\"\
-      )\n    adjustments_made: bool = Field(..., description=\"Whether any adjustments\
-      \ were made to the DAG during finalization.\")\n    adjusted_task_order: str\
-      \ = Field(..., description=\"Ordered list of task identifiers in the finalized\
-      \ DAG.\")\n    missing_dependencies: str = Field(..., description=\"List of\
-      \ task identifiers that have missing or unresolved dependencies.\")\n    cycles_detected:\
-      \ str = Field(..., description=\"List of detected cycles in the DAG, if any.\"\
-      )\n    warnings: str = Field(..., description=\"Any warnings or notes about\
-      \ potential issues.\")\n    summary: str = Field(..., description=\"Short textual\
-      \ summary of the finalized workflow.\")\n\n\ndef finalize_workflow(validate_dag_input:\
-      \ ValidateDagOutput, **kwargs) -> FinalizeWorkflowOutput:\n    \"\"\"Finalize\
-      \ the workflow DAG\n\n    Args:\n        validate_dag_input: Input from the\
-      \ 'validate_dag' node.\n        **kwargs: Additional keyword arguments.\n\n\
-      \    Returns:\n        FinalizeWorkflowOutput: Object containing outputs for\
-      \ this node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return\
-      \ stub output with placeholder values\n    return FinalizeWorkflowOutput(\n\
-      \        dag_representation=\"\",\n        is_valid=False,\n        adjustments_made=False,\n\
-      \        adjusted_task_order=\"\",\n        missing_dependencies=\"\",\n   \
-      \     cycles_detected=\"\",\n        warnings=\"\",\n        summary=\"\",\n\
-      \    )"
+      \ bool = (\n        Field(..., description=\"Indicates whether the DAG passes\
+      \ all validation checks.\")\n    )\n    node_count: int = (\n        Field(...,\
+      \ description=\"Total number of nodes present in the DAG.\")\n    )\n    edge_count:\
+      \ int = (\n        Field(..., description=\"Total number of directed edges in\
+      \ the DAG.\")\n    )\n    cycles_detected: str = (\n        Field(..., description=\"\
+      List of cycle identifiers or descriptions found in the DAG (empty if none).\"\
+      )\n    )\n    missing_dependencies: str = (\n        Field(..., description=\"\
+      List of node names that reference non\\u2011existent dependencies (empty if\
+      \ none).\")\n    )\n    errors: str = (\n        Field(..., description=\"Detailed\
+      \ error messages for any validation failures.\")\n    )\n\n\nclass FinalizeWorkflowOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for finalize_workflow node outputs.\"\"\"\n    dag_representation:\
+      \ str = (\n        Field(..., description=\"String representation of the finalized\
+      \ DAG, e.g., serialized adjacency list or other format.\")\n    )\n    is_valid:\
+      \ bool = (\n        Field(..., description=\"Whether the finalized DAG is valid\
+      \ and acyclic.\")\n    )\n    adjustments_made: bool = (\n        Field(...,\
+      \ description=\"Whether any adjustments were made to the DAG during finalization.\"\
+      )\n    )\n    adjusted_task_order: str = (\n        Field(..., description=\"\
+      Ordered list of task identifiers in the finalized DAG.\")\n    )\n    missing_dependencies:\
+      \ str = (\n        Field(..., description=\"List of task identifiers that have\
+      \ missing or unresolved dependencies.\")\n    )\n    cycles_detected: str =\
+      \ (\n        Field(..., description=\"List of detected cycles in the DAG, if\
+      \ any.\")\n    )\n    warnings: str = (\n        Field(..., description=\"Any\
+      \ warnings or notes about potential issues.\")\n    )\n    summary: str = (\n\
+      \        Field(..., description=\"Short textual summary of the finalized workflow.\"\
+      )\n    )\n\n\ndef finalize_workflow(validate_dag_input: ValidateDagOutput, **kwargs)\
+      \ -> FinalizeWorkflowOutput:\n    \"\"\"\n    Finalize a workflow DAG by validating\
+      \ its structure, resolving missing\n    dependencies, removing cycles, and ordering\
+      \ tasks.\n\n    Parameters\n    ----------\n    task_ids : List[str]\n     \
+      \   Unique identifiers of all tasks in the DAG.\n    edge_sources : List[str]\n\
+      \        Source task identifiers for each directed edge.\n    edge_destinations\
+      \ : List[str]\n        Destination task identifiers for each directed edge.\n\
+      \    is_valid : bool\n        Result of the validation step (True if the DAG\
+      \ passed all checks).\n    node_count : int\n        Total number of nodes in\
+      \ the DAG.\n    edge_count : int\n        Total number of directed edges in\
+      \ the DAG.\n    cycles_detected : List[str]\n        List of cycle identifiers\
+      \ found during validation.\n    missing_dependencies : List[str]\n        List\
+      \ of node names that reference non‑existent dependencies.\n    errors : List[str]\n\
+      \        Detailed error messages from the validation step.\n\n    Returns\n\
+      \    -------\n    Dict[str, Any]\n        A dictionary containing the finalized\
+      \ DAG representation and\n        metadata: dag_representation (str), is_valid\
+      \ (bool),\n        adjustments_made (bool), adjusted_task_order (List[str]),\n\
+      \        missing_dependencies (List[str]), cycles_detected (List[str]),\n  \
+      \      warnings (List[str]), and summary (str).\n\n    Raises\n    ------\n\
+      \    ValueError\n        If any required input lists are empty or lengths of\
+      \ edge_sources and\n        edge_destinations mismatch.\n\n    Examples\n  \
+      \  --------\n    >>> dag = finalize_workflow(\n\n    ...     task_ids=['A',\
+      \ 'B', 'C'],\n\n    ...     edge_sources=['A', 'B'],\n\n    ...     edge_destinations=['B',\
+      \ 'C'],\n\n    ...     is_valid=True,\n\n    ...     node_count=3,\n\n    ...\
+      \     edge_count=2,\n\n    ...     cycles_detected=[],\n\n    ...     missing_dependencies=[],\n\
+      \n    ...     errors=[]\n\n    >>> )\n    {'dag_representation': 'A -> B ->\
+      \ C', 'is_valid': True, 'adjustments_made':\n    False, 'adjusted_task_order':\
+      \ ['A', 'B', 'C'], 'missing_dependencies': [],\n    'cycles_detected': [], 'warnings':\
+      \ [], 'summary': 'DAG finalized\n    successfully.'}\n\n    >>> dag = finalize_workflow(\n\
+      \n    ...     task_ids=['A', 'B', 'C'],\n\n    ...     edge_sources=['A', 'B',\
+      \ 'C'],\n\n    ...     edge_destinations=['B', 'C', 'A'],\n\n    ...     is_valid=False,\n\
+      \n    ...     node_count=3,\n\n    ...     edge_count=3,\n\n    ...     cycles_detected=['A->B->C->A'],\n\
+      \n    ...     missing_dependencies=[],\n\n    ...     errors=['Cycle detected']\n\
+      \n    >>> )\n    {'dag_representation': 'A -> B -> C', 'is_valid': False, 'adjustments_made':\n\
+      \    True, 'adjusted_task_order': ['A', 'B', 'C'], 'missing_dependencies': [],\n\
+      \    'cycles_detected': ['A->B->C->A'], 'warnings': ['Cycle removed:\n    A->B->C->A'],\
+      \ 'summary': 'DAG finalized with cycle removal.'}\n\n    \"\"\"\n    return\
+      \ FinalizeWorkflowOutput(\n        dag_representation=\"\",\n        is_valid=False,\n\
+      \        adjustments_made=False,\n        adjusted_task_order=\"\",\n      \
+      \  missing_dependencies=\"\",\n        cycles_detected=\"\",\n        warnings=\"\
+      \",\n        summary=\"\",\n    )"
     name: finalize_workflow
     nodes_depended_on:
     - validate_dag
@@ -399,21 +456,37 @@ nodes:
     implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
       \n\nclass DecomposeObjectiveIntoTasksOutput(BaseModel):\n    \"\"\"Pydantic\
       \ model for decompose_objective_into_tasks node outputs.\"\"\"\n    tasks: List[str]\
-      \ = Field(..., description=\"List of task descriptions that represent the decomposed\
-      \ workflow objective\")\n    task_count: int = Field(..., description=\"Number\
-      \ of tasks identified in the decomposition\")\n\n\nclass IdentifyTaskDependenciesOutput(BaseModel):\n\
-      \    \"\"\"Pydantic model for identify_task_dependencies node outputs.\"\"\"\
-      \n    tasks: List[str] = Field(..., description=\"List of identified task names.\"\
-      )\n    dependencies: List[str] = Field(..., description=\"List of dependency\
-      \ relationships in the format 'TaskA depends on TaskB'.\")\n    dependency_exists:\
-      \ bool = Field(..., description=\"Indicates whether any dependencies were identified.\"\
-      )\n\n\ndef identify_task_dependencies(decompose_objective_into_tasks_input:\
+      \ = (\n        Field(..., description=\"List of task descriptions that represent\
+      \ the decomposed workflow objective\")\n    )\n    task_count: int = (\n   \
+      \     Field(..., description=\"Number of tasks identified in the decomposition\"\
+      )\n    )\n\n\nclass IdentifyTaskDependenciesOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for identify_task_dependencies node outputs.\"\"\"\n    tasks: List[str]\
+      \ = Field(..., description=\"List of identified task names.\")\n    dependencies:\
+      \ List[str] = (\n        Field(..., description=\"List of dependency relationships\
+      \ in the format 'TaskA depends on TaskB'.\")\n    )\n    dependency_exists:\
+      \ bool = (\n        Field(..., description=\"Indicates whether any dependencies\
+      \ were identified.\")\n    )\n\n\ndef identify_task_dependencies(decompose_objective_into_tasks_input:\
       \ DecomposeObjectiveIntoTasksOutput, **kwargs) -> IdentifyTaskDependenciesOutput:\n\
-      \    \"\"\"Identify dependencies between tasks\n\n    Args:\n        decompose_objective_into_tasks_input:\
-      \ Input from the 'decompose_objective_into_tasks' node.\n        **kwargs: Additional\
-      \ keyword arguments.\n\n    Returns:\n        IdentifyTaskDependenciesOutput:\
-      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
-      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \    \"\"\"\n    Infers direct dependencies between tasks from a list of task\
+      \ descriptions.\n\n    Parameters\n    ----------\n    tasks : List[str]\n \
+      \       Task descriptions generated by decompose_objective_into_tasks.\n\n \
+      \   Returns\n    -------\n    Dict[str, Any]\n        A dictionary with keys\
+      \ 'tasks', 'dependencies', and\n        'dependency_exists' matching the node's\
+      \ output structure.\n\n    Raises\n    ------\n    ValueError\n        If the\
+      \ input `tasks` is not a list of strings or is empty.\n\n    Examples\n    --------\n\
+      \    >>> tasks_input = [\"Collect data\", \"Preprocess data\", \"Train model\"\
+      ,\n    \"Evaluate model\"]\n    >>> # Assuming the following simple dependency\
+      \ logic:\n    >>> # 'Preprocess data' depends on 'Collect data'\n    >>> # 'Train\
+      \ model' depends on 'Preprocess data'\n    >>> # 'Evaluate model' depends on\
+      \ 'Train model'\n    >>> result = identify_task_dependencies(tasks_input)\n\
+      \    >>> print(result)\n    {'tasks': ['Collect data', 'Preprocess data', 'Train\
+      \ model', 'Evaluate\n    model'], 'dependencies': ['Preprocess data depends\
+      \ on Collect data', 'Train\n    model depends on Preprocess data', 'Evaluate\
+      \ model depends on Train model'],\n    'dependency_exists': True}\n\n    >>>\
+      \ tasks_input = [\"Generate report\", \"Publish report\"]\n    >>> # No explicit\
+      \ dependencies specified\n    >>> result = identify_task_dependencies(tasks_input)\n\
+      \    >>> print(result)\n    {'tasks': ['Generate report', 'Publish report'],\
+      \ 'dependencies': [],\n    'dependency_exists': False}\n\n    \"\"\"\n    return\
       \ IdentifyTaskDependenciesOutput(\n        tasks=[],\n        dependencies=[],\n\
       \        dependency_exists=False,\n    )"
     name: identify_task_dependencies
@@ -479,30 +552,55 @@ nodes:
     description: Validate the created DAG for correctness and acyclicity
     implementation: "from pydantic import BaseModel, Field\n\n\nclass CreateTaskDagOutput(BaseModel):\n\
       \    \"\"\"Pydantic model for create_task_dag node outputs.\"\"\"\n    task_ids:\
-      \ str = Field(..., description=\"List of unique task identifiers used in the\
-      \ DAG\")\n    edge_sources: str = Field(..., description=\"List of source task\
-      \ identifiers for each directed edge in the DAG\")\n    edge_destinations: str\
-      \ = Field(..., description=\"List of destination task identifiers for each directed\
-      \ edge in the DAG\")\n    is_valid: bool = Field(..., description=\"Indicates\
-      \ whether the constructed DAG is acyclic and complete\")\n\n\nclass ValidateDagOutput(BaseModel):\n\
+      \ str = (\n        Field(..., description=\"List of unique task identifiers\
+      \ used in the DAG\")\n    )\n    edge_sources: str = (\n        Field(..., description=\"\
+      List of source task identifiers for each directed edge in the DAG\")\n    )\n\
+      \    edge_destinations: str = (\n        Field(..., description=\"List of destination\
+      \ task identifiers for each directed edge in the DAG\")\n    )\n    is_valid:\
+      \ bool = (\n        Field(..., description=\"Indicates whether the constructed\
+      \ DAG is acyclic and complete\")\n    )\n\n\nclass ValidateDagOutput(BaseModel):\n\
       \    \"\"\"Pydantic model for validate_dag node outputs.\"\"\"\n    is_valid:\
-      \ bool = Field(..., description=\"Indicates whether the DAG passes all validation\
-      \ checks.\")\n    node_count: int = Field(..., description=\"Total number of\
-      \ nodes present in the DAG.\")\n    edge_count: int = Field(..., description=\"\
-      Total number of directed edges in the DAG.\")\n    cycles_detected: str = Field(...,\
-      \ description=\"List of cycle identifiers or descriptions found in the DAG (empty\
-      \ if none).\")\n    missing_dependencies: str = Field(..., description=\"List\
-      \ of node names that reference non\\u2011existent dependencies (empty if none).\"\
-      )\n    errors: str = Field(..., description=\"Detailed error messages for any\
-      \ validation failures.\")\n\n\ndef validate_dag(create_task_dag_input: CreateTaskDagOutput,\
-      \ **kwargs) -> ValidateDagOutput:\n    \"\"\"Validate the created DAG for correctness\
-      \ and acyclicity\n\n    Args:\n        create_task_dag_input: Input from the\
-      \ 'create_task_dag' node.\n        **kwargs: Additional keyword arguments.\n\
-      \n    Returns:\n        ValidateDagOutput: Object containing outputs for this\
-      \ node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub\
-      \ output with placeholder values\n    return ValidateDagOutput(\n        is_valid=False,\n\
-      \        node_count=0,\n        edge_count=0,\n        cycles_detected=\"\"\
-      ,\n        missing_dependencies=\"\",\n        errors=\"\",\n    )"
+      \ bool = (\n        Field(..., description=\"Indicates whether the DAG passes\
+      \ all validation checks.\")\n    )\n    node_count: int = (\n        Field(...,\
+      \ description=\"Total number of nodes present in the DAG.\")\n    )\n    edge_count:\
+      \ int = (\n        Field(..., description=\"Total number of directed edges in\
+      \ the DAG.\")\n    )\n    cycles_detected: str = (\n        Field(..., description=\"\
+      List of cycle identifiers or descriptions found in the DAG (empty if none).\"\
+      )\n    )\n    missing_dependencies: str = (\n        Field(..., description=\"\
+      List of node names that reference non\\u2011existent dependencies (empty if\
+      \ none).\")\n    )\n    errors: str = (\n        Field(..., description=\"Detailed\
+      \ error messages for any validation failures.\")\n    )\n\n\ndef validate_dag(create_task_dag_input:\
+      \ CreateTaskDagOutput, **kwargs) -> ValidateDagOutput:\n    \"\"\"\n    Validates\
+      \ a Directed Acyclic Graph (DAG) representation for correctness,\n    acyclicity,\
+      \ and missing dependencies.\n\n    Parameters\n    ----------\n    task_ids\
+      \ : List[str]\n        List of unique identifiers for all tasks in the workflow.\n\
+      \    edge_sources : List[str]\n        List of task identifiers representing\
+      \ the source of each directed\n        edge.\n    edge_destinations : List[str]\n\
+      \        List of task identifiers representing the destination of each\n   \
+      \     directed edge.\n    is_valid_input : bool\n        (Optional) A flag from\
+      \ `create_task_dag` indicating preliminary\n        validity. It is used only\
+      \ as a hint; full validation is performed\n        regardless.\n\n    Returns\n\
+      \    -------\n    dict\n        Dictionary containing validation results: -\
+      \ `is_valid` (bool):\n        Overall validity. - `node_count` (int): Number\
+      \ of nodes. -\n        `edge_count` (int): Number of directed edges. - `cycles_detected`\n\
+      \        (List[str]): Descriptions of any detected cycles. -\n        `missing_dependencies`\
+      \ (List[str]): Tasks that reference undefined\n        dependencies. - `errors`\
+      \ (List[str]): Human‑readable error messages\n        for all failures.\n\n\
+      \    Raises\n    ------\n    ValueError\n        If `edge_sources` and `edge_destinations`\
+      \ lists are not of the same\n        length.\n    ValueError\n        If `task_ids`\
+      \ contains duplicate identifiers.\n\n    Examples\n    --------\n    >>> task_ids\
+      \ = ['A', 'B', 'C']\n    >>> edge_sources = ['A', 'B']\n    >>> edge_destinations\
+      \ = ['B', 'C']\n    >>> result = validate_dag(task_ids, edge_sources, edge_destinations)\n\
+      \    >>> print(result)\n    {'is_valid': True, 'node_count': 3, 'edge_count':\
+      \ 2, 'cycles_detected': [],\n    'missing_dependencies': [], 'errors': []}\n\
+      \n    >>> task_ids = ['A', 'B', 'C']\n    >>> edge_sources = ['A', 'B', 'C']\n\
+      \    >>> edge_destinations = ['B', 'C', 'A']\n    >>> result = validate_dag(task_ids,\
+      \ edge_sources, edge_destinations)\n    >>> print(result)\n    {'is_valid':\
+      \ False, 'node_count': 3, 'edge_count': 3, 'cycles_detected': ['A\n    -> B\
+      \ -> C -> A'], 'missing_dependencies': [], 'errors': ['Cycle detected: A\n \
+      \   -> B -> C -> A']}\n\n    \"\"\"\n    return ValidateDagOutput(\n       \
+      \ is_valid=False,\n        node_count=0,\n        edge_count=0,\n        cycles_detected=\"\
+      \",\n        missing_dependencies=\"\",\n        errors=\"\",\n    )"
     name: validate_dag
     nodes_depended_on:
     - create_task_dag
