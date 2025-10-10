@@ -6,10 +6,12 @@ import json
 import sys
 from typing import Dict, Any, List, Callable, Coroutine, Union, Optional
 
-from code.prepareforprayer import prepareforprayer
-from code.invokeprayer import invokeprayer
-from code.reflectonprayer import reflectonprayer
-from code.concludeprayer import concludeprayer
+from code.plan_meal import plan_meal
+from code.create_shopping_list import create_shopping_list
+from code.purchase_ingredients import purchase_ingredients
+from code.prepare_ingredients import prepare_ingredients
+from code.cook_meal import cook_meal
+from code.serve_meal import serve_meal
 
 # Get async mode from environment variable or default to False
 ASYNC_MODE = os.environ.get('ASYNC_MODE', '').lower() in ('true', '1', 'yes', 'y')
@@ -31,10 +33,12 @@ def make_async(func):
 
     return async_wrapper
 
-prepareforprayer_async = make_async(prepareforprayer)
-invokeprayer_async = make_async(invokeprayer)
-reflectonprayer_async = make_async(reflectonprayer)
-concludeprayer_async = make_async(concludeprayer)
+plan_meal_async = make_async(plan_meal)
+create_shopping_list_async = make_async(create_shopping_list)
+purchase_ingredients_async = make_async(purchase_ingredients)
+prepare_ingredients_async = make_async(prepare_ingredients)
+cook_meal_async = make_async(cook_meal)
+serve_meal_async = make_async(serve_meal)
 
 async def run_workflow(user_input: str) -> Dict[str, Any]:
     """Execute the workflow by running each level in the topological sort.
@@ -48,37 +52,53 @@ async def run_workflow(user_input: str) -> Dict[str, Any]:
     # Store results for each node
     results = {}
 
-    # Level 0: prepareforprayer
-    async def run_prepareforprayer():
-        # Call the async version of prepareforprayer with results from dependencies
-        return await prepareforprayer_async(user_input)
+    # Level 0: plan_meal
+    async def run_plan_meal():
+        # Call the async version of plan_meal with results from dependencies
+        return await plan_meal_async(user_input)
 
     # Run level 0 nodes in parallel
-    results['prepareforprayer'] = await run_prepareforprayer()
+    results['plan_meal'] = await run_plan_meal()
 
-    # Level 1: invokeprayer
-    async def run_invokeprayer():
-        # Call the async version of invokeprayer with results from dependencies
-        return await invokeprayer_async(results['prepareforprayer'])
+    # Level 1: create_shopping_list
+    async def run_create_shopping_list():
+        # Call the async version of create_shopping_list with results from dependencies
+        return await create_shopping_list_async(results['plan_meal'])
 
     # Run level 1 nodes in parallel
-    results['invokeprayer'] = await run_invokeprayer()
+    results['create_shopping_list'] = await run_create_shopping_list()
 
-    # Level 2: reflectonprayer
-    async def run_reflectonprayer():
-        # Call the async version of reflectonprayer with results from dependencies
-        return await reflectonprayer_async(results['invokeprayer'])
+    # Level 2: purchase_ingredients
+    async def run_purchase_ingredients():
+        # Call the async version of purchase_ingredients with results from dependencies
+        return await purchase_ingredients_async(results['create_shopping_list'])
 
     # Run level 2 nodes in parallel
-    results['reflectonprayer'] = await run_reflectonprayer()
+    results['purchase_ingredients'] = await run_purchase_ingredients()
 
-    # Level 3: concludeprayer
-    async def run_concludeprayer():
-        # Call the async version of concludeprayer with results from dependencies
-        return await concludeprayer_async(results['reflectonprayer'])
+    # Level 3: prepare_ingredients
+    async def run_prepare_ingredients():
+        # Call the async version of prepare_ingredients with results from dependencies
+        return await prepare_ingredients_async(results['plan_meal'], results['purchase_ingredients'])
 
     # Run level 3 nodes in parallel
-    results['concludeprayer'] = await run_concludeprayer()
+    results['prepare_ingredients'] = await run_prepare_ingredients()
+
+    # Level 4: cook_meal
+    async def run_cook_meal():
+        # Call the async version of cook_meal with results from dependencies
+        return await cook_meal_async(results['prepare_ingredients'])
+
+    # Run level 4 nodes in parallel
+    results['cook_meal'] = await run_cook_meal()
+
+    # Level 5: serve_meal
+    async def run_serve_meal():
+        # Call the async version of serve_meal with results from dependencies
+        return await serve_meal_async(results['cook_meal'])
+
+    # Run level 5 nodes in parallel
+    results['serve_meal'] = await run_serve_meal()
 
     # Return all results
     return results
