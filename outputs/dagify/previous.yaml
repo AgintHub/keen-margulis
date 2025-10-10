@@ -1,4 +1,4 @@
-dag_type: plain_text
+dag_type: typed
 description: Generated workflow from UI.
 name: simple_sports_workflow
 nodes:
@@ -9,6 +9,13 @@ nodes:
     nodes_depended_on:
     - identify_sport
     nodes_dependent_on: []
+    output_structure:
+    - description: Whether the sport is team-based or individual
+      key: sport_type
+      type: str
+    - description: One-sentence explanation for the classification
+      key: rationale
+      type: str
     prompt: Decide whether the identified sport is team-based or individual. Provide
       a one-sentence rationale.
   gather_sport_info:
@@ -18,6 +25,17 @@ nodes:
     nodes_depended_on:
     - identify_sport
     nodes_dependent_on: []
+    output_structure:
+    - description: List of key rules governing the sport
+      key: rules
+      type: List[str]
+    - description: List of major professional leagues associated with the sport
+      key: popular_leagues
+      type: List[str]
+    - description: List of major international tournaments or competitions for the
+        sport
+      key: major_tournaments
+      type: List[str]
     prompt: Collect general information about the identified sport, including its
       rules, popular leagues, and major tournaments.
   identify_key_players:
@@ -28,6 +46,13 @@ nodes:
     - identify_sport
     - list_major_leagues
     nodes_dependent_on: []
+    output_structure:
+    - description: Names of the 3-5 key players
+      key: player_names
+      type: List[str]
+    - description: Leagues corresponding to each player
+      key: player_leagues
+      type: List[str]
     prompt: Name 3-5 key players currently active in the identified sport and their
       respective leagues.
   identify_sport:
@@ -36,6 +61,10 @@ nodes:
     name: identify_sport
     nodes_depended_on: []
     nodes_dependent_on: []
+    output_structure:
+    - description: The name of the sport identified or specified by the user
+      key: selected_sport
+      type: str
     prompt: Specify the sport you are interested in (e.g., soccer, basketball, tennis).
   list_major_leagues:
     agent: false
@@ -44,6 +73,10 @@ nodes:
     nodes_depended_on:
     - identify_sport
     nodes_dependent_on: []
+    output_structure:
+    - description: List of major professional leagues for the identified sport
+      key: league_names
+      type: List[str]
     prompt: Enumerate the major professional leagues associated with the identified
       sport (e.g., NBA for basketball, NFL for American football).
   summarize_sport_info:
@@ -56,5 +89,22 @@ nodes:
     - list_major_leagues
     - identify_key_players
     nodes_dependent_on: []
+    output_structure:
+    - description: Whether the sport is team-based or individual.
+      key: sport_type
+      type: str
+    - description: List of major professional leagues associated with the sport.
+      key: major_leagues
+      type: List[str]
+    - description: List of 3-5 key players currently active in the sport and their
+        respective leagues.
+      key: key_players
+      type: List[str]
+    - description: Concise summary of the sport, not exceeding 200 words.
+      key: summary
+      type: str
+    - description: Number of words in the summary.
+      key: word_count
+      type: int
     prompt: Compile the gathered information into a concise summary (≤200 words) covering
       the sport type, major leagues, and key players.
