@@ -1,6 +1,5 @@
-dag_type: plain_text
-description: A detailed workflow for creating a trading system, including strategy
-  development, risk management, and execution planning.
+dag_type: typed
+description: Generated workflow from UI.
 name: trading_workflow
 nodes:
   choose_trading_strategy:
@@ -10,6 +9,30 @@ nodes:
     nodes_depended_on:
     - define_trading_objectives
     nodes_dependent_on: []
+    output_structure:
+    - description: The name or identifier of the selected trading strategy.
+      key: strategy_name
+      type: str
+    - description: The high‑level category of the strategy, e.g., 'trend following',
+        'mean reversion', 'statistical arbitrage', or 'options play'.
+      key: strategy_type
+      type: str
+    - description: A numeric score (0.0 to 1.0) indicating how well the strategy meets
+        the defined objectives.
+      key: alignment_score
+      type: float
+    - description: Primary risk factors associated with this strategy.
+      key: key_risk_factors
+      type: List[str]
+    - description: Asset classes that the strategy intends to trade.
+      key: asset_classes
+      type: List[str]
+    - description: Market conditions under which the strategy performs best.
+      key: market_conditions
+      type: List[str]
+    - description: Approximate number of trades executed per day or per month.
+      key: trade_frequency
+      type: int
     prompt: Identify a trading strategy that aligns with the stated objectives, considering
       factors like market conditions and asset classes.
   compile_trading_workflow_summary:
@@ -22,6 +45,25 @@ nodes:
     - develop_trade_execution_plan
     - design_monitoring_and_control_system
     nodes_dependent_on: []
+    output_structure:
+    - description: Concise description of the defined trading objectives.
+      key: objectives_summary
+      type: str
+    - description: Brief overview of the selected trading strategy.
+      key: strategy_summary
+      type: str
+    - description: Summary of the trade execution plan, including order types and
+        venues.
+      key: execution_plan_summary
+      type: str
+    - description: Description of the monitoring and control system with key alerts
+        and reporting mechanisms.
+      key: monitoring_system_summary
+      type: str
+    - description: Final consolidated summary that ties together objectives, strategy,
+        execution plan, and monitoring system.
+      key: overall_summary
+      type: str
     prompt: Summarize the trading workflow, including objectives, strategy, execution
       plan, and monitoring system.
   define_risk_management_rules:
@@ -32,6 +74,28 @@ nodes:
     nodes_depended_on:
     - choose_trading_strategy
     nodes_dependent_on: []
+    output_structure:
+    - description: Method for determining position size per trade (e.g., fixed percentage,
+        volatility scaling, Kelly criterion).
+      key: position_sizing_rule
+      type: str
+    - description: Maximum allowed position size as a percentage of total portfolio
+        capital.
+      key: max_position_size_pct
+      type: float
+    - description: Maximum daily drawdown allowed before rebalancing or halt.
+      key: max_daily_drawdown_pct
+      type: float
+    - description: Stop-loss level as a percentage of entry price.
+      key: stop_loss_level_pct
+      type: float
+    - description: List of asset classes or instruments to diversify across.
+      key: diversification_instruments
+      type: List[str]
+    - description: Textual guidelines for portfolio diversification (e.g., correlation
+        thresholds, sector caps).
+      key: portfolio_diversification_guidelines
+      type: str
     prompt: Specify risk management rules, including position sizing, stop-loss levels,
       and portfolio diversification guidelines.
   define_trading_objectives:
@@ -41,6 +105,20 @@ nodes:
     name: define_trading_objectives
     nodes_depended_on: []
     nodes_dependent_on: []
+    output_structure:
+    - description: Target annualized return expressed as a percentage
+      key: return_target_percent
+      type: float
+    - description: Maximum acceptable drawdown expressed as a percentage
+      key: max_drawdown_percent
+      type: float
+    - description: Risk tolerance level (e.g., 'conservative', 'moderate', 'aggressive')
+      key: risk_tolerance_category
+      type: str
+    - description: List of textual constraints or special requirements for the trading
+        strategy
+      key: constraints
+      type: List[str]
     prompt: List the core objectives for the trading system, focusing on return targets,
       risk limits, and any specific constraints.
   design_monitoring_and_control_system:
@@ -51,6 +129,35 @@ nodes:
     - specify_performance_metrics
     - develop_trade_execution_plan
     nodes_dependent_on: []
+    output_structure:
+    - description: List of performance metrics monitored by the system.
+      key: monitored_metrics
+      type: List[str]
+    - description: Corresponding threshold values for each monitored metric.
+      key: metric_thresholds
+      type: List[float]
+    - description: Whether alerts are enabled for threshold breaches.
+      key: alert_enabled
+      type: bool
+    - description: Frequency of alerts (e.g., real-time, hourly).
+      key: alert_frequency
+      type: str
+    - description: Schedule for performance reports (e.g., daily, weekly).
+      key: reporting_schedule
+      type: str
+    - description: Channels for distributing reports (e.g., email, dashboard).
+      key: reporting_channels
+      type: List[str]
+    - description: Steps to be taken when intervention is triggered.
+      key: intervention_steps
+      type: List[str]
+    - description: Whether manual override of automated controls is allowed.
+      key: manual_override_allowed
+      type: bool
+    - description: Level of automation in control actions (e.g., fully automated,
+        semi-automated).
+      key: control_automation_level
+      type: str
     prompt: Describe the monitoring and control system, including alerts, reporting,
       and intervention protocols.
   develop_trade_execution_plan:
@@ -61,6 +168,40 @@ nodes:
     - identify_tradable_assets
     - define_risk_management_rules
     nodes_dependent_on: []
+    output_structure:
+    - description: List of tradable asset classes or instruments identified by the
+        parent node.
+      key: asset_classes
+      type: List[str]
+    - description: Order types to be used in execution (e.g., market, limit, bracket,
+        iceberg).
+      key: order_types
+      type: List[str]
+    - description: Trading venues or exchanges where orders will be routed.
+      key: execution_venues
+      type: List[str]
+    - description: Description of the timing strategy (e.g., intraday, market open,
+        end-of-day).
+      key: timing_strategy
+      type: str
+    - description: Maximum acceptable slippage as a percentage of the order price.
+      key: slippage_tolerance_pct
+      type: float
+    - description: Reference to the position sizing rule from the risk management
+        plan.
+      key: position_size_rule
+      type: str
+    - description: Maximum number of units (shares/contracts) per individual order.
+      key: max_order_size
+      type: int
+    - description: Expected average latency from order submission to execution in
+        milliseconds.
+      key: execution_latency_ms
+      type: float
+    - description: Method used to submit orders (e.g., FIX, REST API, proprietary
+        interface).
+      key: order_submission_method
+      type: str
     prompt: Outline the trade execution plan, including the types of orders to use,
       execution venues, and timing considerations.
   identify_tradable_assets:
@@ -70,6 +211,14 @@ nodes:
     nodes_depended_on:
     - choose_trading_strategy
     nodes_dependent_on: []
+    output_structure:
+    - description: List of tradable asset classes or instruments selected for the
+        chosen trading strategy.
+      key: tradable_assets
+      type: List[str]
+    - description: Number of tradable assets identified.
+      key: asset_count
+      type: int
     prompt: List the specific asset classes or instruments that the chosen strategy
       will trade, such as equities, futures, or currencies.
   specify_performance_metrics:
@@ -79,5 +228,24 @@ nodes:
     nodes_depended_on:
     - define_trading_objectives
     nodes_dependent_on: []
+    output_structure:
+    - description: Return on investment over the evaluation period
+      key: roi
+      type: float
+    - description: Sharpe ratio of the trading strategy
+      key: sharpe_ratio
+      type: float
+    - description: Maximum drawdown as a percentage of equity
+      key: max_drawdown
+      type: float
+    - description: Annualized volatility of returns
+      key: annualized_volatility
+      type: float
+    - description: Percentage of profitable trades
+      key: win_rate
+      type: float
+    - description: Annualized return percentage
+      key: annualized_return
+      type: float
     prompt: List the key performance metrics to monitor, such as return on investment,
       Sharpe ratio, and drawdown.
