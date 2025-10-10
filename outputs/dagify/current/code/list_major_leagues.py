@@ -1,3 +1,8 @@
+from ._list_major_leagues.validate_sport_input import validate_sport_input
+from ._list_major_leagues.get_sport_league_mapping import get_sport_league_mapping
+from ._list_major_leagues.retrieve_leagues_for_sport import retrieve_leagues_for_sport
+from ._list_major_leagues.curate_prominent_leagues import curate_prominent_leagues
+
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -5,14 +10,18 @@ from typing import List
 class IdentifySportOutput(BaseModel):
     """Pydantic model for identify_sport node outputs."""
     selected_sport: str = (
-        Field(..., description="The name of the sport identified or specified by the user")
+        Field(..., description = (
+            "The name of the sport identified or specified by the user")
+        )
     )
 
 
 class ListMajorLeaguesOutput(BaseModel):
     """Pydantic model for list_major_leagues node outputs."""
     league_names: List[str] = (
-        Field(..., description="List of major professional leagues for the identified sport")
+        Field(..., description = (
+            "List of major professional leagues for the identified sport")
+        )
     )
 
 
@@ -48,6 +57,14 @@ def list_major_leagues(identify_sport_input: IdentifySportOutput, **kwargs) -> L
     ["Premier League", "La Liga", "Bundesliga", "Serie A", "Ligue 1"]
 
     """
-    return ListMajorLeaguesOutput(
-        league_names=[],
-    )
+    selected_sport: str = identify_sport_input.selected_sport
+    
+    validated_sport: str = validate_sport_input(sport_name=selected_sport)
+    
+    league_mapping: dict = get_sport_league_mapping()
+    
+    major_leagues: List[str] = retrieve_leagues_for_sport(sport=validated_sport, mapping=league_mapping)
+    
+    curated_leagues: List[str] = curate_prominent_leagues(leagues=major_leagues, sport=validated_sport)
+    
+    return ListMajorLeaguesOutput(league_names=curated_leagues)

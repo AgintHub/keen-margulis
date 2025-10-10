@@ -1,10 +1,17 @@
+from ._determine_sport_type.validate_sport_input import validate_sport_input
+from ._determine_sport_type.analyze_sport_characteristics import analyze_sport_characteristics
+from ._determine_sport_type.classify_sport_type import classify_sport_type
+from ._determine_sport_type.generate_classification_rationale import generate_classification_rationale
+
 from pydantic import BaseModel, Field
 
 
 class IdentifySportOutput(BaseModel):
     """Pydantic model for identify_sport node outputs."""
     selected_sport: str = (
-        Field(..., description="The name of the sport identified or specified by the user")
+        Field(..., description = (
+            "The name of the sport identified or specified by the user")
+        )
     )
 
 
@@ -14,7 +21,9 @@ class DetermineSportTypeOutput(BaseModel):
         Field(..., description="Whether the sport is team-based or individual")
     )
     rationale: str = (
-        Field(..., description="One-sentence explanation for the classification")
+        Field(..., description = (
+            "One-sentence explanation for the classification")
+        )
     )
 
 
@@ -54,7 +63,14 @@ def determine_sport_type(identify_sport_input: IdentifySportOutput, **kwargs) ->
     it an individual sport.'
 
     """
+    selected_sport: str = identify_sport_input.selected_sport
+    
+    validated_sport: str = validate_sport_input(sport_name=selected_sport)
+    sport_characteristics: dict = analyze_sport_characteristics(sport=validated_sport)
+    classification: str = classify_sport_type(characteristics=sport_characteristics)
+    explanation: str = generate_classification_rationale(sport=validated_sport, sport_type=classification, characteristics=sport_characteristics)
+    
     return DetermineSportTypeOutput(
-        sport_type="",
-        rationale="",
+        sport_type=classification,
+        rationale=explanation
     )
