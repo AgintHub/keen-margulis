@@ -1,67 +1,496 @@
-dag_type: plain_text
-description: Generated workflow from UI.
-name: Generated Workflow from UI
+dag_type: stub
+description: A comprehensive trading workflow that includes data gathering, analysis,
+  and decision-making.
+name: tradingworkflow
 nodes:
-  define_rules_and_dynamics:
+  analyze_market_trends:
     agent: false
-    description: Specify the rules and dynamics that govern the behavior of the world
-      model.
-    name: define_rules_and_dynamics
+    code_node_type: stub
+    description: Analyze market trends based on historical data to predict future
+      movements.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass GatherMarketDataOutput(BaseModel):\n    \"\"\"Pydantic model for gather_market_data\
+      \ node outputs.\"\"\"\n    stock_prices: List[float] = (\n        Field(...,\
+      \ description=\"Current prices of relevant stocks\")\n    )\n    trading_volumes:\
+      \ List[int] = (\n        Field(..., description=\"Current trading volumes of\
+      \ relevant stocks\")\n    )\n    market_metrics: List[str] = (\n        Field(...,\
+      \ description=\"Other relevant market metrics\")\n    )\n\n\nclass AnalyzeMarketTrendsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for analyze_market_trends node outputs.\"\"\"\n  \
+      \  trend_predictions: List[str] = (\n        Field(..., description=\"Predictions\
+      \ of future market trends.\")\n    )\n    trend_confidence: List[float] = (\n\
+      \        Field(..., description=\"Confidence levels in trend predictions.\"\
+      )\n    )\n\n\ndef analyze_market_trends(gather_market_data_input: GatherMarketDataOutput,\
+      \ **kwargs) -> AnalyzeMarketTrendsOutput:\n    \"\"\"\n    Analyze historical\
+      \ market data to predict future trends and their confidence\n    levels.\n\n\
+      \    Parameters\n    ----------\n    stock_prices : List[float]\n        Historical\
+      \ prices of relevant stocks.\n    trading_volumes : List[int]\n        Historical\
+      \ trading volumes of relevant stocks.\n    market_metrics : List[str]\n    \
+      \    Other relevant historical market metrics.\n\n    Returns\n    -------\n\
+      \    Tuple[List[str], List[float]]\n        A tuple containing a list of trend\
+      \ predictions and a list of their\n        corresponding confidence levels.\n\
+      \n    Raises\n    ------\n    ValueError\n        If the input lists are of\
+      \ different lengths or if the data is\n        inconsistent.\n\n    Examples\n\
+      \    --------\n    >>> stock_prices = [100.0, 120.0, 110.0]\n    >>> trading_volumes\
+      \ = [1000, 1200, 1100]\n    >>> market_metrics = ['metric1', 'metric2', 'metric3']\n\
+      \    >>> trend_predictions, trend_confidence =\n    analyze_market_trends(stock_prices,\
+      \ trading_volumes, market_metrics)\n    (['uptrend', 'downtrend'], [0.8, 0.7])\n\
+      \n    >>> stock_prices = [90.0, 100.0, 95.0]\n    >>> trading_volumes = [900,\
+      \ 1000, 950]\n    >>> market_metrics = ['metric4', 'metric5', 'metric6']\n \
+      \   >>> trend_predictions, trend_confidence =\n    analyze_market_trends(stock_prices,\
+      \ trading_volumes, market_metrics)\n    (['uptrend', 'downtrend'], [0.85, 0.75])\n\
+      \n    \"\"\"\n    return AnalyzeMarketTrendsOutput(\n        trend_predictions=[],\n\
+      \        trend_confidence=[],\n    )"
+    name: analyze_market_trends
     nodes_depended_on:
-    - establish_concept_relationships
+    - gather_market_data
     nodes_dependent_on: []
-    prompt: Outline the laws, principles, or rules that dictate how the concepts and
-      their relationships evolve over time.
-  define_world_boundaries:
+    output_structure:
+    - description: Predictions of future market trends.
+      key: trend_predictions
+      type: List[str]
+    - description: Confidence levels in trend predictions.
+      key: trend_confidence
+      type: List[float]
+    prd:
+      conceptual_info: This node analyzes historical market data to predict future
+        market trends and their confidence levels.
+      docstring:
+        examples:
+        - lines:
+          - stock_prices = [100.0, 120.0, 110.0]
+          - trading_volumes = [1000, 1200, 1100]
+          - market_metrics = ['metric1', 'metric2', 'metric3']
+          - trend_predictions, trend_confidence = analyze_market_trends(stock_prices,
+            trading_volumes, market_metrics)
+          output: (['uptrend', 'downtrend'], [0.8, 0.7])
+        - lines:
+          - stock_prices = [90.0, 100.0, 95.0]
+          - trading_volumes = [900, 1000, 950]
+          - market_metrics = ['metric4', 'metric5', 'metric6']
+          - trend_predictions, trend_confidence = analyze_market_trends(stock_prices,
+            trading_volumes, market_metrics)
+          output: (['uptrend', 'downtrend'], [0.85, 0.75])
+        parameters:
+        - description: Historical prices of relevant stocks.
+          name: stock_prices
+          type: List[float]
+        - description: Historical trading volumes of relevant stocks.
+          name: trading_volumes
+          type: List[int]
+        - description: Other relevant historical market metrics.
+          name: market_metrics
+          type: List[str]
+        raises:
+        - description: If the input lists are of different lengths or if the data
+            is inconsistent.
+          type: ValueError
+        returns:
+          description: A tuple containing a list of trend predictions and a list of
+            their corresponding confidence levels.
+          type: Tuple[List[str], List[float]]
+        summary: Analyze historical market data to predict future trends and their
+          confidence levels.
+    prompt: Analyze historical market data to identify trends.
+    shims: []
+  evaluate_trading_strategies:
     agent: false
-    description: Establish the spatial and temporal limits of the world model.
-    name: define_world_boundaries
+    code_node_type: stub
+    description: Evaluate different trading strategies based on market analysis and
+      risk assessment.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass AnalyzeMarketTrendsOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ analyze_market_trends node outputs.\"\"\"\n    trend_predictions: List[str]\
+      \ = (\n        Field(..., description=\"Predictions of future market trends.\"\
+      )\n    )\n    trend_confidence: List[float] = (\n        Field(..., description=\"\
+      Confidence levels in trend predictions.\")\n    )\n\n\nclass EvaluateTradingStrategiesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for evaluate_trading_strategies node outputs.\"\"\"\
+      \n    strategy_evaluations: List[str] = (\n        Field(..., description=\"\
+      Evaluations of different trading strategies\")\n    )\n    strategy_risks: List[float]\
+      \ = (\n        Field(..., description=\"Risk assessments for each trading strategy\"\
+      )\n    )\n\n\ndef evaluate_trading_strategies(analyze_market_trends_input: AnalyzeMarketTrendsOutput,\
+      \ **kwargs) -> EvaluateTradingStrategiesOutput:\n    \"\"\"\n    Evaluates trading\
+      \ strategies based on market trends and risk.\n\n    Parameters\n    ----------\n\
+      \    trend_predictions : List[str]\n        Predictions of future market trends\
+      \ from 'analyze_market_trends'\n        node.\n    trend_confidence : List[float]\n\
+      \        Confidence levels in trend predictions from 'analyze_market_trends'\n\
+      \        node.\n\n    Returns\n    -------\n    Tuple[List[str], List[float]]\n\
+      \        A tuple containing evaluations of different trading strategies and\n\
+      \        their corresponding risk assessments.\n\n    Raises\n    ------\n \
+      \   ValueError\n        If trend predictions and confidence levels are of different\
+      \ lengths.\n    TypeError\n        If trend predictions are not a list of strings\
+      \ or confidence levels\n        are not a list of floats.\n\n    Examples\n\
+      \    --------\n    >>> trend_predictions = ['Up', 'Down', 'Stable']\n    >>>\
+      \ trend_confidence = [0.8, 0.7, 0.9]\n    >>> evaluate_trading_strategies(trend_predictions,\
+      \ trend_confidence)\n    (['Good strategy', 'Bad strategy', 'Neutral strategy'],\
+      \ [0.2, 0.8, 0.5])\n\n    >>> trend_predictions = ['Up', 'Down']\n    >>> trend_confidence\
+      \ = [0.85, 0.75]\n    >>> evaluate_trading_strategies(trend_predictions, trend_confidence)\n\
+      \    (['Profitable strategy', 'Loss strategy'], [0.15, 0.85])\n\n    \"\"\"\n\
+      \    return EvaluateTradingStrategiesOutput(\n        strategy_evaluations=[],\n\
+      \        strategy_risks=[],\n    )"
+    name: evaluate_trading_strategies
+    nodes_depended_on:
+    - analyze_market_trends
+    nodes_dependent_on: []
+    output_structure:
+    - description: Evaluations of different trading strategies
+      key: strategy_evaluations
+      type: List[str]
+    - description: Risk assessments for each trading strategy
+      key: strategy_risks
+      type: List[float]
+    prd:
+      conceptual_info: This node evaluates different trading strategies based on market
+        analysis and risk assessment, utilizing the outputs from the 'analyze_market_trends'
+        node.
+      docstring:
+        examples:
+        - lines:
+          - trend_predictions = ['Up', 'Down', 'Stable']
+          - trend_confidence = [0.8, 0.7, 0.9]
+          - evaluate_trading_strategies(trend_predictions, trend_confidence)
+          output: (['Good strategy', 'Bad strategy', 'Neutral strategy'], [0.2, 0.8,
+            0.5])
+        - lines:
+          - trend_predictions = ['Up', 'Down']
+          - trend_confidence = [0.85, 0.75]
+          - evaluate_trading_strategies(trend_predictions, trend_confidence)
+          output: (['Profitable strategy', 'Loss strategy'], [0.15, 0.85])
+        parameters:
+        - description: Predictions of future market trends from 'analyze_market_trends'
+            node.
+          name: trend_predictions
+          type: List[str]
+        - description: Confidence levels in trend predictions from 'analyze_market_trends'
+            node.
+          name: trend_confidence
+          type: List[float]
+        raises:
+        - description: If trend predictions and confidence levels are of different
+            lengths.
+          type: ValueError
+        - description: If trend predictions are not a list of strings or confidence
+            levels are not a list of floats.
+          type: TypeError
+        returns:
+          description: A tuple containing evaluations of different trading strategies
+            and their corresponding risk assessments.
+          type: Tuple[List[str], List[float]]
+        summary: Evaluates trading strategies based on market trends and risk.
+    prompt: Evaluate trading strategies based on market trends and risk.
+    shims: []
+  execute_trades:
+    agent: false
+    code_node_type: stub
+    description: Execute trades based on the selected optimal strategy.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass SelectOptimalStrategyOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for select_optimal_strategy node outputs.\"\"\"\n    optimal_strategy: str\
+      \ = (\n        Field(..., description=\"The selected optimal trading strategy\"\
+      )\n    )\n    strategy_confidence: float = (\n        Field(..., description=\"\
+      Confidence level in the selected strategy\")\n    )\n\n\nclass ExecuteTradesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for execute_trades node outputs.\"\"\"\n    trade_outcomes:\
+      \ List[str] = (\n        Field(..., description=\"Outcomes of executed trades\"\
+      )\n    )\n    trade_volumes: List[int] = (\n        Field(..., description=\"\
+      Volumes of executed trades\")\n    )\n\n\ndef execute_trades(select_optimal_strategy_input:\
+      \ SelectOptimalStrategyOutput, **kwargs) -> ExecuteTradesOutput:\n    \"\"\"\
+      \n    Execute trades based on the selected optimal strategy, producing trade\n\
+      \    outcomes and volumes.\n\n    Parameters\n    ----------\n    optimal_strategy\
+      \ : str\n        The selected optimal trading strategy from the\n        'select_optimal_strategy'\
+      \ node.\n    strategy_confidence : float\n        The confidence level in the\
+      \ selected optimal strategy from the\n        'select_optimal_strategy' node.\n\
+      \n    Returns\n    -------\n    Tuple[List[str], List[int]]\n        A tuple\
+      \ containing two lists: the first list contains the outcomes\n        of the\
+      \ executed trades as strings, and the second list contains the\n        volumes\
+      \ of the executed trades as integers.\n\n    Raises\n    ------\n    ValueError\n\
+      \        If the optimal strategy is not recognized or if the strategy\n    \
+      \    confidence is outside the valid range (0 to 1).\n    RuntimeError\n   \
+      \     If there's an issue executing the trades based on the provided\n     \
+      \   strategy.\n\n    Examples\n    --------\n    >>> optimal_strategy = 'buy'\n\
+      \    >>> strategy_confidence = 0.8\n    >>> trade_outcomes, trade_volumes =\
+      \ execute_trades(optimal_strategy,\n    strategy_confidence)\n    (['success',\
+      \ 'success'], [100, 200])\n\n    >>> optimal_strategy = 'sell'\n    >>> strategy_confidence\
+      \ = 0.7\n    >>> trade_outcomes, trade_volumes = execute_trades(optimal_strategy,\n\
+      \    strategy_confidence)\n    (['success', 'failed'], [50, 0])\n\n    \"\"\"\
+      \n    return ExecuteTradesOutput(\n        trade_outcomes=[],\n        trade_volumes=[],\n\
+      \    )"
+    name: execute_trades
+    nodes_depended_on:
+    - select_optimal_strategy
+    nodes_dependent_on: []
+    output_structure:
+    - description: Outcomes of executed trades
+      key: trade_outcomes
+      type: List[str]
+    - description: Volumes of executed trades
+      key: trade_volumes
+      type: List[int]
+    prd:
+      conceptual_info: This node executes trades based on the optimal strategy selected
+        by its parent node, 'select_optimal_strategy'. It takes the optimal strategy
+        and its confidence level as inputs and produces the outcomes and volumes of
+        the executed trades.
+      docstring:
+        examples:
+        - lines:
+          - optimal_strategy = 'buy'
+          - strategy_confidence = 0.8
+          - trade_outcomes, trade_volumes = execute_trades(optimal_strategy, strategy_confidence)
+          output: (['success', 'success'], [100, 200])
+        - lines:
+          - optimal_strategy = 'sell'
+          - strategy_confidence = 0.7
+          - trade_outcomes, trade_volumes = execute_trades(optimal_strategy, strategy_confidence)
+          output: (['success', 'failed'], [50, 0])
+        parameters:
+        - description: The selected optimal trading strategy from the 'select_optimal_strategy'
+            node.
+          name: optimal_strategy
+          type: str
+        - description: The confidence level in the selected optimal strategy from
+            the 'select_optimal_strategy' node.
+          name: strategy_confidence
+          type: float
+        raises:
+        - description: If the optimal strategy is not recognized or if the strategy
+            confidence is outside the valid range (0 to 1).
+          type: ValueError
+        - description: If there's an issue executing the trades based on the provided
+            strategy.
+          type: RuntimeError
+        returns:
+          description: 'A tuple containing two lists: the first list contains the
+            outcomes of the executed trades as strings, and the second list contains
+            the volumes of the executed trades as integers.'
+          type: Tuple[List[str], List[int]]
+        summary: Execute trades based on the selected optimal strategy, producing
+          trade outcomes and volumes.
+    prompt: Execute trades according to the chosen strategy.
+    shims: []
+  gather_market_data:
+    agent: false
+    code_node_type: stub
+    description: Collect current market data including stock prices, trading volumes,
+      and other relevant metrics.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass GatherMarketDataOutput(BaseModel):\n    \"\"\"Pydantic model for gather_market_data\
+      \ node outputs.\"\"\"\n    stock_prices: List[float] = (\n        Field(...,\
+      \ description=\"Current prices of relevant stocks\")\n    )\n    trading_volumes:\
+      \ List[int] = (\n        Field(..., description=\"Current trading volumes of\
+      \ relevant stocks\")\n    )\n    market_metrics: List[str] = (\n        Field(...,\
+      \ description=\"Other relevant market metrics\")\n    )\n\n\ndef gather_market_data(general_input:\
+      \ str, **kwargs) -> GatherMarketDataOutput:\n    \"\"\"\n    Collects current\
+      \ market data including stock prices, trading volumes, and\n    other relevant\
+      \ metrics.\n\n    Returns\n    -------\n    Tuple[List[float], List[int], List[str]]\n\
+      \        A tuple containing the current stock prices, trading volumes, and\n\
+      \        other market metrics.\n\n    Raises\n    ------\n    ConnectionError\n\
+      \        If there's an issue connecting to the data source.\n    ValueError\n\
+      \        If the collected data is invalid or incomplete.\n\n    Examples\n \
+      \   --------\n    >>> gather_market_data()\n    ([123.45, 67.89], [1000, 2000],\
+      \ ['metric1', 'metric2'])\n\n    >>> stock_prices, trading_volumes, market_metrics\
+      \ = gather_market_data()\n    stock_prices = [123.45, 67.89]\n    trading_volumes\
+      \ = [1000, 2000]\n    market_metrics = ['metric1', 'metric2']\n\n    \"\"\"\n\
+      \    return GatherMarketDataOutput(\n        stock_prices=[],\n        trading_volumes=[],\n\
+      \        market_metrics=[],\n    )"
+    name: gather_market_data
     nodes_depended_on: []
     nodes_dependent_on: []
-    prompt: Specify the geographical or spatial extent and the time period covered
-      by the world model.
-  establish_concept_relationships:
+    output_structure:
+    - description: Current prices of relevant stocks
+      key: stock_prices
+      type: List[float]
+    - description: Current trading volumes of relevant stocks
+      key: trading_volumes
+      type: List[int]
+    - description: Other relevant market metrics
+      key: market_metrics
+      type: List[str]
+    prd:
+      conceptual_info: This node is responsible for collecting current market data
+        from reliable sources, including stock prices, trading volumes, and other
+        relevant metrics.
+      docstring:
+        examples:
+        - lines:
+          - gather_market_data()
+          output: ([123.45, 67.89], [1000, 2000], ['metric1', 'metric2'])
+        - lines:
+          - stock_prices, trading_volumes, market_metrics = gather_market_data()
+          output: 'stock_prices = [123.45, 67.89]
+
+            trading_volumes = [1000, 2000]
+
+            market_metrics = [''metric1'', ''metric2'']'
+        parameters: []
+        raises:
+        - description: If there's an issue connecting to the data source.
+          type: ConnectionError
+        - description: If the collected data is invalid or incomplete.
+          type: ValueError
+        returns:
+          description: A tuple containing the current stock prices, trading volumes,
+            and other market metrics.
+          type: Tuple[List[float], List[int], List[str]]
+        summary: Collects current market data including stock prices, trading volumes,
+          and other relevant metrics.
+    prompt: Collect current market data from reliable sources.
+    shims: []
+  monitor_trade_performance:
     agent: false
-    description: Define how the identified concepts interact or relate to each other.
-    name: establish_concept_relationships
+    code_node_type: stub
+    description: Monitor the performance of executed trades and adjust strategies
+      as needed.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass ExecuteTradesOutput(BaseModel):\n    \"\"\"Pydantic model for execute_trades\
+      \ node outputs.\"\"\"\n    trade_outcomes: List[str] = (\n        Field(...,\
+      \ description=\"Outcomes of executed trades\")\n    )\n    trade_volumes: List[int]\
+      \ = (\n        Field(..., description=\"Volumes of executed trades\")\n    )\n\
+      \n\nclass MonitorTradePerformanceOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for monitor_trade_performance node outputs.\"\"\"\n    performance_metrics:\
+      \ List[float] = (\n        Field(..., description=\"Performance metrics of executed\
+      \ trades\")\n    )\n    adjustment_recommendations: List[str] = (\n        Field(...,\
+      \ description=\"Recommendations for strategy adjustments\")\n    )\n\n\ndef\
+      \ monitor_trade_performance(execute_trades_input: ExecuteTradesOutput, **kwargs)\
+      \ -> MonitorTradePerformanceOutput:\n    \"\"\"\n    Monitor trade performance\
+      \ and provide strategy adjustment recommendations.\n\n    Parameters\n    ----------\n\
+      \    trade_outcomes : List[str]\n        Outcomes of executed trades from the\
+      \ 'execute_trades' node.\n    trade_volumes : List[int]\n        Volumes of\
+      \ executed trades from the 'execute_trades' node.\n\n    Returns\n    -------\n\
+      \    Tuple[List[float], List[str]]\n        A tuple containing performance metrics\
+      \ of executed trades and\n        recommendations for strategy adjustments.\n\
+      \n    Raises\n    ------\n    ValueError\n        If trade outcomes or volumes\
+      \ are empty or mismatched.\n\n    Examples\n    --------\n    >>> trade_outcomes\
+      \ = ['success', 'failure', 'success']\n    >>> trade_volumes = [100, 200, 300]\n\
+      \    >>> monitor_trade_performance(trade_outcomes, trade_volumes)\n    ([0.8,\
+      \ 0.2], ['Increase risk for successful trades', 'Review strategy for\n    failed\
+      \ trades'])\n\n    >>> trade_outcomes = ['success', 'success', 'success']\n\
+      \    >>> trade_volumes = [500, 600, 700]\n    >>> monitor_trade_performance(trade_outcomes,\
+      \ trade_volumes)\n    ([1.0], ['Continue current successful strategy'])\n\n\
+      \    \"\"\"\n    return MonitorTradePerformanceOutput(\n        performance_metrics=[],\n\
+      \        adjustment_recommendations=[],\n    )"
+    name: monitor_trade_performance
     nodes_depended_on:
-    - identify_basic_concepts
+    - execute_trades
     nodes_dependent_on: []
-    prompt: Describe the relationships between the concepts, including any hierarchies,
-      associations, or causal links.
-  identify_basic_concepts:
+    output_structure:
+    - description: Performance metrics of executed trades
+      key: performance_metrics
+      type: List[float]
+    - description: Recommendations for strategy adjustments
+      key: adjustment_recommendations
+      type: List[str]
+    prd:
+      conceptual_info: This node monitors the performance of trades executed by the
+        'execute_trades' node and provides recommendations for adjusting trading strategies
+        based on the performance metrics.
+      docstring:
+        examples:
+        - lines:
+          - trade_outcomes = ['success', 'failure', 'success']
+          - trade_volumes = [100, 200, 300]
+          - monitor_trade_performance(trade_outcomes, trade_volumes)
+          output: ([0.8, 0.2], ['Increase risk for successful trades', 'Review strategy
+            for failed trades'])
+        - lines:
+          - trade_outcomes = ['success', 'success', 'success']
+          - trade_volumes = [500, 600, 700]
+          - monitor_trade_performance(trade_outcomes, trade_volumes)
+          output: ([1.0], ['Continue current successful strategy'])
+        parameters:
+        - description: Outcomes of executed trades from the 'execute_trades' node.
+          name: trade_outcomes
+          type: List[str]
+        - description: Volumes of executed trades from the 'execute_trades' node.
+          name: trade_volumes
+          type: List[int]
+        raises:
+        - description: If trade outcomes or volumes are empty or mismatched.
+          type: ValueError
+        returns:
+          description: A tuple containing performance metrics of executed trades and
+            recommendations for strategy adjustments.
+          type: Tuple[List[float], List[str]]
+        summary: Monitor trade performance and provide strategy adjustment recommendations.
+    prompt: Monitor trade performance and adjust strategies.
+    shims: []
+  select_optimal_strategy:
     agent: false
-    description: Determine the fundamental entities and concepts that exist within
-      the world model.
-    name: identify_basic_concepts
-    nodes_depended_on: []
-    nodes_dependent_on: []
-    prompt: List the primary objects, agents, or concepts that are present in the
-      world model.
-  initialize_model_state:
-    agent: false
-    description: Set the initial conditions or state of the world model.
-    name: initialize_model_state
+    code_node_type: stub
+    description: Select the optimal trading strategy based on evaluations and risk
+      assessments.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass EvaluateTradingStrategiesOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for evaluate_trading_strategies node outputs.\"\"\"\n    strategy_evaluations:\
+      \ List[str] = (\n        Field(..., description=\"Evaluations of different trading\
+      \ strategies\")\n    )\n    strategy_risks: List[float] = (\n        Field(...,\
+      \ description=\"Risk assessments for each trading strategy\")\n    )\n\n\nclass\
+      \ SelectOptimalStrategyOutput(BaseModel):\n    \"\"\"Pydantic model for select_optimal_strategy\
+      \ node outputs.\"\"\"\n    optimal_strategy: str = (\n        Field(..., description=\"\
+      The selected optimal trading strategy\")\n    )\n    strategy_confidence: float\
+      \ = (\n        Field(..., description=\"Confidence level in the selected strategy\"\
+      )\n    )\n\n\ndef select_optimal_strategy(evaluate_trading_strategies_input:\
+      \ EvaluateTradingStrategiesOutput, **kwargs) -> SelectOptimalStrategyOutput:\n\
+      \    \"\"\"\n    Selects the optimal trading strategy based on evaluations and\
+      \ risk\n    assessments.\n\n    Parameters\n    ----------\n    strategy_evaluations\
+      \ : List[str]\n        Evaluations of different trading strategies from the\n\
+      \        'evaluate_trading_strategies' node.\n    strategy_risks : List[float]\n\
+      \        Risk assessments for each trading strategy from the\n        'evaluate_trading_strategies'\
+      \ node.\n\n    Returns\n    -------\n    Tuple[str, float]\n        A tuple\
+      \ containing the optimal trading strategy and its confidence\n        level.\n\
+      \n    Raises\n    ------\n    ValueError\n        If the lengths of 'strategy_evaluations'\
+      \ and 'strategy_risks' do not\n        match.\n\n    Examples\n    --------\n\
+      \    >>> strategy_evaluations = ['Good', 'Average', 'Poor']\n    >>> strategy_risks\
+      \ = [0.1, 0.5, 0.8]\n    >>> optimal_strategy, strategy_confidence =\n    select_optimal_strategy(strategy_evaluations,\
+      \ strategy_risks)\n    ('Good', 0.9)\n\n    >>> strategy_evaluations = ['Average',\
+      \ 'Good', 'Poor']\n    >>> strategy_risks = [0.5, 0.1, 0.8]\n    >>> optimal_strategy,\
+      \ strategy_confidence =\n    select_optimal_strategy(strategy_evaluations, strategy_risks)\n\
+      \    ('Good', 0.9)\n\n    \"\"\"\n    return SelectOptimalStrategyOutput(\n\
+      \        optimal_strategy=\"\",\n        strategy_confidence=0.0,\n    )"
+    name: select_optimal_strategy
     nodes_depended_on:
-    - define_rules_and_dynamics
+    - evaluate_trading_strategies
     nodes_dependent_on: []
-    prompt: Describe the initial state of the world model, including any relevant
-      parameters or settings.
-  refine_model_details:
-    agent: false
-    description: Add additional details or refine existing aspects of the world model.
-    name: refine_model_details
-    nodes_depended_on:
-    - validate_model_consistency
-    nodes_dependent_on: []
-    prompt: Enhance the world model by adding more specific details, examples, or
-      scenarios that illustrate its operation.
-  validate_model_consistency:
-    agent: false
-    description: Check the world model for internal consistency and coherence.
-    name: validate_model_consistency
-    nodes_depended_on:
-    - initialize_model_state
-    nodes_dependent_on: []
-    prompt: Verify that the world model's concepts, relationships, rules, and initial
-      state are logically consistent and coherent.
+    output_structure:
+    - description: The selected optimal trading strategy
+      key: optimal_strategy
+      type: str
+    - description: Confidence level in the selected strategy
+      key: strategy_confidence
+      type: float
+    prd:
+      conceptual_info: This node selects the optimal trading strategy based on the
+        evaluations and risk assessments provided by its parent node, 'evaluate_trading_strategies'.
+      docstring:
+        examples:
+        - lines:
+          - strategy_evaluations = ['Good', 'Average', 'Poor']
+          - strategy_risks = [0.1, 0.5, 0.8]
+          - optimal_strategy, strategy_confidence = select_optimal_strategy(strategy_evaluations,
+            strategy_risks)
+          output: ('Good', 0.9)
+        - lines:
+          - strategy_evaluations = ['Average', 'Good', 'Poor']
+          - strategy_risks = [0.5, 0.1, 0.8]
+          - optimal_strategy, strategy_confidence = select_optimal_strategy(strategy_evaluations,
+            strategy_risks)
+          output: ('Good', 0.9)
+        parameters:
+        - description: Evaluations of different trading strategies from the 'evaluate_trading_strategies'
+            node.
+          name: strategy_evaluations
+          type: List[str]
+        - description: Risk assessments for each trading strategy from the 'evaluate_trading_strategies'
+            node.
+          name: strategy_risks
+          type: List[float]
+        raises:
+        - description: If the lengths of 'strategy_evaluations' and 'strategy_risks'
+            do not match.
+          type: ValueError
+        returns:
+          description: A tuple containing the optimal trading strategy and its confidence
+            level.
+          type: Tuple[str, float]
+        summary: Selects the optimal trading strategy based on evaluations and risk
+          assessments.
+    prompt: Choose the best trading strategy based on evaluations.
+    shims: []
