@@ -1,10 +1,34 @@
-dag_type: spec
+dag_type: stub
 description: Generated workflow from UI.
 name: simple_sports_workflow
 nodes:
   determine_sport_type:
     agent: false
+    code_node_type: stub
     description: Determine if the sport is team-based or individual
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass IdentifySportOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for identify_sport node outputs.\"\"\"\n    selected_sport:\
+      \ str = (\n        Field(..., description=\"The name of the sport identified\
+      \ or specified by the user\")\n    )\n\n\nclass DetermineSportTypeOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for determine_sport_type node outputs.\"\"\"\n   \
+      \ sport_type: str = (\n        Field(..., description=\"Whether the sport is\
+      \ team-based or individual\")\n    )\n    rationale: str = (\n        Field(...,\
+      \ description=\"One-sentence explanation for the classification\")\n    )\n\n\
+      \ndef determine_sport_type(identify_sport_input: IdentifySportOutput, **kwargs)\
+      \ -> DetermineSportTypeOutput:\n    \"\"\"\n    Determines whether a sport is\
+      \ team-based or individual.\n\n    Parameters\n    ----------\n    selected_sport\
+      \ : str\n        The name of the sport identified by the parent node.\n\n  \
+      \  Returns\n    -------\n    Dict[str, str]\n        A dictionary containing\
+      \ `sport_type` and `rationale` keys.\n\n    Raises\n    ------\n    ValueError\n\
+      \        If `selected_sport` is empty or not recognized.\n\n    Examples\n \
+      \   --------\n    >>> result = determine_sport_type('soccer')\n    >>> print(result['sport_type'])\n\
+      \    >>> print(result['rationale'])\n    'team-based'\n    'Soccer is a team\
+      \ sport because each side fields 11 players who must\n    coordinate to score\
+      \ goals.'\n\n    >>> result = determine_sport_type('tennis')\n    >>> print(result['sport_type'])\n\
+      \    >>> print(result['rationale'])\n    'individual'\n    'Tennis is played\
+      \ by one or two players competing against each other, making\n    it an individual\
+      \ sport.'\n\n    \"\"\"\n    return DetermineSportTypeOutput(\n        sport_type=\"\
+      \",\n        rationale=\"\",\n    )"
     name: determine_sport_type
     nodes_depended_on:
     - identify_sport
@@ -50,9 +74,47 @@ nodes:
         summary: Determines whether a sport is team-based or individual.
     prompt: Decide whether the identified sport is team-based or individual. Provide
       a one-sentence rationale.
+    shims: []
   gather_sport_info:
     agent: false
+    code_node_type: stub
     description: Gather general information about the identified sport
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass IdentifySportOutput(BaseModel):\n    \"\"\"Pydantic model for identify_sport\
+      \ node outputs.\"\"\"\n    selected_sport: str = (\n        Field(..., description=\"\
+      The name of the sport identified or specified by the user\")\n    )\n\n\nclass\
+      \ GatherSportInfoOutput(BaseModel):\n    \"\"\"Pydantic model for gather_sport_info\
+      \ node outputs.\"\"\"\n    rules: List[str] = (\n        Field(..., description=\"\
+      List of key rules governing the sport\")\n    )\n    popular_leagues: List[str]\
+      \ = (\n        Field(..., description=\"List of major professional leagues associated\
+      \ with the sport\")\n    )\n    major_tournaments: List[str] = (\n        Field(...,\
+      \ description=\"List of major international tournaments or competitions for\
+      \ the sport\")\n    )\n\n\ndef gather_sport_info(identify_sport_input: IdentifySportOutput,\
+      \ **kwargs) -> GatherSportInfoOutput:\n    \"\"\"\n    Gather general information\
+      \ about the identified sport.\n\n    Parameters\n    ----------\n    selected_sport\
+      \ : str\n        The name of the sport identified by the user, e.g., 'soccer',\n\
+      \        'basketball', 'tennis'.\n\n    Returns\n    -------\n    dict\n   \
+      \     A dictionary with three keys:   * rules (List[str]) – key rules\n    \
+      \    governing the sport.   * popular_leagues (List[str]) – major\n        professional\
+      \ leagues.   * major_tournaments (List[str]) – major\n        international\
+      \ tournaments.\n\n    Raises\n    ------\n    ValueError\n        If `selected_sport`\
+      \ is empty or not recognized in the knowledge\n        base.\n\n    Examples\n\
+      \    --------\n    >>> gather_sport_info('soccer')\n    {\n      'rules': [\n\
+      \        'Players may not use their hands except the goalkeeper.',\n       \
+      \ 'Each team has 11 players on the field.',\n        'A match lasts 90 minutes\
+      \ with two 45‑minute halves.'\n      ],\n      'popular_leagues': [\n      \
+      \  'Premier League',\n        'La Liga',\n        'Bundesliga',\n        'Serie\
+      \ A'\n      ],\n      'major_tournaments': [\n        'FIFA World Cup',\n  \
+      \      'UEFA Champions League',\n        'Copa América'\n      ]\n    }\n\n\
+      \    >>> gather_sport_info('basketball')\n    {\n      'rules': [\n        'Each\
+      \ team has five players on the court.',\n        'The game is played in four\
+      \ 12‑minute quarters.',\n        'Players must advance the ball by dribbling\
+      \ or passing.'\n      ],\n      'popular_leagues': [\n        'NBA',\n     \
+      \   'EuroLeague',\n        'NBL'\n      ],\n      'major_tournaments': [\n \
+      \       'NBA Finals',\n        'FIBA World Cup',\n        'Olympic Games Basketball'\
+      \ \n      ]\n    }\n\n    \"\"\"\n    return GatherSportInfoOutput(\n      \
+      \  rules=[],\n        popular_leagues=[],\n        major_tournaments=[],\n \
+      \   )"
     name: gather_sport_info
     nodes_depended_on:
     - identify_sport
@@ -107,9 +169,43 @@ nodes:
         summary: Gather general information about the identified sport.
     prompt: Collect general information about the identified sport, including its
       rules, popular leagues, and major tournaments.
+    shims: []
   identify_key_players:
     agent: false
+    code_node_type: stub
     description: Identify key players in the sport
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass IdentifySportOutput(BaseModel):\n    \"\"\"Pydantic model for identify_sport\
+      \ node outputs.\"\"\"\n    selected_sport: str = (\n        Field(..., description=\"\
+      The name of the sport identified or specified by the user\")\n    )\n\n\nclass\
+      \ ListMajorLeaguesOutput(BaseModel):\n    \"\"\"Pydantic model for list_major_leagues\
+      \ node outputs.\"\"\"\n    league_names: List[str] = (\n        Field(..., description=\"\
+      List of major professional leagues for the identified sport\")\n    )\n\n\n\
+      class IdentifyKeyPlayersOutput(BaseModel):\n    \"\"\"Pydantic model for identify_key_players\
+      \ node outputs.\"\"\"\n    player_names: List[str] = (\n        Field(..., description=\"\
+      Names of the 3-5 key players\")\n    )\n    player_leagues: List[str] = (\n\
+      \        Field(..., description=\"Leagues corresponding to each player\")\n\
+      \    )\n\n\ndef identify_key_players(identify_sport_input: IdentifySportOutput,\
+      \ list_major_leagues_input: ListMajorLeaguesOutput, **kwargs) -> IdentifyKeyPlayersOutput:\n\
+      \    \"\"\"\n    Retrieve 3–5 prominent active players for a specified sport\
+      \ along with the\n    league each player belongs to.\n\n    Parameters\n   \
+      \ ----------\n    selected_sport : str\n        The sport for which key players\
+      \ should be identified (e.g.,\n        'soccer', 'basketball').\n    league_names\
+      \ : List[str]\n        A list of major professional leagues associated with\
+      \ the sport,\n        obtained from the `list_major_leagues` node.\n\n    Returns\n\
+      \    -------\n    Tuple[List[str], List[str]]\n        A tuple containing two\
+      \ lists: the first list holds the names of 3‑5\n        key players, and the\
+      \ second list holds the corresponding league\n        names for each player.\n\
+      \n    Raises\n    ------\n    ValueError\n        Raised if the function cannot\
+      \ find at least three suitable players\n        or if the input lists are empty.\n\
+      \n    Examples\n    --------\n    >>> player_names, player_leagues = identify_key_players(\n\
+      \    ...     'soccer',\n    ...     ['Premier League', 'La Liga', 'Serie A']\n\
+      \    >>> )\n    (['Lionel Messi', 'Cristiano Ronaldo', 'Neymar Jr.'], ['Premier\
+      \ League', 'La\n    Liga', 'Serie A'])\n\n    >>> names, leagues = identify_key_players(\n\
+      \    ...     'basketball',\n    ...     ['NBA', 'EuroLeague']\n    >>> )\n \
+      \   (['LeBron James', 'Kevin Durant', 'Stephen Curry'], ['NBA', 'NBA', 'NBA'])\n\
+      \n    \"\"\"\n    return IdentifyKeyPlayersOutput(\n        player_names=[],\n\
+      \        player_leagues=[],\n    )"
     name: identify_key_players
     nodes_depended_on:
     - identify_sport
@@ -164,9 +260,23 @@ nodes:
           with the league each player belongs to.
     prompt: Name 3-5 key players currently active in the identified sport and their
       respective leagues.
+    shims: []
   identify_sport:
     agent: false
+    code_node_type: stub
     description: Identify the sport of interest
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass IdentifySportOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for identify_sport node outputs.\"\"\"\n    selected_sport:\
+      \ str = (\n        Field(..., description=\"The name of the sport identified\
+      \ or specified by the user\")\n    )\n\n\ndef identify_sport(general_input:\
+      \ str, **kwargs) -> IdentifySportOutput:\n    \"\"\"\n    Prompts the user to\
+      \ specify a sport of interest and returns the selected\n    sport name as a\
+      \ string.\n\n    Returns\n    -------\n    str\n        The selected sport name.\n\
+      \n    Raises\n    ------\n    ValueError\n        Raised if the user provides\
+      \ an empty or whitespace-only input.\n\n    Examples\n    --------\n    >>>\
+      \ sport = identify_sport()\n    'soccer'\n\n    >>> sport = identify_sport()\n\
+      \    'basketball'\n\n    \"\"\"\n    return IdentifySportOutput(\n        selected_sport=\"\
+      \",\n    )"
     name: identify_sport
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -195,9 +305,33 @@ nodes:
         summary: Prompts the user to specify a sport of interest and returns the selected
           sport name as a string.
     prompt: Specify the sport you are interested in (e.g., soccer, basketball, tennis).
+    shims: []
   list_major_leagues:
     agent: false
+    code_node_type: stub
     description: List major professional leagues for the sport
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass IdentifySportOutput(BaseModel):\n    \"\"\"Pydantic model for identify_sport\
+      \ node outputs.\"\"\"\n    selected_sport: str = (\n        Field(..., description=\"\
+      The name of the sport identified or specified by the user\")\n    )\n\n\nclass\
+      \ ListMajorLeaguesOutput(BaseModel):\n    \"\"\"Pydantic model for list_major_leagues\
+      \ node outputs.\"\"\"\n    league_names: List[str] = (\n        Field(..., description=\"\
+      List of major professional leagues for the identified sport\")\n    )\n\n\n\
+      def list_major_leagues(identify_sport_input: IdentifySportOutput, **kwargs)\
+      \ -> ListMajorLeaguesOutput:\n    \"\"\"\n    Enumerates the major professional\
+      \ leagues for a specified sport.\n\n    Parameters\n    ----------\n    selected_sport\
+      \ : str\n        The name of the sport for which to retrieve major professional\n\
+      \        leagues. Must be a non-empty string and match one of the supported\n\
+      \        sports.\n\n    Returns\n    -------\n    List[str]\n        A list\
+      \ of league names (strings) representing the top professional\n        leagues\
+      \ associated with the input sport.\n\n    Raises\n    ------\n    ValueError\n\
+      \        Raised if `selected_sport` is an empty string or if the sport is not\n\
+      \        recognized in the internal league mapping.\n\n    Examples\n    --------\n\
+      \    >>> league_names = list_major_leagues(selected_sport=\"basketball\")\n\
+      \    [\"NBA\", \"EuroLeague\", \"NBL\", \"CBA\", \"Liga ACB\"]\n\n    >>> league_names\
+      \ = list_major_leagues(selected_sport=\"soccer\")\n    [\"Premier League\",\
+      \ \"La Liga\", \"Bundesliga\", \"Serie A\", \"Ligue 1\"]\n\n    \"\"\"\n   \
+      \ return ListMajorLeaguesOutput(\n        league_names=[],\n    )"
     name: list_major_leagues
     nodes_depended_on:
     - identify_sport
@@ -234,9 +368,70 @@ nodes:
         summary: Enumerates the major professional leagues for a specified sport.
     prompt: Enumerate the major professional leagues associated with the identified
       sport (e.g., NBA for basketball, NFL for American football).
+    shims: []
   summarize_sport_info:
     agent: false
+    code_node_type: stub
     description: Summarize the gathered information about the sport
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass GatherSportInfoOutput(BaseModel):\n    \"\"\"Pydantic model for gather_sport_info\
+      \ node outputs.\"\"\"\n    rules: List[str] = (\n        Field(..., description=\"\
+      List of key rules governing the sport\")\n    )\n    popular_leagues: List[str]\
+      \ = (\n        Field(..., description=\"List of major professional leagues associated\
+      \ with the sport\")\n    )\n    major_tournaments: List[str] = (\n        Field(...,\
+      \ description=\"List of major international tournaments or competitions for\
+      \ the sport\")\n    )\n\n\nclass DetermineSportTypeOutput(BaseModel):\n    \"\
+      \"\"Pydantic model for determine_sport_type node outputs.\"\"\"\n    sport_type:\
+      \ str = (\n        Field(..., description=\"Whether the sport is team-based\
+      \ or individual\")\n    )\n    rationale: str = (\n        Field(..., description=\"\
+      One-sentence explanation for the classification\")\n    )\n\n\nclass ListMajorLeaguesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for list_major_leagues node outputs.\"\"\"\n    league_names:\
+      \ List[str] = (\n        Field(..., description=\"List of major professional\
+      \ leagues for the identified sport\")\n    )\n\n\nclass IdentifyKeyPlayersOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for identify_key_players node outputs.\"\"\"\n   \
+      \ player_names: List[str] = (\n        Field(..., description=\"Names of the\
+      \ 3-5 key players\")\n    )\n    player_leagues: List[str] = (\n        Field(...,\
+      \ description=\"Leagues corresponding to each player\")\n    )\n\n\nclass SummarizeSportInfoOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for summarize_sport_info node outputs.\"\"\"\n   \
+      \ sport_type: str = (\n        Field(..., description=\"Whether the sport is\
+      \ team-based or individual.\")\n    )\n    major_leagues: List[str] = (\n  \
+      \      Field(..., description=\"List of major professional leagues associated\
+      \ with the sport.\")\n    )\n    key_players: List[str] = (\n        Field(...,\
+      \ description=\"List of 3-5 key players currently active in the sport and their\
+      \ respective leagues.\")\n    )\n    summary: str = (\n        Field(..., description=\"\
+      Concise summary of the sport, not exceeding 200 words.\")\n    )\n    word_count:\
+      \ int = Field(..., description=\"Number of words in the summary.\")\n\n\ndef\
+      \ summarize_sport_info(gather_sport_info_input: GatherSportInfoOutput, determine_sport_type_input:\
+      \ DetermineSportTypeOutput, list_major_leagues_input: ListMajorLeaguesOutput,\
+      \ identify_key_players_input: IdentifyKeyPlayersOutput, **kwargs) -> SummarizeSportInfoOutput:\n\
+      \    \"\"\"\n    Generate a concise summary of a sport and return a structured\
+      \ dictionary\n    with metadata.\n\n    Parameters\n    ----------\n    sport_type\
+      \ : str\n        Classification of the sport, e.g., \"team-based\" or \"individual\"\
+      .\n    major_leagues : List[str]\n        Names of the major professional leagues\
+      \ for the sport.\n    key_players : List[str]\n        A list of 3–5 active\
+      \ players and their leagues (formatted as \"Player\n        – League\").\n\n\
+      \    Returns\n    -------\n    Dict[str, Any]\n        Dictionary containing\
+      \ sport_type (str), major_leagues (List[str]),\n        key_players (List[str]),\
+      \ summary (str), and word_count (int).\n\n    Raises\n    ------\n    ValueError\n\
+      \        If the constructed summary exceeds 200 words.\n    TypeError\n    \
+      \    If any input parameter is of an unexpected type.\n\n    Examples\n    --------\n\
+      \    >>> result = summarize_sport_info(\n    ...     sport_type='team-based',\n\
+      \    ...     major_leagues=['NBA', 'EuroLeague'],\n    ...     key_players=['LeBron\
+      \ James – NBA', 'Giannis Antetokounmpo – NBA']\n    >>> )\n    >>> print(result['summary'])\n\
+      \    \"Basketball is a team-based sport played worldwide, with major leagues\
+      \ such\n    as the NBA and EuroLeague showcasing elite talent. Key players include\n\
+      \    LeBron James and Giannis Antetokounmpo, both stars of the NBA.\"\n    \"\
+      word_count: 27\"\n\n    >>> summary_data = summarize_sport_info(\n    ...  \
+      \   sport_type='team-based',\n    ...     major_leagues=['Premier League', 'La\
+      \ Liga', 'Serie A'],\n    ...     key_players=['Lionel Messi – La Liga', 'Cristiano\
+      \ Ronaldo – Serie\n    A', 'Kevin De Bruyne – Premier League']\n    >>> )\n\
+      \    >>> print(summary_data['summary'])\n    \"Football (soccer) is a team-based\
+      \ sport with premier competitions including\n    the Premier League, La Liga,\
+      \ and Serie A. Notable players feature Lionel\n    Messi and Cristiano Ronaldo\
+      \ in top European clubs, along with Kevin De\n    Bruyne.\"\n    \"word_count:\
+      \ 31\"\n\n    \"\"\"\n    return SummarizeSportInfoOutput(\n        sport_type=\"\
+      \",\n        major_leagues=[],\n        key_players=[],\n        summary=\"\"\
+      ,\n        word_count=0,\n    )"
     name: summarize_sport_info
     nodes_depended_on:
     - gather_sport_info
@@ -317,3 +512,4 @@ nodes:
           with metadata.
     prompt: Compile the gathered information into a concise summary (≤200 words) covering
       the sport type, major leagues, and key players.
+    shims: []

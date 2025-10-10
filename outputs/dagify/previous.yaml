@@ -1,4 +1,4 @@
-dag_type: typed
+dag_type: spec
 description: Generated workflow from UI.
 name: simple_sports_workflow
 nodes:
@@ -16,6 +16,38 @@ nodes:
     - description: One-sentence explanation for the classification
       key: rationale
       type: str
+    prd:
+      conceptual_info: Classifies a sport as team-based or individual using a concise
+        rationale.
+      docstring:
+        examples:
+        - lines:
+          - result = determine_sport_type('soccer')
+          - print(result['sport_type'])
+          - print(result['rationale'])
+          output: '''team-based''
+
+            ''Soccer is a team sport because each side fields 11 players who must
+            coordinate to score goals.'''
+        - lines:
+          - result = determine_sport_type('tennis')
+          - print(result['sport_type'])
+          - print(result['rationale'])
+          output: '''individual''
+
+            ''Tennis is played by one or two players competing against each other,
+            making it an individual sport.'''
+        parameters:
+        - description: The name of the sport identified by the parent node.
+          name: selected_sport
+          type: str
+        raises:
+        - description: If `selected_sport` is empty or not recognized.
+          type: ValueError
+        returns:
+          description: A dictionary containing `sport_type` and `rationale` keys.
+          type: Dict[str, str]
+        summary: Determines whether a sport is team-based or individual.
     prompt: Decide whether the identified sport is team-based or individual. Provide
       a one-sentence rationale.
   gather_sport_info:
@@ -36,6 +68,43 @@ nodes:
         sport
       key: major_tournaments
       type: List[str]
+    prd:
+      conceptual_info: This node compiles core facts about a sport once its name is
+        known, providing a structured set of rules, leagues, and tournaments.
+      docstring:
+        examples:
+        - lines:
+          - gather_sport_info('soccer')
+          output: "{\n  'rules': [\n    'Players may not use their hands except the\
+            \ goalkeeper.',\n    'Each team has 11 players on the field.',\n    'A\
+            \ match lasts 90 minutes with two 45‑minute halves.'\n  ],\n  'popular_leagues':\
+            \ [\n    'Premier League',\n    'La Liga',\n    'Bundesliga',\n    'Serie\
+            \ A'\n  ],\n  'major_tournaments': [\n    'FIFA World Cup',\n    'UEFA\
+            \ Champions League',\n    'Copa América'\n  ]\n}"
+        - lines:
+          - gather_sport_info('basketball')
+          output: "{\n  'rules': [\n    'Each team has five players on the court.',\n\
+            \    'The game is played in four 12‑minute quarters.',\n    'Players must\
+            \ advance the ball by dribbling or passing.'\n  ],\n  'popular_leagues':\
+            \ [\n    'NBA',\n    'EuroLeague',\n    'NBL'\n  ],\n  'major_tournaments':\
+            \ [\n    'NBA Finals',\n    'FIBA World Cup',\n    'Olympic Games Basketball'\
+            \ \n  ]\n}"
+        parameters:
+        - description: The name of the sport identified by the user, e.g., 'soccer',
+            'basketball', 'tennis'.
+          name: selected_sport
+          type: str
+        raises:
+        - description: If `selected_sport` is empty or not recognized in the knowledge
+            base.
+          type: ValueError
+        returns:
+          description: "A dictionary with three keys:\n  * rules (List[str]) – key\
+            \ rules governing the sport.\n  * popular_leagues (List[str]) – major\
+            \ professional leagues.\n  * major_tournaments (List[str]) – major international\
+            \ tournaments."
+          type: dict
+        summary: Gather general information about the identified sport.
     prompt: Collect general information about the identified sport, including its
       rules, popular leagues, and major tournaments.
   identify_key_players:
@@ -53,6 +122,46 @@ nodes:
     - description: Leagues corresponding to each player
       key: player_leagues
       type: List[str]
+    prd:
+      conceptual_info: This node selects a short list of currently active, top‑tier
+        players for a given sport and maps each player to one of the sport's major
+        professional leagues.
+      docstring:
+        examples:
+        - lines:
+          - player_names, player_leagues = identify_key_players(
+          - '    ''soccer'','
+          - '    [''Premier League'', ''La Liga'', ''Serie A'']'
+          - )
+          output: (['Lionel Messi', 'Cristiano Ronaldo', 'Neymar Jr.'], ['Premier
+            League', 'La Liga', 'Serie A'])
+        - lines:
+          - names, leagues = identify_key_players(
+          - '    ''basketball'','
+          - '    [''NBA'', ''EuroLeague'']'
+          - )
+          output: (['LeBron James', 'Kevin Durant', 'Stephen Curry'], ['NBA', 'NBA',
+            'NBA'])
+        parameters:
+        - description: The sport for which key players should be identified (e.g.,
+            'soccer', 'basketball').
+          name: selected_sport
+          type: str
+        - description: A list of major professional leagues associated with the sport,
+            obtained from the `list_major_leagues` node.
+          name: league_names
+          type: List[str]
+        raises:
+        - description: Raised if the function cannot find at least three suitable
+            players or if the input lists are empty.
+          type: ValueError
+        returns:
+          description: 'A tuple containing two lists: the first list holds the names
+            of 3‑5 key players, and the second list holds the corresponding league
+            names for each player.'
+          type: Tuple[List[str], List[str]]
+        summary: Retrieve 3–5 prominent active players for a specified sport along
+          with the league each player belongs to.
     prompt: Name 3-5 key players currently active in the identified sport and their
       respective leagues.
   identify_sport:
@@ -65,6 +174,26 @@ nodes:
     - description: The name of the sport identified or specified by the user
       key: selected_sport
       type: str
+    prd:
+      conceptual_info: Collects user input to determine which sport to analyze, serving
+        as the foundational data for all subsequent nodes in the sports workflow.
+      docstring:
+        examples:
+        - lines:
+          - sport = identify_sport()
+          output: '''soccer'''
+        - lines:
+          - sport = identify_sport()
+          output: '''basketball'''
+        parameters: []
+        raises:
+        - description: Raised if the user provides an empty or whitespace-only input.
+          type: ValueError
+        returns:
+          description: The selected sport name.
+          type: str
+        summary: Prompts the user to specify a sport of interest and returns the selected
+          sport name as a string.
     prompt: Specify the sport you are interested in (e.g., soccer, basketball, tennis).
   list_major_leagues:
     agent: false
@@ -77,6 +206,32 @@ nodes:
     - description: List of major professional leagues for the identified sport
       key: league_names
       type: List[str]
+    prd:
+      conceptual_info: Retrieves a curated list of the most prominent professional
+        leagues for a given sport, facilitating downstream tasks such as player identification
+        and summary generation.
+      docstring:
+        examples:
+        - lines:
+          - league_names = list_major_leagues(selected_sport="basketball")
+          output: '["NBA", "EuroLeague", "NBL", "CBA", "Liga ACB"]'
+        - lines:
+          - league_names = list_major_leagues(selected_sport="soccer")
+          output: '["Premier League", "La Liga", "Bundesliga", "Serie A", "Ligue 1"]'
+        parameters:
+        - description: The name of the sport for which to retrieve major professional
+            leagues. Must be a non-empty string and match one of the supported sports.
+          name: selected_sport
+          type: str
+        raises:
+        - description: Raised if `selected_sport` is an empty string or if the sport
+            is not recognized in the internal league mapping.
+          type: ValueError
+        returns:
+          description: A list of league names (strings) representing the top professional
+            leagues associated with the input sport.
+          type: List[str]
+        summary: Enumerates the major professional leagues for a specified sport.
     prompt: Enumerate the major professional leagues associated with the identified
       sport (e.g., NBA for basketball, NFL for American football).
   summarize_sport_info:
@@ -106,5 +261,59 @@ nodes:
     - description: Number of words in the summary.
       key: word_count
       type: int
+    prd:
+      conceptual_info: Creates a succinct, 200‑word or fewer summary of a sport, integrating
+        its classification (team or individual), major professional leagues, and key
+        active players.
+      docstring:
+        examples:
+        - lines:
+          - result = summarize_sport_info(
+          - '    sport_type=''team-based'','
+          - '    major_leagues=[''NBA'', ''EuroLeague''],'
+          - '    key_players=[''LeBron James – NBA'', ''Giannis Antetokounmpo – NBA'']'
+          - )
+          - print(result['summary'])
+          output: '"Basketball is a team-based sport played worldwide, with major
+            leagues such as the NBA and EuroLeague showcasing elite talent. Key players
+            include LeBron James and Giannis Antetokounmpo, both stars of the NBA."
+
+            "word_count: 27"'
+        - lines:
+          - summary_data = summarize_sport_info(
+          - '    sport_type=''team-based'','
+          - '    major_leagues=[''Premier League'', ''La Liga'', ''Serie A''],'
+          - '    key_players=[''Lionel Messi – La Liga'', ''Cristiano Ronaldo – Serie
+            A'', ''Kevin De Bruyne – Premier League'']'
+          - )
+          - print(summary_data['summary'])
+          output: '"Football (soccer) is a team-based sport with premier competitions
+            including the Premier League, La Liga, and Serie A. Notable players feature
+            Lionel Messi and Cristiano Ronaldo in top European clubs, along with Kevin
+            De Bruyne."
+
+            "word_count: 31"'
+        parameters:
+        - description: Classification of the sport, e.g., "team-based" or "individual".
+          name: sport_type
+          type: str
+        - description: Names of the major professional leagues for the sport.
+          name: major_leagues
+          type: List[str]
+        - description: A list of 3–5 active players and their leagues (formatted as
+            "Player – League").
+          name: key_players
+          type: List[str]
+        raises:
+        - description: If the constructed summary exceeds 200 words.
+          type: ValueError
+        - description: If any input parameter is of an unexpected type.
+          type: TypeError
+        returns:
+          description: Dictionary containing sport_type (str), major_leagues (List[str]),
+            key_players (List[str]), summary (str), and word_count (int).
+          type: Dict[str, Any]
+        summary: Generate a concise summary of a sport and return a structured dictionary
+          with metadata.
     prompt: Compile the gathered information into a concise summary (≤200 words) covering
       the sport type, major leagues, and key players.
