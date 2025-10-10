@@ -6,10 +6,10 @@ import json
 import sys
 from typing import Dict, Any, List, Callable, Coroutine, Union, Optional
 
-from code.analyze_color_distribution import analyze_color_distribution
-from code.capture_rush_hour_traffic_images import capture_rush_hour_traffic_images
-from code.extract_vehicle_data_from_images import extract_vehicle_data_from_images
-from code.generate_color_analysis_report import generate_color_analysis_report
+from code.collect_leaf_data import collect_leaf_data
+from code.analyze_leaf_shapes import analyze_leaf_shapes
+from code.extract_leaf_features import extract_leaf_features
+from code.generate_leaf_pattern_insights import generate_leaf_pattern_insights
 
 # Get async mode from environment variable or default to False
 ASYNC_MODE = os.environ.get('ASYNC_MODE', '').lower() in ('true', '1', 'yes', 'y')
@@ -31,10 +31,10 @@ def make_async(func):
 
     return async_wrapper
 
-analyze_color_distribution_async = make_async(analyze_color_distribution)
-capture_rush_hour_traffic_images_async = make_async(capture_rush_hour_traffic_images)
-extract_vehicle_data_from_images_async = make_async(extract_vehicle_data_from_images)
-generate_color_analysis_report_async = make_async(generate_color_analysis_report)
+collect_leaf_data_async = make_async(collect_leaf_data)
+analyze_leaf_shapes_async = make_async(analyze_leaf_shapes)
+extract_leaf_features_async = make_async(extract_leaf_features)
+generate_leaf_pattern_insights_async = make_async(generate_leaf_pattern_insights)
 
 async def run_workflow(user_input: str) -> Dict[str, Any]:
     """Execute the workflow by running each level in the topological sort.
@@ -48,37 +48,37 @@ async def run_workflow(user_input: str) -> Dict[str, Any]:
     # Store results for each node
     results = {}
 
-    # Level 0: capture_rush_hour_traffic_images
-    async def run_capture_rush_hour_traffic_images():
-        # Call the async version of capture_rush_hour_traffic_images with results from dependencies
-        return await capture_rush_hour_traffic_images_async(user_input)
+    # Level 0: collect_leaf_data
+    async def run_collect_leaf_data():
+        # Call the async version of collect_leaf_data with results from dependencies
+        return await collect_leaf_data_async(user_input)
 
     # Run level 0 nodes in parallel
-    results['capture_rush_hour_traffic_images'] = await run_capture_rush_hour_traffic_images()
+    results['collect_leaf_data'] = await run_collect_leaf_data()
 
-    # Level 1: extract_vehicle_data_from_images
-    async def run_extract_vehicle_data_from_images():
-        # Call the async version of extract_vehicle_data_from_images with results from dependencies
-        return await extract_vehicle_data_from_images_async(results['capture_rush_hour_traffic_images'])
+    # Level 1: analyze_leaf_shapes
+    async def run_analyze_leaf_shapes():
+        # Call the async version of analyze_leaf_shapes with results from dependencies
+        return await analyze_leaf_shapes_async(results['collect_leaf_data'])
 
     # Run level 1 nodes in parallel
-    results['extract_vehicle_data_from_images'] = await run_extract_vehicle_data_from_images()
+    results['analyze_leaf_shapes'] = await run_analyze_leaf_shapes()
 
-    # Level 2: analyze_color_distribution
-    async def run_analyze_color_distribution():
-        # Call the async version of analyze_color_distribution with results from dependencies
-        return await analyze_color_distribution_async(results['extract_vehicle_data_from_images'])
+    # Level 2: extract_leaf_features
+    async def run_extract_leaf_features():
+        # Call the async version of extract_leaf_features with results from dependencies
+        return await extract_leaf_features_async(results['collect_leaf_data'], results['analyze_leaf_shapes'])
 
     # Run level 2 nodes in parallel
-    results['analyze_color_distribution'] = await run_analyze_color_distribution()
+    results['extract_leaf_features'] = await run_extract_leaf_features()
 
-    # Level 3: generate_color_analysis_report
-    async def run_generate_color_analysis_report():
-        # Call the async version of generate_color_analysis_report with results from dependencies
-        return await generate_color_analysis_report_async(results['analyze_color_distribution'])
+    # Level 3: generate_leaf_pattern_insights
+    async def run_generate_leaf_pattern_insights():
+        # Call the async version of generate_leaf_pattern_insights with results from dependencies
+        return await generate_leaf_pattern_insights_async(results['extract_leaf_features'])
 
     # Run level 3 nodes in parallel
-    results['generate_color_analysis_report'] = await run_generate_color_analysis_report()
+    results['generate_leaf_pattern_insights'] = await run_generate_leaf_pattern_insights()
 
     # Return all results
     return results

@@ -1,6 +1,9 @@
 from typing import List
 
 
+from collections import Counter
+
+
 def identify_pattern_variations(patterns: str) -> List[str]:
     """
     Identifies variations in a given list of patterns and returns them as a list
@@ -33,4 +36,23 @@ def identify_pattern_variations(patterns: str) -> List[str]:
     ['yellow']
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    if not isinstance(patterns, str):
+        raise TypeError("If the input patterns are not of type str.")
+    
+    if not patterns or not patterns.strip():
+        raise ValueError("If the input patterns are not in the expected format or are empty.")
+    
+    pattern_list = [pattern.strip() for pattern in patterns.split(',')]
+    
+    if not pattern_list or all(not pattern for pattern in pattern_list):
+        raise ValueError("If the input patterns are not in the expected format or are empty.")
+    
+    pattern_counts = Counter(pattern_list)
+    
+    if len(pattern_counts) <= 1:
+        return []
+    
+    max_count = max(pattern_counts.values())
+    variations = [pattern for pattern, count in pattern_counts.items() if count < max_count]
+    
+    return variations

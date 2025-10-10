@@ -41,4 +41,18 @@ def combine_variation_lists(vein_variations: str, color_variations: str) -> List
     ['simple', 'complex', 'red', 'green']
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    if not isinstance(vein_variations, str):
+        raise TypeError("vein_variations must be of type string")
+    if not isinstance(color_variations, str):
+        raise TypeError("color_variations must be of type string")
+    
+    if not vein_variations.strip() or not color_variations.strip():
+        raise ValueError("Input strings cannot be empty or contain only whitespace")
+    
+    vein_list = [item.strip() for item in vein_variations.split(',') if item.strip()]
+    color_list = [item.strip() for item in color_variations.split(',') if item.strip()]
+    
+    if not vein_list or not color_list:
+        raise ValueError("Input strings are not properly formatted")
+    
+    return vein_list + color_list

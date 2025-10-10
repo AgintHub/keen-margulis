@@ -1,6 +1,9 @@
 from typing import List
 
 
+import json
+
+
 def identify_common_patterns(patterns: str) -> List[str]:
     """
     Identifies and returns common patterns from the input list of patterns.
@@ -32,4 +35,24 @@ def identify_common_patterns(patterns: str) -> List[str]:
     ['simple']
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    
+    if not isinstance(patterns, str):
+        raise TypeError("If the input type is not a string representation of a list.")
+    
+    try:
+        pattern_list = json.loads(patterns)
+    except json.JSONDecodeError:
+        raise ValueError("If the input patterns are not in the expected format.")
+    
+    if not isinstance(pattern_list, list):
+        raise ValueError("If the input patterns are not in the expected format.")
+    
+    pattern_counts = {}
+    for pattern in pattern_list:
+        if not isinstance(pattern, str):
+            continue
+        pattern_counts[pattern] = pattern_counts.get(pattern, 0) + 1
+    
+    common_patterns = [pattern for pattern, count in pattern_counts.items() if count > 1]
+    
+    return common_patterns

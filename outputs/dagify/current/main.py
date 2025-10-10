@@ -6,8 +6,8 @@ import json
 import sys
 from typing import Dict, Any, List, Callable, Coroutine, Union, Optional
 
-from code.collect_leaf_data import collect_leaf_data
 from code.analyze_leaf_shapes import analyze_leaf_shapes
+from code.collect_leaf_data import collect_leaf_data
 from code.extract_leaf_features import extract_leaf_features
 from code.generate_leaf_pattern_insights import generate_leaf_pattern_insights
 
@@ -31,8 +31,8 @@ def make_async(func):
 
     return async_wrapper
 
-collect_leaf_data_async = make_async(collect_leaf_data)
 analyze_leaf_shapes_async = make_async(analyze_leaf_shapes)
+collect_leaf_data_async = make_async(collect_leaf_data)
 extract_leaf_features_async = make_async(extract_leaf_features)
 generate_leaf_pattern_insights_async = make_async(generate_leaf_pattern_insights)
 

@@ -5,48 +5,13 @@ PRDs for nodes in the 'leafpatternworkflow' module.
 
 ## Table of Contents
 
-- [collect_leaf_data](#collect_leaf_data)
-
 - [analyze_leaf_shapes](#analyze_leaf_shapes)
+
+- [collect_leaf_data](#collect_leaf_data)
 
 - [extract_leaf_features](#extract_leaf_features)
 
 - [generate_leaf_pattern_insights](#generate_leaf_pattern_insights)
-
-
-
----
-
-## collect_leaf_data
-
-### Description
-Gather data on various leaf patterns including images and characteristics
-
-### Conceptual Info
-
-The 'collect_leaf_data' node is responsible for gathering images and characteristics of various leaf patterns.
-
-### Docstring
-
-**Summary:** Collects leaf images and their characteristics, returning lists of image file names/URLs and characteristic descriptions.
-
-**Returns:** Tuple[List[str], List[str]] - A tuple containing a list of leaf image file names/URLs and a list of characteristic descriptions for each leaf.
-
-**Raises:**
-
-- Exception: If there's an issue collecting or processing the leaf data.
-**Examples:**
-
-```python
->>> leaf_images, leaf_characteristics = collect_leaf_data()
-(['leaf1.jpg', 'leaf2.jpg'], ['Ovate with smooth edges', 'Lanceolate with serrated edges'])
-```
-
-```python
->>> leaf_data = collect_leaf_data(); print(leaf_data[0]); print(leaf_data[1])
-['leaf1.jpg', 'leaf2.jpg']
-['Ovate with smooth edges', 'Lanceolate with serrated edges']
-```
 
 
 
@@ -88,6 +53,41 @@ This node analyzes the shapes of leaves based on the data collected by the 'coll
 >>> leaf_characteristics = ['elliptical', 'lanceolate']
 >>> leaf_shape_categories, shape_category_counts = analyze_leaf_shapes(leaf_images, leaf_characteristics)
 (['elliptical', 'lanceolate'], [1, 1])
+```
+
+
+
+---
+
+## collect_leaf_data
+
+### Description
+Gather data on various leaf patterns including images and characteristics
+
+### Conceptual Info
+
+The 'collect_leaf_data' node is responsible for gathering images and characteristics of various leaf patterns.
+
+### Docstring
+
+**Summary:** Collects leaf images and their characteristics, returning lists of image file names/URLs and characteristic descriptions.
+
+**Returns:** Tuple[List[str], List[str]] - A tuple containing a list of leaf image file names/URLs and a list of characteristic descriptions for each leaf.
+
+**Raises:**
+
+- Exception: If there's an issue collecting or processing the leaf data.
+**Examples:**
+
+```python
+>>> leaf_images, leaf_characteristics = collect_leaf_data()
+(['leaf1.jpg', 'leaf2.jpg'], ['Ovate with smooth edges', 'Lanceolate with serrated edges'])
+```
+
+```python
+>>> leaf_data = collect_leaf_data(); print(leaf_data[0]); print(leaf_data[1])
+['leaf1.jpg', 'leaf2.jpg']
+['Ovate with smooth edges', 'Lanceolate with serrated edges']
 ```
 
 

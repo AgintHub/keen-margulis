@@ -31,4 +31,6 @@ def validate_input_lengths(images: str, characteristics: str) -> str:
     ValueError: 'Lengths of images and characteristics do not match.'
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    if len(images) != len(characteristics):
+        raise ValueError("Lengths of images and characteristics do not match.")
+    return "Input lengths are valid."

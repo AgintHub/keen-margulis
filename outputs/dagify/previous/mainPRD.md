@@ -1,178 +1,183 @@
-# trafficcarcoloranalysisworkflow - Complete PRD Documentation
+# leafpatternworkflow - Complete PRD Documentation
 
 ## Overview
-PRDs for nodes in the 'trafficcarcoloranalysisworkflow' module.
+PRDs for nodes in the 'leafpatternworkflow' module.
 
 ## Table of Contents
 
-- [analyze_color_distribution](#analyze_color_distribution)
+- [collect_leaf_data](#collect_leaf_data)
 
-- [capture_rush_hour_traffic_images](#capture_rush_hour_traffic_images)
+- [analyze_leaf_shapes](#analyze_leaf_shapes)
 
-- [extract_vehicle_data_from_images](#extract_vehicle_data_from_images)
+- [extract_leaf_features](#extract_leaf_features)
 
-- [generate_color_analysis_report](#generate_color_analysis_report)
+- [generate_leaf_pattern_insights](#generate_leaf_pattern_insights)
 
 
 
 ---
 
-## analyze_color_distribution
+## collect_leaf_data
 
 ### Description
-Analyze the distribution of vehicle colors observed during rush hour
+Gather data on various leaf patterns including images and characteristics
 
 ### Conceptual Info
 
-This node analyzes the distribution of vehicle colors observed during rush hour, calculating their frequency, identifying the most common colors, and providing statistical measures of the color distribution.
+The 'collect_leaf_data' node is responsible for gathering images and characteristics of various leaf patterns.
 
 ### Docstring
 
-**Summary:** Analyze vehicle color distribution from extracted vehicle data.
+**Summary:** Collects leaf images and their characteristics, returning lists of image file names/URLs and characteristic descriptions.
+
+**Returns:** Tuple[List[str], List[str]] - A tuple containing a list of leaf image file names/URLs and a list of characteristic descriptions for each leaf.
+
+**Raises:**
+
+- Exception: If there's an issue collecting or processing the leaf data.
+**Examples:**
+
+```python
+>>> leaf_images, leaf_characteristics = collect_leaf_data()
+(['leaf1.jpg', 'leaf2.jpg'], ['Ovate with smooth edges', 'Lanceolate with serrated edges'])
+```
+
+```python
+>>> leaf_data = collect_leaf_data(); print(leaf_data[0]); print(leaf_data[1])
+['leaf1.jpg', 'leaf2.jpg']
+['Ovate with smooth edges', 'Lanceolate with serrated edges']
+```
+
+
+
+---
+
+## analyze_leaf_shapes
+
+### Description
+Analyze the shapes of leaves and categorize them
+
+### Conceptual Info
+
+This node analyzes the shapes of leaves based on the data collected by the 'collect_leaf_data' node and categorizes them into different types.
+
+### Docstring
+
+**Summary:** Analyze leaf shapes and categorize them into different types based on the collected leaf data.
 
 **Parameters:**
 
-- vehicle_colors (List[str]): List of detected vehicle colors from the extract_vehicle_data_from_images node.
-- vehicle_confidence_scores (List[float]): Confidence scores for the detected vehicle colors (same order as vehicle_colors).
-**Returns:** Tuple[List[float], List[str], List[float]] - A tuple containing the frequency of each observed vehicle color, the list of most common vehicle colors observed, and statistical measures (mean, median, std dev) of color distribution.
+- leaf_images (List[str]): List of image file names or URLs of leaves collected by the 'collect_leaf_data' node.
+- leaf_characteristics (List[str]): List of characteristic descriptions for each leaf collected by the 'collect_leaf_data' node.
+**Returns:** Tuple[List[str], List[int]] - A tuple containing a list of shape categories for the leaves and a list of counts of leaves in each shape category.
 
 **Raises:**
 
-- ValueError: If the input lists (vehicle_colors and vehicle_confidence_scores) are of different lengths.
-- TypeError: If the input types are not as expected (List[str] for vehicle_colors and List[float] for vehicle_confidence_scores).
+- ValueError: If the input lists 'leaf_images' and 'leaf_characteristics' are of different lengths.
 **Examples:**
 
 ```python
->>> vehicle_colors = ['red', 'blue', 'red', 'green', 'blue', 'blue']
->>> vehicle_confidence_scores = [0.8, 0.9, 0.7, 0.6, 0.95, 0.85]
->>> color_frequencies, most_common_colors, color_distribution_stats = analyze_color_distribution(vehicle_colors, vehicle_confidence_scores)
-([0.3333333333333333, 0.5, 0.16666666666666666], ['blue'], [0.8166666666666667, 0.875, 0.10246950860768163])
+>>> leaf_images = ['leaf1.jpg', 'leaf2.jpg', 'leaf3.jpg']
+>>> leaf_characteristics = ['oval', 'lanceolate', 'cordate']
+>>> leaf_shape_categories, shape_category_counts = analyze_leaf_shapes(leaf_images, leaf_characteristics)
+(['oval', 'lanceolate', 'cordate'], [1, 1, 1])
 ```
 
 ```python
->>> vehicle_colors = ['black', 'white', 'black', 'white', 'black']
->>> vehicle_confidence_scores = [0.9, 0.8, 0.85, 0.7, 0.95]
->>> color_frequencies, most_common_colors, color_distribution_stats = analyze_color_distribution(vehicle_colors, vehicle_confidence_scores)
-([0.6, 0.4], ['black'], [0.8833333333333333, 0.9, 0.08164965809277261])
+>>> leaf_images = ['leaf4.jpg', 'leaf5.jpg']
+>>> leaf_characteristics = ['elliptical', 'lanceolate']
+>>> leaf_shape_categories, shape_category_counts = analyze_leaf_shapes(leaf_images, leaf_characteristics)
+(['elliptical', 'lanceolate'], [1, 1])
 ```
 
 
 
 ---
 
-## capture_rush_hour_traffic_images
+## extract_leaf_features
 
 ### Description
-Capture images of traffic during rush hour using cameras or other imaging devices
+Extract features from leaf images such as vein patterns and colors
 
 ### Conceptual Info
 
-This node captures images of traffic during rush hour using cameras or other imaging devices, ensuring good lighting conditions and focus on vehicle features.
+This node processes leaf images to extract features such as vein patterns and colors, building upon the data collected and shape analysis from previous nodes.
 
 ### Docstring
 
-**Summary:** Captures images of traffic during rush hour and returns file paths and timestamps.
-
-**Returns:** Tuple[List[str], List[str]] - A tuple containing a list of image file paths and a list of corresponding timestamps.
-
-**Raises:**
-
-- IOError: If there's an issue capturing or saving the images.
-- ValueError: If the captured images or timestamps are invalid or empty.
-**Examples:**
-
-```python
->>> image_paths, image_timestamps = capture_rush_hour_traffic_images()
-(['path/to/image1.jpg', 'path/to/image2.jpg'], ['2023-03-01 08:00:00', '2023-03-01 08:01:00'])
-```
-
-
-
----
-
-## extract_vehicle_data_from_images
-
-### Description
-Use computer vision to extract vehicle data including colors from captured images
-
-### Conceptual Info
-
-This node utilizes computer vision techniques to analyze images captured during rush hour traffic and extract vehicle color information.
-
-### Docstring
-
-**Summary:** Extracts vehicle color data from a list of image paths using computer vision.
+**Summary:** Extracts features from leaf images, including vein patterns and colors, using data from collect_leaf_data and analyze_leaf_shapes.
 
 **Parameters:**
 
-- image_paths (List[str]): List of file paths to the images captured during rush hour traffic.
-- image_timestamps (List[str]): Timestamps for when each image was captured (same order as image_paths).
-**Returns:** Tuple[List[str], List[float]] - A tuple containing a list of detected vehicle colors and their corresponding confidence scores.
+- leaf_images (List[str]): List of image file names or URLs of leaves from collect_leaf_data.
+- leaf_characteristics (List[str]): List of characteristic descriptions for each leaf from collect_leaf_data.
+- leaf_shape_categories (List[str]): List of shape categories for the leaves from analyze_leaf_shapes.
+- shape_category_counts (List[int]): Counts of leaves in each shape category from analyze_leaf_shapes.
+**Returns:** Tuple[List[str], List[str]] - A tuple containing a list of descriptions of vein patterns for each leaf and a list of colors observed in the leaves.
 
 **Raises:**
 
-- ValueError: If the input lists (image_paths and image_timestamps) are of different lengths.
-- FileNotFoundError: If any of the image paths in image_paths do not exist.
-- Exception: If there's an issue processing an image (e.g., due to corruption or unsupported format).
+- ValueError: If leaf_images or leaf_characteristics are empty or mismatched in length.
+- TypeError: If the input lists are not of the expected types.
 **Examples:**
 
 ```python
->>> image_paths = ['/path/to/image1.jpg', '/path/to/image2.jpg']
->>> image_timestamps = ['2023-04-01 08:00:00', '2023-04-01 08:01:00']
->>> vehicle_colors, vehicle_confidence_scores = extract_vehicle_data_from_images(image_paths, image_timestamps)
-(['red', 'blue'], [0.9, 0.85])
+>>> leaf_images = ['leaf1.jpg', 'leaf2.jpg']
+>>> leaf_characteristics = ['characteristic1', 'characteristic2']
+>>> leaf_shape_categories = ['shape1', 'shape2']
+>>> shape_category_counts = [1, 2]
+>>> result = extract_leaf_features(leaf_images, leaf_characteristics, leaf_shape_categories, shape_category_counts)
+(['vein pattern 1', 'vein pattern 2'], ['color1', 'color2'])
 ```
 
 ```python
->>> image_paths = ['/path/to/image3.jpg']
->>> image_timestamps = ['2023-04-01 08:02:00']
->>> vehicle_colors, vehicle_confidence_scores = extract_vehicle_data_from_images(image_paths, image_timestamps)
-(['black'], [0.95])
+>>> leaf_images = ['leaf3.jpg']
+>>> leaf_characteristics = ['characteristic3']
+>>> leaf_shape_categories = ['shape3']
+>>> shape_category_counts = [3]
+>>> result = extract_leaf_features(leaf_images, leaf_characteristics, leaf_shape_categories, shape_category_counts)
+(['vein pattern 3'], ['color3'])
 ```
 
 
 
 ---
 
-## generate_color_analysis_report
+## generate_leaf_pattern_insights
 
 ### Description
-Compile the findings into a comprehensive report on vehicle colors during rush hour
+Generate insights on leaf patterns based on the extracted features
 
 ### Conceptual Info
 
-This node generates a comprehensive report on vehicle colors during rush hour, including a summary of key findings and a visualization of color distribution.
+This node analyzes the features extracted from leaf images to identify common patterns and variations, providing a summary of the insights gained.
 
 ### Docstring
 
-**Summary:** Generate a detailed report on vehicle color analysis during rush hour.
+**Summary:** Generate insights on leaf patterns based on extracted features such as vein patterns and colors.
 
 **Parameters:**
 
-- color_frequencies (List[float]): Frequency of each observed vehicle color from the analysis.
-- most_common_colors (List[str]): List of most common vehicle colors observed during rush hour.
-- color_distribution_stats (List[float]): Statistical measures (mean, median, std dev) of color distribution.
-**Returns:** Tuple[str, str, bool] - A tuple containing the report summary, path to color distribution visualization, and a boolean indicating report validity.
+- leaf_vein_patterns (List[str]): Descriptions of vein patterns for each leaf, extracted by the parent node 'extract_leaf_features'
+- leaf_colors (List[str]): List of colors observed in the leaves, extracted by the parent node 'extract_leaf_features'
+**Returns:** Tuple[List[str], List[str], str] - A tuple containing a list of common leaf patterns, a list of leaf pattern variations, and a summary of key insights on leaf patterns.
 
 **Raises:**
 
-- ValueError: If input data is inconsistent or missing required fields.
-- RuntimeError: If visualization generation fails.
+- ValueError: If the input lists 'leaf_vein_patterns' or 'leaf_colors' are empty or not provided.
 **Examples:**
 
 ```python
->>> color_frequencies = [0.3, 0.2, 0.1, 0.1, 0.1, 0.1, 0.1]
->>> most_common_colors = ['black', 'white', 'gray', 'red', 'blue', 'silver', 'other']
->>> color_distribution_stats = [0.2, 0.1, 0.05]
->>> report_summary, visualization_path, is_valid = generate_color_analysis_report(color_frequencies, most_common_colors, color_distribution_stats)
-('Summary: Black and white are most common...', '/path/to/visualization.png', True)
+>>> leaf_vein_patterns = ['parallel', 'net-like', 'parallel']
+>>> leaf_colors = ['green', 'green', 'yellow']
+>>> common_leaf_patterns, leaf_pattern_variations, insights_summary = generate_leaf_pattern_insights(leaf_vein_patterns, leaf_colors)
+(['parallel', 'net-like'], ['green', 'yellow'], 'Key insights: Parallel vein patterns are common, with variations in color.')
 ```
 
 ```python
->>> color_frequencies = [0.4, 0.3, 0.3]
->>> most_common_colors = ['black', 'white', 'gray']
->>> color_distribution_stats = [0.3, 0.3, 0.0]
->>> report_summary, visualization_path, is_valid = generate_color_analysis_report(color_frequencies, most_common_colors, color_distribution_stats)
-('Summary: Black and white dominate...', '/path/to/visualization2.png', True)
+>>> leaf_vein_patterns = ['net-like', 'net-like', 'net-like']
+>>> leaf_colors = ['green', 'variegated', 'green']
+>>> common_leaf_patterns, leaf_pattern_variations, insights_summary = generate_leaf_pattern_insights(leaf_vein_patterns, leaf_colors)
+(['net-like'], ['variegated'], 'Key insights: Net-like vein patterns are predominant, with some variation in leaf color.')
 ```
 

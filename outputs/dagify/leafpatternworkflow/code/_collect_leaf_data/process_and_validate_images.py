@@ -1,6 +1,9 @@
 from typing import List
 
 
+import re
+
+
 def process_and_validate_images(images: str) -> List[str]:
     """
     Processes and validates image file names or URLs, returning a list of valid
@@ -34,4 +37,28 @@ def process_and_validate_images(images: str) -> List[str]:
     []
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    
+    if not isinstance(images, str):
+        raise TypeError("Input must be a string")
+    
+    if not images.strip():
+        raise ValueError("Input string is empty")
+    
+    image_list = re.split(r'[,;\n\s]+', images.strip())
+    
+    image_list = [img.strip() for img in image_list if img.strip()]
+    
+    valid_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp', '.svg'}
+    
+    valid_images = []
+    
+    for img in image_list:
+        if img.startswith(('http://', 'https://')):
+            if re.match(r'^https?://[^\s/$.?#].[^\s]*$', img):
+                if any(img.lower().endswith(ext) for ext in valid_extensions) or '.' not in img.split('/')[-1]:
+                    valid_images.append(img)
+        else:
+            if '.' in img and any(img.lower().endswith(ext) for ext in valid_extensions):
+                valid_images.append(img)
+    
+    return valid_images

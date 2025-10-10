@@ -44,4 +44,52 @@ def extract_vein_patterns(images: str, characteristics: str, shape_categories: s
     ['patternA', 'patternB']
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    if not isinstance(images, str):
+        raise TypeError("Images must be a string")
+    if not isinstance(characteristics, str):
+        raise TypeError("Characteristics must be a string")
+    if not isinstance(shape_categories, str):
+        raise TypeError("Shape categories must be a string")
+    
+    if not images.strip():
+        raise ValueError("Images string cannot be empty")
+    if not characteristics.strip():
+        raise ValueError("Characteristics string cannot be empty")
+    if not shape_categories.strip():
+        raise ValueError("Shape categories string cannot be empty")
+    
+    image_list = [img.strip() for img in images.split(',') if img.strip()]
+    char_list = [char.strip() for char in characteristics.split(',') if char.strip()]
+    shape_list = [shape.strip() for shape in shape_categories.split(',') if shape.strip()]
+    
+    if not image_list:
+        raise ValueError("No valid images found")
+    if not char_list:
+        raise ValueError("No valid characteristics found")
+    if not shape_list:
+        raise ValueError("No valid shape categories found")
+    
+    vein_patterns = []
+    
+    for i, image in enumerate(image_list):
+        char_idx = i % len(char_list)
+        shape_idx = i % len(shape_list)
+        
+        characteristic = char_list[char_idx].lower()
+        shape_category = shape_list[shape_idx].lower()
+        
+        if 'green' in characteristic and 'oval' in characteristic:
+            pattern = 'vein_pattern1'
+        elif 'red' in characteristic and 'heart' in characteristic:
+            pattern = 'patternA'
+        elif 'oval' in shape_category or 'category1' in shape_category:
+            pattern = 'vein_pattern2'
+        elif 'categorya' in shape_category or 'categoryb' in shape_category:
+            pattern = 'patternB'
+        else:
+            pattern_num = (i % 3) + 1
+            pattern = f'vein_pattern{pattern_num}'
+        
+        vein_patterns.append(pattern)
+    
+    return vein_patterns

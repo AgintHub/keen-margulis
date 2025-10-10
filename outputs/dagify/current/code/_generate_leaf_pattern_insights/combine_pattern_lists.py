@@ -1,6 +1,9 @@
 from typing import List
 
 
+import ast
+
+
 def combine_pattern_lists(vein_patterns: str, color_patterns: str) -> List[str]:
     """
     Combines two lists of patterns into a single list, removing duplicates and
@@ -43,4 +46,36 @@ def combine_pattern_lists(vein_patterns: str, color_patterns: str) -> List[str]:
     ['pattern1', 'pattern2', 'pattern3']
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    
+    try:
+        vein_list = ast.literal_eval(vein_patterns)
+        if not isinstance(vein_list, list):
+            raise ValueError("vein_patterns is not a valid list representation")
+    except (ValueError, SyntaxError) as e:
+        raise ValueError("vein_patterns is not a valid list representation") from e
+    except Exception as e:
+        raise TypeError("vein_patterns cannot be parsed into a list") from e
+    
+    try:
+        color_list = ast.literal_eval(color_patterns)
+        if not isinstance(color_list, list):
+            raise ValueError("color_patterns is not a valid list representation")
+    except (ValueError, SyntaxError) as e:
+        raise ValueError("color_patterns is not a valid list representation") from e
+    except Exception as e:
+        raise TypeError("color_patterns cannot be parsed into a list") from e
+    
+    combined_list = []
+    seen = set()
+    
+    for pattern in vein_list:
+        if pattern not in seen:
+            combined_list.append(pattern)
+            seen.add(pattern)
+    
+    for pattern in color_list:
+        if pattern not in seen:
+            combined_list.append(pattern)
+            seen.add(pattern)
+    
+    return combined_list
