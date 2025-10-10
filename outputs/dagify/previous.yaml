@@ -1,4 +1,4 @@
-dag_type: plain_text
+dag_type: typed
 description: Generated workflow from UI.
 name: news_analysis_workflow
 nodes:
@@ -9,6 +9,17 @@ nodes:
     nodes_depended_on:
     - summarize_news_articles
     nodes_dependent_on: []
+    output_structure:
+    - description: The sequential index of each article in the input list.
+      key: article_index
+      type: List[int]
+    - description: Sentiment category for each article, one of 'positive', 'negative',
+        or 'neutral'.
+      key: sentiment_category
+      type: List[str]
+    - description: Confidence score (0.0 to 1.0) for the assigned sentiment.
+      key: sentiment_confidence
+      type: List[float]
     prompt: Determine the sentiment of the news articles, categorizing them as positive,
       negative, or neutral.
   categorize_news_articles:
@@ -18,6 +29,23 @@ nodes:
     nodes_depended_on:
     - filter_news_articles
     nodes_dependent_on: []
+    output_structure:
+    - description: List of article titles that were filtered and are now categorized.
+      key: article_titles
+      type: List[str]
+    - description: List of category labels corresponding to each article in `article_titles`;
+        indices match.
+      key: categories
+      type: List[str]
+    - description: Total number of distinct categories identified.
+      key: unique_category_count
+      type: int
+    - description: Total number of articles processed by this node.
+      key: article_count
+      type: int
+    - description: Indicates whether the categorization succeeded without errors.
+      key: is_successful
+      type: bool
     prompt: Group news articles by their topic or theme, such as politics, economics,
       or social issues.
   compile_analysis_report:
@@ -28,6 +56,28 @@ nodes:
     - analyze_sentiment
     - identify_trends
     nodes_dependent_on: []
+    output_structure:
+    - description: Full textual analysis report combining sentiment and trend insights.
+      key: report_text
+      type: str
+    - description: Brief summary of overall sentiment distribution (positive/negative/neutral).
+      key: sentiment_summary
+      type: str
+    - description: Brief summary of key trends identified across articles.
+      key: trend_summary
+      type: str
+    - description: Sentiment category for each article in the order processed.
+      key: sentiment_per_article
+      type: List[str]
+    - description: List of trending topics or themes identified in the articles.
+      key: trend_topics
+      type: List[str]
+    - description: Total number of articles included in the analysis.
+      key: article_count
+      type: int
+    - description: Flag indicating whether the report was generated successfully.
+      key: is_valid
+      type: bool
     prompt: Create a detailed report summarizing the analysis, including sentiment
       analysis and trend identification.
   filter_news_articles:
@@ -37,6 +87,19 @@ nodes:
     nodes_depended_on:
     - source_news_articles
     nodes_dependent_on: []
+    output_structure:
+    - description: List of article identifiers or titles that passed the relevance
+        and duplication filters.
+      key: filtered_article_ids
+      type: List[str]
+    - description: List of article identifiers or titles that were excluded due to
+        irrelevance or duplication.
+      key: removed_article_ids
+      type: List[str]
+    - description: Indicates whether the filtering operation completed successfully
+        without errors.
+      key: filter_success
+      type: bool
     prompt: Remove news articles that are not relevant to the analysis or are duplicates.
   identify_trends:
     agent: false
@@ -45,6 +108,17 @@ nodes:
     nodes_depended_on:
     - summarize_news_articles
     nodes_dependent_on: []
+    output_structure:
+    - description: List of topics that show a trend across the news articles.
+      key: trending_topics
+      type: List[str]
+    - description: Sentiment trend for each corresponding trending topic, e.g., 'increasing
+        positive', 'decreasing negative', or 'stable neutral'.
+      key: sentiment_trends
+      type: List[str]
+    - description: A concise textual summary of the overall trend patterns identified.
+      key: overall_trend_summary
+      type: str
     prompt: Look for trends or patterns in the news articles, such as recurring topics
       or changing sentiment.
   source_news_articles:
@@ -53,6 +127,25 @@ nodes:
     name: source_news_articles
     nodes_depended_on: []
     nodes_dependent_on: []
+    output_structure:
+    - description: List of URLs for the news articles collected.
+      key: article_urls
+      type: List[str]
+    - description: Headlines of the news articles collected.
+      key: article_titles
+      type: List[str]
+    - description: Full text content of each news article.
+      key: article_texts
+      type: List[str]
+    - description: Names of the sources from which each article was retrieved.
+      key: article_sources
+      type: List[str]
+    - description: Total number of news articles collected.
+      key: article_count
+      type: int
+    - description: Indicates whether the fetch operation succeeded.
+      key: fetch_successful
+      type: bool
     prompt: Collect news articles from multiple sources, focusing on diverse topics
       and viewpoints.
   summarize_news_articles:
@@ -62,5 +155,12 @@ nodes:
     nodes_depended_on:
     - categorize_news_articles
     nodes_dependent_on: []
+    output_structure:
+    - description: Number of article summaries generated
+      key: summary_count
+      type: int
+    - description: Concise summaries for each news article, ordered as input
+      key: summaries
+      type: List[str]
     prompt: Create a concise summary of the main points in each news article, highlighting
       key information.
