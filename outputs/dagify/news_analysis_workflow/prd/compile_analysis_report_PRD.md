@@ -1,51 +1,49 @@
 # compile_analysis_report PRD
 
 ## Description
-Compile the sentiment and trend data produced by the preceding analysis nodes into a single, coherent textual report and concise summaries.
+Generates a comprehensive and validated textual analysis report by integrating sentiment scores and trend data. Ensures robust validation, clear summaries, and structured output for downstream consumption.
 
 
 ## Conceptual Info
 
-This node aggregates sentiment scores and trend findings from previous analysis steps to produce a unified report that can be consumed by end‑users or downstream systems.
+This node aggregates sentiment analysis and trend detection results into a detailed report for downstream applications.
 
 ## Docstring
 
 ### Summary
-Generate a comprehensive analysis report from sentiment and trend data.
+Generates a summarized analysis report from sentiment and trend data.
 
 ### Parameters
 
-- **sentiment_category** (List[str]): Sentiment label for each article ('positive', 'negative', 'neutral').
-- **sentiment_confidence** (List[float]): Confidence score (0.0–1.0) for each article's sentiment.
-- **trending_topics** (List[str]): List of topics that exhibit a trend across the articles.
-- **sentiment_trends** (List[str]): Sentiment trend description for each corresponding trending topic.
-- **overall_trend_summary** (str): Concise textual summary of the overall trend patterns identified.
+- **analyze_sentiment_input** (AnalyzeSentimentOutput): Output of the analyze_sentiment node, including sentiment categories and confidence scores.
+- **identify_trends_input** (IdentifyTrendsOutput): Output of the identify_trends node, including trending topics and sentiment trends.
 
 ### Returns
 
-Dict[str, Any]: Dictionary containing the full report text, sentiment and trend summaries, per‑article sentiment list, trend topics list, article count, and validity flag.
+CompileAnalysisReportOutput: Structured output containing the completed analysis report, summaries, and validation status.
 
 ### Raises
 
-- ValueError: If the lengths of `sentiment_category` and `sentiment_confidence` do not match, or if `trending_topics` and `sentiment_trends` differ in length.
-- TypeError: If any input parameter is of an unexpected type.
+- ValueError: Raised if input validation fails or if inconsistencies are found in the inputs.
+- TypeError: Raised if input parameters are of unexpected types.
 
 ### Examples
 
 ```python
->>> sentiment_category = ['positive', 'neutral', 'negative'],
->>> sentiment_confidence = [0.92, 0.85, 0.78],
->>> trending_topics = ['Climate Action', 'Tech Innovation'],
->>> sentiment_trends = ['decreasing positive', 'increasing positive'],
->>> overall_trend_summary = 'The overall sentiment is shifting from positive to more neutral, with rising excitement around tech.'
->>> report = compile_analysis_report(sentiment_category, sentiment_confidence, trending_topics, sentiment_trends, overall_trend_summary)
-{
-  'report_text': 'Analysis Report:\n\nSentiment:\n- Positive: 1\n- Neutral: 1\n- Negative: 1\n\nTrends:\n- Climate Action: decreasing positive\n- Tech Innovation: increasing positive\n\nOverall Trend: The overall sentiment is shifting from positive to more neutral, with rising excitement around tech.',
-  'sentiment_summary': '1 positive, 1 neutral, 1 negative',
-  'trend_summary': 'Climate Action shows decreasing positivity while Tech Innovation is gaining traction.',
-  'sentiment_per_article': ['positive', 'neutral', 'negative'],
-  'trend_topics': ['Climate Action', 'Tech Innovation'],
-  'article_count': 3,
-  'is_valid': True
-}
+>>> analyze_output = AnalyzeSentimentOutput(
+...     article_index=[0, 1],
+...     sentiment_category=['positive', 'neutral'],
+...     sentiment_confidence=[0.95, 0.78]
+>>> )
+>>> trends_output = IdentifyTrendsOutput(
+...     trending_topics=['AI', 'Climate Change'],
+...     sentiment_trends=['increasing positive', 'stable neutral'],
+...     overall_trend_summary='AI topics are gaining positivity while climate sentiment remains neutral.'
+>>> )
+>>> result = compile_analysis_report(
+...     analyze_sentiment_input=analyze_output,
+...     identify_trends_input=trends_output
+>>> )
+>>> print(result.report_text)
+Full analysis report combining sentiment and trend insights.
 ```

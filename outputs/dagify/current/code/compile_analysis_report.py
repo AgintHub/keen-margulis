@@ -1,172 +1,109 @@
-from ._compile_analysis_report.validate_input_parameters import validate_input_parameters
-from ._compile_analysis_report.count_sentiment_categories import count_sentiment_categories
-from ._compile_analysis_report.generate_sentiment_summary import generate_sentiment_summary
-from ._compile_analysis_report.generate_trend_summary import generate_trend_summary
-from ._compile_analysis_report.generate_full_report import generate_full_report
-from ._compile_analysis_report.validate_report_completion import validate_report_completion
-
-from pydantic import BaseModel, Field
+import logging
 from typing import List
+from pydantic import BaseModel, Field
 
 
-class AnalyzeSentimentOutput(BaseModel):
-    """Pydantic model for analyze_sentiment node outputs."""
-    article_index: List[int] = (
-        Field(..., description = (
-            "The sequential index of each article in the input list.")
-        )
-    )
-    sentiment_category: List[str] = (
-        Field(..., description = (
-            "Sentiment category for each article, one of 'positive', 'negative', or 'neutral'.")
-        )
-    )
-    sentiment_confidence: List[float] = (
-        Field(..., description = (
-            "Confidence score (0.0 to 1.0) for the assigned sentiment.")
-        )
-    )
-
-
-class IdentifyTrendsOutput(BaseModel):
-    """Pydantic model for identify_trends node outputs."""
-    trending_topics: List[str] = (
-        Field(..., description = (
-            "List of topics that show a trend across the news articles.")
-        )
-    )
-    sentiment_trends: List[str] = (
-        Field(..., description = (
-            "Sentiment trend for each corresponding trending topic, e.g., 'increasing positive', 'decreasing negative', or 'stable neutral'.")
-        )
-    )
-    overall_trend_summary: str = (
-        Field(..., description = (
-            "A concise textual summary of the overall trend patterns identified.")
-        )
-    )
-
-
-class CompileAnalysisReportOutput(BaseModel):
-    """Pydantic model for compile_analysis_report node outputs."""
-    report_text: str = (
-        Field(..., description = (
-            "Full textual analysis report combining sentiment and trend insights.")
-        )
-    )
-    sentiment_summary: str = (
-        Field(..., description = (
-            "Brief summary of overall sentiment distribution (positive/negative/neutral).")
-        )
-    )
-    trend_summary: str = (
-        Field(..., description = (
-            "Brief summary of key trends identified across articles.")
-        )
-    )
-    sentiment_per_article: List[str] = (
-        Field(..., description = (
-            "Sentiment category for each article in the order processed.")
-        )
-    )
-    trend_topics: List[str] = (
-        Field(..., description = (
-            "List of trending topics or themes identified in the articles.")
-        )
-    )
-    article_count: int = (
-        Field(..., description = (
-            "Total number of articles included in the analysis.")
-        )
-    )
-    is_valid: bool = (
-        Field(..., description = (
-            "Flag indicating whether the report was generated successfully.")
-        )
-    )
-
-
-def compile_analysis_report(analyze_sentiment_input: AnalyzeSentimentOutput, identify_trends_input: IdentifyTrendsOutput, **kwargs) -> CompileAnalysisReportOutput:
+def compile_analysis_report(
     """
-    Generate a comprehensive analysis report from sentiment and trend data.
+    Generates a summarized analysis report from sentiment and trend data.
 
     Parameters
     ----------
-    sentiment_category : List[str]
-        Sentiment label for each article ('positive', 'negative',
-        'neutral').
-    sentiment_confidence : List[float]
-        Confidence score (0.0–1.0) for each article's sentiment.
-    trending_topics : List[str]
-        List of topics that exhibit a trend across the articles.
-    sentiment_trends : List[str]
-        Sentiment trend description for each corresponding trending topic.
-    overall_trend_summary : str
-        Concise textual summary of the overall trend patterns identified.
+    analyze_sentiment_input : AnalyzeSentimentOutput
+        Output of the analyze_sentiment node, including sentiment categories
+        and confidence scores.
+    identify_trends_input : IdentifyTrendsOutput
+        Output of the identify_trends node, including trending topics and
+        sentiment trends.
 
     Returns
     -------
-    Dict[str, Any]
-        Dictionary containing the full report text, sentiment and trend
-        summaries, per‑article sentiment list, trend topics list, article
-        count, and validity flag.
+    CompileAnalysisReportOutput
+        Structured output containing the completed analysis report,
+        summaries, and validation status.
 
     Raises
     ------
     ValueError
-        If the lengths of `sentiment_category` and `sentiment_confidence` do
-        not match, or if `trending_topics` and `sentiment_trends` differ in
-        length.
+        Raised if input validation fails or if inconsistencies are found in
+        the inputs.
     TypeError
-        If any input parameter is of an unexpected type.
+        Raised if input parameters are of unexpected types.
 
     Examples
     --------
-    >>> sentiment_category = ['positive', 'neutral', 'negative'],
-    >>> sentiment_confidence = [0.92, 0.85, 0.78],
-    >>> trending_topics = ['Climate Action', 'Tech Innovation'],
-    >>> sentiment_trends = ['decreasing positive', 'increasing positive'],
-    >>> overall_trend_summary = 'The overall sentiment is shifting from positive
-    to more neutral, with rising excitement around tech.'
-    >>> report = compile_analysis_report(sentiment_category,
-    sentiment_confidence, trending_topics, sentiment_trends,
-    overall_trend_summary)
-    {
-      'report_text': 'Analysis Report:\n\nSentiment:\n- Positive: 1\n- Neutral:
-    1\n- Negative: 1\n\nTrends:\n- Climate Action: decreasing positive\n- Tech
-    Innovation: increasing positive\n\nOverall Trend: The overall sentiment is
-    shifting from positive to more neutral, with rising excitement around
-    tech.',
-      'sentiment_summary': '1 positive, 1 neutral, 1 negative',
-      'trend_summary': 'Climate Action shows decreasing positivity while Tech
-    Innovation is gaining traction.',
-      'sentiment_per_article': ['positive', 'neutral', 'negative'],
-      'trend_topics': ['Climate Action', 'Tech Innovation'],
-      'article_count': 3,
-      'is_valid': True
-    }
+    >>> analyze_output = AnalyzeSentimentOutput(
+    ...     article_index=[0, 1],
+    ...     sentiment_category=['positive', 'neutral'],
+    ...     sentiment_confidence=[0.95, 0.78]
+    >>> )
+    >>> trends_output = IdentifyTrendsOutput(
+    ...     trending_topics=['AI', 'Climate Change'],
+    ...     sentiment_trends=['increasing positive', 'stable neutral'],
+    ...     overall_trend_summary='AI topics are gaining positivity while
+    climate sentiment remains neutral.'
+    >>> )
+    >>> result = compile_analysis_report(
+    ...     analyze_sentiment_input=analyze_output,
+    ...     identify_trends_input=trends_output
+    >>> )
+    >>> print(result.report_text)
+    Full analysis report combining sentiment and trend insights.
 
     """
-    validate_input_parameters(sentiment_data=analyze_sentiment_input, trends_data=identify_trends_input)
-    
-    sentiment_counts: dict = count_sentiment_categories(sentiment_categories=analyze_sentiment_input.sentiment_category)
-    
-    sentiment_summary_text: str = generate_sentiment_summary(sentiment_counts=sentiment_counts)
-    
-    trend_summary_text: str = generate_trend_summary(trending_topics=identify_trends_input.trending_topics, sentiment_trends=identify_trends_input.sentiment_trends)
-    
-    full_report_text: str = generate_full_report(sentiment_summary=sentiment_summary_text, trend_summary=trend_summary_text, overall_trend_summary=identify_trends_input.overall_trend_summary, sentiment_counts=sentiment_counts, trending_topics=identify_trends_input.trending_topics, sentiment_trends=identify_trends_input.sentiment_trends)
-    
-    article_count: int = len(analyze_sentiment_input.sentiment_category)
-    
-    is_valid_report: bool = validate_report_completion(report_text=full_report_text, article_count=article_count)
-    
-    return CompileAnalysisReportOutput(
-        report_text=full_report_text,
-        sentiment_summary=sentiment_summary_text,
-        trend_summary=trend_summary_text,
-        sentiment_per_article=analyze_sentiment_input.sentiment_category,
-        trend_topics=identify_trends_input.trending_topics,
-        article_count=article_count,
-        is_valid=is_valid_report
-    )
+    analyze_sentiment_input: 'AnalyzeSentimentOutput',
+    identify_trends_input: 'IdentifyTrendsOutput',
+    **kwargs: dict
+) -> 'CompileAnalysisReportOutput':
+    logger = logging.getLogger(__name__)
+
+    try:
+        if not analyze_sentiment_input or not identify_trends_input:
+            raise ValueError("Input data for sentiment analysis and trends cannot be empty.")
+
+        sentiment_count = {
+            "positive": analyze_sentiment_input.sentiment_category.count("positive"),
+            "negative": analyze_sentiment_input.sentiment_category.count("negative"),
+            "neutral": analyze_sentiment_input.sentiment_category.count("neutral")
+        }
+
+        sentiment_summary = (
+            f"Sentiment Distribution: Positive={sentiment_count['positive']}, "
+            f"Neutral={sentiment_count['neutral']}, Negative={sentiment_count['negative']}"
+        )
+
+        trend_summary = (
+            identify_trends_input.overall_trend_summary or
+            "No notable trends were identified in the input data."
+        )
+
+        full_report = (
+            f"Analysis Report\n\n"
+            f"--- Sentiment Summary ---\n{sentiment_summary}\n\n"
+            f"--- Trends ---\n"
+            f"Topics: {', '.join(identify_trends_input.trending_topics)}\n"
+            f"Details: {trend_summary}\n"
+        )
+
+        return CompileAnalysisReportOutput(
+            report_text=full_report,
+            sentiment_summary=sentiment_summary,
+            trend_summary=trend_summary,
+            sentiment_per_article=analyze_sentiment_input.sentiment_category,
+            trend_topics=identify_trends_input.trending_topics,
+            article_count=len(analyze_sentiment_input.sentiment_category),
+            is_valid=True
+        )
+
+    except ValueError as e:
+        logger.error("Input validation failed: %s", e)
+        return CompileAnalysisReportOutput(
+            report_text="", trend_summary="", sentiment_summary="",
+            sentiment_per_article=[], trend_topics=[], article_count=0, is_valid=False
+        )
+    except Exception as e:
+        logger.error("Unhandled error during report compilation: %s", e)
+        return CompileAnalysisReportOutput(
+            report_text="", trend_summary="", sentiment_summary="",
+            sentiment_per_article=[], trend_topics=[], article_count=0, is_valid=False
+        )

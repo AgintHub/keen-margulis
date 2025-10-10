@@ -1,114 +1,68 @@
+import logging
+from typing import List
+from pydantic import BaseModel, Field
 from ._summarize_news_articles.get_article_texts import get_article_texts
 from ._summarize_news_articles.validate_input_lists import validate_input_lists
 from ._summarize_news_articles.preprocess_article_text import preprocess_article_text
 from ._summarize_news_articles.generate_concise_summary import generate_concise_summary
-
-from pydantic import BaseModel, Field
-from typing import List
-
-
-class CategorizeNewsArticlesOutput(BaseModel):
-    """Pydantic model for categorize_news_articles node outputs."""
-    article_titles: List[str] = (
-        Field(..., description = (
-            "List of article titles that were filtered and are now categorized.")
-        )
-    )
-    categories: List[str] = (
-        Field(..., description = (
-            "List of category labels corresponding to each article in `article_titles`; indices match.")
-        )
-    )
-    unique_category_count: int = (
-        Field(..., description = (
-            "Total number of distinct categories identified.")
-        )
-    )
-    article_count: int = (
-        Field(..., description = (
-            "Total number of articles processed by this node.")
-        )
-    )
-    is_successful: bool = (
-        Field(..., description = (
-            "Indicates whether the categorization succeeded without errors.")
-        )
-    )
+from ._categorize_news_articles import CategorizeNewsArticlesOutput
 
 
 class SummarizeNewsArticlesOutput(BaseModel):
-    """Pydantic model for summarize_news_articles node outputs."""
     summary_count: int = (
         Field(..., description="Number of article summaries generated")
     )
     summaries: List[str] = (
-        Field(..., description = (
-            "Concise summaries for each news article, ordered as input")
-        )
+        Field(..., description="Concise summaries for each news article, ordered as input")
     )
-
 
 def summarize_news_articles(categorize_news_articles_input: CategorizeNewsArticlesOutput, **kwargs) -> SummarizeNewsArticlesOutput:
     """
-    Generate concise summaries for a collection of news articles.
+    Generate concise one‑sentence summaries of news articles.
 
     Parameters
     ----------
-    article_titles : List[str]
-        List of article titles corresponding to the articles to be
-        summarized.
-    article_texts : List[str]
-        Full text content of each article in the same order as
-        `article_titles`.
+    categorize_news_articles_input : CategorizeNewsArticlesOutput
+        Output from the categorization node containing article titles and
+        associated metadata.
 
     Returns
     -------
-    Tuple[int, List[str]]
-        A tuple where the first element is the number of summaries generated
-        and the second element is a list of summary strings ordered to match
-        the input articles.
+    SummarizeNewsArticlesOutput
+        Structured output with the count of summaries and the list of
+        summary strings.
 
     Raises
     ------
     ValueError
-        If either `article_titles` or `article_texts` is empty, or if the
-        two lists have different lengths.
+        Raised when no article titles are provided or when title and text
+        counts mismatch.
     TypeError
-        If the inputs are not of the expected list-of-strings types.
+        Raised when input types are not as expected.
 
     Examples
     --------
-    >>> summaries = summarize_news_articles(
-    ...     article_titles=["Economy grows 3%", "Championship ends in
-    tie‑breaker"],
-    ...     article_texts=[
-    ...         "The economy grew by 3% last quarter, driven largely by consumer
-    spending and investment in technology sectors.",
-    ...         "In an unexpected turn, the championship final concluded with a
-    dramatic tie‑breaker, sending the crowd into a frenzy."
-    >>> ]
-    >>> )
-    (2, ['Economy grew 3% driven by consumer spending and tech investment.',
-    'Championship final ended with a dramatic tie‑breaker.'])
-
-    >>> summaries = summarize_news_articles(article_titles=[], article_texts=[])
-    ValueError: No articles provided.
+    >>> output = summarize_news_articles(categorize_news_articles_input)
+    >>> print(output.summary_count)
+    >>> print(output.summaries)
+    2
+    ['Economy grew 3% driven by consumer spending and tech investment.',
+    'Championship final ended with a dramatic tie‑breaker.']
 
     """
-    article_titles: List[str] = categorize_news_articles_input.article_titles
-    article_texts: List[str] = get_article_texts(titles=article_titles)
-    
+    logger = logging.getLogger(__name__)
+    article_titles = categorize_news_articles_input.article_titles
+    if not article_titles:
+        logger.error("No article titles provided")
+        raise ValueError("No article titles provided")
+    article_texts = get_article_texts(titles=article_titles)
+    if not article_texts or len(article_texts) != len(article_titles):
+        logger.error("Mismatch between article titles and texts")
+        raise ValueError("Mismatch between article titles and texts")
     validate_input_lists(titles=article_titles, texts=article_texts)
-    
     summaries: List[str] = []
-    for i, (title, text) in enumerate(zip(article_titles, article_texts)):
-        processed_text: str = preprocess_article_text(text=text)
-        summary: str = generate_concise_summary(title=title, text=processed_text)
+    for title, text in zip(article_titles, article_texts):
+        processed_text = preprocess_article_text(text=text)
+        summary = generate_concise_summary(title=title, text=processed_text)
         summaries.append(summary)
-    
-    summary_count: int = len(summaries)
-    
-    return SummarizeNewsArticlesOutput(
-        summary_count=summary_count,
-        summaries=summaries
-    )
+    return SummarizeNewsArticlesOutput(summary_count=len(summaries), summaries=summaries)
