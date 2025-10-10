@@ -1,3 +1,9 @@
+from ._summarize_sport_info.validate_input_types import validate_input_types
+from ._summarize_sport_info.format_players_with_leagues import format_players_with_leagues
+from ._summarize_sport_info.generate_sport_summary import generate_sport_summary
+from ._summarize_sport_info.count_words import count_words
+from ._summarize_sport_info.validate_word_count_limit import validate_word_count_limit
+
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -8,10 +14,14 @@ class GatherSportInfoOutput(BaseModel):
         Field(..., description="List of key rules governing the sport")
     )
     popular_leagues: List[str] = (
-        Field(..., description="List of major professional leagues associated with the sport")
+        Field(..., description = (
+            "List of major professional leagues associated with the sport")
+        )
     )
     major_tournaments: List[str] = (
-        Field(..., description="List of major international tournaments or competitions for the sport")
+        Field(..., description = (
+            "List of major international tournaments or competitions for the sport")
+        )
     )
 
 
@@ -21,14 +31,18 @@ class DetermineSportTypeOutput(BaseModel):
         Field(..., description="Whether the sport is team-based or individual")
     )
     rationale: str = (
-        Field(..., description="One-sentence explanation for the classification")
+        Field(..., description = (
+            "One-sentence explanation for the classification")
+        )
     )
 
 
 class ListMajorLeaguesOutput(BaseModel):
     """Pydantic model for list_major_leagues node outputs."""
     league_names: List[str] = (
-        Field(..., description="List of major professional leagues for the identified sport")
+        Field(..., description = (
+            "List of major professional leagues for the identified sport")
+        )
     )
 
 
@@ -48,13 +62,19 @@ class SummarizeSportInfoOutput(BaseModel):
         Field(..., description="Whether the sport is team-based or individual.")
     )
     major_leagues: List[str] = (
-        Field(..., description="List of major professional leagues associated with the sport.")
+        Field(..., description = (
+            "List of major professional leagues associated with the sport.")
+        )
     )
     key_players: List[str] = (
-        Field(..., description="List of 3-5 key players currently active in the sport and their respective leagues.")
+        Field(..., description = (
+            "List of 3-5 key players currently active in the sport and their respective leagues.")
+        )
     )
     summary: str = (
-        Field(..., description="Concise summary of the sport, not exceeding 200 words.")
+        Field(..., description = (
+            "Concise summary of the sport, not exceeding 200 words.")
+        )
     )
     word_count: int = Field(..., description="Number of words in the summary.")
 
@@ -114,10 +134,32 @@ def summarize_sport_info(gather_sport_info_input: GatherSportInfoOutput, determi
     "word_count: 31"
 
     """
+    validate_input_types(gather_sport_info_input, determine_sport_type_input, list_major_leagues_input, identify_key_players_input)
+    
+    sport_type: str = determine_sport_type_input.sport_type
+    major_leagues: List[str] = list_major_leagues_input.league_names
+    
+    formatted_key_players: List[str] = format_players_with_leagues(
+        player_names=identify_key_players_input.player_names,
+        player_leagues=identify_key_players_input.player_leagues
+    )
+    
+    summary_text: str = generate_sport_summary(
+        sport_type=sport_type,
+        major_leagues=major_leagues,
+        key_players=formatted_key_players,
+        sport_rules=gather_sport_info_input.rules,
+        tournaments=gather_sport_info_input.major_tournaments
+    )
+    
+    word_count: int = count_words(text=summary_text)
+    
+    validate_word_count_limit(word_count=word_count, max_words=200)
+    
     return SummarizeSportInfoOutput(
-        sport_type="",
-        major_leagues=[],
-        key_players=[],
-        summary="",
-        word_count=0,
+        sport_type=sport_type,
+        major_leagues=major_leagues,
+        key_players=formatted_key_players,
+        summary=summary_text,
+        word_count=word_count
     )

@@ -4,6 +4,12 @@ from .determine_sport_type import determine_sport_type
 from .identify_key_players import identify_key_players
 from .identify_sport import identify_sport
 from .summarize_sport_info import summarize_sport_info
+from . import _list_major_leagues
+from . import _determine_sport_type
+from . import _gather_sport_info
+from . import _identify_key_players
+from . import _identify_sport
+from . import _summarize_sport_info
 
 
 __all__ = [
@@ -12,5 +18,11 @@ __all__ = [
     'determine_sport_type',
     'identify_key_players',
     'identify_sport',
-    'summarize_sport_info'
+    'summarize_sport_info',
+    '_list_major_leagues',
+    '_determine_sport_type',
+    '_gather_sport_info',
+    '_identify_key_players',
+    '_identify_sport',
+    '_summarize_sport_info'
 ]
