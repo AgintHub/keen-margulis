@@ -1,3 +1,6 @@
+import ast
+
+
 def calculate_mean(scores: str) -> float:
     """
     Calculates the mean of a list of confidence scores passed as a string.
@@ -29,4 +32,23 @@ def calculate_mean(scores: str) -> float:
     NaN
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    
+    if not isinstance(scores, str):
+        raise TypeError("If the input is not a string.")
+    
+    try:
+        scores_list = ast.literal_eval(scores)
+        if not isinstance(scores_list, list):
+            raise ValueError("If the input string cannot be parsed into a list of numbers.")
+        
+        for item in scores_list:
+            if not isinstance(item, (int, float)):
+                raise ValueError("If the input string cannot be parsed into a list of numbers.")
+        
+    except (ValueError, SyntaxError) as e:
+        raise ValueError("If the input string cannot be parsed into a list of numbers.") from e
+    
+    if len(scores_list) == 0:
+        return float('nan')
+    
+    return sum(scores_list) / len(scores_list)

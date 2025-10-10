@@ -1,6 +1,11 @@
 from typing import List
 
 
+import os
+import base64
+import hashlib
+
+
 def save_images_to_storage(image_data: str, output_directory: str, file_format: str) -> List[str]:
     """
     Saves image data to storage, returning a list of saved file paths.
@@ -41,4 +46,33 @@ def save_images_to_storage(image_data: str, output_directory: str, file_format: 
     ['/tmp/images/image1.jpg', '/tmp/images/image2.jpg']
 
     """
-    raise NotImplementedError("This is a virtual stub node that needs to be implemented")
+    
+    if not isinstance(image_data, str):
+        raise TypeError("image_data must be of type str")
+    if not isinstance(output_directory, str):
+        raise TypeError("output_directory must be of type str")
+    if not isinstance(file_format, str):
+        raise TypeError("file_format must be of type str")
+    
+    if not os.path.exists(output_directory):
+        try:
+            os.makedirs(output_directory, exist_ok=True)
+        except OSError:
+            raise ValueError("output directory is invalid or inaccessible")
+    
+    if not os.access(output_directory, os.W_OK):
+        raise ValueError("output directory is invalid or inaccessible")
+    
+    try:
+        image_bytes = base64.b64decode(image_data)
+    except Exception:
+        image_bytes = image_data.encode('utf-8')
+    
+    file_hash = hashlib.md5(image_bytes).hexdigest()[:8]
+    filename = f"image_{file_hash}.{file_format.lstrip('.')}"
+    filepath = os.path.join(output_directory, filename)
+    
+    with open(filepath, 'wb') as f:
+        f.write(image_bytes)
+    
+    return [filepath]
