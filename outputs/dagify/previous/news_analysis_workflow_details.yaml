@@ -1,5 +1,6 @@
 dag_type: plain_text
-description: Generated workflow from UI.
+description: A workflow for analyzing the news, involving sourcing, filtering, categorizing,
+  and summarizing news articles.
 name: news_analysis_workflow
 nodes:
   analyze_sentiment:
