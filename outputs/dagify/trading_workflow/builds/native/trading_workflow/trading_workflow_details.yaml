@@ -64,7 +64,8 @@ nodes:
       execution venues, and timing considerations.
   identify_tradable_assets:
     agent: false
-    description: Determine the specific assets or instruments to be traded.
+    description: Determine the specific assets or instruments to be traded for the
+      selected strategy.
     name: identify_tradable_assets
     nodes_depended_on:
     - choose_trading_strategy
