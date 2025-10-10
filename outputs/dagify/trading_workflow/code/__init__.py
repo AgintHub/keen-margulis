@@ -14,10 +14,15 @@ from .analyze_market_trends import analyze_market_trends
 from .simulate_trades import simulate_trades
 from .analyze_market_data import analyze_market_data
 from .identify_trading_opportunities import identify_trading_opportunities
+from .monitor_trade_performance import monitor_trade_performance
+from . import _evaluate_trading_strategies
 from . import _execute_trades
 from . import _generate_trading_signals
+from . import _gather_market_data
 from . import _collect_market_data
 from . import _monitor_trades
+from . import _analyze_market_trends
+from . import _monitor_trade_performance
 from . import _analyze_market_data
 
 
@@ -38,9 +43,14 @@ __all__ = [
     'simulate_trades',
     'analyze_market_data',
     'identify_trading_opportunities',
+    'monitor_trade_performance',
+    '_evaluate_trading_strategies',
     '_execute_trades',
     '_generate_trading_signals',
+    '_gather_market_data',
     '_collect_market_data',
     '_monitor_trades',
+    '_analyze_market_trends',
+    '_monitor_trade_performance',
     '_analyze_market_data'
 ]
