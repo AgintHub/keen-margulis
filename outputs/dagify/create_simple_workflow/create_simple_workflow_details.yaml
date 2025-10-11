@@ -4,55 +4,59 @@ name: create_simple_workflow
 nodes:
   create_task_dag:
     agent: false
-    description: Create a DAG representing the tasks and their dependencies
+    description: Create a Directed Acyclic Graph (DAG) of tasks
     name: create_task_dag
     nodes_depended_on:
-    - determine_task_dependencies
-    nodes_dependent_on: []
-    prompt: Using the tasks and dependencies identified, create a Directed Acyclic
-      Graph (DAG) that represents the workflow. Ensure the DAG is acyclic and properly
-      ordered.
+    - identify_task_dependencies
+    nodes_dependent_on:
+    - refine_dag
+    prompt: Using the task dependencies, construct a DAG that represents the workflow.
+      Ensure it is acyclic and properly ordered.
+  decompose_objective_into_tasks:
+    agent: false
+    description: Break down the workflow objective into fundamental tasks
+    name: decompose_objective_into_tasks
+    nodes_depended_on:
+    - define_workflow_objective
+    nodes_dependent_on:
+    - identify_task_dependencies
+    prompt: Decompose the workflow objective into individual, self-contained tasks
+      or steps.
   define_workflow_objective:
     agent: false
     description: Define the objective of the workflow
     name: define_workflow_objective
     nodes_depended_on: []
-    nodes_dependent_on: []
-    prompt: Clearly state the primary objective of the workflow. What is the main
-      task or goal?
-  determine_task_dependencies:
-    agent: false
-    description: Determine the dependencies between tasks
-    name: determine_task_dependencies
-    nodes_depended_on:
-    - identify_required_tasks
-    nodes_dependent_on: []
-    prompt: Analyze the tasks identified and determine their dependencies. Which tasks
-      must be completed before others can start?
+    nodes_dependent_on:
+    - decompose_objective_into_tasks
+    prompt: Clearly state the primary goal of the workflow. What is it intended to
+      achieve?
   finalize_workflow:
     agent: false
-    description: Finalize the workflow based on the validated DAG
+    description: Finalize the workflow DAG
     name: finalize_workflow
     nodes_depended_on:
-    - validate_dag
+    - refine_dag
     nodes_dependent_on: []
-    prompt: Using the validated DAG, finalize the workflow. This includes formatting
-      the DAG into the required JSON structure.
-  identify_required_tasks:
+    prompt: Confirm that the workflow DAG is complete, concurrent, and acyclic. Make
+      any final adjustments as needed.
+  identify_task_dependencies:
     agent: false
-    description: Identify the tasks required to achieve the workflow objective
-    name: identify_required_tasks
+    description: Identify dependencies between tasks
+    name: identify_task_dependencies
     nodes_depended_on:
-    - define_workflow_objective
-    nodes_dependent_on: []
-    prompt: List the key tasks or operations necessary to accomplish the workflow
-      objective. Break down complex tasks into simpler components.
-  validate_dag:
+    - decompose_objective_into_tasks
+    nodes_dependent_on:
+    - create_task_dag
+    prompt: Analyze the tasks and identify any dependencies between them. Which tasks
+      must be completed before others can start?
+  refine_dag:
     agent: false
-    description: Validate the created DAG for correctness and acyclicity
-    name: validate_dag
+    description: Refine the DAG to maximize concurrency and ensure acyclicity
+    name: refine_dag
     nodes_depended_on:
     - create_task_dag
-    nodes_dependent_on: []
-    prompt: Check the DAG for any cycles or inconsistencies. Verify that it accurately
-      represents the workflow and its dependencies.
+    nodes_dependent_on:
+    - finalize_workflow
+    prompt: Review the DAG for opportunities to increase concurrency while maintaining
+      acyclicity. Make any necessary adjustments.
