@@ -3,25 +3,25 @@
     "output": {
       "boiled": true,
       "temperature_celsius": 100.0,
-      "boil_time_seconds": 40
+      "boil_time_seconds": 90
     },
     "description": "Simulates heating a supplied liquid (water, milk, tea, etc.) to its boiling point, recording the temperature reached, the duration of heating, and whether the liquid is ready for use in downstream processes."
   },
   "brew_coffee": {
     "output": {
-      "brew_start_timestamp": "2023-12-01T00:00:00.000Z",
-      "brew_end_timestamp": "2023-12-01T00:05:00.000Z",
+      "brew_start_timestamp": "2023-12-01T12:00:00",
+      "brew_end_timestamp": "2023-12-01T12:05:00",
       "brew_duration_seconds": 300.0,
-      "brewed_volume_cups": 16,
+      "brewed_volume_cups": 1,
       "brewed_success": true,
-      "final_temperature_c": 94.5
+      "final_temperature_c": 95.0
     },
     "description": "Simulates heating a liquid (water, tea, or any beverage base) to its boiling point, measuring the duration taken and confirming readiness for downstream brewing or processing steps."
   },
   "measure_coffee": {
     "output": {
-      "ground_amount_grams": 236.56,
-      "desired_cup_count": 16,
+      "ground_amount_grams": 2.0,
+      "desired_cup_count": 1,
       "grounds_type": "medium grind",
       "measurement_valid": true
     },
@@ -29,7 +29,7 @@
   },
   "prepare_coffee_maker": {
     "output": {
-      "coffee_grounds_amount_g": 236.56,
+      "coffee_grounds_amount_g": 2.0,
       "filter_prepared": true,
       "coffee_maker_status": "ready"
     },
@@ -38,8 +38,8 @@
   "serve_coffee": {
     "output": {
       "served": true,
-      "temperature_c": 94.5,
-      "volume_ml": 3785
+      "temperature_c": 95.0,
+      "volume_ml": 237
     },
     "description": "Serve the coffee"
   }
