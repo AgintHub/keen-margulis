@@ -1,46 +1,48 @@
 # create_task_dag PRD
 
 ## Description
-Create a DAG representing the tasks and their dependencies
+Create a Directed Acyclic Graph (DAG) of tasks.
 
 
 ## Conceptual Info
 
-Builds a directed acyclic graph (DAG) from a list of task identifiers and dependency relations, producing node identifiers, edge lists, and a validity flag.
+Builds a topological representation of tasks based on identified dependencies, ensuring no cycles exist and producing an execution order.
 
 ## Docstring
 
 ### Summary
-Constructs a DAG from given tasks and dependency relations.
+Constructs a Directed Acyclic Graph (DAG) of tasks from dependency information, returning an ordered list of tasks, the edge list, and an acyclicity flag.
 
 ### Parameters
 
-- **tasks** (List[str]): A list of task identifiers that will become the DAG nodes.
-- **dependencies** (List[str]): Each string represents a dependency in the format 'TaskA depends on TaskB'.
+- **task_names** (List[str]): All task identifiers identified from decomposition.
+- **dependency_pairs** (List[str]): Dependency relationships in the format 'TaskA -> TaskB', indicating TaskA must complete before TaskB.
+- **dependency_count** (int): Total number of dependency relationships identified.
 
 ### Returns
 
-dict: A dictionary with four keys: task_ids (List[str]), edge_sources (List[str]), edge_destinations (List[str]), and is_valid (bool).
+Tuple[List[str], List[str], bool]: A tuple containing the ordered list of tasks, the formatted edge list, and a boolean indicating if the DAG is acyclic.
 
 ### Raises
 
-- ValueError: Raised when a dependency refers to a task not present in the `tasks` list.
-- ValueError: Raised when a dependency string does not match the expected 'TaskA depends on TaskB' pattern.
+- ValueError: If the provided dependencies contain a cycle or if input lists are inconsistent.
 
 ### Examples
 
 ```python
->>> tasks = ['A', 'B', 'C']
->>> dependencies = ['B depends on A', 'C depends on B']
->>> result = create_task_dag(tasks, dependencies)
->>> print(result)
-{'task_ids': ['A', 'B', 'C'], 'edge_sources': ['A', 'B'], 'edge_destinations': ['B', 'C'], 'is_valid': True}
+>>> dag_nodes, dag_edges, is_acyclic = create_task_dag(
+    ['A', 'B', 'C'],
+    ['A -> B', 'B -> C'],
+    2
+)
+>>> print(dag_nodes, dag_edges, is_acyclic)
+(['A', 'B', 'C'], ['A->B', 'B->C'], True)
 ```
 
 ```python
->>> tasks = ['A', 'B']
->>> dependencies = ['A depends on B', 'B depends on A']
->>> result = create_task_dag(tasks, dependencies)
->>> print(result)
-{'task_ids': ['A', 'B'], 'edge_sources': ['B', 'A'], 'edge_destinations': ['A', 'B'], 'is_valid': False}
+>>> try:
+...     create_task_dag(['A', 'B'], ['A -> B', 'B -> A'], 2)
+>>> except ValueError as e:
+...     print(e)
+"Cycle detected in task dependencies: ['A -> B', 'B -> A']"
 ```
