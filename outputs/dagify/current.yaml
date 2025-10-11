@@ -1,5 +1,5 @@
-dag_type: plain_text
-description: A workflow to create a simple cup of coffee
+dag_type: typed
+description: Generated workflow from UI.
 name: simple_coffee_workflow
 nodes:
   boil_water:
@@ -8,6 +8,18 @@ nodes:
     name: boil_water
     nodes_depended_on: []
     nodes_dependent_on: []
+    output_structure:
+    - description: Whether the water has reached the boiling point and is ready for
+        brewing.
+      key: boiled
+      type: bool
+    - description: Current temperature of the water in degrees Celsius after boiling.
+      key: temperature_celsius
+      type: float
+    - description: Duration taken to bring the water to boiling temperature, measured
+        in seconds.
+      key: boil_time_seconds
+      type: int
     prompt: Boil water to the appropriate temperature for brewing coffee.
   brew_coffee:
     agent: false
@@ -17,6 +29,25 @@ nodes:
     - boil_water
     - prepare_coffee_maker
     nodes_dependent_on: []
+    output_structure:
+    - description: ISO 8601 timestamp when brewing started
+      key: brew_start_timestamp
+      type: str
+    - description: ISO 8601 timestamp when brewing completed
+      key: brew_end_timestamp
+      type: str
+    - description: Total duration of the brewing process in seconds
+      key: brew_duration_seconds
+      type: float
+    - description: Number of cups of coffee brewed
+      key: brewed_volume_cups
+      type: int
+    - description: Whether the brewing process completed successfully
+      key: brewed_success
+      type: bool
+    - description: Final temperature of the brewed coffee in degrees Celsius
+      key: final_temperature_c
+      type: float
     prompt: Pour the boiled water into the coffee maker and start the brewing process.
   measure_coffee:
     agent: false
@@ -24,6 +55,19 @@ nodes:
     name: measure_coffee
     nodes_depended_on: []
     nodes_dependent_on: []
+    output_structure:
+    - description: Amount of coffee grounds measured in grams
+      key: ground_amount_grams
+      type: float
+    - description: Number of coffee cups to be brewed
+      key: desired_cup_count
+      type: int
+    - description: Type of coffee grounds used (e.g., medium grind, dark roast)
+      key: grounds_type
+      type: str
+    - description: Indicates whether the measurement was performed correctly
+      key: measurement_valid
+      type: bool
     prompt: Measure the appropriate amount of coffee grounds for the desired number
       of cups.
   prepare_coffee_maker:
@@ -33,6 +77,17 @@ nodes:
     nodes_depended_on:
     - measure_coffee
     nodes_dependent_on: []
+    output_structure:
+    - description: The amount of coffee grounds added to the coffee maker's filter
+        in grams
+      key: coffee_grounds_amount_g
+      type: float
+    - description: Whether the filter is properly prepared and ready
+      key: filter_prepared
+      type: bool
+    - description: Current status of the coffee maker (e.g., 'ready', 'error')
+      key: coffee_maker_status
+      type: str
     prompt: Put the measured coffee grounds into the coffee maker's filter.
   serve_coffee:
     agent: false
@@ -41,4 +96,14 @@ nodes:
     nodes_depended_on:
     - brew_coffee
     nodes_dependent_on: []
+    output_structure:
+    - description: Whether the coffee has been successfully served into a cup
+      key: served
+      type: bool
+    - description: The temperature of the served coffee in degrees Celsius
+      key: temperature_c
+      type: float
+    - description: The volume of the served coffee in milliliters
+      key: volume_ml
+      type: int
     prompt: Pour the freshly brewed coffee into a cup and serve.
