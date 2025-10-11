@@ -6,10 +6,11 @@ import json
 import sys
 from typing import Dict, Any, List, Callable, Coroutine, Union, Optional
 
-from code.analyze_leaf_shapes import analyze_leaf_shapes
-from code.collect_leaf_data import collect_leaf_data
-from code.extract_leaf_features import extract_leaf_features
-from code.generate_leaf_pattern_insights import generate_leaf_pattern_insights
+from code.gather_wcfb_data import gather_wcfb_data
+from code.analyze_business_operations import analyze_business_operations
+from code.examine_customer_feedback import examine_customer_feedback
+from code.assess_market_trends import assess_market_trends
+from code.integrate_analysis_results import integrate_analysis_results
 
 # Get async mode from environment variable or default to False
 ASYNC_MODE = os.environ.get('ASYNC_MODE', '').lower() in ('true', '1', 'yes', 'y')
@@ -31,10 +32,11 @@ def make_async(func):
 
     return async_wrapper
 
-analyze_leaf_shapes_async = make_async(analyze_leaf_shapes)
-collect_leaf_data_async = make_async(collect_leaf_data)
-extract_leaf_features_async = make_async(extract_leaf_features)
-generate_leaf_pattern_insights_async = make_async(generate_leaf_pattern_insights)
+gather_wcfb_data_async = make_async(gather_wcfb_data)
+analyze_business_operations_async = make_async(analyze_business_operations)
+examine_customer_feedback_async = make_async(examine_customer_feedback)
+assess_market_trends_async = make_async(assess_market_trends)
+integrate_analysis_results_async = make_async(integrate_analysis_results)
 
 async def run_workflow(user_input: str) -> Dict[str, Any]:
     """Execute the workflow by running each level in the topological sort.
@@ -48,37 +50,40 @@ async def run_workflow(user_input: str) -> Dict[str, Any]:
     # Store results for each node
     results = {}
 
-    # Level 0: collect_leaf_data
-    async def run_collect_leaf_data():
-        # Call the async version of collect_leaf_data with results from dependencies
-        return await collect_leaf_data_async(user_input)
+    # Level 0: gather_wcfb_data
+    async def run_gather_wcfb_data():
+        # Call the async version of gather_wcfb_data with results from dependencies
+        return await gather_wcfb_data_async(user_input)
 
     # Run level 0 nodes in parallel
-    results['collect_leaf_data'] = await run_collect_leaf_data()
+    results['gather_wcfb_data'] = await run_gather_wcfb_data()
 
-    # Level 1: analyze_leaf_shapes
-    async def run_analyze_leaf_shapes():
-        # Call the async version of analyze_leaf_shapes with results from dependencies
-        return await analyze_leaf_shapes_async(results['collect_leaf_data'])
+    # Level 1: analyze_business_operations, examine_customer_feedback, assess_market_trends
+    async def run_analyze_business_operations():
+        # Call the async version of analyze_business_operations with results from dependencies
+        return await analyze_business_operations_async(results['gather_wcfb_data'])
+
+    async def run_examine_customer_feedback():
+        # Call the async version of examine_customer_feedback with results from dependencies
+        return await examine_customer_feedback_async(results['gather_wcfb_data'])
+
+    async def run_assess_market_trends():
+        # Call the async version of assess_market_trends with results from dependencies
+        return await assess_market_trends_async(results['gather_wcfb_data'])
 
     # Run level 1 nodes in parallel
-    results['analyze_leaf_shapes'] = await run_analyze_leaf_shapes()
+    level_1_results = await asyncio.gather(run_analyze_business_operations(), run_examine_customer_feedback(), run_assess_market_trends())
+    results['analyze_business_operations'] = level_1_results[0]
+    results['examine_customer_feedback'] = level_1_results[1]
+    results['assess_market_trends'] = level_1_results[2]
 
-    # Level 2: extract_leaf_features
-    async def run_extract_leaf_features():
-        # Call the async version of extract_leaf_features with results from dependencies
-        return await extract_leaf_features_async(results['collect_leaf_data'], results['analyze_leaf_shapes'])
+    # Level 2: integrate_analysis_results
+    async def run_integrate_analysis_results():
+        # Call the async version of integrate_analysis_results with results from dependencies
+        return await integrate_analysis_results_async(results['analyze_business_operations'], results['examine_customer_feedback'], results['assess_market_trends'])
 
     # Run level 2 nodes in parallel
-    results['extract_leaf_features'] = await run_extract_leaf_features()
-
-    # Level 3: generate_leaf_pattern_insights
-    async def run_generate_leaf_pattern_insights():
-        # Call the async version of generate_leaf_pattern_insights with results from dependencies
-        return await generate_leaf_pattern_insights_async(results['extract_leaf_features'])
-
-    # Run level 3 nodes in parallel
-    results['generate_leaf_pattern_insights'] = await run_generate_leaf_pattern_insights()
+    results['integrate_analysis_results'] = await run_integrate_analysis_results()
 
     # Return all results
     return results

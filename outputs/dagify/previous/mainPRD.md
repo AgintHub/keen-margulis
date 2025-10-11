@@ -1,183 +1,209 @@
-# leafpatternworkflow - Complete PRD Documentation
+# wcfb_analysis_workflow - Complete PRD Documentation
 
 ## Overview
-PRDs for nodes in the 'leafpatternworkflow' module.
+PRDs for nodes in the 'wcfb_analysis_workflow' module.
 
 ## Table of Contents
 
-- [analyze_leaf_shapes](#analyze_leaf_shapes)
+- [gather_wcfb_data](#gather_wcfb_data)
 
-- [collect_leaf_data](#collect_leaf_data)
+- [analyze_business_operations](#analyze_business_operations)
 
-- [extract_leaf_features](#extract_leaf_features)
+- [examine_customer_feedback](#examine_customer_feedback)
 
-- [generate_leaf_pattern_insights](#generate_leaf_pattern_insights)
+- [assess_market_trends](#assess_market_trends)
+
+- [integrate_analysis_results](#integrate_analysis_results)
 
 
 
 ---
 
-## analyze_leaf_shapes
+## gather_wcfb_data
 
 ### Description
-Analyze the shapes of leaves and categorize them
+Gather data necessary for WCFB analysis
 
 ### Conceptual Info
 
-This node analyzes the shapes of leaves based on the data collected by the 'collect_leaf_data' node and categorizes them into different types.
+This node gathers relevant data for WCFB analysis from various sources.
 
 ### Docstring
 
-**Summary:** Analyze leaf shapes and categorize them into different types based on the collected leaf data.
+**Summary:** Gathers data necessary for WCFB analysis from business operations, customer feedback, and market trends.
+
+**Returns:** Tuple[str, List[str], List[float]] - A tuple containing business operations data, customer feedback data, and market trends data.
+
+**Raises:**
+
+- DataCollectionError: If there's an issue collecting data from any of the sources.
+**Examples:**
+
+```python
+>>> gather_wcfb_data()
+('Business operations data', ['Customer feedback 1', 'Customer feedback 2'], [1.2, 3.4, 5.6])
+```
+
+```python
+>>> business_ops_data, customer_feedback, market_trends = gather_wcfb_data()
+business_ops_data: 'Business operations data'
+customer_feedback: ['Customer feedback 1', 'Customer feedback 2']
+market_trends: [1.2, 3.4, 5.6]
+```
+
+
+
+---
+
+## analyze_business_operations
+
+### Description
+Analyze business operations data
+
+### Conceptual Info
+
+This node analyzes business operations data gathered from various sources to identify strengths, weaknesses, and efficiency metrics.
+
+### Docstring
+
+**Summary:** Analyzes business operations data to identify areas of strength and weakness.
 
 **Parameters:**
 
-- leaf_images (List[str]): List of image file names or URLs of leaves collected by the 'collect_leaf_data' node.
-- leaf_characteristics (List[str]): List of characteristic descriptions for each leaf collected by the 'collect_leaf_data' node.
-**Returns:** Tuple[List[str], List[int]] - A tuple containing a list of shape categories for the leaves and a list of counts of leaves in each shape category.
+- business_operations_data (str): Data related to business operations gathered from the 'gather_wcfb_data' node.
+**Returns:** Tuple[List[str], List[str], List[float]] - A tuple containing a list of business operation strengths, a list of business operation weaknesses, and a list of efficiency metrics for business operations.
 
 **Raises:**
 
-- ValueError: If the input lists 'leaf_images' and 'leaf_characteristics' are of different lengths.
+- ValueError: If the input 'business_operations_data' is empty or not in the expected format.
 **Examples:**
 
 ```python
->>> leaf_images = ['leaf1.jpg', 'leaf2.jpg', 'leaf3.jpg']
->>> leaf_characteristics = ['oval', 'lanceolate', 'cordate']
->>> leaf_shape_categories, shape_category_counts = analyze_leaf_shapes(leaf_images, leaf_characteristics)
-(['oval', 'lanceolate', 'cordate'], [1, 1, 1])
+>>> business_operations_data = '{"sales": 1000, "expenses": 500, "productivity": 0.8}'
+>>> strengths, weaknesses, efficiency_metrics = analyze_business_operations(business_operations_data)
+>>> print(strengths, weaknesses, efficiency_metrics)
+['High sales'] ['High expenses'] [0.8]
 ```
 
 ```python
->>> leaf_images = ['leaf4.jpg', 'leaf5.jpg']
->>> leaf_characteristics = ['elliptical', 'lanceolate']
->>> leaf_shape_categories, shape_category_counts = analyze_leaf_shapes(leaf_images, leaf_characteristics)
-(['elliptical', 'lanceolate'], [1, 1])
+>>> business_operations_data = '{"sales": 800, "expenses": 600, "productivity": 0.7}'
+>>> strengths, weaknesses, efficiency_metrics = analyze_business_operations(business_operations_data)
+>>> print(strengths, weaknesses, efficiency_metrics)
+['Moderate sales'] ['High expenses'] [0.7]
 ```
 
 
 
 ---
 
-## collect_leaf_data
+## examine_customer_feedback
 
 ### Description
-Gather data on various leaf patterns including images and characteristics
+Analyze customer feedback
 
 ### Conceptual Info
 
-The 'collect_leaf_data' node is responsible for gathering images and characteristics of various leaf patterns.
+This node analyzes customer feedback data to identify patterns, areas for improvement, and overall customer satisfaction.
 
 ### Docstring
 
-**Summary:** Collects leaf images and their characteristics, returning lists of image file names/URLs and characteristic descriptions.
-
-**Returns:** Tuple[List[str], List[str]] - A tuple containing a list of leaf image file names/URLs and a list of characteristic descriptions for each leaf.
-
-**Raises:**
-
-- Exception: If there's an issue collecting or processing the leaf data.
-**Examples:**
-
-```python
->>> leaf_images, leaf_characteristics = collect_leaf_data()
-(['leaf1.jpg', 'leaf2.jpg'], ['Ovate with smooth edges', 'Lanceolate with serrated edges'])
-```
-
-```python
->>> leaf_data = collect_leaf_data(); print(leaf_data[0]); print(leaf_data[1])
-['leaf1.jpg', 'leaf2.jpg']
-['Ovate with smooth edges', 'Lanceolate with serrated edges']
-```
-
-
-
----
-
-## extract_leaf_features
-
-### Description
-Extract features from leaf images such as vein patterns and colors
-
-### Conceptual Info
-
-This node processes leaf images to extract features such as vein patterns and colors, building upon the data collected and shape analysis from previous nodes.
-
-### Docstring
-
-**Summary:** Extracts features from leaf images, including vein patterns and colors, using data from collect_leaf_data and analyze_leaf_shapes.
+**Summary:** Analyze customer feedback data to extract insights.
 
 **Parameters:**
 
-- leaf_images (List[str]): List of image file names or URLs of leaves from collect_leaf_data.
-- leaf_characteristics (List[str]): List of characteristic descriptions for each leaf from collect_leaf_data.
-- leaf_shape_categories (List[str]): List of shape categories for the leaves from analyze_leaf_shapes.
-- shape_category_counts (List[int]): Counts of leaves in each shape category from analyze_leaf_shapes.
-**Returns:** Tuple[List[str], List[str]] - A tuple containing a list of descriptions of vein patterns for each leaf and a list of colors observed in the leaves.
+- customer_feedback_data (List[str]): List of customer feedback comments from the gather_wcfb_data node.
+**Returns:** Tuple[float, List[str], List[str]] - A tuple containing the overall customer satisfaction score, a list of common customer complaints, and a list of themes from positive customer feedback.
 
 **Raises:**
 
-- ValueError: If leaf_images or leaf_characteristics are empty or mismatched in length.
-- TypeError: If the input lists are not of the expected types.
+- ValueError: If customer_feedback_data is empty or not a list of strings.
 **Examples:**
 
 ```python
->>> leaf_images = ['leaf1.jpg', 'leaf2.jpg']
->>> leaf_characteristics = ['characteristic1', 'characteristic2']
->>> leaf_shape_categories = ['shape1', 'shape2']
->>> shape_category_counts = [1, 2]
->>> result = extract_leaf_features(leaf_images, leaf_characteristics, leaf_shape_categories, shape_category_counts)
-(['vein pattern 1', 'vein pattern 2'], ['color1', 'color2'])
+>>> customer_feedback_data = ['Great service!', 'Slow delivery.', 'Excellent product!']
+>>> result = examine_customer_feedback(customer_feedback_data)
+>>> print(result)
+(0.8, ['Slow delivery.'], ['Great service!', 'Excellent product!'])
 ```
 
 ```python
->>> leaf_images = ['leaf3.jpg']
->>> leaf_characteristics = ['characteristic3']
->>> leaf_shape_categories = ['shape3']
->>> shape_category_counts = [3]
->>> result = extract_leaf_features(leaf_images, leaf_characteristics, leaf_shape_categories, shape_category_counts)
-(['vein pattern 3'], ['color3'])
+>>> customer_feedback_data = ['Good product.', 'Bad customer support.', 'Fast shipping!']
+>>> result = examine_customer_feedback(customer_feedback_data)
+>>> print(result)
+(0.7, ['Bad customer support.'], ['Good product.', 'Fast shipping!'])
 ```
 
 
 
 ---
 
-## generate_leaf_pattern_insights
+## assess_market_trends
 
 ### Description
-Generate insights on leaf patterns based on the extracted features
+Analyze market trends
 
 ### Conceptual Info
 
-This node analyzes the features extracted from leaf images to identify common patterns and variations, providing a summary of the insights gained.
+This node analyzes market trends to identify opportunities and threats, providing a forecast of future market trends.
 
 ### Docstring
 
-**Summary:** Generate insights on leaf patterns based on extracted features such as vein patterns and colors.
+**Summary:** Assess market trends based on gathered data to identify opportunities, threats, and forecast future trends.
 
 **Parameters:**
 
-- leaf_vein_patterns (List[str]): Descriptions of vein patterns for each leaf, extracted by the parent node 'extract_leaf_features'
-- leaf_colors (List[str]): List of colors observed in the leaves, extracted by the parent node 'extract_leaf_features'
-**Returns:** Tuple[List[str], List[str], str] - A tuple containing a list of common leaf patterns, a list of leaf pattern variations, and a summary of key insights on leaf patterns.
+- market_trends_data (List[float]): List of market trend metrics gathered from various sources.
+**Returns:** Tuple[List[str], List[str], str] - A tuple containing a list of market opportunities, a list of market threats, and a forecast of future market trends.
 
 **Raises:**
 
-- ValueError: If the input lists 'leaf_vein_patterns' or 'leaf_colors' are empty or not provided.
+- ValueError: If market_trends_data is empty or not a list of floats.
 **Examples:**
 
 ```python
->>> leaf_vein_patterns = ['parallel', 'net-like', 'parallel']
->>> leaf_colors = ['green', 'green', 'yellow']
->>> common_leaf_patterns, leaf_pattern_variations, insights_summary = generate_leaf_pattern_insights(leaf_vein_patterns, leaf_colors)
-(['parallel', 'net-like'], ['green', 'yellow'], 'Key insights: Parallel vein patterns are common, with variations in color.')
+>>> assess_market_trends(market_trends_data=[0.5, 0.7, 0.3])
+(['growing demand'], ['increasing competition'], 'The market is expected to grow steadily.')
 ```
 
 ```python
->>> leaf_vein_patterns = ['net-like', 'net-like', 'net-like']
->>> leaf_colors = ['green', 'variegated', 'green']
->>> common_leaf_patterns, leaf_pattern_variations, insights_summary = generate_leaf_pattern_insights(leaf_vein_patterns, leaf_colors)
-(['net-like'], ['variegated'], 'Key insights: Net-like vein patterns are predominant, with some variation in leaf color.')
+>>> assess_market_trends(market_trends_data=[0.2, 0.4, 0.1])
+(['niche market'], ['declining trend'], 'The market is showing signs of decline.')
+```
+
+
+
+---
+
+## integrate_analysis_results
+
+### Description
+Integrate analysis results
+
+### Conceptual Info
+
+This node integrates the results from business operations analysis, customer feedback examination, and market trends assessment to form a comprehensive WCFB analysis.
+
+### Docstring
+
+**Summary:** Integrates analysis results from multiple sources into a comprehensive WCFB analysis report, key recommendations, and an implementation roadmap.
+
+**Parameters:**
+
+- business_operations_analysis (dict): Results from business operations analysis, including strengths, weaknesses, and efficiency metrics.
+- customer_feedback_examination (dict): Results from customer feedback examination, including customer satisfaction score, common complaints, and positive feedback themes.
+- market_trends_assessment (dict): Results from market trends assessment, including market opportunities, market threats, and trend forecast.
+**Returns:** tuple[str, list[str], list[str]] - A tuple containing the comprehensive WCFB analysis report, key recommendations, and implementation roadmap.
+
+**Raises:**
+
+- ValueError: If any of the input analysis results are missing or invalid.
+**Examples:**
+
+```python
+>>> business_operations_analysis = {'strengths': ['Efficient supply chain'], 'weaknesses': ['High employee turnover'], 'efficiency_metrics': [0.8]}
+>>> customer_feedback_examination = {'customer_satisfaction_score': 0.7, 'common_complaints': ['Poor customer service'], 'positive_feedback_themes': ['Quality products']}
+>>> market_trends_assessment = {'market_opportunities': ['Growing demand for eco-friendly products'], 'market_threats': ['Increasing competition'], 'trend_forecast': 'Steady growth'}
+>>> integrate_analysis_results(business_operations_analysis, customer_feedback_examination, market_trends_assessment)
+('Comprehensive WCFB analysis report...', ['Improve customer service', 'Invest in eco-friendly products'], ['Step 1: Train customer service staff', 'Step 2: Develop eco-friendly product line'])
 ```
 
