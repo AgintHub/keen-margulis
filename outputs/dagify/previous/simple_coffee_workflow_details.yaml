@@ -4,7 +4,9 @@ name: simple_coffee_workflow
 nodes:
   boil_water:
     agent: false
-    description: Boil water for the coffee
+    description: Simulates heating a supplied liquid (water, milk, tea, etc.) to its
+      boiling point, recording the temperature reached, the duration of heating, and
+      whether the liquid is ready for use in downstream processes.
     name: boil_water
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -21,37 +23,63 @@ nodes:
       key: boil_time_seconds
       type: int
     prd:
-      conceptual_info: The boil_water node simulates heating water to its boiling
-        point, measuring how long the process takes and confirming readiness for brewing.
+      conceptual_info: The boil_liquid node is a core thermodynamic simulation step
+        that transforms any input liquid into a ready‑to‑use state for brewing, cooking,
+        or analytical processes. It abstracts the physics of heating while providing
+        measurable metrics that downstream nodes can leverage for timing, quality
+        control, and safety checks.
       docstring:
         examples:
         - lines:
-          - output = boil_water()
-          - print(output)
+          - result = boil_liquid(liquid_type='water', volume=0.5)
+          - print(result)
           output: '{''boiled'': True, ''temperature_celsius'': 100.0, ''boil_time_seconds'':
-            120}'
-        parameters: []
+            90}'
+        parameters:
+        - description: Name of the liquid to be boiled (e.g., "water", "milk", "tea").
+          name: liquid_type
+          type: str
+        - description: Volume of the liquid in liters.
+          name: volume
+          type: float
         raises:
-        - description: Raised if the boiling simulation fails due to invalid conditions
-            (e.g., insufficient water).
+        - description: Raised if an unsupported liquid type is provided.
           type: ValueError
+        - description: Raised if the heating simulation fails to converge within realistic
+            limits.
+          type: RuntimeError
         returns:
-          description: 'A dictionary containing three keys:
+          description: Dictionary containing `boiled` (bool), `temperature_celsius`
+            (float), and `boil_time_seconds` (int).
+          type: dict
+        summary: Heats a liquid to its boiling point and returns the readiness status,
+          final temperature, and heating duration.
+    prompt: 'Heat the supplied liquid to its boiling point using realistic physical
+      properties. The node receives the liquid type and volume via context (e.g.,
+      parent nodes provide `liquid_type: str` and `volume: float` in liters). Your
+      task is:
 
-            - ''boiled'' (bool): True if water has reached boiling point.
 
-            - ''temperature_celsius'' (float): The final temperature in Celsius.
+      1. Determine the boiling point of the specified liquid.
 
-            - ''boil_time_seconds'' (int): Number of seconds elapsed during boiling.'
-          type: Dict[str, Any]
-        summary: Boils water to 100 °C, measures the boiling time, and indicates when
-          it is ready for coffee brewing.
-    prompt: Boil water to the appropriate temperature for brewing coffee.
+      2. Simulate the heating process, tracking temperature rise over time.
+
+      3. Record the total time taken to reach boiling, expressed in whole seconds.
+
+      4. Return a Boolean flag indicating the liquid has successfully reached its
+      boiling temperature.
+
+      5. Output the final temperature (in °C) and the boiling duration.
+
+
+      Return only the fields listed in `output_structure`.
+
+      '
   brew_coffee:
     agent: false
-    description: Brew the coffee by pouring boiled water into a pre‑prepared coffee
-      maker, starting the brewing cycle, and collecting timing, volume, and temperature
-      metrics.
+    description: Simulates heating a liquid (water, tea, or any beverage base) to
+      its boiling point, measuring the duration taken and confirming readiness for
+      downstream brewing or processing steps.
     name: brew_coffee
     nodes_depended_on:
     - boil_water
@@ -77,74 +105,31 @@ nodes:
       key: final_temperature_c
       type: float
     prd:
-      conceptual_info: The brew_coffee node simulates the physical act of brewing
-        coffee. It takes the results of boiling water and preparing the coffee maker,
-        pours the water into the machine, initiates the brew cycle, and measures key
-        performance metrics such as start/end timestamps, duration, volume, success
-        flag, and final temperature.
+      conceptual_info: The boil_any_liquid node models the physical process of heating
+        a liquid to its boiling point, capturing key performance metrics such as time,
+        temperature, and success status to inform subsequent brewing stages.
       docstring:
         examples:
         - lines:
-          - brew_coffee(
-          - '    boiled=True,'
-          - '    temperature_celsius=95.0,'
-          - '    boil_time_seconds=120,'
-          - '    coffee_grounds_amount_g=18.0,'
-          - '    filter_prepared=True,'
-          - '    coffee_maker_status=''ready'','
-          - '    desired_cup_count=2'
-          - )
-          output: '{''brew_start_timestamp'': ''2025-10-11T08:00:00Z'', ''brew_end_timestamp'':
-            ''2025-10-11T08:03:45Z'', ''brew_duration_seconds'': 225.0, ''brewed_volume_cups'':
-            2, ''brewed_success'': True, ''final_temperature_c'': 88.5}'
-        - lines:
-          - brew_coffee(
-          - '    boiled=False,'
-          - '    temperature_celsius=0.0,'
-          - '    boil_time_seconds=0,'
-          - '    coffee_grounds_amount_g=18.0,'
-          - '    filter_prepared=True,'
-          - '    coffee_maker_status=''ready'','
-          - '    desired_cup_count=2'
-          - )
-          output: 'ValueError: Water must be boiled before brewing.'
+          - result = boil_any_liquid(target_temperature_celsius=100.0)
+          - print(result['boiled'], result['temperature_celsius'], result['boil_time_seconds'])
+          output: True 100.0 45
         parameters:
-        - description: Indicates whether the water has reached boiling point and is
-            ready for brewing.
-          name: boiled
-          type: bool
-        - description: Temperature of the water after boiling, in degrees Celsius.
-          name: temperature_celsius
+        - description: Desired boiling temperature for the liquid in degrees Celsius.
+          name: target_temperature_celsius
           type: float
-        - description: Duration taken to bring the water to boiling temperature, in
-            seconds.
-          name: boil_time_seconds
-          type: int
-        - description: Amount of coffee grounds added to the coffee maker's filter,
-            in grams.
-          name: coffee_grounds_amount_g
-          type: float
-        - description: Whether the filter is properly prepared and ready.
-          name: filter_prepared
-          type: bool
-        - description: Current status of the coffee maker (e.g., 'ready', 'error').
-          name: coffee_maker_status
-          type: str
-        - description: Number of cups that should be brewed based on the coffee grounds
-            measurement.
-          name: desired_cup_count
-          type: int
         raises:
-        - description: Raised if the water is not boiled, the filter is not prepared,
-            the coffee maker status is not 'ready', or any input values are invalid.
+        - description: Raised if the liquid fails to reach the target temperature
+            within the allowed timeframe.
           type: ValueError
         returns:
-          description: Dictionary containing brewing timestamps, duration, volume,
-            success flag, and final temperature.
+          description: Dictionary containing boiled status, temperature, and boil
+            time.
           type: dict
-        summary: Start the brewing process by combining boiled water with a prepared
-          coffee maker and record brewing metrics.
-    prompt: Pour the boiled water into the coffee maker and start the brewing process.
+        summary: Boil the specified liquid to its target boiling temperature and report
+          readiness metrics.
+    prompt: Boil the provided liquid to its target boiling temperature, ensuring it
+      reaches the specified temperature before proceeding.
   measure_coffee:
     agent: false
     description: Measure the coffee grounds

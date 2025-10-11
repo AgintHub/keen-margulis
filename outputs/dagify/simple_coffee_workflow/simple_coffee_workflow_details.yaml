@@ -1,12 +1,35 @@
-dag_type: spec
+dag_type: stub
 description: Generated workflow from UI.
 name: simple_coffee_workflow
 nodes:
   boil_water:
     agent: false
+    code_node_type: stub
     description: Simulates heating a supplied liquid (water, milk, tea, etc.) to its
       boiling point, recording the temperature reached, the duration of heating, and
       whether the liquid is ready for use in downstream processes.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass BoilWaterOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for boil_water node outputs.\"\"\"\n    boiled: bool\
+      \ = (\n        Field(..., description=\"Whether the water has reached the boiling\
+      \ point and is ready for brewing.\")\n    )\n    temperature_celsius: float\
+      \ = (\n        Field(..., description=\"Current temperature of the water in\
+      \ degrees Celsius after boiling.\")\n    )\n    boil_time_seconds: int = (\n\
+      \        Field(..., description=\"Duration taken to bring the water to boiling\
+      \ temperature, measured in seconds.\")\n    )\n\n\ndef boil_water(general_input:\
+      \ str, **kwargs) -> BoilWaterOutput:\n    \"\"\"\n    Heats a liquid to its\
+      \ boiling point and returns the readiness status, final\n    temperature, and\
+      \ heating duration.\n\n    Parameters\n    ----------\n    liquid_type : str\n\
+      \        Name of the liquid to be boiled (e.g., \"water\", \"milk\", \"tea\"\
+      ).\n    volume : float\n        Volume of the liquid in liters.\n\n    Returns\n\
+      \    -------\n    dict\n        Dictionary containing `boiled` (bool), `temperature_celsius`\n\
+      \        (float), and `boil_time_seconds` (int).\n\n    Raises\n    ------\n\
+      \    ValueError\n        Raised if an unsupported liquid type is provided.\n\
+      \    RuntimeError\n        Raised if the heating simulation fails to converge\
+      \ within realistic\n        limits.\n\n    Examples\n    --------\n    >>> result\
+      \ = boil_liquid(liquid_type='water', volume=0.5)\n    >>> print(result)\n  \
+      \  {'boiled': True, 'temperature_celsius': 100.0, 'boil_time_seconds': 90}\n\
+      \n    \"\"\"\n    return BoilWaterOutput(\n        boiled=False,\n        temperature_celsius=0.0,\n\
+      \        boil_time_seconds=0,\n    )"
     name: boil_water
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -75,11 +98,53 @@ nodes:
       Return only the fields listed in `output_structure`.
 
       '
+    shims: []
   brew_coffee:
     agent: false
+    code_node_type: stub
     description: Simulates heating a liquid (water, tea, or any beverage base) to
       its boiling point, measuring the duration taken and confirming readiness for
       downstream brewing or processing steps.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass BoilWaterOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for boil_water node outputs.\"\"\"\n    boiled: bool\
+      \ = (\n        Field(..., description=\"Whether the water has reached the boiling\
+      \ point and is ready for brewing.\")\n    )\n    temperature_celsius: float\
+      \ = (\n        Field(..., description=\"Current temperature of the water in\
+      \ degrees Celsius after boiling.\")\n    )\n    boil_time_seconds: int = (\n\
+      \        Field(..., description=\"Duration taken to bring the water to boiling\
+      \ temperature, measured in seconds.\")\n    )\n\n\nclass PrepareCoffeeMakerOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for prepare_coffee_maker node outputs.\"\"\"\n   \
+      \ coffee_grounds_amount_g: float = (\n        Field(..., description=\"The amount\
+      \ of coffee grounds added to the coffee maker's filter in grams\")\n    )\n\
+      \    filter_prepared: bool = (\n        Field(..., description=\"Whether the\
+      \ filter is properly prepared and ready\")\n    )\n    coffee_maker_status:\
+      \ str = (\n        Field(..., description=\"Current status of the coffee maker\
+      \ (e.g., 'ready', 'error')\")\n    )\n\n\nclass BrewCoffeeOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for brew_coffee node outputs.\"\"\"\n    brew_start_timestamp:\
+      \ str = (\n        Field(..., description=\"ISO 8601 timestamp when brewing\
+      \ started\")\n    )\n    brew_end_timestamp: str = (\n        Field(..., description=\"\
+      ISO 8601 timestamp when brewing completed\")\n    )\n    brew_duration_seconds:\
+      \ float = (\n        Field(..., description=\"Total duration of the brewing\
+      \ process in seconds\")\n    )\n    brewed_volume_cups: int = (\n        Field(...,\
+      \ description=\"Number of cups of coffee brewed\")\n    )\n    brewed_success:\
+      \ bool = (\n        Field(..., description=\"Whether the brewing process completed\
+      \ successfully\")\n    )\n    final_temperature_c: float = (\n        Field(...,\
+      \ description=\"Final temperature of the brewed coffee in degrees Celsius\"\
+      )\n    )\n\n\ndef brew_coffee(boil_water_input: BoilWaterOutput, prepare_coffee_maker_input:\
+      \ PrepareCoffeeMakerOutput, **kwargs) -> BrewCoffeeOutput:\n    \"\"\"\n   \
+      \ Boil the specified liquid to its target boiling temperature and report\n \
+      \   readiness metrics.\n\n    Parameters\n    ----------\n    target_temperature_celsius\
+      \ : float\n        Desired boiling temperature for the liquid in degrees Celsius.\n\
+      \n    Returns\n    -------\n    dict\n        Dictionary containing boiled status,\
+      \ temperature, and boil time.\n\n    Raises\n    ------\n    ValueError\n  \
+      \      Raised if the liquid fails to reach the target temperature within\n \
+      \       the allowed timeframe.\n\n    Examples\n    --------\n    >>> result\
+      \ = boil_any_liquid(target_temperature_celsius=100.0)\n    >>> print(result['boiled'],\
+      \ result['temperature_celsius'],\n    result['boil_time_seconds'])\n    True\
+      \ 100.0 45\n\n    \"\"\"\n    return BrewCoffeeOutput(\n        brew_start_timestamp=\"\
+      \",\n        brew_end_timestamp=\"\",\n        brew_duration_seconds=0.0,\n\
+      \        brewed_volume_cups=0,\n        brewed_success=False,\n        final_temperature_c=0.0,\n\
+      \    )"
     name: brew_coffee
     nodes_depended_on:
     - boil_water
@@ -130,9 +195,35 @@ nodes:
           readiness metrics.
     prompt: Boil the provided liquid to its target boiling temperature, ensuring it
       reaches the specified temperature before proceeding.
+    shims: []
   measure_coffee:
     agent: false
+    code_node_type: stub
     description: Measure the coffee grounds
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass MeasureCoffeeOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for measure_coffee node outputs.\"\"\"\n    ground_amount_grams:\
+      \ float = (\n        Field(..., description=\"Amount of coffee grounds measured\
+      \ in grams\")\n    )\n    desired_cup_count: int = (\n        Field(..., description=\"\
+      Number of coffee cups to be brewed\")\n    )\n    grounds_type: str = (\n  \
+      \      Field(..., description=\"Type of coffee grounds used (e.g., medium grind,\
+      \ dark roast)\")\n    )\n    measurement_valid: bool = (\n        Field(...,\
+      \ description=\"Indicates whether the measurement was performed correctly\"\
+      )\n    )\n\n\ndef measure_coffee(general_input: str, **kwargs) -> MeasureCoffeeOutput:\n\
+      \    \"\"\"\n    Calculate and verify the amount of coffee grounds needed for\
+      \ a given number\n    of cups.\n\n    Parameters\n    ----------\n    desired_cup_count\
+      \ : int\n        The target number of coffee cups to brew.\n    grounds_type\
+      \ : str\n        The type of coffee grounds (e.g., 'medium grind', 'dark roast').\n\
+      \n    Returns\n    -------\n    dict\n        Dictionary containing `ground_amount_grams`\
+      \ (float),\n        `desired_cup_count` (int), `grounds_type` (str), and\n \
+      \       `measurement_valid` (bool).\n\n    Raises\n    ------\n    ValueError\n\
+      \        If `desired_cup_count` is not a positive integer or `grounds_type`\n\
+      \        is not among the supported types.\n\n    Examples\n    --------\n \
+      \   >>> measure_coffee(3, 'medium grind')\n    {'ground_amount_grams': 18.0,\
+      \ 'desired_cup_count': 3, 'grounds_type':\n    'medium grind', 'measurement_valid':\
+      \ True}\n\n    >>> measure_coffee(0, 'dark roast')\n    ValueError: desired_cup_count\
+      \ must be a positive integer.\n\n    \"\"\"\n    return MeasureCoffeeOutput(\n\
+      \        ground_amount_grams=0.0,\n        desired_cup_count=0,\n        grounds_type=\"\
+      \",\n        measurement_valid=False,\n    )"
     name: measure_coffee
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -182,9 +273,50 @@ nodes:
           number of cups.
     prompt: Measure the appropriate amount of coffee grounds for the desired number
       of cups.
+    shims: []
   prepare_coffee_maker:
     agent: false
+    code_node_type: stub
     description: Prepare the coffee maker
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass MeasureCoffeeOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for measure_coffee node outputs.\"\"\"\n    ground_amount_grams:\
+      \ float = (\n        Field(..., description=\"Amount of coffee grounds measured\
+      \ in grams\")\n    )\n    desired_cup_count: int = (\n        Field(..., description=\"\
+      Number of coffee cups to be brewed\")\n    )\n    grounds_type: str = (\n  \
+      \      Field(..., description=\"Type of coffee grounds used (e.g., medium grind,\
+      \ dark roast)\")\n    )\n    measurement_valid: bool = (\n        Field(...,\
+      \ description=\"Indicates whether the measurement was performed correctly\"\
+      )\n    )\n\n\nclass PrepareCoffeeMakerOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for prepare_coffee_maker node outputs.\"\"\"\n    coffee_grounds_amount_g:\
+      \ float = (\n        Field(..., description=\"The amount of coffee grounds added\
+      \ to the coffee maker's filter in grams\")\n    )\n    filter_prepared: bool\
+      \ = (\n        Field(..., description=\"Whether the filter is properly prepared\
+      \ and ready\")\n    )\n    coffee_maker_status: str = (\n        Field(...,\
+      \ description=\"Current status of the coffee maker (e.g., 'ready', 'error')\"\
+      )\n    )\n\n\ndef prepare_coffee_maker(measure_coffee_input: MeasureCoffeeOutput,\
+      \ **kwargs) -> PrepareCoffeeMakerOutput:\n    \"\"\"\n    Adds the specified\
+      \ amount of coffee grounds into the coffee maker's filter,\n    validates the\
+      \ measurement, and reports the amount added, filter status, and\n    overall\
+      \ maker status.\n\n    Parameters\n    ----------\n    ground_amount_grams :\
+      \ float\n        Amount of coffee grounds measured in grams (from measure_coffee).\n\
+      \    desired_cup_count : int\n        Number of coffee cups to be brewed (from\
+      \ measure_coffee).\n    grounds_type : str\n        Type of coffee grounds used\
+      \ (e.g., medium grind, dark roast).\n    measurement_valid : bool\n        Flag\
+      \ indicating whether the measurement was performed correctly.\n\n    Returns\n\
+      \    -------\n    dict\n        Dictionary with keys `coffee_grounds_amount_g`\
+      \ (float),\n        `filter_prepared` (bool), and `coffee_maker_status` (str).\n\
+      \n    Raises\n    ------\n    ValueError\n        If `measurement_valid` is\
+      \ False or `ground_amount_grams` is\n        non‑positive.\n\n    Examples\n\
+      \    --------\n    >>> result = prepare_coffee_maker(\n    ...     ground_amount_grams=15.0,\n\
+      \    ...     desired_cup_count=2,\n    ...     grounds_type='medium',\n    ...\
+      \     measurement_valid=True)\n    >>> print(result)\n    {'coffee_grounds_amount_g':\
+      \ 15.0, 'filter_prepared': True,\n    'coffee_maker_status': 'ready'}\n\n  \
+      \  >>> try:\n    ...     prepare_coffee_maker(\n    ...         ground_amount_grams=15.0,\n\
+      \    ...         desired_cup_count=2,\n    ...         grounds_type='medium',\n\
+      \    ...         measurement_valid=False)\n    >>> except ValueError as e:\n\
+      \    ...     print(e)\n    Invalid measurement: measurement_valid is False\n\
+      \n    \"\"\"\n    return PrepareCoffeeMakerOutput(\n        coffee_grounds_amount_g=0.0,\n\
+      \        filter_prepared=False,\n        coffee_maker_status=\"\",\n    )"
     name: prepare_coffee_maker
     nodes_depended_on:
     - measure_coffee
@@ -250,9 +382,54 @@ nodes:
           filter, validates the measurement, and reports the amount added, filter
           status, and overall maker status.
     prompt: Put the measured coffee grounds into the coffee maker's filter.
+    shims: []
   serve_coffee:
     agent: false
+    code_node_type: stub
     description: Serve the coffee
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass BrewCoffeeOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for brew_coffee node outputs.\"\"\"\n    brew_start_timestamp:\
+      \ str = (\n        Field(..., description=\"ISO 8601 timestamp when brewing\
+      \ started\")\n    )\n    brew_end_timestamp: str = (\n        Field(..., description=\"\
+      ISO 8601 timestamp when brewing completed\")\n    )\n    brew_duration_seconds:\
+      \ float = (\n        Field(..., description=\"Total duration of the brewing\
+      \ process in seconds\")\n    )\n    brewed_volume_cups: int = (\n        Field(...,\
+      \ description=\"Number of cups of coffee brewed\")\n    )\n    brewed_success:\
+      \ bool = (\n        Field(..., description=\"Whether the brewing process completed\
+      \ successfully\")\n    )\n    final_temperature_c: float = (\n        Field(...,\
+      \ description=\"Final temperature of the brewed coffee in degrees Celsius\"\
+      )\n    )\n\n\nclass ServeCoffeeOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for serve_coffee node outputs.\"\"\"\n    served: bool = (\n        Field(...,\
+      \ description=\"Whether the coffee has been successfully served into a cup\"\
+      )\n    )\n    temperature_c: float = (\n        Field(..., description=\"The\
+      \ temperature of the served coffee in degrees Celsius\")\n    )\n    volume_ml:\
+      \ int = (\n        Field(..., description=\"The volume of the served coffee\
+      \ in milliliters\")\n    )\n\n\ndef serve_coffee(brew_coffee_input: BrewCoffeeOutput,\
+      \ **kwargs) -> ServeCoffeeOutput:\n    \"\"\"\n    Serve freshly brewed coffee\
+      \ into a cup based on brewing results.\n\n    Parameters\n    ----------\n \
+      \   brew_start_timestamp : str\n        ISO 8601 timestamp when brewing started.\n\
+      \    brew_end_timestamp : str\n        ISO 8601 timestamp when brewing completed.\n\
+      \    brew_duration_seconds : float\n        Total duration of the brewing process\
+      \ in seconds.\n    brewed_volume_cups : int\n        Number of cups of coffee\
+      \ brewed.\n    brewed_success : bool\n        Indicates whether the brewing\
+      \ process completed successfully.\n    final_temperature_c : float\n       \
+      \ Final temperature of the brewed coffee in degrees Celsius.\n\n    Returns\n\
+      \    -------\n    dict\n        A dictionary with keys:   - served (bool): Whether\
+      \ the coffee was\n        served.   - temperature_c (float): Served coffee temperature.\
+      \   -\n        volume_ml (int): Served coffee volume in milliliters.\n\n   \
+      \ Raises\n    ------\n    ValueError\n        Raised if `brewed_success` is\
+      \ False, indicating the coffee cannot be\n        served.\n\n    Examples\n\
+      \    --------\n    >>> serve_coffee(\n    ...     brew_start_timestamp=\"2025-10-11T10:00:00Z\"\
+      ,\n    ...     brew_end_timestamp=\"2025-10-11T10:03:30Z\",\n    ...     brew_duration_seconds=210.0,\n\
+      \    ...     brewed_volume_cups=2,\n    ...     brewed_success=True,\n    ...\
+      \     final_temperature_c=90.0)\n    {\n      'served': True,\n      'temperature_c':\
+      \ 90.0,\n      'volume_ml': 480\n    }\n\n    >>> serve_coffee(\n    ...   \
+      \  brew_start_timestamp=\"2025-10-11T10:10:00Z\",\n    ...     brew_end_timestamp=\"\
+      2025-10-11T10:12:00Z\",\n    ...     brew_duration_seconds=120.0,\n    ... \
+      \    brewed_volume_cups=1,\n    ...     brewed_success=False,\n    ...     final_temperature_c=85.0)\n\
+      \    ValueError: Brewed coffee is not successful; cannot serve.\n\n    \"\"\"\
+      \n    return ServeCoffeeOutput(\n        served=False,\n        temperature_c=0.0,\n\
+      \        volume_ml=0,\n    )"
     name: serve_coffee
     nodes_depended_on:
     - brew_coffee
@@ -322,3 +499,4 @@ nodes:
           type: dict
         summary: Serve freshly brewed coffee into a cup based on brewing results.
     prompt: Pour the freshly brewed coffee into a cup and serve.
+    shims: []

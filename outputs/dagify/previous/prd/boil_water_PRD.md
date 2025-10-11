@@ -1,33 +1,36 @@
 # boil_water PRD
 
 ## Description
-Boil water for the coffee
+Simulates heating a supplied liquid (water, milk, tea, etc.) to its boiling point, recording the temperature reached, the duration of heating, and whether the liquid is ready for use in downstream processes.
 
 
 ## Conceptual Info
 
-The boil_water node simulates heating water to its boiling point, measuring how long the process takes and confirming readiness for brewing.
+The boil_liquid node is a core thermodynamic simulation step that transforms any input liquid into a ready‑to‑use state for brewing, cooking, or analytical processes. It abstracts the physics of heating while providing measurable metrics that downstream nodes can leverage for timing, quality control, and safety checks.
 
 ## Docstring
 
 ### Summary
-Boils water to 100 °C, measures the boiling time, and indicates when it is ready for coffee brewing.
+Heats a liquid to its boiling point and returns the readiness status, final temperature, and heating duration.
+
+### Parameters
+
+- **liquid_type** (str): Name of the liquid to be boiled (e.g., "water", "milk", "tea").
+- **volume** (float): Volume of the liquid in liters.
 
 ### Returns
 
-Dict[str, Any]: A dictionary containing three keys:
-- 'boiled' (bool): True if water has reached boiling point.
-- 'temperature_celsius' (float): The final temperature in Celsius.
-- 'boil_time_seconds' (int): Number of seconds elapsed during boiling.
+dict: Dictionary containing `boiled` (bool), `temperature_celsius` (float), and `boil_time_seconds` (int).
 
 ### Raises
 
-- ValueError: Raised if the boiling simulation fails due to invalid conditions (e.g., insufficient water).
+- ValueError: Raised if an unsupported liquid type is provided.
+- RuntimeError: Raised if the heating simulation fails to converge within realistic limits.
 
 ### Examples
 
 ```python
->>> output = boil_water()
->>> print(output)
-{'boiled': True, 'temperature_celsius': 100.0, 'boil_time_seconds': 120}
+>>> result = boil_liquid(liquid_type='water', volume=0.5)
+>>> print(result)
+{'boiled': True, 'temperature_celsius': 100.0, 'boil_time_seconds': 90}
 ```
