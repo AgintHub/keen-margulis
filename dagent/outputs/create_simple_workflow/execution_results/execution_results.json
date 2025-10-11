@@ -1,0 +1,76 @@
+{
+  "create_task_dag": {
+    "output": {
+      "dag_nodes": [
+        "define_workflow_objective",
+        "identify_task_dependencies",
+        "create_workflow_structure"
+      ],
+      "dag_edges": [
+        "define_workflow_objective -> identify_task_dependencies",
+        "identify_task_dependencies -> create_workflow_structure"
+      ],
+      "is_acyclic": true
+    },
+    "description": "Create a Directed Acyclic Graph (DAG) of tasks"
+  },
+  "decompose_objective_into_tasks": {
+    "output": {
+      "task_names": [
+        "define_workflow_objective",
+        "identify_task_dependencies",
+        "create_workflow_structure"
+      ],
+      "task_descriptions": [
+        "Define the primary goal of the workflow.",
+        "Identify dependencies between tasks.",
+        "Create the structure of the workflow."
+      ],
+      "num_tasks": 3
+    },
+    "description": "Break down the workflow objective into fundamental tasks"
+  },
+  "define_workflow_objective": {
+    "output": {
+      "objective": "The primary goal of this workflow is to create a simple workflow."
+    },
+    "description": "Define the objective of the workflow"
+  },
+  "finalize_workflow": {
+    "output": {
+      "dag_is_complete": true,
+      "dag_is_concurrent": true,
+      "dag_is_acyclic": true,
+      "adjusted_node_list": [],
+      "dag_summary": "The DAG is complete, concurrent, and acyclic with a maximum concurrency of 2."
+    },
+    "description": "Finalize the workflow DAG"
+  },
+  "identify_task_dependencies": {
+    "output": {
+      "task_names": [
+        "define_workflow_objective",
+        "identify_task_dependencies",
+        "create_workflow_structure"
+      ],
+      "dependency_pairs": [
+        "define_workflow_objective -> identify_task_dependencies",
+        "identify_task_dependencies -> create_workflow_structure"
+      ],
+      "dependency_count": 2
+    },
+    "description": "Identify dependencies between tasks"
+  },
+  "refine_dag": {
+    "output": {
+      "dag_edges": [
+        "define_workflow_objective -> identify_task_dependencies",
+        "identify_task_dependencies -> create_workflow_structure"
+      ],
+      "is_acyclic": true,
+      "is_concurrent": true,
+      "max_concurrency": 2
+    },
+    "description": "Refine the DAG to maximize concurrency and ensure acyclicity"
+  }
+}
