@@ -6,11 +6,11 @@ import json
 import sys
 from typing import Dict, Any, List, Callable, Coroutine, Union, Optional
 
-from code.gather_wcfb_data import gather_wcfb_data
-from code.analyze_business_operations import analyze_business_operations
-from code.examine_customer_feedback import examine_customer_feedback
-from code.assess_market_trends import assess_market_trends
-from code.integrate_analysis_results import integrate_analysis_results
+from code.gather_historical_game_data import gather_historical_game_data
+from code.extract_player_statistics import extract_player_statistics
+from code.analyze_team_performance import analyze_team_performance
+from code.identify_top_performers import identify_top_performers
+from code.generate_performance_report import generate_performance_report
 
 # Get async mode from environment variable or default to False
 ASYNC_MODE = os.environ.get('ASYNC_MODE', '').lower() in ('true', '1', 'yes', 'y')
@@ -32,11 +32,11 @@ def make_async(func):
 
     return async_wrapper
 
-gather_wcfb_data_async = make_async(gather_wcfb_data)
-analyze_business_operations_async = make_async(analyze_business_operations)
-examine_customer_feedback_async = make_async(examine_customer_feedback)
-assess_market_trends_async = make_async(assess_market_trends)
-integrate_analysis_results_async = make_async(integrate_analysis_results)
+gather_historical_game_data_async = make_async(gather_historical_game_data)
+extract_player_statistics_async = make_async(extract_player_statistics)
+analyze_team_performance_async = make_async(analyze_team_performance)
+identify_top_performers_async = make_async(identify_top_performers)
+generate_performance_report_async = make_async(generate_performance_report)
 
 async def run_workflow(user_input: str) -> Dict[str, Any]:
     """Execute the workflow by running each level in the topological sort.
@@ -50,40 +50,43 @@ async def run_workflow(user_input: str) -> Dict[str, Any]:
     # Store results for each node
     results = {}
 
-    # Level 0: gather_wcfb_data
-    async def run_gather_wcfb_data():
-        # Call the async version of gather_wcfb_data with results from dependencies
-        return await gather_wcfb_data_async(user_input)
+    # Level 0: gather_historical_game_data
+    async def run_gather_historical_game_data():
+        # Call the async version of gather_historical_game_data with results from dependencies
+        return await gather_historical_game_data_async(user_input)
 
     # Run level 0 nodes in parallel
-    results['gather_wcfb_data'] = await run_gather_wcfb_data()
+    results['gather_historical_game_data'] = await run_gather_historical_game_data()
 
-    # Level 1: analyze_business_operations, examine_customer_feedback, assess_market_trends
-    async def run_analyze_business_operations():
-        # Call the async version of analyze_business_operations with results from dependencies
-        return await analyze_business_operations_async(results['gather_wcfb_data'])
+    # Level 1: analyze_team_performance, extract_player_statistics
+    async def run_analyze_team_performance():
+        # Call the async version of analyze_team_performance with results from dependencies
+        return await analyze_team_performance_async(results['gather_historical_game_data'])
 
-    async def run_examine_customer_feedback():
-        # Call the async version of examine_customer_feedback with results from dependencies
-        return await examine_customer_feedback_async(results['gather_wcfb_data'])
-
-    async def run_assess_market_trends():
-        # Call the async version of assess_market_trends with results from dependencies
-        return await assess_market_trends_async(results['gather_wcfb_data'])
+    async def run_extract_player_statistics():
+        # Call the async version of extract_player_statistics with results from dependencies
+        return await extract_player_statistics_async(results['gather_historical_game_data'])
 
     # Run level 1 nodes in parallel
-    level_1_results = await asyncio.gather(run_analyze_business_operations(), run_examine_customer_feedback(), run_assess_market_trends())
-    results['analyze_business_operations'] = level_1_results[0]
-    results['examine_customer_feedback'] = level_1_results[1]
-    results['assess_market_trends'] = level_1_results[2]
+    level_1_results = await asyncio.gather(run_analyze_team_performance(), run_extract_player_statistics())
+    results['analyze_team_performance'] = level_1_results[0]
+    results['extract_player_statistics'] = level_1_results[1]
 
-    # Level 2: integrate_analysis_results
-    async def run_integrate_analysis_results():
-        # Call the async version of integrate_analysis_results with results from dependencies
-        return await integrate_analysis_results_async(results['analyze_business_operations'], results['examine_customer_feedback'], results['assess_market_trends'])
+    # Level 2: identify_top_performers
+    async def run_identify_top_performers():
+        # Call the async version of identify_top_performers with results from dependencies
+        return await identify_top_performers_async(results['extract_player_statistics'])
 
     # Run level 2 nodes in parallel
-    results['integrate_analysis_results'] = await run_integrate_analysis_results()
+    results['identify_top_performers'] = await run_identify_top_performers()
+
+    # Level 3: generate_performance_report
+    async def run_generate_performance_report():
+        # Call the async version of generate_performance_report with results from dependencies
+        return await generate_performance_report_async(results['analyze_team_performance'], results['identify_top_performers'])
+
+    # Run level 3 nodes in parallel
+    results['generate_performance_report'] = await run_generate_performance_report()
 
     # Return all results
     return results
