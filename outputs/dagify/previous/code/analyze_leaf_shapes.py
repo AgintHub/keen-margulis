@@ -10,6 +10,12 @@ from ._analyze_leaf_shapes.normalize_characteristics import normalize_characteri
 from ._analyze_leaf_shapes.extract_shape_categories import extract_shape_categories
 from ._analyze_leaf_shapes.count_shape_categories import count_shape_categories
 
+from ._analyze_leaf_shapes.validate_input_lengths import validate_input_lengths
+from ._analyze_leaf_shapes.preprocess_leaf_images import preprocess_leaf_images
+from ._analyze_leaf_shapes.normalize_characteristics import normalize_characteristics
+from ._analyze_leaf_shapes.extract_shape_categories import extract_shape_categories
+from ._analyze_leaf_shapes.count_shape_categories import count_shape_categories
+
 from pydantic import BaseModel, Field
 from typing import List
 

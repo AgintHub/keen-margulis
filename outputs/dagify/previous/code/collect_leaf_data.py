@@ -12,6 +12,13 @@ from ._collect_leaf_data.process_and_validate_images import process_and_validate
 from ._collect_leaf_data.extract_leaf_characteristics import extract_leaf_characteristics
 from ._collect_leaf_data.validate_characteristics import validate_characteristics
 
+from ._collect_leaf_data.identify_leaf_data_sources import identify_leaf_data_sources
+from ._collect_leaf_data.gather_raw_leaf_data import gather_raw_leaf_data
+from ._collect_leaf_data.extract_leaf_images import extract_leaf_images
+from ._collect_leaf_data.process_and_validate_images import process_and_validate_images
+from ._collect_leaf_data.extract_leaf_characteristics import extract_leaf_characteristics
+from ._collect_leaf_data.validate_characteristics import validate_characteristics
+
 from pydantic import BaseModel, Field
 from typing import List
 

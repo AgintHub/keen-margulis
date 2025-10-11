@@ -38,7 +38,6 @@ def extract_leaf_colors(images: str, characteristics: str) -> List[str]:
     ['green, white', 'deep green']
 
     """
-    
     if not isinstance(images, str):
         raise TypeError("Images parameter must be a string")
     if not isinstance(characteristics, str):

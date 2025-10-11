@@ -36,7 +36,6 @@ def validate_input_data(vein_patterns: str, colors: str) -> str:
     ValueError: Input lists cannot be empty
 
     """
-    
     if not isinstance(vein_patterns, str) or not isinstance(colors, str):
         raise TypeError("Input types for vein_patterns or colors are not as expected.")
     

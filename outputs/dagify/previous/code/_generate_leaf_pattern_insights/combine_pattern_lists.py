@@ -46,7 +46,6 @@ def combine_pattern_lists(vein_patterns: str, color_patterns: str) -> List[str]:
     ['pattern1', 'pattern2', 'pattern3']
 
     """
-    
     try:
         vein_list = ast.literal_eval(vein_patterns)
         if not isinstance(vein_list, list):
