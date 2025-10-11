@@ -1,117 +1,77 @@
-from ._create_task_dag.parse_dependency_strings import parse_dependency_strings
-from ._create_task_dag.validate_task_references import validate_task_references
-from ._create_task_dag.extract_edge_sources import extract_edge_sources
-from ._create_task_dag.extract_edge_destinations import extract_edge_destinations
-from ._create_task_dag.check_dag_acyclicity import check_dag_acyclicity
-from ._create_task_dag.format_task_list import format_task_list
-from ._create_task_dag.format_edge_list import format_edge_list
-
 from pydantic import BaseModel, Field
 from typing import List
 
 
 class IdentifyTaskDependenciesOutput(BaseModel):
     """Pydantic model for identify_task_dependencies node outputs."""
-    tasks: List[str] = Field(..., description="List of identified task names.")
-    dependencies: List[str] = (
-        Field(..., description = (
-            "List of dependency relationships in the format 'TaskA depends on TaskB'.")
-        )
+    task_names: List[str] = (
+        Field(..., description="List of all task names identified from decomposition.")
     )
-    dependency_exists: bool = (
-        Field(..., description = (
-            "Indicates whether any dependencies were identified.")
-        )
+    dependency_pairs: List[str] = (
+        Field(..., description="List of dependency relationships in the format 'TaskA -> TaskB' indicating TaskA must be completed before TaskB can start.")
+    )
+    dependency_count: int = (
+        Field(..., description="Total number of dependency relationships identified.")
     )
 
 
 class CreateTaskDagOutput(BaseModel):
     """Pydantic model for create_task_dag node outputs."""
-    task_ids: str = (
-        Field(..., description = (
-            "List of unique task identifiers used in the DAG")
-        )
+    dag_nodes: List[str] = (
+        Field(..., description="Ordered list of task identifiers in the DAG.")
     )
-    edge_sources: str = (
-        Field(..., description = (
-            "List of source task identifiers for each directed edge in the DAG")
-        )
+    dag_edges: List[str] = (
+        Field(..., description="List of edges representing dependencies, formatted as 'source->target'.")
     )
-    edge_destinations: str = (
-        Field(..., description = (
-            "List of destination task identifiers for each directed edge in the DAG")
-        )
-    )
-    is_valid: bool = (
-        Field(..., description = (
-            "Indicates whether the constructed DAG is acyclic and complete")
-        )
+    is_acyclic: bool = (
+        Field(..., description="Indicates whether the constructed DAG is acyclic.")
     )
 
 
 def create_task_dag(identify_task_dependencies_input: IdentifyTaskDependenciesOutput, **kwargs) -> CreateTaskDagOutput:
     """
-    Constructs a DAG from given tasks and dependency relations.
+    Constructs a Directed Acyclic Graph (DAG) of tasks from dependency
+    information, returning an ordered list of tasks, the edge list, and an
+    acyclicity flag.
 
     Parameters
     ----------
-    tasks : List[str]
-        A list of task identifiers that will become the DAG nodes.
-    dependencies : List[str]
-        Each string represents a dependency in the format 'TaskA depends on
-        TaskB'.
+    task_names : List[str]
+        All task identifiers identified from decomposition.
+    dependency_pairs : List[str]
+        Dependency relationships in the format 'TaskA -> TaskB', indicating
+        TaskA must complete before TaskB.
+    dependency_count : int
+        Total number of dependency relationships identified.
 
     Returns
     -------
-    dict
-        A dictionary with four keys: task_ids (List[str]), edge_sources
-        (List[str]), edge_destinations (List[str]), and is_valid (bool).
+    Tuple[List[str], List[str], bool]
+        A tuple containing the ordered list of tasks, the formatted edge
+        list, and a boolean indicating if the DAG is acyclic.
 
     Raises
     ------
     ValueError
-        Raised when a dependency refers to a task not present in the `tasks`
-        list.
-    ValueError
-        Raised when a dependency string does not match the expected 'TaskA
-        depends on TaskB' pattern.
+        If the provided dependencies contain a cycle or if input lists are
+        inconsistent.
 
     Examples
     --------
-    >>> tasks = ['A', 'B', 'C']
-    >>> dependencies = ['B depends on A', 'C depends on B']
-    >>> result = create_task_dag(tasks, dependencies)
-    >>> print(result)
-    {'task_ids': ['A', 'B', 'C'], 'edge_sources': ['A', 'B'],
-    'edge_destinations': ['B', 'C'], 'is_valid': True}
+    >>> dag_nodes, dag_edges, is_acyclic = create_task_dag(     ['A', 'B', 'C'],
+    ['A -> B', 'B -> C'],     2 )
+    >>> print(dag_nodes, dag_edges, is_acyclic)
+    (['A', 'B', 'C'], ['A->B', 'B->C'], True)
 
-    >>> tasks = ['A', 'B']
-    >>> dependencies = ['A depends on B', 'B depends on A']
-    >>> result = create_task_dag(tasks, dependencies)
-    >>> print(result)
-    {'task_ids': ['A', 'B'], 'edge_sources': ['B', 'A'], 'edge_destinations':
-    ['A', 'B'], 'is_valid': False}
+    >>> try:
+    ...     create_task_dag(['A', 'B'], ['A -> B', 'B -> A'], 2)
+    >>> except ValueError as e:
+    ...     print(e)
+    "Cycle detected in task dependencies: ['A -> B', 'B -> A']"
 
     """
-    tasks = identify_task_dependencies_input.tasks
-    dependencies = identify_task_dependencies_input.dependencies
-    
-    parsed_dependencies: List[tuple] = parse_dependency_strings(dependencies=dependencies)
-    
-    validate_task_references(tasks=tasks, parsed_dependencies=parsed_dependencies)
-    
-    edge_sources: List[str] = extract_edge_sources(parsed_dependencies=parsed_dependencies)
-    edge_destinations: List[str] = extract_edge_destinations(parsed_dependencies=parsed_dependencies)
-    
-    is_acyclic: bool = check_dag_acyclicity(tasks=tasks, edge_sources=edge_sources, edge_destinations=edge_destinations)
-    
-    task_ids_str: str = format_task_list(tasks=tasks)
-    edge_sources_str: str = format_edge_list(edges=edge_sources)
-    edge_destinations_str: str = format_edge_list(edges=edge_destinations)
-    
     return CreateTaskDagOutput(
-        task_ids=task_ids_str,
-        edge_sources=edge_sources_str,
-        edge_destinations=edge_destinations_str,
-        is_valid=is_acyclic
+        dag_nodes=[],
+        dag_edges=[],
+        is_acyclic=False,
     )

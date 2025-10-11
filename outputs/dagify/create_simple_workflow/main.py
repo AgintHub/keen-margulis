@@ -11,7 +11,7 @@ from code.decompose_objective_into_tasks import decompose_objective_into_tasks
 from code.define_workflow_objective import define_workflow_objective
 from code.finalize_workflow import finalize_workflow
 from code.identify_task_dependencies import identify_task_dependencies
-from code.validate_dag import validate_dag
+from code.refine_dag import refine_dag
 
 # Get async mode from environment variable or default to False
 ASYNC_MODE = os.environ.get('ASYNC_MODE', '').lower() in ('true', '1', 'yes', 'y')
@@ -38,7 +38,7 @@ decompose_objective_into_tasks_async = make_async(decompose_objective_into_tasks
 define_workflow_objective_async = make_async(define_workflow_objective)
 finalize_workflow_async = make_async(finalize_workflow)
 identify_task_dependencies_async = make_async(identify_task_dependencies)
-validate_dag_async = make_async(validate_dag)
+refine_dag_async = make_async(refine_dag)
 
 async def run_workflow(user_input: str) -> Dict[str, Any]:
     """Execute the workflow by running each level in the topological sort.
@@ -84,18 +84,18 @@ async def run_workflow(user_input: str) -> Dict[str, Any]:
     # Run level 3 nodes in parallel
     results['create_task_dag'] = await run_create_task_dag()
 
-    # Level 4: validate_dag
-    async def run_validate_dag():
-        # Call the async version of validate_dag with results from dependencies
-        return await validate_dag_async(results['create_task_dag'])
+    # Level 4: refine_dag
+    async def run_refine_dag():
+        # Call the async version of refine_dag with results from dependencies
+        return await refine_dag_async(results['create_task_dag'])
 
     # Run level 4 nodes in parallel
-    results['validate_dag'] = await run_validate_dag()
+    results['refine_dag'] = await run_refine_dag()
 
     # Level 5: finalize_workflow
     async def run_finalize_workflow():
         # Call the async version of finalize_workflow with results from dependencies
-        return await finalize_workflow_async(results['validate_dag'])
+        return await finalize_workflow_async(results['refine_dag'])
 
     # Run level 5 nodes in parallel
     results['finalize_workflow'] = await run_finalize_workflow()

@@ -15,7 +15,7 @@ PRDs for nodes in the 'create_simple_workflow' module.
 
 - [identify_task_dependencies](#identify_task_dependencies)
 
-- [validate_dag](#validate_dag)
+- [refine_dag](#refine_dag)
 
 
 
@@ -24,42 +24,44 @@ PRDs for nodes in the 'create_simple_workflow' module.
 ## create_task_dag
 
 ### Description
-Create a DAG representing the tasks and their dependencies
+Create a Directed Acyclic Graph (DAG) of tasks.
 
 ### Conceptual Info
 
-Builds a directed acyclic graph (DAG) from a list of task identifiers and dependency relations, producing node identifiers, edge lists, and a validity flag.
+Builds a topological representation of tasks based on identified dependencies, ensuring no cycles exist and producing an execution order.
 
 ### Docstring
 
-**Summary:** Constructs a DAG from given tasks and dependency relations.
+**Summary:** Constructs a Directed Acyclic Graph (DAG) of tasks from dependency information, returning an ordered list of tasks, the edge list, and an acyclicity flag.
 
 **Parameters:**
 
-- tasks (List[str]): A list of task identifiers that will become the DAG nodes.
-- dependencies (List[str]): Each string represents a dependency in the format 'TaskA depends on TaskB'.
-**Returns:** dict - A dictionary with four keys: task_ids (List[str]), edge_sources (List[str]), edge_destinations (List[str]), and is_valid (bool).
+- task_names (List[str]): All task identifiers identified from decomposition.
+- dependency_pairs (List[str]): Dependency relationships in the format 'TaskA -> TaskB', indicating TaskA must complete before TaskB.
+- dependency_count (int): Total number of dependency relationships identified.
+**Returns:** Tuple[List[str], List[str], bool] - A tuple containing the ordered list of tasks, the formatted edge list, and a boolean indicating if the DAG is acyclic.
 
 **Raises:**
 
-- ValueError: Raised when a dependency refers to a task not present in the `tasks` list.
-- ValueError: Raised when a dependency string does not match the expected 'TaskA depends on TaskB' pattern.
+- ValueError: If the provided dependencies contain a cycle or if input lists are inconsistent.
 **Examples:**
 
 ```python
->>> tasks = ['A', 'B', 'C']
->>> dependencies = ['B depends on A', 'C depends on B']
->>> result = create_task_dag(tasks, dependencies)
->>> print(result)
-{'task_ids': ['A', 'B', 'C'], 'edge_sources': ['A', 'B'], 'edge_destinations': ['B', 'C'], 'is_valid': True}
+>>> dag_nodes, dag_edges, is_acyclic = create_task_dag(
+    ['A', 'B', 'C'],
+    ['A -> B', 'B -> C'],
+    2
+)
+>>> print(dag_nodes, dag_edges, is_acyclic)
+(['A', 'B', 'C'], ['A->B', 'B->C'], True)
 ```
 
 ```python
->>> tasks = ['A', 'B']
->>> dependencies = ['A depends on B', 'B depends on A']
->>> result = create_task_dag(tasks, dependencies)
->>> print(result)
-{'task_ids': ['A', 'B'], 'edge_sources': ['B', 'A'], 'edge_destinations': ['A', 'B'], 'is_valid': False}
+>>> try:
+...     create_task_dag(['A', 'B'], ['A -> B', 'B -> A'], 2)
+>>> except ValueError as e:
+...     print(e)
+"Cycle detected in task dependencies: ['A -> B', 'B -> A']"
 ```
 
 
@@ -69,34 +71,34 @@ Builds a directed acyclic graph (DAG) from a list of task identifiers and depend
 ## decompose_objective_into_tasks
 
 ### Description
-Break down the workflow objective into individual tasks
+Break down the workflow objective into fundamental tasks.
 
 ### Conceptual Info
 
-Transforms a high‑level workflow goal into a concrete sequence of actionable tasks, enabling downstream dependency analysis and DAG construction.
+This node transforms a high‑level workflow goal into a concrete, actionable set of tasks. It interprets the objective text, extracts meaningful sub‑tasks, and returns an ordered list of task names, short descriptions, and the overall count. The decomposition is intentionally kept self‑contained so that downstream nodes can establish dependencies and construct a DAG.
 
 ### Docstring
 
-**Summary:** Breaks down a workflow objective into discrete tasks.
+**Summary:** Decomposes a workflow objective string into a list of task names, descriptions, and a task count.
 
 **Parameters:**
 
-- workflow_objective (str): A concise statement describing the primary goal of the workflow.
-**Returns:** Tuple[List[str], int] - A tuple containing (1) a list of task descriptions and (2) the count of tasks.
+- objective (str): Primary goal statement of the workflow provided by `define_workflow_objective`.
+**Returns:** tuple[List[str], List[str], int] - A tuple containing: 1) list of task names, 2) list of brief task descriptions, 3) integer count of tasks.
 
 **Raises:**
 
-- ValueError: Raised when `workflow_objective` is empty or consists only of whitespace.
+- ValueError: Raised when the `objective` string is empty or cannot be parsed into distinct tasks.
 **Examples:**
 
 ```python
->>> tasks, count = decompose_objective_into_tasks('Build a machine learning pipeline for predicting house prices')
-(['Collect and clean data', 'Split dataset', 'Select model', 'Train model', 'Evaluate model', 'Deploy model'], 6)
+>>> result = decompose_objective_into_tasks("Process customer orders and generate invoices")
+{'task_names': ['Process orders', 'Generate invoices'], 'task_descriptions': ['Handle incoming orders from sales', 'Create and send invoices to customers'], 'num_tasks': 2}
 ```
 
 ```python
->>> tasks, count = decompose_objective_into_tasks('Write a report')
-(['Plan report structure', 'Collect data', 'Write draft', 'Revise', 'Finalize'], 5)
+>>> result = decompose_objective_into_tasks("Collect data, clean data, and train a machine learning model")
+{'task_names': ['Collect data', 'Clean data', 'Train ML model'], 'task_descriptions': ['Gather raw data from sources', 'Perform data cleaning and preprocessing', 'Train a predictive model on cleaned data'], 'num_tasks': 3}
 ```
 
 
@@ -110,27 +112,31 @@ Define the objective of the workflow
 
 ### Conceptual Info
 
-Captures the high‑level purpose of the workflow, providing a clear goal that drives the subsequent task decomposition, dependency analysis, and DAG construction.
+The node captures the high‑level purpose of the entire workflow, producing a single natural‑language sentence that guides downstream task decomposition.
 
 ### Docstring
 
-**Summary:** Generate a concise objective statement for the workflow based on the user’s intent.
+**Summary:** Generate a concise primary goal statement for the workflow.
 
-**Returns:** str - Concise objective of the workflow.
+**Returns:** str - A natural‑language statement describing the workflow’s overall objective.
 
 **Raises:**
 
-- ValueError: If the generated objective is empty or exceeds an acceptable length.
+- ValueError: If the generated objective is empty or consists only of whitespace.
 **Examples:**
 
 ```python
+>>> # Example 1: Basic workflow objective
 >>> objective = define_workflow_objective()
-'Implement an automated data ingestion pipeline for real‑time analytics'
+>>> print(objective)
+'Automate the ingestion, transformation, and reporting of sales data.'
 ```
 
 ```python
+>>> # Example 2: High‑level objective for a data science pipeline
 >>> objective = define_workflow_objective()
-'Develop a user‑friendly mobile application for inventory management'
+>>> print(objective)
+'Deliver actionable insights from customer behavior data through automated analysis and visualization.'
 ```
 
 
@@ -144,78 +150,38 @@ Finalize the workflow DAG
 
 ### Conceptual Info
 
-The finalize_workflow node takes a validated DAG, checks for any remaining inconsistencies such as missing dependencies or cycles, applies necessary adjustments, and produces a clean, ordered representation ready for execution.
+The `finalize_workflow` node validates the refined DAG for completeness, acyclicity, and optimal concurrency. It performs any last‑minute adjustments such as re‑ordering parallel branches or inserting dummy synchronization nodes, and produces a concise summary of the final graph.
 
 ### Docstring
 
-**Summary:** Finalize a workflow DAG by validating its structure, resolving missing dependencies, removing cycles, and ordering tasks.
+**Summary:** Finalize and validate a workflow DAG, ensuring it is complete, concurrent, and acyclic.
 
 **Parameters:**
 
-- task_ids (List[str]): Unique identifiers of all tasks in the DAG.
-- edge_sources (List[str]): Source task identifiers for each directed edge.
-- edge_destinations (List[str]): Destination task identifiers for each directed edge.
-- is_valid (bool): Result of the validation step (True if the DAG passed all checks).
-- node_count (int): Total number of nodes in the DAG.
-- edge_count (int): Total number of directed edges in the DAG.
-- cycles_detected (List[str]): List of cycle identifiers found during validation.
-- missing_dependencies (List[str]): List of node names that reference non‑existent dependencies.
-- errors (List[str]): Detailed error messages from the validation step.
-**Returns:** Dict[str, Any] - A dictionary containing the finalized DAG representation and metadata: dag_representation (str), is_valid (bool), adjustments_made (bool), adjusted_task_order (List[str]), missing_dependencies (List[str]), cycles_detected (List[str]), warnings (List[str]), and summary (str).
+- dag_edges (List[str]): Directed edges of the refined DAG, formatted as 'TaskA->TaskB'.
+- is_acyclic (bool): True if the refined DAG contains no cycles.
+- is_concurrent (bool): True if the refined DAG already supports maximum concurrency.
+- max_concurrency (int): Maximum number of tasks that can run concurrently in the refined DAG.
+**Returns:** dict - A dictionary with keys `dag_is_complete`, `dag_is_concurrent`, `dag_is_acyclic`, `adjusted_node_list`, and `dag_summary`.
 
 **Raises:**
 
-- ValueError: If any required input lists are empty or lengths of edge_sources and edge_destinations mismatch.
+- ValueError: If `dag_edges` is empty or malformed.
+- RuntimeError: If the DAG cannot be made acyclic or fully concurrent after adjustments.
 **Examples:**
 
 ```python
->>> dag = finalize_workflow(
-
-...     task_ids=['A', 'B', 'C'],
-
-...     edge_sources=['A', 'B'],
-
-...     edge_destinations=['B', 'C'],
-
-...     is_valid=True,
-
-...     node_count=3,
-
-...     edge_count=2,
-
-...     cycles_detected=[],
-
-...     missing_dependencies=[],
-
-...     errors=[]
-
->>> )
-{'dag_representation': 'A -> B -> C', 'is_valid': True, 'adjustments_made': False, 'adjusted_task_order': ['A', 'B', 'C'], 'missing_dependencies': [], 'cycles_detected': [], 'warnings': [], 'summary': 'DAG finalized successfully.'}
+>>> result = finalize_workflow(dag_edges=['A->B', 'B->C'], is_acyclic=True, is_concurrent=False, max_concurrency=2)
+>>> print(result)
+{'dag_is_complete': True, 'dag_is_concurrent': True, 'dag_is_acyclic': True, 'adjusted_node_list': ['B'], 'dag_summary': 'DAG has 3 nodes and 2 edges. Concurrency adjusted to 2.'}
 ```
 
 ```python
->>> dag = finalize_workflow(
-
-...     task_ids=['A', 'B', 'C'],
-
-...     edge_sources=['A', 'B', 'C'],
-
-...     edge_destinations=['B', 'C', 'A'],
-
-...     is_valid=False,
-
-...     node_count=3,
-
-...     edge_count=3,
-
-...     cycles_detected=['A->B->C->A'],
-
-...     missing_dependencies=[],
-
-...     errors=['Cycle detected']
-
->>> )
-{'dag_representation': 'A -> B -> C', 'is_valid': False, 'adjustments_made': True, 'adjusted_task_order': ['A', 'B', 'C'], 'missing_dependencies': [], 'cycles_detected': ['A->B->C->A'], 'warnings': ['Cycle removed: A->B->C->A'], 'summary': 'DAG finalized with cycle removal.'}
+>>> try:
+...     finalize_workflow(dag_edges=[], is_acyclic=True, is_concurrent=True, max_concurrency=1)
+>>> except ValueError as e:
+...     print(e)
+'dag_edges list is empty or contains malformed entries.'
 ```
 
 
@@ -225,97 +191,91 @@ The finalize_workflow node takes a validated DAG, checks for any remaining incon
 ## identify_task_dependencies
 
 ### Description
-Identify dependencies between tasks
+Determines precedence relationships among tasks produced by the decomposition step, producing an explicit list of dependency pairs.
 
 ### Conceptual Info
 
-This node processes a list of task descriptions produced by the decomposition step and infers direct dependencies between tasks. It returns the original list of tasks, a concise list of dependency strings, and a flag indicating whether any dependencies exist.
+This node takes the set of tasks generated by the decomposition step and infers which tasks must precede others, producing a set of explicit dependency pairs that can be used to construct a DAG.
 
 ### Docstring
 
-**Summary:** Infers direct dependencies between tasks from a list of task descriptions.
+**Summary:** Identify dependencies between decomposed tasks and return a list of dependency pairs.
 
 **Parameters:**
 
-- tasks (List[str]): Task descriptions generated by decompose_objective_into_tasks.
-**Returns:** Dict[str, Any] - A dictionary with keys 'tasks', 'dependencies', and 'dependency_exists' matching the node's output structure.
+- task_names (List[str]): Names of the individual tasks produced by the decomposition step.
+- task_descriptions (List[str]): Brief textual descriptions of each task corresponding to task_names.
+**Returns:** Dict[str, Any] - A dictionary containing three keys:
+
+- 'task_names' (List[str]): The original list of task names.
+- 'dependency_pairs' (List[str]): Explicit dependencies formatted as 'TaskA -> TaskB'.
+- 'dependency_count' (int): Total number of dependencies identified.
 
 **Raises:**
 
-- ValueError: If the input `tasks` is not a list of strings or is empty.
+- ValueError: If task_names and task_descriptions are of different lengths, or if either list is empty.
 **Examples:**
 
 ```python
->>> tasks_input = ["Collect data", "Preprocess data", "Train model", "Evaluate model"]
->>> # Assuming the following simple dependency logic:
->>> # 'Preprocess data' depends on 'Collect data'
->>> # 'Train model' depends on 'Preprocess data'
->>> # 'Evaluate model' depends on 'Train model'
->>> result = identify_task_dependencies(tasks_input)
->>> print(result)
-{'tasks': ['Collect data', 'Preprocess data', 'Train model', 'Evaluate model'], 'dependencies': ['Preprocess data depends on Collect data', 'Train model depends on Preprocess data', 'Evaluate model depends on Train model'], 'dependency_exists': True}
+>>> task_names = ['Collect Data', 'Clean Data', 'Analyze Data']
+>>> task_descriptions = ['Gather raw data', 'Remove noise', 'Run statistical models']
+>>> result = identify_task_dependencies(task_names, task_descriptions)
+>>> print(result['dependency_pairs'])
+['Collect Data -> Clean Data', 'Clean Data -> Analyze Data']
 ```
 
 ```python
->>> tasks_input = ["Generate report", "Publish report"]
->>> # No explicit dependencies specified
->>> result = identify_task_dependencies(tasks_input)
->>> print(result)
-{'tasks': ['Generate report', 'Publish report'], 'dependencies': [], 'dependency_exists': False}
+>>> task_names = ['Design Model', 'Train Model', 'Validate Model', 'Deploy Model']
+>>> task_descriptions = ['Create architecture', 'Fit parameters', 'Evaluate performance', 'Release to production']
+>>> result = identify_task_dependencies(task_names, task_descriptions)
+>>> print(result['dependency_count'])
+3
 ```
 
 
 
 ---
 
-## validate_dag
+## refine_dag
 
 ### Description
-Validate the created DAG for correctness and acyclicity
+Refine the DAG to maximize concurrency and ensure acyclicity.
 
 ### Conceptual Info
 
-The `validate_dag` node verifies that a workflow DAG is well‑formed, acyclic, and internally consistent. It acts as a safety net before the workflow is finalized, catching missing dependencies and logical cycles that could cause runtime failures.
+This node takes a previously constructed DAG and optimizes it for maximum concurrent execution by reordering independent tasks and ensuring no cycles.
 
 ### Docstring
 
-**Summary:** Validates a Directed Acyclic Graph (DAG) representation for correctness, acyclicity, and missing dependencies.
+**Summary:** Optimizes a DAG for maximum concurrency while preserving acyclicity.
 
 **Parameters:**
 
-- task_ids (List[str]): List of unique identifiers for all tasks in the workflow.
-- edge_sources (List[str]): List of task identifiers representing the source of each directed edge.
-- edge_destinations (List[str]): List of task identifiers representing the destination of each directed edge.
-- is_valid_input (bool): (Optional) A flag from `create_task_dag` indicating preliminary validity. It is used only as a hint; full validation is performed regardless.
-**Returns:** dict - Dictionary containing validation results:
-- `is_valid` (bool): Overall validity.
-- `node_count` (int): Number of nodes.
-- `edge_count` (int): Number of directed edges.
-- `cycles_detected` (List[str]): Descriptions of any detected cycles.
-- `missing_dependencies` (List[str]): Tasks that reference undefined dependencies.
-- `errors` (List[str]): Human‑readable error messages for all failures.
+- dag_nodes (List[str]): Ordered list of task identifiers in the DAG.
+- dag_edges (List[str]): List of edges representing dependencies, formatted as "TaskA->TaskB".
+- is_acyclic (bool): Indicates whether the input DAG is acyclic.
+**Returns:** Tuple[List[str], bool, bool, int] - A tuple containing (refined_dag_edges, is_acyclic, is_concurrent, max_concurrency).
 
 **Raises:**
 
-- ValueError: If `edge_sources` and `edge_destinations` lists are not of the same length.
-- ValueError: If `task_ids` contains duplicate identifiers.
+- ValueError: Raised if dag_edges is empty or if the input graph is cyclic.
 **Examples:**
 
 ```python
->>> task_ids = ['A', 'B', 'C']
->>> edge_sources = ['A', 'B']
->>> edge_destinations = ['B', 'C']
->>> result = validate_dag(task_ids, edge_sources, edge_destinations)
->>> print(result)
-{'is_valid': True, 'node_count': 3, 'edge_count': 2, 'cycles_detected': [], 'missing_dependencies': [], 'errors': []}
+>>> dag_nodes = ['A', 'B', 'C'],
+>>> dag_edges = ['A->B', 'B->C'],
+>>> is_acyclic = True,
+>>> refined = refine_dag(dag_nodes, dag_edges, is_acyclic),
+>>> print(refined)
+(['A->B', 'B->C'], True, False, 1)
 ```
 
 ```python
->>> task_ids = ['A', 'B', 'C']
->>> edge_sources = ['A', 'B', 'C']
->>> edge_destinations = ['B', 'C', 'A']
->>> result = validate_dag(task_ids, edge_sources, edge_destinations)
->>> print(result)
-{'is_valid': False, 'node_count': 3, 'edge_count': 3, 'cycles_detected': ['A -> B -> C -> A'], 'missing_dependencies': [], 'errors': ['Cycle detected: A -> B -> C -> A']}
+>>> dag_nodes = ['A', 'B', 'C'],
+>>> dag_edges = ['A->C'],
+>>> is_acyclic = True,
+>>> refined = refine_dag(dag_nodes, dag_edges, is_acyclic),
+>>> print(refined)
+(['A->C'], True, True, 2)
 ```
 

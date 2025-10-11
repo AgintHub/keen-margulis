@@ -4,6 +4,7 @@ from .define_workflow_objective import define_workflow_objective
 from .decompose_objective_into_tasks import decompose_objective_into_tasks
 from .finalize_workflow import finalize_workflow
 from .identify_task_dependencies import identify_task_dependencies
+from .refine_dag import refine_dag
 from . import _create_task_dag
 from . import _decompose_objective_into_tasks
 from . import _define_workflow_objective
@@ -18,6 +19,7 @@ __all__ = [
     'decompose_objective_into_tasks',
     'finalize_workflow',
     'identify_task_dependencies',
+    'refine_dag',
     '_create_task_dag',
     '_decompose_objective_into_tasks',
     '_define_workflow_objective',
