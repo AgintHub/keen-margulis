@@ -1,0 +1,32 @@
+{
+  "boil_water": {
+    "output": {
+      "output": "Boiled water at 200\u00b0F (93\u00b0C) for brewing coffee."
+    },
+    "description": "Boil water for the coffee"
+  },
+  "brew_coffee": {
+    "output": {
+      "output": "Pouring the boiled water at 200\u00b0F (93\u00b0C) into the coffee maker with 2 tablespoons of coffee grounds in the filter. Starting the brewing process."
+    },
+    "description": "Brew the coffee"
+  },
+  "measure_coffee": {
+    "output": {
+      "output": "2 tablespoons"
+    },
+    "description": "Measure the coffee grounds"
+  },
+  "prepare_coffee_maker": {
+    "output": {
+      "output": "Added 2 tablespoons of coffee grounds to the coffee maker's filter."
+    },
+    "description": "Prepare the coffee maker"
+  },
+  "serve_coffee": {
+    "output": {
+      "output": "Pouring the freshly brewed coffee into a cup and serving."
+    },
+    "description": "Serve the coffee"
+  }
+}
