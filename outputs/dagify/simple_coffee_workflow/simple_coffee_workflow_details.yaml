@@ -1,4 +1,4 @@
-dag_type: typed
+dag_type: spec
 description: Generated workflow from UI.
 name: simple_coffee_workflow
 nodes:
@@ -20,10 +20,38 @@ nodes:
         in seconds.
       key: boil_time_seconds
       type: int
+    prd:
+      conceptual_info: The boil_water node simulates heating water to its boiling
+        point, measuring how long the process takes and confirming readiness for brewing.
+      docstring:
+        examples:
+        - lines:
+          - output = boil_water()
+          - print(output)
+          output: '{''boiled'': True, ''temperature_celsius'': 100.0, ''boil_time_seconds'':
+            120}'
+        parameters: []
+        raises:
+        - description: Raised if the boiling simulation fails due to invalid conditions
+            (e.g., insufficient water).
+          type: ValueError
+        returns:
+          description: 'A dictionary containing three keys:
+
+            - ''boiled'' (bool): True if water has reached boiling point.
+
+            - ''temperature_celsius'' (float): The final temperature in Celsius.
+
+            - ''boil_time_seconds'' (int): Number of seconds elapsed during boiling.'
+          type: Dict[str, Any]
+        summary: Boils water to 100 °C, measures the boiling time, and indicates when
+          it is ready for coffee brewing.
     prompt: Boil water to the appropriate temperature for brewing coffee.
   brew_coffee:
     agent: false
-    description: Brew the coffee
+    description: Brew the coffee by pouring boiled water into a pre‑prepared coffee
+      maker, starting the brewing cycle, and collecting timing, volume, and temperature
+      metrics.
     name: brew_coffee
     nodes_depended_on:
     - boil_water
@@ -48,6 +76,74 @@ nodes:
     - description: Final temperature of the brewed coffee in degrees Celsius
       key: final_temperature_c
       type: float
+    prd:
+      conceptual_info: The brew_coffee node simulates the physical act of brewing
+        coffee. It takes the results of boiling water and preparing the coffee maker,
+        pours the water into the machine, initiates the brew cycle, and measures key
+        performance metrics such as start/end timestamps, duration, volume, success
+        flag, and final temperature.
+      docstring:
+        examples:
+        - lines:
+          - brew_coffee(
+          - '    boiled=True,'
+          - '    temperature_celsius=95.0,'
+          - '    boil_time_seconds=120,'
+          - '    coffee_grounds_amount_g=18.0,'
+          - '    filter_prepared=True,'
+          - '    coffee_maker_status=''ready'','
+          - '    desired_cup_count=2'
+          - )
+          output: '{''brew_start_timestamp'': ''2025-10-11T08:00:00Z'', ''brew_end_timestamp'':
+            ''2025-10-11T08:03:45Z'', ''brew_duration_seconds'': 225.0, ''brewed_volume_cups'':
+            2, ''brewed_success'': True, ''final_temperature_c'': 88.5}'
+        - lines:
+          - brew_coffee(
+          - '    boiled=False,'
+          - '    temperature_celsius=0.0,'
+          - '    boil_time_seconds=0,'
+          - '    coffee_grounds_amount_g=18.0,'
+          - '    filter_prepared=True,'
+          - '    coffee_maker_status=''ready'','
+          - '    desired_cup_count=2'
+          - )
+          output: 'ValueError: Water must be boiled before brewing.'
+        parameters:
+        - description: Indicates whether the water has reached boiling point and is
+            ready for brewing.
+          name: boiled
+          type: bool
+        - description: Temperature of the water after boiling, in degrees Celsius.
+          name: temperature_celsius
+          type: float
+        - description: Duration taken to bring the water to boiling temperature, in
+            seconds.
+          name: boil_time_seconds
+          type: int
+        - description: Amount of coffee grounds added to the coffee maker's filter,
+            in grams.
+          name: coffee_grounds_amount_g
+          type: float
+        - description: Whether the filter is properly prepared and ready.
+          name: filter_prepared
+          type: bool
+        - description: Current status of the coffee maker (e.g., 'ready', 'error').
+          name: coffee_maker_status
+          type: str
+        - description: Number of cups that should be brewed based on the coffee grounds
+            measurement.
+          name: desired_cup_count
+          type: int
+        raises:
+        - description: Raised if the water is not boiled, the filter is not prepared,
+            the coffee maker status is not 'ready', or any input values are invalid.
+          type: ValueError
+        returns:
+          description: Dictionary containing brewing timestamps, duration, volume,
+            success flag, and final temperature.
+          type: dict
+        summary: Start the brewing process by combining boiled water with a prepared
+          coffee maker and record brewing metrics.
     prompt: Pour the boiled water into the coffee maker and start the brewing process.
   measure_coffee:
     agent: false
@@ -68,6 +164,37 @@ nodes:
     - description: Indicates whether the measurement was performed correctly
       key: measurement_valid
       type: bool
+    prd:
+      conceptual_info: The `measure_coffee` node calculates the required quantity
+        of coffee grounds based on user-provided cup count and grounds type, ensuring
+        the measurement is valid before the grounds are transferred to the coffee
+        maker.
+      docstring:
+        examples:
+        - lines:
+          - measure_coffee(3, 'medium grind')
+          output: '{''ground_amount_grams'': 18.0, ''desired_cup_count'': 3, ''grounds_type'':
+            ''medium grind'', ''measurement_valid'': True}'
+        - lines:
+          - measure_coffee(0, 'dark roast')
+          output: 'ValueError: desired_cup_count must be a positive integer.'
+        parameters:
+        - description: The target number of coffee cups to brew.
+          name: desired_cup_count
+          type: int
+        - description: The type of coffee grounds (e.g., 'medium grind', 'dark roast').
+          name: grounds_type
+          type: str
+        raises:
+        - description: If `desired_cup_count` is not a positive integer or `grounds_type`
+            is not among the supported types.
+          type: ValueError
+        returns:
+          description: Dictionary containing `ground_amount_grams` (float), `desired_cup_count`
+            (int), `grounds_type` (str), and `measurement_valid` (bool).
+          type: dict
+        summary: Calculate and verify the amount of coffee grounds needed for a given
+          number of cups.
     prompt: Measure the appropriate amount of coffee grounds for the desired number
       of cups.
   prepare_coffee_maker:
@@ -88,6 +215,55 @@ nodes:
     - description: Current status of the coffee maker (e.g., 'ready', 'error')
       key: coffee_maker_status
       type: str
+    prd:
+      conceptual_info: Prepares the coffee maker by loading the measured coffee grounds
+        into the filter, verifying filter readiness, and reporting the status of the
+        coffee maker.
+      docstring:
+        examples:
+        - lines:
+          - result = prepare_coffee_maker(
+          - '    ground_amount_grams=15.0,'
+          - '    desired_cup_count=2,'
+          - '    grounds_type=''medium'','
+          - '    measurement_valid=True)'
+          - print(result)
+          output: '{''coffee_grounds_amount_g'': 15.0, ''filter_prepared'': True,
+            ''coffee_maker_status'': ''ready''}'
+        - lines:
+          - 'try:'
+          - '    prepare_coffee_maker('
+          - '        ground_amount_grams=15.0,'
+          - '        desired_cup_count=2,'
+          - '        grounds_type=''medium'','
+          - '        measurement_valid=False)'
+          - 'except ValueError as e:'
+          - '    print(e)'
+          output: 'Invalid measurement: measurement_valid is False'
+        parameters:
+        - description: Amount of coffee grounds measured in grams (from measure_coffee).
+          name: ground_amount_grams
+          type: float
+        - description: Number of coffee cups to be brewed (from measure_coffee).
+          name: desired_cup_count
+          type: int
+        - description: Type of coffee grounds used (e.g., medium grind, dark roast).
+          name: grounds_type
+          type: str
+        - description: Flag indicating whether the measurement was performed correctly.
+          name: measurement_valid
+          type: bool
+        raises:
+        - description: If `measurement_valid` is False or `ground_amount_grams` is
+            non‑positive.
+          type: ValueError
+        returns:
+          description: Dictionary with keys `coffee_grounds_amount_g` (float), `filter_prepared`
+            (bool), and `coffee_maker_status` (str).
+          type: dict
+        summary: Adds the specified amount of coffee grounds into the coffee maker's
+          filter, validates the measurement, and reports the amount added, filter
+          status, and overall maker status.
     prompt: Put the measured coffee grounds into the coffee maker's filter.
   serve_coffee:
     agent: false
@@ -106,4 +282,58 @@ nodes:
     - description: The volume of the served coffee in milliliters
       key: volume_ml
       type: int
+    prd:
+      conceptual_info: This node takes the results of the brewing process, verifies
+        that brewing succeeded, converts the brewed volume from cups to milliliters,
+        and simulates pouring the coffee into a cup while preserving its temperature.
+      docstring:
+        examples:
+        - lines:
+          - serve_coffee(
+          - '    brew_start_timestamp="2025-10-11T10:00:00Z",'
+          - '    brew_end_timestamp="2025-10-11T10:03:30Z",'
+          - '    brew_duration_seconds=210.0,'
+          - '    brewed_volume_cups=2,'
+          - '    brewed_success=True,'
+          - '    final_temperature_c=90.0)'
+          output: "{\n  'served': True,\n  'temperature_c': 90.0,\n  'volume_ml':\
+            \ 480\n}"
+        - lines:
+          - serve_coffee(
+          - '    brew_start_timestamp="2025-10-11T10:10:00Z",'
+          - '    brew_end_timestamp="2025-10-11T10:12:00Z",'
+          - '    brew_duration_seconds=120.0,'
+          - '    brewed_volume_cups=1,'
+          - '    brewed_success=False,'
+          - '    final_temperature_c=85.0)'
+          output: 'ValueError: Brewed coffee is not successful; cannot serve.'
+        parameters:
+        - description: ISO 8601 timestamp when brewing started.
+          name: brew_start_timestamp
+          type: str
+        - description: ISO 8601 timestamp when brewing completed.
+          name: brew_end_timestamp
+          type: str
+        - description: Total duration of the brewing process in seconds.
+          name: brew_duration_seconds
+          type: float
+        - description: Number of cups of coffee brewed.
+          name: brewed_volume_cups
+          type: int
+        - description: Indicates whether the brewing process completed successfully.
+          name: brewed_success
+          type: bool
+        - description: Final temperature of the brewed coffee in degrees Celsius.
+          name: final_temperature_c
+          type: float
+        raises:
+        - description: Raised if `brewed_success` is False, indicating the coffee
+            cannot be served.
+          type: ValueError
+        returns:
+          description: "A dictionary with keys:\n  - served (bool): Whether the coffee\
+            \ was served.\n  - temperature_c (float): Served coffee temperature.\n\
+            \  - volume_ml (int): Served coffee volume in milliliters."
+          type: dict
+        summary: Serve freshly brewed coffee into a cup based on brewing results.
     prompt: Pour the freshly brewed coffee into a cup and serve.
