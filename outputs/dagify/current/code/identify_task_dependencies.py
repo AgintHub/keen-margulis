@@ -1,5 +1,12 @@
+from ._identify_task_dependencies.normalize_task_names import normalize_task_names
+from ._identify_task_dependencies.normalize_task_descriptions import normalize_task_descriptions
+from ._identify_task_dependencies.detect_semantic_relationships import detect_semantic_relationships
+from ._identify_task_dependencies.detect_keyword_dependencies import detect_keyword_dependencies
+from ._identify_task_dependencies.merge_dependency_sources import merge_dependency_sources
+from ._identify_task_dependencies.filter_duplicate_dependencies import filter_duplicate_dependencies
+from ._identify_task_dependencies.format_dependency_pairs import format_dependency_pairs
+
 import logging
-import re
 from typing import List
 
 from pydantic import BaseModel  # noqa: E0611
@@ -67,17 +74,22 @@ def identify_task_dependencies(decompose_objective_into_tasks_input: DecomposeOb
     if len(task_names) != len(task_descriptions):
         logger.error("Task names and descriptions list lengths differ")
         raise ValueError("Task names and descriptions list lengths differ")
-    dependencies: List[str] = []
-    for i, (name_a, desc_a) in enumerate(zip(task_names, task_descriptions)):
-        for j, (name_b, desc_b) in enumerate(zip(task_names, task_descriptions)):
-            if i == j:
-                continue
-            if re.search(rf"\\b{re.escape(name_b)}\\b", desc_a, re.IGNORECASE):
-                pair = f"{name_a} -> {name_b}"
-                if pair not in dependencies:
-                    dependencies.append(pair)
+    
+    normalized_tasks: List[str] = normalize_task_names(task_names=task_names)
+    normalized_descriptions: List[str] = normalize_task_descriptions(descriptions=task_descriptions)
+    
+    semantic_matches: List[tuple] = detect_semantic_relationships(task_names=normalized_tasks, descriptions=normalized_descriptions)
+    
+    keyword_matches: List[tuple] = detect_keyword_dependencies(task_names=normalized_tasks, descriptions=normalized_descriptions)
+    
+    merged_dependencies: List[tuple] = merge_dependency_sources(semantic_matches=semantic_matches, keyword_matches=keyword_matches)
+    
+    filtered_dependencies: List[tuple] = filter_duplicate_dependencies(dependencies=merged_dependencies)
+    
+    dependency_pairs: List[str] = format_dependency_pairs(dependencies=filtered_dependencies)
+    
     return IdentifyTaskDependenciesOutput(
         task_names=task_names,
-        dependency_pairs=dependencies,
-        dependency_count=len(dependencies)
+        dependency_pairs=dependency_pairs,
+        dependency_count=len(dependency_pairs)
     )

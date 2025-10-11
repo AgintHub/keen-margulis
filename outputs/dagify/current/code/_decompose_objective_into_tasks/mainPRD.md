@@ -5,176 +5,165 @@ PRDs for nodes in the '_decompose_objective_into_tasks' module.
 
 ## Table of Contents
 
-- [validate_workflow_objective](#validate_workflow_objective)
+- [validate_input_type_and_content](#validate_input_type_and_content)
 
-- [parse_objective_components](#parse_objective_components)
+- [sanitize_and_normalize_text](#sanitize_and_normalize_text)
 
-- [generate_task_sequence](#generate_task_sequence)
+- [enhance_objective_clarity](#enhance_objective_clarity)
 
-- [refine_task_descriptions](#refine_task_descriptions)
-
-
-
----
-
-## validate_workflow_objective
-
-### Description
-Validates and normalizes a workflow objective string.
-
-### Conceptual Info
-
-The shim serves as a gatekeeper that ensures workflow objectives are well‑formed before they are used to generate tasks, preventing downstream errors and improving overall workflow quality.
-
-### Docstring
-
-**Summary:** Validate and normalize a workflow objective string.
-
-**Parameters:**
-
-- objective (str): The raw workflow objective string provided by the user.
-**Returns:** str - A trimmed, non‑empty objective string ready for further processing.
-
-**Raises:**
-
-- ValueError: Raised when the objective is empty or fails validation checks.
-- TypeError: Raised when the provided objective is not of type `str`.
-**Examples:**
-
-```python
->>> validate_workflow_objective('Collect market data')
-'Collect market data'
-```
-
-```python
->>> validate_workflow_objective('  Plan project timeline  ')
-'Plan project timeline'
-```
+- [apply_workflow_formatting_standards](#apply_workflow_formatting_standards)
 
 
 
 ---
 
-## parse_objective_components
+## validate_input_type_and_content
 
 ### Description
-Parses a workflow objective string into a list of its constituent components.
+Validates that the input is a non‑empty string and returns the input trimmed of leading and trailing whitespace.
 
 ### Conceptual Info
 
-This shim takes a validated workflow objective string and splits it into individual, actionable components that can later be used to generate tasks.
+Ensures that the provided input is a non‑empty string, performs basic sanity checks, and returns the cleaned string for downstream workflow processing.
 
 ### Docstring
 
-**Summary:** Parses the provided objective string into a list of its constituent components.
+**Summary:** Validate the input type and content for workflow objective definition, ensuring the input is a non‑empty string and trimming extraneous whitespace.
 
 **Parameters:**
 
-- objective (str): A validated workflow objective string to be parsed.
-**Returns:** List[str] - A list of strings, each representing an actionable component of the objective.
+- input_value (str): The raw input string to validate and clean.
+**Returns:** str - A cleaned string with leading and trailing whitespace removed; may raise exceptions if validation fails.
 
 **Raises:**
 
-- ValueError: Raised when the objective string cannot be parsed into any component.
-- TypeError: Raised when the provided objective is not of type str.
+- ValueError: Raised when the input string is empty or contains only whitespace.
+- TypeError: Raised when the input is not of type str.
 **Examples:**
 
 ```python
->>> parsed = parse_objective_components('Build a web app that allows users to upload photos and share them with friends')
->>> print(parsed)
-['Build a web app', 'allow users to upload photos', 'share them with friends']
+>>> validate_input_type_and_content('  Hello World  ')
+'Hello World'
 ```
 
 ```python
->>> parsed = parse_objective_components('Create a financial model to forecast quarterly earnings')
->>> print(parsed)
-['Create a financial model', 'forecast quarterly earnings']
+>>> validate_input_type_and_content('Python 3.11')
+'Python 3.11'
 ```
 
 
 
 ---
 
-## generate_task_sequence
+## sanitize_and_normalize_text
 
 ### Description
-Generates a list of task descriptions from the given components and high‑level objective.
+Sanitizes and normalizes raw input text into a clean, consistent string suitable for downstream processing.
 
 ### Conceptual Info
 
-The generate_task_sequence shim translates a decomposed set of components and an overall objective into actionable task descriptions, forming a bridge between high‑level planning and low‑level execution steps.
+This shim normalizes raw user input by trimming whitespace, collapsing consecutive spaces, removing non-printable characters, and standardizing line breaks into a single space, producing a clean, consistent string ready for further processing.
 
 ### Docstring
 
-**Summary:** Generates a sequence of task descriptions based on input components and the overarching objective.
+**Summary:** Sanitize and normalize a text string, ensuring it is trimmed, single-spaced, printable, and line breaks are standardized.
 
 **Parameters:**
 
-- components (List[str]): A list of strings describing sub‑components or steps that constitute the objective.
-- objective (str): A concise, high‑level statement of the goal to be achieved.
-**Returns:** List[str] - A list of task descriptions, each string representing an actionable step toward the objective.
+- text (str): Raw input text that may contain irregular spacing, line breaks, or non-printable characters.
+**Returns:** str - The cleaned text string with uniform spacing and line breaks.
 
 **Raises:**
 
-- ValueError: Raised when either `components` or `objective` is empty.
-- TypeError: Raised when `components` is not a list of strings or `objective` is not a string.
+- TypeError: Raised if the input is not a string.
+- ValueError: Raised if the input is an empty string or contains only whitespace after sanitization.
 **Examples:**
 
 ```python
->>> components = ["collect data", "clean data", "visualize results"],
->>> objective = "Produce a clean data set ready for analysis",
->>> output = generate_task_sequence(components=components, objective=objective),
->>> print(output)
-["Collect data from sources", "Clean the collected data", "Visualize the cleaned data"]
+>>> sanitize_and_normalize_text('  Hello   world  ')
+'Hello world'
 ```
 
 ```python
->>> components = ["draft email", "review email"],
->>> objective = "Send an email to the team",
->>> output = generate_task_sequence(components=components, objective=objective),
->>> print(output)
-["Draft the email", "Review the email for accuracy"]
+>>> sanitize_and_normalize_text('Line1\nLine2')
+'Line1 Line2'
 ```
 
 
 
 ---
 
-## refine_task_descriptions
+## enhance_objective_clarity
 
 ### Description
-Refines a list of task descriptions into clearer, more actionable steps.
+Refines an objective statement to be clearer, more specific, and action‑oriented.
 
 ### Conceptual Info
 
-The shim takes a sequence of high-level tasks and elaborates them into detailed, actionable steps that can be directly executed.
+This shim takes a raw objective string and produces a more precise, actionable statement suitable for workflow design.
 
 ### Docstring
 
-**Summary:** Refines a list of task descriptions into more detailed, actionable steps.
+**Summary:** Improve the clarity of an objective by refining wording, adding specificity, and ensuring an actionable, concise statement.
 
 **Parameters:**
 
-- tasks (List[str]): A list of task descriptions that represent the decomposed workflow objective.
-**Returns:** List[str] - A list of refined task descriptions, each more detailed and actionable than the input.
+- objective (str): The raw objective statement to be enhanced.
+**Returns:** str - A refined objective statement that is clear, specific, and actionable.
 
 **Raises:**
 
-- ValueError: If any task description is empty or not a string.
-- TypeError: If the input `tasks` is not a list of strings.
+- TypeError: If the `objective` parameter is not a string.
+- ValueError: If the `objective` parameter is empty or contains only whitespace.
 **Examples:**
 
 ```python
->>> tasks = ['Collect data', 'Process data']
->>> refined = refine_task_descriptions(tasks=tasks)
->>> print(refined)
-['Collect raw data from specified sources', 'Process collected data using predefined transformation steps']
+>>> enhance_objective_clarity('Improve user engagement')
+'Increase user engagement by 20% within six months.'
 ```
 
 ```python
->>> tasks = ['Write report']
->>> refined = refine_task_descriptions(tasks=tasks)
->>> print(refined)
-['Write a comprehensive report detailing findings, methodology, and recommendations']
+>>> enhance_objective_clarity('Create a more robust system')
+'Develop a robust, fault‑tolerant system that can handle 10,000 concurrent users.'
+```
+
+
+
+---
+
+## apply_workflow_formatting_standards
+
+### Description
+Formats a workflow objective string into a standardized format suitable for downstream processing.
+
+### Conceptual Info
+
+This shim ensures that a workflow objective is cleaned, standardized, and ready for use by subsequent components.
+
+### Docstring
+
+**Summary:** Applies workflow formatting standards to the given objective string.
+
+**Parameters:**
+
+- objective (str): The raw workflow objective that needs standardization.
+**Returns:** str - The objective string after applying formatting standards such as trimming whitespace, normalizing sentence case, and ensuring a single period at the end.
+
+**Raises:**
+
+- TypeError: Raised if `objective` is not a string.
+- ValueError: Raised if `objective` is empty or consists only of whitespace.
+**Examples:**
+
+```python
+>>> formatted = apply_workflow_formatting_standards('design a user-friendly interface')
+>>> print(formatted)
+'Design a user-friendly interface.'
+```
+
+```python
+>>> formatted = apply_workflow_formatting_standards('   create a test plan and    review  ')
+>>> print(formatted)
+'Create a test plan and review.'
 ```
 

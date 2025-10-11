@@ -5,42 +5,62 @@ nodes:
   create_task_dag:
     agent: false
     code_node_type: stub
-    description: Create a Directed Acyclic Graph (DAG) of tasks.
-    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass IdentifyTaskDependenciesOutput(BaseModel):\n    \"\"\"Pydantic model\
-      \ for identify_task_dependencies node outputs.\"\"\"\n    task_names: List[str]\
-      \ = (\n        Field(..., description=\"List of all task names identified from\
-      \ decomposition.\")\n    )\n    dependency_pairs: List[str] = (\n        Field(...,\
-      \ description=\"List of dependency relationships in the format 'TaskA -> TaskB'\
-      \ indicating TaskA must be completed before TaskB can start.\")\n    )\n   \
-      \ dependency_count: int = (\n        Field(..., description=\"Total number of\
-      \ dependency relationships identified.\")\n    )\n\n\nclass CreateTaskDagOutput(BaseModel):\n\
-      \    \"\"\"Pydantic model for create_task_dag node outputs.\"\"\"\n    dag_nodes:\
-      \ List[str] = (\n        Field(..., description=\"Ordered list of task identifiers\
-      \ in the DAG.\")\n    )\n    dag_edges: List[str] = (\n        Field(..., description=\"\
-      List of edges representing dependencies, formatted as 'source->target'.\")\n\
-      \    )\n    is_acyclic: bool = (\n        Field(..., description=\"Indicates\
-      \ whether the constructed DAG is acyclic.\")\n    )\n\n\ndef create_task_dag(identify_task_dependencies_input:\
-      \ IdentifyTaskDependenciesOutput, **kwargs) -> CreateTaskDagOutput:\n    \"\"\
-      \"\n    Constructs a Directed Acyclic Graph (DAG) of tasks from dependency\n\
-      \    information, returning an ordered list of tasks, the edge list, and an\n\
-      \    acyclicity flag.\n\n    Parameters\n    ----------\n    task_names : List[str]\n\
-      \        All task identifiers identified from decomposition.\n    dependency_pairs\
-      \ : List[str]\n        Dependency relationships in the format 'TaskA -> TaskB',\
-      \ indicating\n        TaskA must complete before TaskB.\n    dependency_count\
-      \ : int\n        Total number of dependency relationships identified.\n\n  \
-      \  Returns\n    -------\n    Tuple[List[str], List[str], bool]\n        A tuple\
-      \ containing the ordered list of tasks, the formatted edge\n        list, and\
-      \ a boolean indicating if the DAG is acyclic.\n\n    Raises\n    ------\n  \
-      \  ValueError\n        If the provided dependencies contain a cycle or if input\
-      \ lists are\n        inconsistent.\n\n    Examples\n    --------\n    >>> dag_nodes,\
-      \ dag_edges, is_acyclic = create_task_dag(     ['A', 'B', 'C'],\n    ['A ->\
-      \ B', 'B -> C'],     2 )\n    >>> print(dag_nodes, dag_edges, is_acyclic)\n\
-      \    (['A', 'B', 'C'], ['A->B', 'B->C'], True)\n\n    >>> try:\n    ...    \
-      \ create_task_dag(['A', 'B'], ['A -> B', 'B -> A'], 2)\n    >>> except ValueError\
-      \ as e:\n    ...     print(e)\n    \"Cycle detected in task dependencies: ['A\
-      \ -> B', 'B -> A']\"\n\n    \"\"\"\n    return CreateTaskDagOutput(\n      \
-      \  dag_nodes=[],\n        dag_edges=[],\n        is_acyclic=False,\n    )"
+    description: Constructs a directed acyclic graph (DAG) from explicit dependency
+      pairs, performs a topological sort to produce a deterministic execution order,
+      and validates that the graph contains no cycles. The node returns the ordered
+      task list, the dependency edge list in compact form, and a boolean flag indicating
+      acyclicity.
+    implementation: "import logging\nfrom collections import defaultdict, deque\n\
+      from typing import Set, List\n\n\nlog = logging.getLogger(__name__)\n\n\ndef\
+      \ _parse_edge(edge: str) -> tuple[str, str]:\n    \"\"\"\n    Creates a DAG\
+      \ from dependency pairs and returns an execution order.\n\n    Parameters\n\
+      \    ----------\n    identify_task_dependencies_input : IdentifyTaskDependenciesOutput\n\
+      \        Output from the identify_task_dependencies node containing task\n \
+      \       names and dependency pairs.\n    kwargs : dict\n        Additional keyword\
+      \ arguments for future extensions.\n\n    Returns\n    -------\n    CreateTaskDagOutput\n\
+      \        Dataclass containing the ordered task list, edge list, and\n      \
+      \  acyclicity flag.\n\n    Raises\n    ------\n    ValueError\n        If input\
+      \ validation fails or a cycle is detected in the dependency\n        graph.\n\
+      \n    Examples\n    --------\n    >>> from your_module import create_task_dag,\
+      \ IdentifyTaskDependenciesOutput\n    >>> input_data = IdentifyTaskDependenciesOutput(\n\
+      \    ...     task_names=[\"A\", \"B\", \"C\"],\n    ...     dependency_pairs=[\"\
+      A -> B\", \"B -> C\"],\n    ...     dependency_count=2\n    >>> )\n    >>> output\
+      \ = create_task_dag(input_data)\n    >>> print(output.dag_nodes, output.dag_edges,\
+      \ output.is_acyclic)\n    [\"A\", \"B\", \"C\"] ['A->B', 'B->C'] True\n\n  \
+      \  \"\"\"\n    parts = [p.strip() for p in edge.split('->')]\n    if len(parts)\
+      \ != 2 or not parts[0] or not parts[1]:\n        raise ValueError(f\"Invalid\
+      \ dependency format: '{edge}'. Expected 'TaskA -> TaskB'\")\n    return parts[0],\
+      \ parts[1]\n\n\ndef create_task_dag(identify_task_dependencies_input: IdentifyTaskDependenciesOutput,\
+      \ **kwargs) -> CreateTaskDagOutput:\n    \"\"\"\n    Constructs a Directed Acyclic\
+      \ Graph (DAG) from dependency pairs and returns an execution order.\n    \"\"\
+      \"\n    task_names = identify_task_dependencies_input.task_names\n    dependency_pairs\
+      \ = identify_task_dependencies_input.dependency_pairs\n    dependency_count\
+      \ = identify_task_dependencies_input.dependency_count\n\n    if not isinstance(task_names,\
+      \ list) or not all(isinstance(t, str) and t for t in task_names):\n        raise\
+      \ ValueError(\"task_names must be a list of non-empty strings\")\n    if not\
+      \ isinstance(dependency_pairs, list) or not all(isinstance(d, str) and d for\
+      \ d in dependency_pairs):\n        raise ValueError(\"dependency_pairs must\
+      \ be a list of non-empty strings\")\n    if dependency_count != len(dependency_pairs):\n\
+      \        raise ValueError(\"dependency_count does not match the number of dependency_pairs\"\
+      )\n\n    task_set: Set[str] = set(task_names)\n    adjacency: defaultdict[str,\
+      \ Set[str]] = defaultdict(set)\n    indegree: defaultdict[str, int] = defaultdict(int)\n\
+      \n    for pair in dependency_pairs:\n        src, dst = _parse_edge(pair)\n\
+      \        if src == dst:\n            raise ValueError(f\"Self‑dependency detected:\
+      \ '{src}' -> '{dst}'\")\n        if src not in task_set or dst not in task_set:\n\
+      \            raise ValueError(f\"Dependency references unknown task: '{pair}'\"\
+      )\n        if dst not in adjacency[src]:\n            adjacency[src].add(dst)\n\
+      \            indegree[dst] += 1\n            if src not in indegree:\n     \
+      \           indegree[src] += 0\n\n    zero_indegree = deque([t for t in task_names\
+      \ if indegree[t] == 0])\n    topo_order: List[str] = []\n    while zero_indegree:\n\
+      \        node = zero_indegree.popleft()\n        topo_order.append(node)\n \
+      \       for neighbor in adjacency[node]:\n            indegree[neighbor] -=\
+      \ 1\n            if indegree[neighbor] == 0:\n                zero_indegree.append(neighbor)\n\
+      \n    is_acyclic = len(topo_order) == len(task_names)\n    if not is_acyclic:\n\
+      \        cycle_nodes = [t for t in task_names if indegree[t] > 0]\n        raise\
+      \ ValueError(f\"Cycle detected in task dependencies involving: {cycle_nodes}\"\
+      )\n\n    dag_edges = [f\"{src}->{dst}\" for src in adjacency for dst in adjacency[src]]\n\
+      \n    return CreateTaskDagOutput(\n        dag_nodes=topo_order,\n        dag_edges=dag_edges,\n\
+      \        is_acyclic=is_acyclic\n    )"
     name: create_task_dag
     nodes_depended_on:
     - identify_task_dependencies
@@ -61,76 +81,58 @@ nodes:
       docstring:
         examples:
         - lines:
-          - "dag_nodes, dag_edges, is_acyclic = create_task_dag(\n    ['A', 'B', 'C'],\n\
-            \    ['A -> B', 'B -> C'],\n    2\n)"
-          - print(dag_nodes, dag_edges, is_acyclic)
-          output: (['A', 'B', 'C'], ['A->B', 'B->C'], True)
-        - lines:
-          - 'try:'
-          - '    create_task_dag([''A'', ''B''], [''A -> B'', ''B -> A''], 2)'
-          - 'except ValueError as e:'
-          - '    print(e)'
-          output: '"Cycle detected in task dependencies: [''A -> B'', ''B -> A'']"'
+          - from your_module import create_task_dag, IdentifyTaskDependenciesOutput
+          - input_data = IdentifyTaskDependenciesOutput(
+          - '    task_names=["A", "B", "C"],'
+          - '    dependency_pairs=["A -> B", "B -> C"],'
+          - '    dependency_count=2'
+          - )
+          - output = create_task_dag(input_data)
+          - print(output.dag_nodes, output.dag_edges, output.is_acyclic)
+          output: '["A", "B", "C"] [''A->B'', ''B->C''] True'
         parameters:
-        - description: All task identifiers identified from decomposition.
-          name: task_names
-          type: List[str]
-        - description: Dependency relationships in the format 'TaskA -> TaskB', indicating
-            TaskA must complete before TaskB.
-          name: dependency_pairs
-          type: List[str]
-        - description: Total number of dependency relationships identified.
-          name: dependency_count
-          type: int
+        - description: Output from the identify_task_dependencies node containing
+            task names and dependency pairs.
+          name: identify_task_dependencies_input
+          type: IdentifyTaskDependenciesOutput
+        - description: Additional keyword arguments for future extensions.
+          name: kwargs
+          type: dict
         raises:
-        - description: If the provided dependencies contain a cycle or if input lists
-            are inconsistent.
+        - description: If input validation fails or a cycle is detected in the dependency
+            graph.
           type: ValueError
         returns:
-          description: A tuple containing the ordered list of tasks, the formatted
-            edge list, and a boolean indicating if the DAG is acyclic.
-          type: Tuple[List[str], List[str], bool]
-        summary: Constructs a Directed Acyclic Graph (DAG) of tasks from dependency
-          information, returning an ordered list of tasks, the edge list, and an acyclicity
-          flag.
+          description: Dataclass containing the ordered task list, edge list, and
+            acyclicity flag.
+          type: CreateTaskDagOutput
+        summary: Creates a DAG from dependency pairs and returns an execution order.
     prompt: Using the task dependencies, construct a DAG that represents the workflow.
       Ensure it is acyclic and properly ordered.
     shims: []
   decompose_objective_into_tasks:
     agent: false
     code_node_type: stub
-    description: Break down the workflow objective into fundamental tasks.
-    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass DefineWorkflowObjectiveOutput(BaseModel):\n    \"\"\"Pydantic model\
-      \ for define_workflow_objective node outputs.\"\"\"\n    objective: str = (\n\
-      \        Field(..., description=\"Primary goal statement of the workflow\")\n\
-      \    )\n\n\nclass DecomposeObjectiveIntoTasksOutput(BaseModel):\n    \"\"\"\
-      Pydantic model for decompose_objective_into_tasks node outputs.\"\"\"\n    task_names:\
-      \ List[str] = (\n        Field(..., description=\"List of task names identified\
-      \ by decomposition.\")\n    )\n    task_descriptions: List[str] = (\n      \
-      \  Field(..., description=\"Brief descriptions for each corresponding task.\"\
-      )\n    )\n    num_tasks: int = Field(..., description=\"Total number of tasks\
-      \ identified.\")\n\n\ndef decompose_objective_into_tasks(define_workflow_objective_input:\
-      \ DefineWorkflowObjectiveOutput, **kwargs) -> DecomposeObjectiveIntoTasksOutput:\n\
-      \    \"\"\"\n    Decomposes a workflow objective string into a list of task\
-      \ names,\n    descriptions, and a task count.\n\n    Parameters\n    ----------\n\
-      \    objective : str\n        Primary goal statement of the workflow provided\
-      \ by\n        `define_workflow_objective`.\n\n    Returns\n    -------\n   \
-      \ tuple[List[str], List[str], int]\n        A tuple containing: 1) list of task\
-      \ names, 2) list of brief task\n        descriptions, 3) integer count of tasks.\n\
-      \n    Raises\n    ------\n    ValueError\n        Raised when the `objective`\
-      \ string is empty or cannot be parsed into\n        distinct tasks.\n\n    Examples\n\
-      \    --------\n    >>> result = decompose_objective_into_tasks(\"Process customer\
-      \ orders and\n    generate invoices\")\n    {'task_names': ['Process orders',\
-      \ 'Generate invoices'], 'task_descriptions':\n    ['Handle incoming orders from\
-      \ sales', 'Create and send invoices to\n    customers'], 'num_tasks': 2}\n\n\
-      \    >>> result = decompose_objective_into_tasks(\"Collect data, clean data,\
-      \ and\n    train a machine learning model\")\n    {'task_names': ['Collect data',\
-      \ 'Clean data', 'Train ML model'],\n    'task_descriptions': ['Gather raw data\
-      \ from sources', 'Perform data cleaning\n    and preprocessing', 'Train a predictive\
-      \ model on cleaned data'],\n    'num_tasks': 3}\n\n    \"\"\"\n    return DecomposeObjectiveIntoTasksOutput(\n\
-      \        task_names=[],\n        task_descriptions=[],\n        num_tasks=0,\n\
-      \    )"
+    description: Captures the high‑level purpose of a workflow as a single natural‑language
+      sentence, ensuring clarity and consistency for downstream decomposition.
+    implementation: "import logging\nfrom pydantic import BaseModel, Field\n\n\nlogger\
+      \ = logging.getLogger(__name__)\n\nclass DefineWorkflowObjectiveOutput(BaseModel):\n\
+      \    objective: str = (\n        Field(..., description=\"Primary goal statement\
+      \ of the workflow\")\n    )\n\ndef define_workflow_objective(general_input:\
+      \ str, **kwargs) -> DefineWorkflowObjectiveOutput:\n    \"\"\"\n    Return a\
+      \ validated objective string.\n\n    Parameters\n    ----------\n    general_input\
+      \ : str\n        Human‑readable description of the desired workflow.\n\n   \
+      \ Returns\n    -------\n    DefineWorkflowObjectiveOutput\n        A pydantic\
+      \ model containing the validated objective.\n\n    Raises\n    ------\n    ValueError\n\
+      \        If the input is empty, non‑string, or only whitespace.\n\n    Examples\n\
+      \    --------\n    >>> from your_package import define_workflow_objective\n\
+      \    >>> objective_output = define_workflow_objective(\"Automate the ingestion,\n\
+      \    transformation, and reporting of sales data.\")\n    >>> print(objective_output.objective)\n\
+      \    \"Automate the ingestion, transformation, and reporting of sales data.\"\
+      \n\n    \"\"\"\n    if not isinstance(general_input, str) or not general_input.strip():\n\
+      \        logger.error(\"Input objective is empty or not a string\")\n      \
+      \  raise ValueError(\"Input objective must be a non-empty string\")\n    objective\
+      \ = general_input.strip()\n    return DefineWorkflowObjectiveOutput(objective=objective)"
     name: decompose_objective_into_tasks
     nodes_depended_on:
     - define_workflow_objective
@@ -146,63 +148,61 @@ nodes:
       key: num_tasks
       type: int
     prd:
-      conceptual_info: This node transforms a high‑level workflow goal into a concrete,
-        actionable set of tasks. It interprets the objective text, extracts meaningful
-        sub‑tasks, and returns an ordered list of task names, short descriptions,
-        and the overall count. The decomposition is intentionally kept self‑contained
-        so that downstream nodes can establish dependencies and construct a DAG.
+      conceptual_info: This node serves as the foundational description of a workflow.
+        By accepting a human‑friendly prompt and validating it, it guarantees that
+        downstream nodes start from a well‑formed objective, reducing ambiguity and
+        improving maintainability.
       docstring:
         examples:
         - lines:
-          - result = decompose_objective_into_tasks("Process customer orders and generate
-            invoices")
-          output: '{''task_names'': [''Process orders'', ''Generate invoices''], ''task_descriptions'':
-            [''Handle incoming orders from sales'', ''Create and send invoices to
-            customers''], ''num_tasks'': 2}'
-        - lines:
-          - result = decompose_objective_into_tasks("Collect data, clean data, and
-            train a machine learning model")
-          output: '{''task_names'': [''Collect data'', ''Clean data'', ''Train ML
-            model''], ''task_descriptions'': [''Gather raw data from sources'', ''Perform
-            data cleaning and preprocessing'', ''Train a predictive model on cleaned
-            data''], ''num_tasks'': 3}'
+          - from your_package import define_workflow_objective
+          - objective_output = define_workflow_objective("Automate the ingestion,
+            transformation, and reporting of sales data.")
+          - print(objective_output.objective)
+          output: '"Automate the ingestion, transformation, and reporting of sales
+            data."'
         parameters:
-        - description: Primary goal statement of the workflow provided by `define_workflow_objective`.
-          name: objective
+        - description: Human‑readable description of the desired workflow.
+          name: general_input
           type: str
         raises:
-        - description: Raised when the `objective` string is empty or cannot be parsed
-            into distinct tasks.
+        - description: If the input is empty, non‑string, or only whitespace.
           type: ValueError
         returns:
-          description: 'A tuple containing: 1) list of task names, 2) list of brief
-            task descriptions, 3) integer count of tasks.'
-          type: tuple[List[str], List[str], int]
-        summary: Decomposes a workflow objective string into a list of task names,
-          descriptions, and a task count.
-    prompt: Decompose the workflow objective into individual, self-contained tasks
-      or steps.
+          description: A pydantic model containing the validated objective.
+          type: DefineWorkflowObjectiveOutput
+        summary: Return a validated objective string.
+    prompt: Provide a concise primary goal statement for the workflow.
     shims: []
   define_workflow_objective:
     agent: false
     code_node_type: stub
-    description: Define the objective of the workflow
-    implementation: "from pydantic import BaseModel, Field\n\n\nclass DefineWorkflowObjectiveOutput(BaseModel):\n\
-      \    \"\"\"Pydantic model for define_workflow_objective node outputs.\"\"\"\n\
-      \    objective: str = (\n        Field(..., description=\"Primary goal statement\
-      \ of the workflow\")\n    )\n\n\ndef define_workflow_objective(general_input:\
-      \ str, **kwargs) -> DefineWorkflowObjectiveOutput:\n    \"\"\"\n    Generate\
-      \ a concise primary goal statement for the workflow.\n\n    Returns\n    -------\n\
-      \    str\n        A natural‑language statement describing the workflow’s overall\n\
-      \        objective.\n\n    Raises\n    ------\n    ValueError\n        If the\
-      \ generated objective is empty or consists only of whitespace.\n\n    Examples\n\
-      \    --------\n    >>> # Example 1: Basic workflow objective\n    >>> objective\
-      \ = define_workflow_objective()\n    >>> print(objective)\n    'Automate the\
-      \ ingestion, transformation, and reporting of sales data.'\n\n    >>> # Example\
-      \ 2: High‑level objective for a data science pipeline\n    >>> objective = define_workflow_objective()\n\
-      \    >>> print(objective)\n    'Deliver actionable insights from customer behavior\
-      \ data through automated\n    analysis and visualization.'\n\n    \"\"\"\n \
-      \   return DefineWorkflowObjectiveOutput(\n        objective=\"\",\n    )"
+    description: Creates a clear, single-sentence statement that defines the primary
+      goal of the entire workflow, serving as a guiding beacon for downstream task
+      decomposition.
+    implementation: "import logging\nfrom typing import Any\nfrom pydantic import\
+      \ BaseModel, Field, ValidationError\n\n\nlogger = logging.getLogger(__name__)\n\
+      \nclass DefineWorkflowObjectiveOutput(BaseModel):\n    objective: str = (\n\
+      \        Field(..., description=\"Primary goal statement of the workflow\")\n\
+      \    )\n\ndef define_workflow_objective(general_input: str, **kwargs: Any) ->\
+      \ DefineWorkflowObjectiveOutput:\n    \"\"\"\n    Defines the workflow’s primary\
+      \ objective statement.\n\n    Parameters\n    ----------\n    general_input\
+      \ : str\n        High‑level description or context used to generate the objective.\n\
+      \n    Returns\n    -------\n    DefineWorkflowObjectiveOutput\n        Object\
+      \ containing the primary goal sentence.\n\n    Raises\n    ------\n    ValueError\n\
+      \        If the input is empty or consists only of whitespace.\n\n    Examples\n\
+      \    --------\n    >>> output = define_workflow_objective(\"automate data ingestion\
+      \ and\n    reporting\")\n    >>> print(output.objective)\n    \"The primary\
+      \ objective of this workflow is to automate data ingestion and\n    reporting.\"\
+      \n\n    \"\"\"\n    if not isinstance(general_input, str):\n        logger.error(\"\
+      general_input must be a string\")\n        raise ValueError(\"general_input\
+      \ must be a string\")\n    cleaned = general_input.strip()\n    if not cleaned:\n\
+      \        logger.error(\"general_input is empty or whitespace only\")\n     \
+      \   raise ValueError(\"general_input must be a non-empty string\")\n    objective\
+      \ = f\"The primary objective of this workflow is to {cleaned}.\"\n    try:\n\
+      \        return DefineWorkflowObjectiveOutput(objective=objective)\n    except\
+      \ ValidationError as ve:\n        logger.error(\"Validation error when creating\
+      \ output: %s\", ve)\n        raise"
     name: define_workflow_objective
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -211,80 +211,127 @@ nodes:
       key: objective
       type: str
     prd:
-      conceptual_info: The node captures the high‑level purpose of the entire workflow,
-        producing a single natural‑language sentence that guides downstream task decomposition.
+      conceptual_info: Captures the high-level purpose of the workflow in a single
+        natural-language sentence, ensuring all downstream tasks align with a clear,
+        actionable goal.
       docstring:
         examples:
         - lines:
-          - '# Example 1: Basic workflow objective'
-          - objective = define_workflow_objective()
-          - print(objective)
-          output: '''Automate the ingestion, transformation, and reporting of sales
-            data.'''
-        - lines:
-          - '# Example 2: High‑level objective for a data science pipeline'
-          - objective = define_workflow_objective()
-          - print(objective)
-          output: '''Deliver actionable insights from customer behavior data through
-            automated analysis and visualization.'''
-        parameters: []
+          - output = define_workflow_objective("automate data ingestion and reporting")
+          - print(output.objective)
+          output: '"The primary objective of this workflow is to automate data ingestion
+            and reporting."'
+        parameters:
+        - description: High‑level description or context used to generate the objective.
+          name: general_input
+          type: str
         raises:
-        - description: If the generated objective is empty or consists only of whitespace.
+        - description: If the input is empty or consists only of whitespace.
           type: ValueError
         returns:
-          description: A natural‑language statement describing the workflow’s overall
-            objective.
-          type: str
-        summary: Generate a concise primary goal statement for the workflow.
-    prompt: Clearly state the primary goal of the workflow. What is it intended to
-      achieve?
+          description: Object containing the primary goal sentence.
+          type: DefineWorkflowObjectiveOutput
+        summary: Defines the workflow’s primary objective statement.
+    prompt: Generate a concise, single-sentence objective for the workflow based on
+      the provided context or description.
     shims: []
   finalize_workflow:
     agent: false
     code_node_type: stub
-    description: Finalize the workflow DAG
+    description: Validates the refined DAG, ensures completeness, acyclicity, and
+      optimal concurrency, performs any last‑minute adjustments, and returns a concise
+      summary.
     implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass RefineDagOutput(BaseModel):\n    \"\"\"Pydantic model for refine_dag\
-      \ node outputs.\"\"\"\n    dag_edges: List[str] = (\n        Field(..., description=\"\
-      List of directed edges in the refined DAG, formatted as \\\"TaskA->TaskB\\\"\
-      .\")\n    )\n    is_acyclic: bool = (\n        Field(..., description=\"Indicates\
-      \ whether the refined DAG contains any cycles.\")\n    )\n    is_concurrent:\
-      \ bool = (\n        Field(..., description=\"Indicates whether the DAG has been\
-      \ adjusted to allow concurrent execution of independent tasks.\")\n    )\n \
-      \   max_concurrency: int = (\n        Field(..., description=\"Maximum number\
-      \ of tasks that can run concurrently in the refined DAG.\")\n    )\n\n\nclass\
-      \ FinalizeWorkflowOutput(BaseModel):\n    \"\"\"Pydantic model for finalize_workflow\
-      \ node outputs.\"\"\"\n    dag_is_complete: bool = (\n        Field(..., description=\"\
-      Whether the DAG is fully defined and ready\")\n    )\n    dag_is_concurrent:\
-      \ bool = (\n        Field(..., description=\"Whether the DAG has maximized concurrency\"\
-      )\n    )\n    dag_is_acyclic: bool = (\n        Field(..., description=\"Whether\
-      \ the DAG contains no cycles\")\n    )\n    adjusted_node_list: str = (\n  \
-      \      Field(..., description=\"List of node names that were adjusted during\
-      \ finalization\")\n    )\n    dag_summary: str = (\n        Field(..., description=\"\
-      Human-readable summary of the finalized DAG\")\n    )\n\n\ndef finalize_workflow(refine_dag_input:\
-      \ RefineDagOutput, **kwargs) -> FinalizeWorkflowOutput:\n    \"\"\"\n    Finalize\
-      \ and validate a workflow DAG, ensuring it is complete, concurrent,\n    and\
-      \ acyclic.\n\n    Parameters\n    ----------\n    dag_edges : List[str]\n  \
-      \      Directed edges of the refined DAG, formatted as 'TaskA->TaskB'.\n   \
-      \ is_acyclic : bool\n        True if the refined DAG contains no cycles.\n \
-      \   is_concurrent : bool\n        True if the refined DAG already supports maximum\
-      \ concurrency.\n    max_concurrency : int\n        Maximum number of tasks that\
-      \ can run concurrently in the refined\n        DAG.\n\n    Returns\n    -------\n\
-      \    dict\n        A dictionary with keys `dag_is_complete`, `dag_is_concurrent`,\n\
-      \        `dag_is_acyclic`, `adjusted_node_list`, and `dag_summary`.\n\n    Raises\n\
-      \    ------\n    ValueError\n        If `dag_edges` is empty or malformed.\n\
-      \    RuntimeError\n        If the DAG cannot be made acyclic or fully concurrent\
-      \ after\n        adjustments.\n\n    Examples\n    --------\n    >>> result\
-      \ = finalize_workflow(dag_edges=['A->B', 'B->C'], is_acyclic=True,\n    is_concurrent=False,\
-      \ max_concurrency=2)\n    >>> print(result)\n    {'dag_is_complete': True, 'dag_is_concurrent':\
-      \ True, 'dag_is_acyclic': True,\n    'adjusted_node_list': ['B'], 'dag_summary':\
-      \ 'DAG has 3 nodes and 2 edges.\n    Concurrency adjusted to 2.'}\n\n    >>>\
-      \ try:\n    ...     finalize_workflow(dag_edges=[], is_acyclic=True, is_concurrent=True,\n\
-      \    max_concurrency=1)\n    >>> except ValueError as e:\n    ...     print(e)\n\
-      \    'dag_edges list is empty or contains malformed entries.'\n\n    \"\"\"\n\
-      \    return FinalizeWorkflowOutput(\n        dag_is_complete=False,\n      \
-      \  dag_is_concurrent=False,\n        dag_is_acyclic=False,\n        adjusted_node_list=\"\
-      \",\n        dag_summary=\"\",\n    )"
+      import logging\nimport re\n\n\nclass RefineDagOutput(BaseModel):\n    dag_edges:\
+      \ List[str] = (\n        Field(..., description=\"List of directed edges in\
+      \ the refined DAG, formatted as 'TaskA->TaskB'.\")\n    )\n    is_acyclic: bool\
+      \ = (\n        Field(..., description=\"Indicates whether the refined DAG contains\
+      \ any cycles.\")\n    )\n    is_concurrent: bool = (\n        Field(..., description=\"\
+      Indicates whether the DAG has been adjusted to allow concurrent execution of\
+      \ independent tasks.\")\n    )\n    max_concurrency: int = (\n        Field(...,\
+      \ description=\"Maximum number of tasks that can run concurrently in the refined\
+      \ DAG.\")\n    )\n\nclass FinalizeWorkflowOutput(BaseModel):\n    dag_is_complete:\
+      \ bool = (\n        Field(..., description=\"Whether the DAG is fully defined\
+      \ and ready\")\n    )\n    dag_is_concurrent: bool = (\n        Field(..., description=\"\
+      Whether the DAG has maximized concurrency\")\n    )\n    dag_is_acyclic: bool\
+      \ = (\n        Field(..., description=\"Whether the DAG contains no cycles\"\
+      )\n    )\n    adjusted_node_list: str = (\n        Field(..., description=\"\
+      Comma‑separated list of node names that were adjusted during finalization\"\
+      )\n    )\n    dag_summary: str = (\n        Field(..., description=\"Human‑readable\
+      \ summary of the finalized DAG\")\n    )\n\ndef finalize_workflow(refine_dag_input:\
+      \ RefineDagOutput, **kwargs) -> FinalizeWorkflowOutput:\n    \"\"\"\n    Finalizes\
+      \ and validates a workflow DAG, performing any necessary adjustments\n    and\
+      \ returning key status flags and a summary.\n\n    Parameters\n    ----------\n\
+      \    refine_dag_input : RefineDagOutput\n        Output from the refine_dag\
+      \ node containing the refined edges,\n        acyclicity flag, concurrency flag,\
+      \ and maximum concurrency count.\n\n    Returns\n    -------\n    FinalizeWorkflowOutput\n\
+      \        An object containing completion, concurrency, acyclicity status,\n\
+      \        list of adjusted nodes, and a textual summary.\n\n    Raises\n    ------\n\
+      \    ValueError\n        If dag_edges is empty or contains malformed entries.\n\
+      \n    Examples\n    --------\n    >>> from pydantic import BaseModel, Field\n\
+      \    >>> from typing import List\n    >>> class RefineDagOutput(BaseModel):\n\
+      \    ...     dag_edges: List[str] = Field(..., description=\"List of directed\n\
+      \    edges in the refined DAG, formatted as 'TaskA->TaskB'.\")\n    ...    \
+      \ is_acyclic: bool = Field(..., description=\"Indicates whether the\n    refined\
+      \ DAG contains any cycles.\")\n    ...     is_concurrent: bool = Field(...,\
+      \ description=\"Indicates whether the\n    DAG has been adjusted to allow concurrent\
+      \ execution of independent tasks.\")\n    ...     max_concurrency: int = Field(...,\
+      \ description=\"Maximum number of\n    tasks that can run concurrently in the\
+      \ refined DAG.\")\n    >>> class FinalizeWorkflowOutput(BaseModel):\n    ...\
+      \     dag_is_complete: bool = Field(..., description=\"Whether the DAG is\n\
+      \    fully defined and ready\")\n    ...     dag_is_concurrent: bool = Field(...,\
+      \ description=\"Whether the DAG\n    has maximized concurrency\")\n    ... \
+      \    dag_is_acyclic: bool = Field(..., description=\"Whether the DAG\n    contains\
+      \ no cycles\")\n    ...     adjusted_node_list: str = Field(..., description=\"\
+      Comma‑separated\n    list of node names that were adjusted during finalization\"\
+      )\n    ...     dag_summary: str = Field(..., description=\"Human‑readable summary\
+      \ of\n    the finalized DAG\")\n    >>> def finalize_workflow(refine_dag_input:\
+      \ RefineDagOutput, **kwargs) ->\n    FinalizeWorkflowOutput:\n    ...     import\
+      \ logging\n    ...     import re\n    ...     logger = logging.getLogger(__name__)\n\
+      \    ...     if not refine_dag_input.dag_edges:\n    ...         logger.error(\"\
+      dag_edges list is empty\")\n    ...         raise ValueError(\"dag_edges list\
+      \ is empty or contains malformed\n    entries\")\n    ...     edge_pattern =\
+      \ re.compile(r'^\\s*([^\\s]+)\\s*->\\s*([^\\s]+)\\s*$')\n    ...     nodes =\
+      \ set()\n    ...     for edge in refine_dag_input.dag_edges:\n    ...      \
+      \   m = edge_pattern.match(edge)\n    ...         if not m:\n    ...       \
+      \      logger.error(\"malformed edge: %s\", edge)\n    ...             raise\
+      \ ValueError(\"dag_edges list is empty or contains\n    malformed entries\"\
+      )\n    ...         src, dst = m.group(1), m.group(2)\n    ...         nodes.update([src,\
+      \ dst])\n    ...     node_count = len(nodes)\n    ...     edge_count = len(refine_dag_input.dag_edges)\n\
+      \    ...     dag_is_complete = node_count > 0 and edge_count > 0\n    ...  \
+      \   dag_is_concurrent = refine_dag_input.is_concurrent\n    ...     dag_is_acyclic\
+      \ = refine_dag_input.is_acyclic\n    ...     adjusted = []\n    ...     if not\
+      \ dag_is_concurrent:\n    ...         adjusted.append(\"SyncNode\")\n    ...\
+      \     if not dag_is_acyclic:\n    ...         adjusted.append(\"CycleBreaker\"\
+      )\n    ...     adjusted_node_list = \",\".join(adjusted)\n    ...     dag_summary\
+      \ = f\"DAG has {node_count} nodes and {edge_count} edges.\n    Acyclic: {dag_is_acyclic}.\
+      \ Concurrency: {'maximized' if dag_is_concurrent\n    else 'not maximized'}.\"\
+      \n    ...     return FinalizeWorkflowOutput(\n    ...         dag_is_complete=dag_is_complete,\n\
+      \    ...         dag_is_concurrent=dag_is_concurrent,\n    ...         dag_is_acyclic=dag_is_acyclic,\n\
+      \    ...         adjusted_node_list=adjusted_node_list,\n    ...         dag_summary=dag_summary\n\
+      \    ...     )\n    >>> # Example usage:\n    >>> refine_output = RefineDagOutput(dag_edges=['A->B',\
+      \ 'B->C'],\n    is_acyclic=True, is_concurrent=False, max_concurrency=2)\n \
+      \   >>> result = finalize_workflow(refine_output)\n    >>> print(result.dag_summary)\n\
+      \    DAG has 3 nodes and 2 edges. Acyclic: True. Concurrency: not maximized.\n\
+      \n    \"\"\"\n    logger = logging.getLogger(__name__)\n    if not refine_dag_input.dag_edges:\n\
+      \        logger.error(\"dag_edges list is empty\")\n        raise ValueError(\"\
+      dag_edges list is empty or contains malformed entries\")\n    edge_pattern =\
+      \ re.compile(r'^\\s*([^\\s]+)\\s*->\\s*([^\\s]+)\\s*$')\n    nodes = set()\n\
+      \    for edge in refine_dag_input.dag_edges:\n        m = edge_pattern.match(edge)\n\
+      \        if not m:\n            logger.error(\"malformed edge: %s\", edge)\n\
+      \            raise ValueError(\"dag_edges list is empty or contains malformed\
+      \ entries\")\n        src, dst = m.group(1), m.group(2)\n        nodes.update([src,\
+      \ dst])\n    node_count = len(nodes)\n    edge_count = len(refine_dag_input.dag_edges)\n\
+      \    dag_is_complete = node_count > 0 and edge_count > 0\n    dag_is_concurrent\
+      \ = refine_dag_input.is_concurrent\n    dag_is_acyclic = refine_dag_input.is_acyclic\n\
+      \    adjusted = []\n    if not dag_is_concurrent:\n        adjusted.append(\"\
+      SyncNode\")\n    if not dag_is_acyclic:\n        adjusted.append(\"CycleBreaker\"\
+      )\n    adjusted_node_list = \",\".join(adjusted)\n    dag_summary = f\"DAG has\
+      \ {node_count} nodes and {edge_count} edges. Acyclic: {dag_is_acyclic}. Concurrency:\
+      \ {'maximized' if dag_is_concurrent else 'not maximized'}.\"\n    return FinalizeWorkflowOutput(\n\
+      \        dag_is_complete=dag_is_complete,\n        dag_is_concurrent=dag_is_concurrent,\n\
+      \        dag_is_acyclic=dag_is_acyclic,\n        adjusted_node_list=adjusted_node_list,\n\
+      \        dag_summary=dag_summary\n    )"
     name: finalize_workflow
     nodes_depended_on:
     - refine_dag
@@ -306,98 +353,145 @@ nodes:
       key: dag_summary
       type: str
     prd:
-      conceptual_info: The `finalize_workflow` node validates the refined DAG for
-        completeness, acyclicity, and optimal concurrency. It performs any last‑minute
-        adjustments such as re‑ordering parallel branches or inserting dummy synchronization
-        nodes, and produces a concise summary of the final graph.
+      conceptual_info: The finalize_workflow node is the final validation step in
+        a workflow DAG pipeline. It verifies that the DAG is fully defined, contains
+        no cycles, and is configured for maximum concurrency. If any of these properties
+        are not satisfied, the node records the adjustments it would perform, such
+        as adding a dummy synchronization node or a cycle‑breaking node, and logs
+        the outcome. The node produces a summary that is useful for monitoring and
+        debugging downstream processes.
       docstring:
         examples:
         - lines:
-          - result = finalize_workflow(dag_edges=['A->B', 'B->C'], is_acyclic=True,
+          - from pydantic import BaseModel, Field
+          - from typing import List
+          - 'class RefineDagOutput(BaseModel):'
+          - '    dag_edges: List[str] = Field(..., description="List of directed edges
+            in the refined DAG, formatted as ''TaskA->TaskB''.")'
+          - '    is_acyclic: bool = Field(..., description="Indicates whether the
+            refined DAG contains any cycles.")'
+          - '    is_concurrent: bool = Field(..., description="Indicates whether the
+            DAG has been adjusted to allow concurrent execution of independent tasks.")'
+          - '    max_concurrency: int = Field(..., description="Maximum number of
+            tasks that can run concurrently in the refined DAG.")'
+          - 'class FinalizeWorkflowOutput(BaseModel):'
+          - '    dag_is_complete: bool = Field(..., description="Whether the DAG is
+            fully defined and ready")'
+          - '    dag_is_concurrent: bool = Field(..., description="Whether the DAG
+            has maximized concurrency")'
+          - '    dag_is_acyclic: bool = Field(..., description="Whether the DAG contains
+            no cycles")'
+          - '    adjusted_node_list: str = Field(..., description="Comma‑separated
+            list of node names that were adjusted during finalization")'
+          - '    dag_summary: str = Field(..., description="Human‑readable summary
+            of the finalized DAG")'
+          - 'def finalize_workflow(refine_dag_input: RefineDagOutput, **kwargs) ->
+            FinalizeWorkflowOutput:'
+          - '    import logging'
+          - '    import re'
+          - '    logger = logging.getLogger(__name__)'
+          - '    if not refine_dag_input.dag_edges:'
+          - '        logger.error("dag_edges list is empty")'
+          - '        raise ValueError("dag_edges list is empty or contains malformed
+            entries")'
+          - '    edge_pattern = re.compile(r''^\s*([^\s]+)\s*->\s*([^\s]+)\s*$'')'
+          - '    nodes = set()'
+          - '    for edge in refine_dag_input.dag_edges:'
+          - '        m = edge_pattern.match(edge)'
+          - '        if not m:'
+          - '            logger.error("malformed edge: %s", edge)'
+          - '            raise ValueError("dag_edges list is empty or contains malformed
+            entries")'
+          - '        src, dst = m.group(1), m.group(2)'
+          - '        nodes.update([src, dst])'
+          - '    node_count = len(nodes)'
+          - '    edge_count = len(refine_dag_input.dag_edges)'
+          - '    dag_is_complete = node_count > 0 and edge_count > 0'
+          - '    dag_is_concurrent = refine_dag_input.is_concurrent'
+          - '    dag_is_acyclic = refine_dag_input.is_acyclic'
+          - '    adjusted = []'
+          - '    if not dag_is_concurrent:'
+          - '        adjusted.append("SyncNode")'
+          - '    if not dag_is_acyclic:'
+          - '        adjusted.append("CycleBreaker")'
+          - '    adjusted_node_list = ",".join(adjusted)'
+          - '    dag_summary = f"DAG has {node_count} nodes and {edge_count} edges.
+            Acyclic: {dag_is_acyclic}. Concurrency: {''maximized'' if dag_is_concurrent
+            else ''not maximized''}."'
+          - '    return FinalizeWorkflowOutput('
+          - '        dag_is_complete=dag_is_complete,'
+          - '        dag_is_concurrent=dag_is_concurrent,'
+          - '        dag_is_acyclic=dag_is_acyclic,'
+          - '        adjusted_node_list=adjusted_node_list,'
+          - '        dag_summary=dag_summary'
+          - '    )'
+          - '# Example usage:'
+          - refine_output = RefineDagOutput(dag_edges=['A->B', 'B->C'], is_acyclic=True,
             is_concurrent=False, max_concurrency=2)
-          - print(result)
-          output: '{''dag_is_complete'': True, ''dag_is_concurrent'': True, ''dag_is_acyclic'':
-            True, ''adjusted_node_list'': [''B''], ''dag_summary'': ''DAG has 3 nodes
-            and 2 edges. Concurrency adjusted to 2.''}'
-        - lines:
-          - 'try:'
-          - '    finalize_workflow(dag_edges=[], is_acyclic=True, is_concurrent=True,
-            max_concurrency=1)'
-          - 'except ValueError as e:'
-          - '    print(e)'
-          output: '''dag_edges list is empty or contains malformed entries.'''
+          - result = finalize_workflow(refine_output)
+          - print(result.dag_summary)
+          output: 'DAG has 3 nodes and 2 edges. Acyclic: True. Concurrency: not maximized.'
         parameters:
-        - description: Directed edges of the refined DAG, formatted as 'TaskA->TaskB'.
-          name: dag_edges
-          type: List[str]
-        - description: True if the refined DAG contains no cycles.
-          name: is_acyclic
-          type: bool
-        - description: True if the refined DAG already supports maximum concurrency.
-          name: is_concurrent
-          type: bool
-        - description: Maximum number of tasks that can run concurrently in the refined
-            DAG.
-          name: max_concurrency
-          type: int
+        - description: Output from the refine_dag node containing the refined edges,
+            acyclicity flag, concurrency flag, and maximum concurrency count.
+          name: refine_dag_input
+          type: RefineDagOutput
         raises:
-        - description: If `dag_edges` is empty or malformed.
+        - description: If dag_edges is empty or contains malformed entries.
           type: ValueError
-        - description: If the DAG cannot be made acyclic or fully concurrent after
-            adjustments.
-          type: RuntimeError
         returns:
-          description: A dictionary with keys `dag_is_complete`, `dag_is_concurrent`,
-            `dag_is_acyclic`, `adjusted_node_list`, and `dag_summary`.
-          type: dict
-        summary: Finalize and validate a workflow DAG, ensuring it is complete, concurrent,
-          and acyclic.
+          description: An object containing completion, concurrency, acyclicity status,
+            list of adjusted nodes, and a textual summary.
+          type: FinalizeWorkflowOutput
+        summary: Finalizes and validates a workflow DAG, performing any necessary
+          adjustments and returning key status flags and a summary.
     prompt: Confirm that the workflow DAG is complete, concurrent, and acyclic. Make
       any final adjustments as needed.
     shims: []
   identify_task_dependencies:
     agent: false
     code_node_type: stub
-    description: Determines precedence relationships among tasks produced by the decomposition
-      step, producing an explicit list of dependency pairs.
-    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass DecomposeObjectiveIntoTasksOutput(BaseModel):\n    \"\"\"Pydantic\
-      \ model for decompose_objective_into_tasks node outputs.\"\"\"\n    task_names:\
-      \ List[str] = (\n        Field(..., description=\"List of task names identified\
-      \ by decomposition.\")\n    )\n    task_descriptions: List[str] = (\n      \
-      \  Field(..., description=\"Brief descriptions for each corresponding task.\"\
-      )\n    )\n    num_tasks: int = Field(..., description=\"Total number of tasks\
-      \ identified.\")\n\n\nclass IdentifyTaskDependenciesOutput(BaseModel):\n   \
-      \ \"\"\"Pydantic model for identify_task_dependencies node outputs.\"\"\"\n\
-      \    task_names: List[str] = (\n        Field(..., description=\"List of all\
-      \ task names identified from decomposition.\")\n    )\n    dependency_pairs:\
-      \ List[str] = (\n        Field(..., description=\"List of dependency relationships\
-      \ in the format 'TaskA -> TaskB' indicating TaskA must be completed before TaskB\
-      \ can start.\")\n    )\n    dependency_count: int = (\n        Field(..., description=\"\
-      Total number of dependency relationships identified.\")\n    )\n\n\ndef identify_task_dependencies(decompose_objective_into_tasks_input:\
+    description: Generates an ordered dependency list by detecting references between
+      task descriptions, supporting downstream DAG construction.
+    implementation: "import logging\nimport re\nfrom typing import List\n\nfrom pydantic\
+      \ import BaseModel  # noqa: E0611\n\n\nclass DecomposeObjectiveIntoTasksOutput(BaseModel):\n\
+      \    task_names: List[str]\n    task_descriptions: List[str]\n    num_tasks:\
+      \ int\n\nclass IdentifyTaskDependenciesOutput(BaseModel):\n    task_names: List[str]\n\
+      \    dependency_pairs: List[str]\n    dependency_count: int\n\ndef identify_task_dependencies(decompose_objective_into_tasks_input:\
       \ DecomposeObjectiveIntoTasksOutput, **kwargs) -> IdentifyTaskDependenciesOutput:\n\
-      \    \"\"\"\n    Identify dependencies between decomposed tasks and return a\
-      \ list of\n    dependency pairs.\n\n    Parameters\n    ----------\n    task_names\
-      \ : List[str]\n        Names of the individual tasks produced by the decomposition\
-      \ step.\n    task_descriptions : List[str]\n        Brief textual descriptions\
-      \ of each task corresponding to task_names.\n\n    Returns\n    -------\n  \
-      \  Dict[str, Any]\n        A dictionary containing three keys:  - 'task_names'\
-      \ (List[str]): The\n        original list of task names. - 'dependency_pairs'\
-      \ (List[str]):\n        Explicit dependencies formatted as 'TaskA -> TaskB'.\
-      \ -\n        'dependency_count' (int): Total number of dependencies identified.\n\
-      \n    Raises\n    ------\n    ValueError\n        If task_names and task_descriptions\
-      \ are of different lengths, or if\n        either list is empty.\n\n    Examples\n\
-      \    --------\n    >>> task_names = ['Collect Data', 'Clean Data', 'Analyze\
-      \ Data']\n    >>> task_descriptions = ['Gather raw data', 'Remove noise', 'Run\
-      \ statistical\n    models']\n    >>> result = identify_task_dependencies(task_names,\
-      \ task_descriptions)\n    >>> print(result['dependency_pairs'])\n    ['Collect\
-      \ Data -> Clean Data', 'Clean Data -> Analyze Data']\n\n    >>> task_names =\
-      \ ['Design Model', 'Train Model', 'Validate Model', 'Deploy\n    Model']\n \
-      \   >>> task_descriptions = ['Create architecture', 'Fit parameters', 'Evaluate\n\
-      \    performance', 'Release to production']\n    >>> result = identify_task_dependencies(task_names,\
-      \ task_descriptions)\n    >>> print(result['dependency_count'])\n    3\n\n \
-      \   \"\"\"\n    return IdentifyTaskDependenciesOutput(\n        task_names=[],\n\
-      \        dependency_pairs=[],\n        dependency_count=0,\n    )"
+      \    \"\"\"\n    Detects precedence relationships among decomposed tasks using\
+      \ text‑matching\n    heuristics.\n\n    Parameters\n    ----------\n    decompose_objective_into_tasks_input\
+      \ : DecomposeObjectiveIntoTasksOutput\n        Pydantic model containing task\
+      \ names and their descriptions.\n\n    Returns\n    -------\n    IdentifyTaskDependenciesOutput\n\
+      \        Model with the original task list, a list of dependency pairs, and\n\
+      \        their count.\n\n    Raises\n    ------\n    ValueError\n        If\
+      \ input lists are empty or mis‑aligned.\n\n    Examples\n    --------\n    >>>\
+      \ from typing import List\n    >>> class DecomposeObjectiveIntoTasksOutput(BaseModel):\n\
+      \    ...     task_names: List[str]\n    ...     task_descriptions: List[str]\n\
+      \    ...     num_tasks: int\n    >>> class IdentifyTaskDependenciesOutput(BaseModel):\n\
+      \    ...     task_names: List[str]\n    ...     dependency_pairs: List[str]\n\
+      \    ...     dependency_count: int\n    >>> input_data = DecomposeObjectiveIntoTasksOutput(**{\n\
+      \    ...     'task_names': ['Collect Data', 'Clean Data', 'Analyze Data'],\n\
+      \    ...     'task_descriptions': ['Gather raw data', 'Remove noise from\n \
+      \   collected data', 'Run statistical models on cleaned data'],\n    ...   \
+      \  'num_tasks': 3\n    >>> })\n    >>> output = identify_task_dependencies(input_data)\n\
+      \    >>> print(output.dependency_pairs)\n    ['Collect Data -> Clean Data',\
+      \ 'Clean Data -> Analyze Data']\n\n    \"\"\"\n    logger = logging.getLogger(__name__)\n\
+      \    task_names = decompose_objective_into_tasks_input.task_names\n    task_descriptions\
+      \ = decompose_objective_into_tasks_input.task_descriptions\n    if not task_names\
+      \ or not task_descriptions:\n        logger.error(\"Task lists cannot be empty\"\
+      )\n        raise ValueError(\"Task lists cannot be empty\")\n    if len(task_names)\
+      \ != len(task_descriptions):\n        logger.error(\"Task names and descriptions\
+      \ list lengths differ\")\n        raise ValueError(\"Task names and descriptions\
+      \ list lengths differ\")\n    dependencies: List[str] = []\n    for i, (name_a,\
+      \ desc_a) in enumerate(zip(task_names, task_descriptions)):\n        for j,\
+      \ (name_b, desc_b) in enumerate(zip(task_names, task_descriptions)):\n     \
+      \       if i == j:\n                continue\n            if re.search(rf\"\\\
+      \\b{re.escape(name_b)}\\\\b\", desc_a, re.IGNORECASE):\n                pair\
+      \ = f\"{name_a} -> {name_b}\"\n                if pair not in dependencies:\n\
+      \                    dependencies.append(pair)\n    return IdentifyTaskDependenciesOutput(\n\
+      \        task_names=task_names,\n        dependency_pairs=dependencies,\n  \
+      \      dependency_count=len(dependencies)\n    )"
     name: identify_task_dependencies
     nodes_depended_on:
     - decompose_objective_into_tasks
@@ -414,92 +508,107 @@ nodes:
       key: dependency_count
       type: int
     prd:
-      conceptual_info: This node takes the set of tasks generated by the decomposition
-        step and infers which tasks must precede others, producing a set of explicit
-        dependency pairs that can be used to construct a DAG.
+      conceptual_info: This node analyzes the semantic content of task descriptions
+        to discover logical precedence. It supports automated workflow generation
+        by turning free‑form text into a deterministic DAG.
       docstring:
         examples:
         - lines:
-          - task_names = ['Collect Data', 'Clean Data', 'Analyze Data']
-          - task_descriptions = ['Gather raw data', 'Remove noise', 'Run statistical
-            models']
-          - result = identify_task_dependencies(task_names, task_descriptions)
-          - print(result['dependency_pairs'])
+          - from typing import List
+          - 'class DecomposeObjectiveIntoTasksOutput(BaseModel):'
+          - '    task_names: List[str]'
+          - '    task_descriptions: List[str]'
+          - '    num_tasks: int'
+          - 'class IdentifyTaskDependenciesOutput(BaseModel):'
+          - '    task_names: List[str]'
+          - '    dependency_pairs: List[str]'
+          - '    dependency_count: int'
+          - input_data = DecomposeObjectiveIntoTasksOutput(**{
+          - '    ''task_names'': [''Collect Data'', ''Clean Data'', ''Analyze Data''],'
+          - '    ''task_descriptions'': [''Gather raw data'', ''Remove noise from
+            collected data'', ''Run statistical models on cleaned data''],'
+          - '    ''num_tasks'': 3'
+          - '})'
+          - output = identify_task_dependencies(input_data)
+          - print(output.dependency_pairs)
           output: '[''Collect Data -> Clean Data'', ''Clean Data -> Analyze Data'']'
-        - lines:
-          - task_names = ['Design Model', 'Train Model', 'Validate Model', 'Deploy
-            Model']
-          - task_descriptions = ['Create architecture', 'Fit parameters', 'Evaluate
-            performance', 'Release to production']
-          - result = identify_task_dependencies(task_names, task_descriptions)
-          - print(result['dependency_count'])
-          output: '3'
         parameters:
-        - description: Names of the individual tasks produced by the decomposition
-            step.
-          name: task_names
-          type: List[str]
-        - description: Brief textual descriptions of each task corresponding to task_names.
-          name: task_descriptions
-          type: List[str]
+        - description: Pydantic model containing task names and their descriptions.
+          name: decompose_objective_into_tasks_input
+          type: DecomposeObjectiveIntoTasksOutput
         raises:
-        - description: If task_names and task_descriptions are of different lengths,
-            or if either list is empty.
+        - description: If input lists are empty or mis‑aligned.
           type: ValueError
         returns:
-          description: 'A dictionary containing three keys:
-
-
-            - ''task_names'' (List[str]): The original list of task names.
-
-            - ''dependency_pairs'' (List[str]): Explicit dependencies formatted as
-            ''TaskA -> TaskB''.
-
-            - ''dependency_count'' (int): Total number of dependencies identified.'
-          type: Dict[str, Any]
-        summary: Identify dependencies between decomposed tasks and return a list
-          of dependency pairs.
-    prompt: Analyze the tasks and identify any dependencies between them. Which tasks
-      must be completed before others can start?
+          description: Model with the original task list, a list of dependency pairs,
+            and their count.
+          type: IdentifyTaskDependenciesOutput
+        summary: Detects precedence relationships among decomposed tasks using text‑matching
+          heuristics.
+    prompt: Analyze the task names and descriptions produced by decompose_objective_into_tasks
+      to infer precedence relationships, returning explicit dependency pairs.
     shims: []
   refine_dag:
     agent: false
     code_node_type: stub
-    description: Refine the DAG to maximize concurrency and ensure acyclicity.
-    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass CreateTaskDagOutput(BaseModel):\n    \"\"\"Pydantic model for create_task_dag\
-      \ node outputs.\"\"\"\n    dag_nodes: List[str] = (\n        Field(..., description=\"\
-      Ordered list of task identifiers in the DAG.\")\n    )\n    dag_edges: List[str]\
-      \ = (\n        Field(..., description=\"List of edges representing dependencies,\
-      \ formatted as 'source->target'.\")\n    )\n    is_acyclic: bool = (\n     \
-      \   Field(..., description=\"Indicates whether the constructed DAG is acyclic.\"\
-      )\n    )\n\n\nclass RefineDagOutput(BaseModel):\n    \"\"\"Pydantic model for\
-      \ refine_dag node outputs.\"\"\"\n    dag_edges: List[str] = (\n        Field(...,\
-      \ description=\"List of directed edges in the refined DAG, formatted as \\\"\
-      TaskA->TaskB\\\".\")\n    )\n    is_acyclic: bool = (\n        Field(..., description=\"\
-      Indicates whether the refined DAG contains any cycles.\")\n    )\n    is_concurrent:\
-      \ bool = (\n        Field(..., description=\"Indicates whether the DAG has been\
-      \ adjusted to allow concurrent execution of independent tasks.\")\n    )\n \
-      \   max_concurrency: int = (\n        Field(..., description=\"Maximum number\
-      \ of tasks that can run concurrently in the refined DAG.\")\n    )\n\n\ndef\
-      \ refine_dag(create_task_dag_input: CreateTaskDagOutput, **kwargs) -> RefineDagOutput:\n\
-      \    \"\"\"\n    Optimizes a DAG for maximum concurrency while preserving acyclicity.\n\
-      \n    Parameters\n    ----------\n    dag_nodes : List[str]\n        Ordered\
-      \ list of task identifiers in the DAG.\n    dag_edges : List[str]\n        List\
-      \ of edges representing dependencies, formatted as\n        \"TaskA->TaskB\"\
-      .\n    is_acyclic : bool\n        Indicates whether the input DAG is acyclic.\n\
-      \n    Returns\n    -------\n    Tuple[List[str], bool, bool, int]\n        A\
-      \ tuple containing (refined_dag_edges, is_acyclic, is_concurrent,\n        max_concurrency).\n\
-      \n    Raises\n    ------\n    ValueError\n        Raised if dag_edges is empty\
-      \ or if the input graph is cyclic.\n\n    Examples\n    --------\n    >>> dag_nodes\
-      \ = ['A', 'B', 'C'],\n    >>> dag_edges = ['A->B', 'B->C'],\n    >>> is_acyclic\
-      \ = True,\n    >>> refined = refine_dag(dag_nodes, dag_edges, is_acyclic),\n\
-      \    >>> print(refined)\n    (['A->B', 'B->C'], True, False, 1)\n\n    >>> dag_nodes\
-      \ = ['A', 'B', 'C'],\n    >>> dag_edges = ['A->C'],\n    >>> is_acyclic = True,\n\
-      \    >>> refined = refine_dag(dag_nodes, dag_edges, is_acyclic),\n    >>> print(refined)\n\
-      \    (['A->C'], True, True, 2)\n\n    \"\"\"\n    return RefineDagOutput(\n\
-      \        dag_edges=[],\n        is_acyclic=False,\n        is_concurrent=False,\n\
-      \        max_concurrency=0,\n    )"
+    description: Refines an existing task DAG to maximize parallel execution by computing
+      level-wise execution groups, ensuring the graph remains acyclic, and producing
+      metrics that indicate potential concurrency.
+    implementation: "import logging\nfrom collections import defaultdict, deque\n\
+      from typing import Dict, Set\nfrom pydantic import BaseModel, Field\n\n\nclass\
+      \ CreateTaskDagOutput(BaseModel):\n    dag_nodes: list[str] = (\n        Field(...,\
+      \ description=\"Ordered list of task identifiers in the DAG.\")\n    )\n   \
+      \ dag_edges: list[str] = (\n        Field(..., description=\"List of edges representing\
+      \ dependencies, formatted as 'source->target'.\")\n    )\n    is_acyclic: bool\
+      \ = (\n        Field(..., description=\"Indicates whether the constructed DAG\
+      \ is acyclic.\")\n    )\n\nclass RefineDagOutput(BaseModel):\n    dag_edges:\
+      \ list[str] = (\n        Field(..., description=\"List of directed edges in\
+      \ the refined DAG, formatted as 'TaskA->TaskB'.\")\n    )\n    is_acyclic: bool\
+      \ = (\n        Field(..., description=\"Indicates whether the refined DAG contains\
+      \ any cycles.\")\n    )\n    is_concurrent: bool = (\n        Field(..., description=\"\
+      Indicates whether the DAG has been adjusted to allow concurrent execution of\
+      \ independent tasks.\")\n    )\n    max_concurrency: int = (\n        Field(...,\
+      \ description=\"Maximum number of tasks that can run concurrently in the refined\
+      \ DAG.\")\n    )\n\ndef refine_dag(create_task_dag_input: CreateTaskDagOutput,\
+      \ **kwargs) -> RefineDagOutput:\n    \"\"\"\n    Compute level‑based execution\
+      \ plan and concurrency statistics for a task\n    DAG.\n\n    Parameters\n \
+      \   ----------\n    create_task_dag_input : CreateTaskDagOutput\n        Output\
+      \ from the create_task_dag node containing nodes, edges, and\n        acyclicity\
+      \ flag.\n\n    Returns\n    -------\n    RefineDagOutput\n        Refined DAG\
+      \ with reordered edges and concurrency metrics.\n\n    Raises\n    ------\n\
+      \    ValueError\n        Raised when the input DAG is empty, malformed, or contains\
+      \ cycles.\n\n    Examples\n    --------\n    >>> dag = CreateTaskDagOutput(dag_nodes=['A',\
+      \ 'B', 'C'], dag_edges=['A->C'],\n    is_acyclic=True)\n    >>> result = refine_dag(dag)\n\
+      \    >>> print(result.dag_edges, result.is_acyclic, result.is_concurrent,\n\
+      \    result.max_concurrency)\n    ['A->C'] True True 2\n\n    \"\"\"\n    logger\
+      \ = logging.getLogger(__name__)\n    dag_nodes = create_task_dag_input.dag_nodes\n\
+      \    dag_edges = create_task_dag_input.dag_edges\n    if not dag_edges:\n  \
+      \      raise ValueError(\"dag_edges list cannot be empty\")\n    node_set: Set[str]\
+      \ = set(dag_nodes)\n    for edge in dag_edges:\n        parts = edge.split('->')\n\
+      \        if len(parts) != 2:\n            raise ValueError(f\"Invalid edge format:\
+      \ {edge}\")\n        src, tgt = parts[0].strip(), parts[1].strip()\n       \
+      \ if src not in node_set or tgt not in node_set:\n            raise ValueError(f\"\
+      Edge references unknown nodes: {edge}\")\n    adj: Dict[str, Set[str]] = defaultdict(set)\n\
+      \    indegree: Dict[str, int] = {node: 0 for node in dag_nodes}\n    for edge\
+      \ in dag_edges:\n        src, tgt = edge.split('->')\n        src, tgt = src.strip(),\
+      \ tgt.strip()\n        if tgt in adj[src]:\n            continue\n        adj[src].add(tgt)\n\
+      \        indegree[tgt] += 1\n    queue: deque = deque([node for node in dag_nodes\
+      \ if indegree[node] == 0])\n    if not queue:\n        raise ValueError(\"No\
+      \ source nodes found; possible cycle.\")\n    sorted_nodes: list[str] = []\n\
+      \    levels: list[list[str]] = []\n    while queue:\n        level_size = len(queue)\n\
+      \        current_level: list[str] = []\n        for _ in range(level_size):\n\
+      \            node = queue.popleft()\n            current_level.append(node)\n\
+      \            sorted_nodes.append(node)\n            for neigh in adj[node]:\n\
+      \                indegree[neigh] -= 1\n                if indegree[neigh] ==\
+      \ 0:\n                    queue.append(neigh)\n        levels.append(current_level)\n\
+      \    if len(sorted_nodes) != len(dag_nodes):\n        raise ValueError(\"Cycle\
+      \ detected during topological sort.\")\n    max_concurrency = max(len(lvl) for\
+      \ lvl in levels)\n    is_concurrent = max_concurrency > 1\n    node_index =\
+      \ {node: idx for idx, node in enumerate(sorted_nodes)}\n    sorted_edges = sorted(dag_edges,\
+      \ key=lambda e: (node_index[e.split('->')[0].strip()], node_index[e.split('->')[1].strip()]))\n\
+      \    return RefineDagOutput(\n        dag_edges=sorted_edges,\n        is_acyclic=True,\n\
+      \        is_concurrent=is_concurrent,\n        max_concurrency=max_concurrency\n\
+      \    )"
     name: refine_dag
     nodes_depended_on:
     - create_task_dag
@@ -520,43 +629,32 @@ nodes:
       key: max_concurrency
       type: int
     prd:
-      conceptual_info: This node takes a previously constructed DAG and optimizes
-        it for maximum concurrent execution by reordering independent tasks and ensuring
-        no cycles.
+      conceptual_info: This node takes a pre‑built DAG and reorganizes it to expose
+        parallelism while guaranteeing that all dependency constraints are honored
+        and that the graph remains a DAG.
       docstring:
         examples:
         - lines:
-          - dag_nodes = ['A', 'B', 'C'],
-          - dag_edges = ['A->B', 'B->C'],
-          - is_acyclic = True,
-          - refined = refine_dag(dag_nodes, dag_edges, is_acyclic),
-          - print(refined)
-          output: (['A->B', 'B->C'], True, False, 1)
-        - lines:
-          - dag_nodes = ['A', 'B', 'C'],
-          - dag_edges = ['A->C'],
-          - is_acyclic = True,
-          - refined = refine_dag(dag_nodes, dag_edges, is_acyclic),
-          - print(refined)
-          output: (['A->C'], True, True, 2)
+          - dag = CreateTaskDagOutput(dag_nodes=['A', 'B', 'C'], dag_edges=['A->C'],
+            is_acyclic=True)
+          - result = refine_dag(dag)
+          - print(result.dag_edges, result.is_acyclic, result.is_concurrent, result.max_concurrency)
+          output: '[''A->C''] True True 2'
         parameters:
-        - description: Ordered list of task identifiers in the DAG.
-          name: dag_nodes
-          type: List[str]
-        - description: List of edges representing dependencies, formatted as "TaskA->TaskB".
-          name: dag_edges
-          type: List[str]
-        - description: Indicates whether the input DAG is acyclic.
-          name: is_acyclic
-          type: bool
+        - description: Output from the create_task_dag node containing nodes, edges,
+            and acyclicity flag.
+          name: create_task_dag_input
+          type: CreateTaskDagOutput
         raises:
-        - description: Raised if dag_edges is empty or if the input graph is cyclic.
+        - description: Raised when the input DAG is empty, malformed, or contains
+            cycles.
           type: ValueError
         returns:
-          description: A tuple containing (refined_dag_edges, is_acyclic, is_concurrent,
-            max_concurrency).
-          type: Tuple[List[str], bool, bool, int]
-        summary: Optimizes a DAG for maximum concurrency while preserving acyclicity.
-    prompt: Review the DAG for opportunities to increase concurrency while maintaining
-      acyclicity. Make any necessary adjustments.
+          description: Refined DAG with reordered edges and concurrency metrics.
+          type: RefineDagOutput
+        summary: Compute level‑based execution plan and concurrency statistics for
+          a task DAG.
+    prompt: Analyze the provided DAG for opportunities to increase concurrency while
+      preserving acyclicity. Adjust node ordering and compute concurrency metrics
+      accordingly.
     shims: []

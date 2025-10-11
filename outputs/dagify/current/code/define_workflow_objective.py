@@ -1,6 +1,11 @@
+from ._define_workflow_objective.validate_input_string import validate_input_string
+from ._define_workflow_objective.clean_and_normalize_input import clean_and_normalize_input
+from ._define_workflow_objective.generate_objective_statement import generate_objective_statement
+from ._define_workflow_objective.create_output_model import create_output_model
+
 import logging
 from typing import Any
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field
 
 
 logger = logging.getLogger(__name__)
@@ -38,16 +43,8 @@ def define_workflow_objective(general_input: str, **kwargs: Any) -> DefineWorkfl
     reporting."
 
     """
-    if not isinstance(general_input, str):
-        logger.error("general_input must be a string")
-        raise ValueError("general_input must be a string")
-    cleaned = general_input.strip()
-    if not cleaned:
-        logger.error("general_input is empty or whitespace only")
-        raise ValueError("general_input must be a non-empty string")
-    objective = f"The primary objective of this workflow is to {cleaned}."
-    try:
-        return DefineWorkflowObjectiveOutput(objective=objective)
-    except ValidationError as ve:
-        logger.error("Validation error when creating output: %s", ve)
-        raise
+    validated_input: str = validate_input_string(input_value=general_input)
+    cleaned_input: str = clean_and_normalize_input(raw_input=validated_input)
+    objective_statement: str = generate_objective_statement(cleaned_description=cleaned_input)
+    output_model: DefineWorkflowObjectiveOutput = create_output_model(objective=objective_statement)
+    return output_model

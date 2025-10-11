@@ -1,41 +1,36 @@
-def generate_objective_statement(requirements: str, domain: str) -> str:
+def generate_objective_statement(cleaned_description: str) -> str:
     """
-    Generate a concise objective statement for a workflow from given
-    requirements and domain.
+    Generate a concise objective statement from a cleaned description of a
+    workflow.
 
     Parameters
     ----------
-    requirements : str
-        A string (or stringified list) representing the key requirements
-        that the objective must satisfy.
-    domain : str
-        The domain or context within which the workflow operates, used to
-        tailor the objective language.
+    cleaned_description : str
+        A pre‑processed, normalized description of the workflow that should
+        be used to create the objective statement.
 
     Returns
     -------
     str
-        A single sentence that succinctly describes the primary goal of the
-        workflow.
+        A short, clear objective statement that summarizes the primary goal
+        of the workflow.
 
     Raises
     ------
     ValueError
-        Raised when the generated objective statement is empty or contains
+        Raised when `cleaned_description` is an empty string or contains
         only whitespace.
     TypeError
-        Raised if either 'requirements' or 'domain' is not a string.
+        Raised when `cleaned_description` is not of type `str`.
 
     Examples
     --------
-    >>> output = generate_objective_statement(requirements='Build an API',
-    domain='Software Development')
-    'Develop a scalable REST API for user authentication.'
+    >>> generate_objective_statement('Process sales data and generate a report')
+    'Process sales data and generate a report'
 
-    >>> output = generate_objective_statement(requirements='Improve customer
-    onboarding', domain='E-commerce')
-    'Streamline the onboarding process to reduce drop‑off rates by 30% in the
-    e‑commerce platform.'
+    >>> generate_objective_statement('Conduct a market analysis and produce
+    insights for the Q4 strategy')
+    'Conduct a market analysis and produce insights for the Q4 strategy'
 
     """
     raise NotImplementedError("This is a virtual stub node that needs to be implemented")

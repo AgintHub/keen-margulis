@@ -1,7 +1,16 @@
+from ._refine_dag.validate_dag_input import validate_dag_input
+from ._refine_dag.build_adjacency_graph import build_adjacency_graph
+from ._refine_dag.verify_dag_acyclicity import verify_dag_acyclicity
+from ._refine_dag.compute_topological_levels import compute_topological_levels
+from ._refine_dag.calculate_concurrency_stats import calculate_concurrency_stats
+from ._refine_dag.reorder_edges_by_topology import reorder_edges_by_topology
+
 import logging
-from collections import defaultdict, deque
-from typing import Dict, Set
+from typing import Dict
 from pydantic import BaseModel, Field
+
+
+from typing import Any
 
 
 class CreateTaskDagOutput(BaseModel):
@@ -9,24 +18,36 @@ class CreateTaskDagOutput(BaseModel):
         Field(..., description="Ordered list of task identifiers in the DAG.")
     )
     dag_edges: list[str] = (
-        Field(..., description="List of edges representing dependencies, formatted as 'source->target'.")
+        Field(..., description = (
+            "List of edges representing dependencies, formatted as 'source->target'.")
+        )
     )
     is_acyclic: bool = (
-        Field(..., description="Indicates whether the constructed DAG is acyclic.")
+        Field(..., description = (
+            "Indicates whether the constructed DAG is acyclic.")
+        )
     )
 
 class RefineDagOutput(BaseModel):
     dag_edges: list[str] = (
-        Field(..., description="List of directed edges in the refined DAG, formatted as 'TaskA->TaskB'.")
+        Field(..., description = (
+            "List of directed edges in the refined DAG, formatted as 'TaskA->TaskB'.")
+        )
     )
     is_acyclic: bool = (
-        Field(..., description="Indicates whether the refined DAG contains any cycles.")
+        Field(..., description = (
+            "Indicates whether the refined DAG contains any cycles.")
+        )
     )
     is_concurrent: bool = (
-        Field(..., description="Indicates whether the DAG has been adjusted to allow concurrent execution of independent tasks.")
+        Field(..., description = (
+            "Indicates whether the DAG has been adjusted to allow concurrent execution of independent tasks.")
+        )
     )
     max_concurrency: int = (
-        Field(..., description="Maximum number of tasks that can run concurrently in the refined DAG.")
+        Field(..., description = (
+            "Maximum number of tasks that can run concurrently in the refined DAG.")
+        )
     )
 
 def refine_dag(create_task_dag_input: CreateTaskDagOutput, **kwargs) -> RefineDagOutput:
@@ -63,51 +84,24 @@ def refine_dag(create_task_dag_input: CreateTaskDagOutput, **kwargs) -> RefineDa
     logger = logging.getLogger(__name__)
     dag_nodes = create_task_dag_input.dag_nodes
     dag_edges = create_task_dag_input.dag_edges
-    if not dag_edges:
-        raise ValueError("dag_edges list cannot be empty")
-    node_set: Set[str] = set(dag_nodes)
-    for edge in dag_edges:
-        parts = edge.split('->')
-        if len(parts) != 2:
-            raise ValueError(f"Invalid edge format: {edge}")
-        src, tgt = parts[0].strip(), parts[1].strip()
-        if src not in node_set or tgt not in node_set:
-            raise ValueError(f"Edge references unknown nodes: {edge}")
-    adj: Dict[str, Set[str]] = defaultdict(set)
-    indegree: Dict[str, int] = {node: 0 for node in dag_nodes}
-    for edge in dag_edges:
-        src, tgt = edge.split('->')
-        src, tgt = src.strip(), tgt.strip()
-        if tgt in adj[src]:
-            continue
-        adj[src].add(tgt)
-        indegree[tgt] += 1
-    queue: deque = deque([node for node in dag_nodes if indegree[node] == 0])
-    if not queue:
-        raise ValueError("No source nodes found; possible cycle.")
-    sorted_nodes: list[str] = []
-    levels: list[list[str]] = []
-    while queue:
-        level_size = len(queue)
-        current_level: list[str] = []
-        for _ in range(level_size):
-            node = queue.popleft()
-            current_level.append(node)
-            sorted_nodes.append(node)
-            for neigh in adj[node]:
-                indegree[neigh] -= 1
-                if indegree[neigh] == 0:
-                    queue.append(neigh)
-        levels.append(current_level)
-    if len(sorted_nodes) != len(dag_nodes):
-        raise ValueError("Cycle detected during topological sort.")
-    max_concurrency = max(len(lvl) for lvl in levels)
-    is_concurrent = max_concurrency > 1
-    node_index = {node: idx for idx, node in enumerate(sorted_nodes)}
-    sorted_edges = sorted(dag_edges, key=lambda e: (node_index[e.split('->')[0].strip()], node_index[e.split('->')[1].strip()]))
+    
+    validate_dag_input(dag_nodes=dag_nodes, dag_edges=dag_edges)
+    
+    adjacency_data: Dict[str, Any] = build_adjacency_graph(dag_nodes=dag_nodes, dag_edges=dag_edges)
+    
+    is_acyclic_check: bool = verify_dag_acyclicity(adjacency_data=adjacency_data, dag_nodes=dag_nodes)
+    if not is_acyclic_check:
+        raise ValueError("Cycle detected in DAG")
+    
+    level_structure: Dict[str, Any] = compute_topological_levels(adjacency_data=adjacency_data, dag_nodes=dag_nodes)
+    
+    concurrency_metrics: Dict[str, Any] = calculate_concurrency_stats(level_structure=level_structure)
+    
+    reordered_edges: list[str] = reorder_edges_by_topology(dag_edges=dag_edges, level_structure=level_structure)
+    
     return RefineDagOutput(
-        dag_edges=sorted_edges,
+        dag_edges=reordered_edges,
         is_acyclic=True,
-        is_concurrent=is_concurrent,
-        max_concurrency=max_concurrency
+        is_concurrent=concurrency_metrics["is_concurrent"],
+        max_concurrency=concurrency_metrics["max_concurrency"]
     )
