@@ -1,31 +1,45 @@
 {
   "boil_water": {
     "output": {
-      "output": "Boiled water at 200\u00b0F (93\u00b0C) for brewing coffee."
+      "boiled": true,
+      "temperature_celsius": 100.0,
+      "boil_time_seconds": 300
     },
     "description": "Boil water for the coffee"
   },
   "brew_coffee": {
     "output": {
-      "output": "Pouring the boiled water at 200\u00b0F (93\u00b0C) into the coffee maker with 2 tablespoons of coffee grounds in the filter. Starting the brewing process."
+      "brew_start_timestamp": "2023-12-01T12:00:00.000Z",
+      "brew_end_timestamp": "2023-12-01T12:05:00.000Z",
+      "brew_duration_seconds": 300.0,
+      "brewed_volume_cups": 1,
+      "brewed_success": true,
+      "final_temperature_c": 95.0
     },
     "description": "Brew the coffee"
   },
   "measure_coffee": {
     "output": {
-      "output": "2 tablespoons"
+      "ground_amount_grams": 30.0,
+      "desired_cup_count": 2,
+      "grounds_type": "medium grind",
+      "measurement_valid": true
     },
     "description": "Measure the coffee grounds"
   },
   "prepare_coffee_maker": {
     "output": {
-      "output": "Added 2 tablespoons of coffee grounds to the coffee maker's filter."
+      "coffee_grounds_amount_g": 30.0,
+      "filter_prepared": true,
+      "coffee_maker_status": "ready"
     },
     "description": "Prepare the coffee maker"
   },
   "serve_coffee": {
     "output": {
-      "output": "Pouring the freshly brewed coffee into a cup and serving."
+      "served": true,
+      "temperature_c": 95.0,
+      "volume_ml": 240
     },
     "description": "Serve the coffee"
   }
