@@ -1,96 +1,58 @@
 dag_type: plain_text
-description: A workflow for analyzing FSU basketball team performance, including data
-  collection, statistical analysis, and report generation.
-name: fsu_basketball_analysis_workflow
+description: A workflow for creating a simple workflow DAG
+name: create_simple_workflow
 nodes:
-  analyze_player_performance:
+  create_task_dag:
     agent: false
-    description: Analyze individual player performance, including scoring, rebounding,
-      and defensive metrics.
-    name: analyze_player_performance
+    description: Create a DAG representing the tasks and their dependencies
+    name: create_task_dag
     nodes_depended_on:
-    - clean_and_preprocess_data
+    - determine_task_dependencies
     nodes_dependent_on: []
-    prompt: Analyze the performance of individual FSU basketball players, focusing
-      on scoring, rebounding, defensive metrics, and other key statistics.
-  calculate_team_statistics:
+    prompt: Using the tasks and dependencies identified, create a Directed Acyclic
+      Graph (DAG) that represents the workflow. Ensure the DAG is acyclic and properly
+      ordered.
+  define_workflow_objective:
     agent: false
-    description: Calculate key team statistics, such as points per game, rebounding
-      margin, and turnover differential.
-    name: calculate_team_statistics
-    nodes_depended_on:
-    - clean_and_preprocess_data
-    nodes_dependent_on: []
-    prompt: Calculate key FSU basketball team statistics, including points per game,
-      rebounding margin, turnover differential, and other relevant metrics.
-  clean_and_preprocess_data:
-    agent: false
-    description: Clean and preprocess the collected game data for analysis.
-    name: clean_and_preprocess_data
-    nodes_depended_on:
-    - collect_game_data
-    nodes_dependent_on: []
-    prompt: Clean and preprocess the collected FSU basketball game data, handling
-      missing values and normalizing statistics as needed.
-  collect_game_data:
-    agent: false
-    description: Gather data on FSU basketball games, including scores, opponent stats,
-      and player performance.
-    name: collect_game_data
+    description: Define the objective of the workflow
+    name: define_workflow_objective
     nodes_depended_on: []
     nodes_dependent_on: []
-    prompt: Collect comprehensive data on recent FSU basketball games, including scores,
-      opponent statistics, and individual player performance metrics.
-  compare_to_previous_seasons:
+    prompt: Clearly state the primary objective of the workflow. What is the main
+      task or goal?
+  determine_task_dependencies:
     agent: false
-    description: Compare current team statistics to those from previous seasons.
-    name: compare_to_previous_seasons
+    description: Determine the dependencies between tasks
+    name: determine_task_dependencies
     nodes_depended_on:
-    - calculate_team_statistics
+    - identify_required_tasks
     nodes_dependent_on: []
-    prompt: Compare the current FSU basketball team's statistics to those from previous
-      seasons, highlighting trends and changes over time.
-  compile_final_analysis:
+    prompt: Analyze the tasks identified and determine their dependencies. Which tasks
+      must be completed before others can start?
+  finalize_workflow:
     agent: false
-    description: Compile the performance report, strengths and weaknesses analysis,
-      and recommendations into a final analysis package.
-    name: compile_final_analysis
+    description: Finalize the workflow based on the validated DAG
+    name: finalize_workflow
     nodes_depended_on:
-    - generate_performance_report
-    - identify_strengths_and_weaknesses
-    - provide_recommendations
+    - validate_dag
     nodes_dependent_on: []
-    prompt: Compile the comprehensive performance report, strengths and weaknesses
-      analysis, and recommendations into a cohesive final analysis package for FSU
-      basketball.
-  generate_performance_report:
+    prompt: Using the validated DAG, finalize the workflow. This includes formatting
+      the DAG into the required JSON structure.
+  identify_required_tasks:
     agent: false
-    description: Generate a comprehensive report on FSU basketball team performance.
-    name: generate_performance_report
+    description: Identify the tasks required to achieve the workflow objective
+    name: identify_required_tasks
     nodes_depended_on:
-    - calculate_team_statistics
-    - analyze_player_performance
-    - compare_to_previous_seasons
+    - define_workflow_objective
     nodes_dependent_on: []
-    prompt: Create a detailed report on FSU basketball team performance, incorporating
-      team statistics, player analysis, and comparisons to previous seasons.
-  identify_strengths_and_weaknesses:
+    prompt: List the key tasks or operations necessary to accomplish the workflow
+      objective. Break down complex tasks into simpler components.
+  validate_dag:
     agent: false
-    description: Identify the team's strengths and weaknesses based on statistical
-      analysis.
-    name: identify_strengths_and_weaknesses
+    description: Validate the created DAG for correctness and acyclicity
+    name: validate_dag
     nodes_depended_on:
-    - calculate_team_statistics
-    - analyze_player_performance
+    - create_task_dag
     nodes_dependent_on: []
-    prompt: Based on the statistical analysis, identify the FSU basketball team's
-      strengths and weaknesses, focusing on areas for improvement.
-  provide_recommendations:
-    agent: false
-    description: Provide actionable recommendations for improving team performance.
-    name: provide_recommendations
-    nodes_depended_on:
-    - identify_strengths_and_weaknesses
-    nodes_dependent_on: []
-    prompt: Based on the identified strengths and weaknesses, provide specific, actionable
-      recommendations for improving FSU basketball team performance.
+    prompt: Check the DAG for any cycles or inconsistencies. Verify that it accurately
+      represents the workflow and its dependencies.

@@ -1,228 +1,321 @@
-# fsu_basketball_analysis_workflow - Complete PRD Documentation
+# create_simple_workflow - Complete PRD Documentation
 
 ## Overview
-PRDs for nodes in the 'fsu_basketball_analysis_workflow' module.
+PRDs for nodes in the 'create_simple_workflow' module.
 
 ## Table of Contents
 
-- [gather_historical_game_data](#gather_historical_game_data)
+- [create_task_dag](#create_task_dag)
 
-- [extract_player_statistics](#extract_player_statistics)
+- [decompose_objective_into_tasks](#decompose_objective_into_tasks)
 
-- [analyze_team_performance](#analyze_team_performance)
+- [define_workflow_objective](#define_workflow_objective)
 
-- [identify_top_performers](#identify_top_performers)
+- [finalize_workflow](#finalize_workflow)
 
-- [generate_performance_report](#generate_performance_report)
+- [identify_task_dependencies](#identify_task_dependencies)
 
-
-
----
-
-## gather_historical_game_data
-
-### Description
-Collect historical game data for FSU basketball team
-
-### Conceptual Info
-
-This node is responsible for collecting historical game data for the FSU basketball team, including game dates, opponents, scores, and game statistics.
-
-### Docstring
-
-**Summary:** Gathers historical game data for the FSU basketball team.
-
-**Returns:** Tuple[List[str], List[str], List[str], List[str]] - A tuple containing lists of game dates, opponents, scores, and game statistics.
-
-**Raises:**
-
-- DataCollectionError: If there's an issue collecting the historical game data.
-**Examples:**
-
-```python
->>> game_data = gather_historical_game_data()
->>> print(game_data)
-(['2023-01-01', '2023-01-03'], ['Team A', 'Team B'], ['74-68', '80-75'], ['Rebounds: 40, Turnovers: 15', 'Rebounds: 35, Turnovers: 10'])
-```
+- [validate_dag](#validate_dag)
 
 
 
 ---
 
-## extract_player_statistics
+## create_task_dag
 
 ### Description
-Extract player statistics from game data
+Create a DAG representing the tasks and their dependencies
 
 ### Conceptual Info
 
-This node processes historical game data to extract individual player statistics, including points scored, rebounds, and assists.
+Builds a directed acyclic graph (DAG) from a list of task identifiers and dependency relations, producing node identifiers, edge lists, and a validity flag.
 
 ### Docstring
 
-**Summary:** Extracts player statistics from historical game data, returning lists of player names and their respective statistics.
+**Summary:** Constructs a DAG from given tasks and dependency relations.
 
 **Parameters:**
 
-- game_dates (List[str]): List of game dates from the historical game data.
-- opponents (List[str]): List of opponents from the historical game data.
-- scores (List[str]): List of game scores from the historical game data.
-- game_statistics (List[str]): List of game statistics from the historical game data.
-**Returns:** Tuple[List[str], List[int], List[int], List[int]] - A tuple containing lists of player names, points scored, rebounds, and assists.
+- tasks (List[str]): A list of task identifiers that will become the DAG nodes.
+- dependencies (List[str]): Each string represents a dependency in the format 'TaskA depends on TaskB'.
+**Returns:** dict - A dictionary with four keys: task_ids (List[str]), edge_sources (List[str]), edge_destinations (List[str]), and is_valid (bool).
 
 **Raises:**
 
-- ValueError: If the input lists are not of the same length.
-- TypeError: If the input data types are not as expected.
+- ValueError: Raised when a dependency refers to a task not present in the `tasks` list.
+- ValueError: Raised when a dependency string does not match the expected 'TaskA depends on TaskB' pattern.
 **Examples:**
 
 ```python
->>> game_dates = ['2022-01-01', '2022-01-03']
->>> opponents = ['Team A', 'Team B']
->>> scores = ['80-70', '90-85']
->>> game_statistics = ['Player1:20,5,3;Player2:15,7,2', 'Player1:22,6,4;Player2:18,8,3']
->>> extract_player_statistics(game_dates, opponents, scores, game_statistics)
-(['Player1', 'Player2'], [42, 33], [11, 15], [7, 5])
+>>> tasks = ['A', 'B', 'C']
+>>> dependencies = ['B depends on A', 'C depends on B']
+>>> result = create_task_dag(tasks, dependencies)
+>>> print(result)
+{'task_ids': ['A', 'B', 'C'], 'edge_sources': ['A', 'B'], 'edge_destinations': ['B', 'C'], 'is_valid': True}
 ```
 
 ```python
->>> game_dates = ['2022-02-01']
->>> opponents = ['Team C']
->>> scores = ['100-90']
->>> game_statistics = ['Player1:25,4,5;Player2:20,6,4']
->>> extract_player_statistics(game_dates, opponents, scores, game_statistics)
-(['Player1', 'Player2'], [25, 20], [4, 6], [5, 4])
+>>> tasks = ['A', 'B']
+>>> dependencies = ['A depends on B', 'B depends on A']
+>>> result = create_task_dag(tasks, dependencies)
+>>> print(result)
+{'task_ids': ['A', 'B'], 'edge_sources': ['B', 'A'], 'edge_destinations': ['A', 'B'], 'is_valid': False}
 ```
 
 
 
 ---
 
-## analyze_team_performance
+## decompose_objective_into_tasks
 
 ### Description
-Analyze overall team performance based on game data
+Break down the workflow objective into individual tasks
 
 ### Conceptual Info
 
-This node analyzes the overall team performance based on historical game data, calculating key metrics such as win/loss record, average score, and average opponent score.
+Transforms a high‑level workflow goal into a concrete sequence of actionable tasks, enabling downstream dependency analysis and DAG construction.
 
 ### Docstring
 
-**Summary:** Analyzes team performance based on historical game data, computing win/loss record and average scores.
+**Summary:** Breaks down a workflow objective into discrete tasks.
 
 **Parameters:**
 
-- game_dates (List[str]): List of game dates from historical game data.
-- opponents (List[str]): List of opponents from historical game data.
-- scores (List[str]): List of game scores from historical game data, formatted as 'team_score-opponent_score'.
-- game_statistics (List[str]): List of game statistics from historical game data.
-**Returns:** Tuple[str, float, float] - A tuple containing the team's win/loss record, average score, and average opponent score.
+- workflow_objective (str): A concise statement describing the primary goal of the workflow.
+**Returns:** Tuple[List[str], int] - A tuple containing (1) a list of task descriptions and (2) the count of tasks.
 
 **Raises:**
 
-- ValueError: If the input lists are of different lengths or if scores are not properly formatted.
+- ValueError: Raised when `workflow_objective` is empty or consists only of whitespace.
 **Examples:**
 
 ```python
->>> game_dates = ['2023-01-01', '2023-01-03']
->>> opponents = ['Team A', 'Team B']
->>> scores = ['80-70', '75-85']
->>> game_statistics = ['stats1', 'stats2']
->>> analyze_team_performance(game_dates, opponents, scores, game_statistics)
-('1-1', 77.5, 77.5)
+>>> tasks, count = decompose_objective_into_tasks('Build a machine learning pipeline for predicting house prices')
+(['Collect and clean data', 'Split dataset', 'Select model', 'Train model', 'Evaluate model', 'Deploy model'], 6)
 ```
 
 ```python
->>> game_dates = ['2023-02-01', '2023-02-03', '2023-02-05']
->>> opponents = ['Team C', 'Team D', 'Team E']
->>> scores = ['90-80', '85-95', '100-90']
->>> game_statistics = ['stats3', 'stats4', 'stats5']
->>> analyze_team_performance(game_dates, opponents, scores, game_statistics)
-('2-1', 91.66666666666667, 88.33333333333333)
+>>> tasks, count = decompose_objective_into_tasks('Write a report')
+(['Plan report structure', 'Collect data', 'Write draft', 'Revise', 'Finalize'], 5)
 ```
 
 
 
 ---
 
-## identify_top_performers
+## define_workflow_objective
 
 ### Description
-Identify top performing players based on statistics
+Define the objective of the workflow
 
 ### Conceptual Info
 
-This node identifies top performing players based on their statistics such as points scored, rebounds, and assists. It takes the output from the 'extract_player_statistics' node and processes it to determine the top performers in each category.
+Captures the high‑level purpose of the workflow, providing a clear goal that drives the subsequent task decomposition, dependency analysis, and DAG construction.
 
 ### Docstring
 
-**Summary:** Identify top performing players based on points scored, rebounds, assists, and other relevant metrics.
+**Summary:** Generate a concise objective statement for the workflow based on the user’s intent.
 
-**Parameters:**
-
-- player_names (List[str]): List of player names extracted from game data.
-- points_scored (List[int]): List of total points scored by each player.
-- rebounds (List[int]): List of total rebounds by each player.
-- assists (List[int]): List of total assists by each player.
-**Returns:** Tuple[List[str], List[str], List[str]] - A tuple containing lists of top scorers, top rebounders, and top assisters.
+**Returns:** str - Concise objective of the workflow.
 
 **Raises:**
 
-- ValueError: If the input lists are of different lengths.
-- TypeError: If the input types are not as expected.
+- ValueError: If the generated objective is empty or exceeds an acceptable length.
 **Examples:**
 
 ```python
->>> player_names = ['Player1', 'Player2', 'Player3']
->>> points_scored = [20, 15, 25]
->>> rebounds = [5, 10, 7]
->>> assists = [8, 6, 9]
->>> top_scorers, top_rebounders, top_assisters = identify_top_performers(player_names, points_scored, rebounds, assists)
-(['Player3', 'Player1', 'Player2'], ['Player2', 'Player3', 'Player1'], ['Player3', 'Player1', 'Player2'])
+>>> objective = define_workflow_objective()
+'Implement an automated data ingestion pipeline for real‑time analytics'
 ```
 
 ```python
->>> player_names = ['PlayerA', 'PlayerB']
->>> points_scored = [30, 20]
->>> rebounds = [8, 12]
->>> assists = [7, 5]
->>> top_scorers, top_rebounders, top_assisters = identify_top_performers(player_names, points_scored, rebounds, assists)
-(['PlayerA', 'PlayerB'], ['PlayerB', 'PlayerA'], ['PlayerA', 'PlayerB'])
+>>> objective = define_workflow_objective()
+'Develop a user‑friendly mobile application for inventory management'
 ```
 
 
 
 ---
 
-## generate_performance_report
+## finalize_workflow
 
 ### Description
-Generate a comprehensive performance report for FSU basketball team
+Finalize the workflow DAG
 
 ### Conceptual Info
 
-This node generates a comprehensive performance report for the FSU basketball team by synthesizing team performance analysis and top performer identification.
+The finalize_workflow node takes a validated DAG, checks for any remaining inconsistencies such as missing dependencies or cycles, applies necessary adjustments, and produces a clean, ordered representation ready for execution.
 
 ### Docstring
 
-**Summary:** Generate a comprehensive performance report for the FSU basketball team.
+**Summary:** Finalize a workflow DAG by validating its structure, resolving missing dependencies, removing cycles, and ordering tasks.
 
 **Parameters:**
 
-- team_performance_analysis (dict): Analysis of team performance including win/loss record, average score, and average opponent score.
-- top_performers (dict): Identification of top performers including top scorers, rebounders, and assisters.
-**Returns:** dict - A dictionary containing the report summary, team statistics, and top performers summary.
+- task_ids (List[str]): Unique identifiers of all tasks in the DAG.
+- edge_sources (List[str]): Source task identifiers for each directed edge.
+- edge_destinations (List[str]): Destination task identifiers for each directed edge.
+- is_valid (bool): Result of the validation step (True if the DAG passed all checks).
+- node_count (int): Total number of nodes in the DAG.
+- edge_count (int): Total number of directed edges in the DAG.
+- cycles_detected (List[str]): List of cycle identifiers found during validation.
+- missing_dependencies (List[str]): List of node names that reference non‑existent dependencies.
+- errors (List[str]): Detailed error messages from the validation step.
+**Returns:** Dict[str, Any] - A dictionary containing the finalized DAG representation and metadata: dag_representation (str), is_valid (bool), adjustments_made (bool), adjusted_task_order (List[str]), missing_dependencies (List[str]), cycles_detected (List[str]), warnings (List[str]), and summary (str).
 
 **Raises:**
 
-- ValueError: If team performance analysis or top performers data is missing or invalid.
+- ValueError: If any required input lists are empty or lengths of edge_sources and edge_destinations mismatch.
 **Examples:**
 
 ```python
->>> team_performance_analysis = {'win_loss_record': '20-10', 'average_score': 74.5, 'average_opponent_score': 68.2}
->>> top_performers = {'top_scorers': ['Player1', 'Player2'], 'top_rebounders': ['Player3'], 'top_assisters': ['Player4']}
->>> generate_performance_report(team_performance_analysis, top_performers)
-{'report_summary': 'The team had a 20-10 record with an average score of 74.5 and average opponent score of 68.2. Top scorers were Player1 and Player2.', 'team_statistics': ['Win/Loss Record: 20-10', 'Average Score: 74.5', 'Average Opponent Score: 68.2'], 'top_performers_summary': 'Top scorers: Player1, Player2. Top rebounders: Player3. Top assisters: Player4.'}
+>>> dag = finalize_workflow(
+
+...     task_ids=['A', 'B', 'C'],
+
+...     edge_sources=['A', 'B'],
+
+...     edge_destinations=['B', 'C'],
+
+...     is_valid=True,
+
+...     node_count=3,
+
+...     edge_count=2,
+
+...     cycles_detected=[],
+
+...     missing_dependencies=[],
+
+...     errors=[]
+
+>>> )
+{'dag_representation': 'A -> B -> C', 'is_valid': True, 'adjustments_made': False, 'adjusted_task_order': ['A', 'B', 'C'], 'missing_dependencies': [], 'cycles_detected': [], 'warnings': [], 'summary': 'DAG finalized successfully.'}
+```
+
+```python
+>>> dag = finalize_workflow(
+
+...     task_ids=['A', 'B', 'C'],
+
+...     edge_sources=['A', 'B', 'C'],
+
+...     edge_destinations=['B', 'C', 'A'],
+
+...     is_valid=False,
+
+...     node_count=3,
+
+...     edge_count=3,
+
+...     cycles_detected=['A->B->C->A'],
+
+...     missing_dependencies=[],
+
+...     errors=['Cycle detected']
+
+>>> )
+{'dag_representation': 'A -> B -> C', 'is_valid': False, 'adjustments_made': True, 'adjusted_task_order': ['A', 'B', 'C'], 'missing_dependencies': [], 'cycles_detected': ['A->B->C->A'], 'warnings': ['Cycle removed: A->B->C->A'], 'summary': 'DAG finalized with cycle removal.'}
+```
+
+
+
+---
+
+## identify_task_dependencies
+
+### Description
+Identify dependencies between tasks
+
+### Conceptual Info
+
+This node processes a list of task descriptions produced by the decomposition step and infers direct dependencies between tasks. It returns the original list of tasks, a concise list of dependency strings, and a flag indicating whether any dependencies exist.
+
+### Docstring
+
+**Summary:** Infers direct dependencies between tasks from a list of task descriptions.
+
+**Parameters:**
+
+- tasks (List[str]): Task descriptions generated by decompose_objective_into_tasks.
+**Returns:** Dict[str, Any] - A dictionary with keys 'tasks', 'dependencies', and 'dependency_exists' matching the node's output structure.
+
+**Raises:**
+
+- ValueError: If the input `tasks` is not a list of strings or is empty.
+**Examples:**
+
+```python
+>>> tasks_input = ["Collect data", "Preprocess data", "Train model", "Evaluate model"]
+>>> # Assuming the following simple dependency logic:
+>>> # 'Preprocess data' depends on 'Collect data'
+>>> # 'Train model' depends on 'Preprocess data'
+>>> # 'Evaluate model' depends on 'Train model'
+>>> result = identify_task_dependencies(tasks_input)
+>>> print(result)
+{'tasks': ['Collect data', 'Preprocess data', 'Train model', 'Evaluate model'], 'dependencies': ['Preprocess data depends on Collect data', 'Train model depends on Preprocess data', 'Evaluate model depends on Train model'], 'dependency_exists': True}
+```
+
+```python
+>>> tasks_input = ["Generate report", "Publish report"]
+>>> # No explicit dependencies specified
+>>> result = identify_task_dependencies(tasks_input)
+>>> print(result)
+{'tasks': ['Generate report', 'Publish report'], 'dependencies': [], 'dependency_exists': False}
+```
+
+
+
+---
+
+## validate_dag
+
+### Description
+Validate the created DAG for correctness and acyclicity
+
+### Conceptual Info
+
+The `validate_dag` node verifies that a workflow DAG is well‑formed, acyclic, and internally consistent. It acts as a safety net before the workflow is finalized, catching missing dependencies and logical cycles that could cause runtime failures.
+
+### Docstring
+
+**Summary:** Validates a Directed Acyclic Graph (DAG) representation for correctness, acyclicity, and missing dependencies.
+
+**Parameters:**
+
+- task_ids (List[str]): List of unique identifiers for all tasks in the workflow.
+- edge_sources (List[str]): List of task identifiers representing the source of each directed edge.
+- edge_destinations (List[str]): List of task identifiers representing the destination of each directed edge.
+- is_valid_input (bool): (Optional) A flag from `create_task_dag` indicating preliminary validity. It is used only as a hint; full validation is performed regardless.
+**Returns:** dict - Dictionary containing validation results:
+- `is_valid` (bool): Overall validity.
+- `node_count` (int): Number of nodes.
+- `edge_count` (int): Number of directed edges.
+- `cycles_detected` (List[str]): Descriptions of any detected cycles.
+- `missing_dependencies` (List[str]): Tasks that reference undefined dependencies.
+- `errors` (List[str]): Human‑readable error messages for all failures.
+
+**Raises:**
+
+- ValueError: If `edge_sources` and `edge_destinations` lists are not of the same length.
+- ValueError: If `task_ids` contains duplicate identifiers.
+**Examples:**
+
+```python
+>>> task_ids = ['A', 'B', 'C']
+>>> edge_sources = ['A', 'B']
+>>> edge_destinations = ['B', 'C']
+>>> result = validate_dag(task_ids, edge_sources, edge_destinations)
+>>> print(result)
+{'is_valid': True, 'node_count': 3, 'edge_count': 2, 'cycles_detected': [], 'missing_dependencies': [], 'errors': []}
+```
+
+```python
+>>> task_ids = ['A', 'B', 'C']
+>>> edge_sources = ['A', 'B', 'C']
+>>> edge_destinations = ['B', 'C', 'A']
+>>> result = validate_dag(task_ids, edge_sources, edge_destinations)
+>>> print(result)
+{'is_valid': False, 'node_count': 3, 'edge_count': 3, 'cycles_detected': ['A -> B -> C -> A'], 'missing_dependencies': [], 'errors': ['Cycle detected: A -> B -> C -> A']}
 ```
 

@@ -6,11 +6,12 @@ import json
 import sys
 from typing import Dict, Any, List, Callable, Coroutine, Union, Optional
 
-from code.gather_historical_game_data import gather_historical_game_data
-from code.extract_player_statistics import extract_player_statistics
-from code.analyze_team_performance import analyze_team_performance
-from code.identify_top_performers import identify_top_performers
-from code.generate_performance_report import generate_performance_report
+from code.create_task_dag import create_task_dag
+from code.decompose_objective_into_tasks import decompose_objective_into_tasks
+from code.define_workflow_objective import define_workflow_objective
+from code.finalize_workflow import finalize_workflow
+from code.identify_task_dependencies import identify_task_dependencies
+from code.validate_dag import validate_dag
 
 # Get async mode from environment variable or default to False
 ASYNC_MODE = os.environ.get('ASYNC_MODE', '').lower() in ('true', '1', 'yes', 'y')
@@ -32,11 +33,12 @@ def make_async(func):
 
     return async_wrapper
 
-gather_historical_game_data_async = make_async(gather_historical_game_data)
-extract_player_statistics_async = make_async(extract_player_statistics)
-analyze_team_performance_async = make_async(analyze_team_performance)
-identify_top_performers_async = make_async(identify_top_performers)
-generate_performance_report_async = make_async(generate_performance_report)
+create_task_dag_async = make_async(create_task_dag)
+decompose_objective_into_tasks_async = make_async(decompose_objective_into_tasks)
+define_workflow_objective_async = make_async(define_workflow_objective)
+finalize_workflow_async = make_async(finalize_workflow)
+identify_task_dependencies_async = make_async(identify_task_dependencies)
+validate_dag_async = make_async(validate_dag)
 
 async def run_workflow(user_input: str) -> Dict[str, Any]:
     """Execute the workflow by running each level in the topological sort.
@@ -50,43 +52,53 @@ async def run_workflow(user_input: str) -> Dict[str, Any]:
     # Store results for each node
     results = {}
 
-    # Level 0: gather_historical_game_data
-    async def run_gather_historical_game_data():
-        # Call the async version of gather_historical_game_data with results from dependencies
-        return await gather_historical_game_data_async(user_input)
+    # Level 0: define_workflow_objective
+    async def run_define_workflow_objective():
+        # Call the async version of define_workflow_objective with results from dependencies
+        return await define_workflow_objective_async(user_input)
 
     # Run level 0 nodes in parallel
-    results['gather_historical_game_data'] = await run_gather_historical_game_data()
+    results['define_workflow_objective'] = await run_define_workflow_objective()
 
-    # Level 1: analyze_team_performance, extract_player_statistics
-    async def run_analyze_team_performance():
-        # Call the async version of analyze_team_performance with results from dependencies
-        return await analyze_team_performance_async(results['gather_historical_game_data'])
-
-    async def run_extract_player_statistics():
-        # Call the async version of extract_player_statistics with results from dependencies
-        return await extract_player_statistics_async(results['gather_historical_game_data'])
+    # Level 1: decompose_objective_into_tasks
+    async def run_decompose_objective_into_tasks():
+        # Call the async version of decompose_objective_into_tasks with results from dependencies
+        return await decompose_objective_into_tasks_async(results['define_workflow_objective'])
 
     # Run level 1 nodes in parallel
-    level_1_results = await asyncio.gather(run_analyze_team_performance(), run_extract_player_statistics())
-    results['analyze_team_performance'] = level_1_results[0]
-    results['extract_player_statistics'] = level_1_results[1]
+    results['decompose_objective_into_tasks'] = await run_decompose_objective_into_tasks()
 
-    # Level 2: identify_top_performers
-    async def run_identify_top_performers():
-        # Call the async version of identify_top_performers with results from dependencies
-        return await identify_top_performers_async(results['extract_player_statistics'])
+    # Level 2: identify_task_dependencies
+    async def run_identify_task_dependencies():
+        # Call the async version of identify_task_dependencies with results from dependencies
+        return await identify_task_dependencies_async(results['decompose_objective_into_tasks'])
 
     # Run level 2 nodes in parallel
-    results['identify_top_performers'] = await run_identify_top_performers()
+    results['identify_task_dependencies'] = await run_identify_task_dependencies()
 
-    # Level 3: generate_performance_report
-    async def run_generate_performance_report():
-        # Call the async version of generate_performance_report with results from dependencies
-        return await generate_performance_report_async(results['analyze_team_performance'], results['identify_top_performers'])
+    # Level 3: create_task_dag
+    async def run_create_task_dag():
+        # Call the async version of create_task_dag with results from dependencies
+        return await create_task_dag_async(results['identify_task_dependencies'])
 
     # Run level 3 nodes in parallel
-    results['generate_performance_report'] = await run_generate_performance_report()
+    results['create_task_dag'] = await run_create_task_dag()
+
+    # Level 4: validate_dag
+    async def run_validate_dag():
+        # Call the async version of validate_dag with results from dependencies
+        return await validate_dag_async(results['create_task_dag'])
+
+    # Run level 4 nodes in parallel
+    results['validate_dag'] = await run_validate_dag()
+
+    # Level 5: finalize_workflow
+    async def run_finalize_workflow():
+        # Call the async version of finalize_workflow with results from dependencies
+        return await finalize_workflow_async(results['validate_dag'])
+
+    # Run level 5 nodes in parallel
+    results['finalize_workflow'] = await run_finalize_workflow()
 
     # Return all results
     return results
