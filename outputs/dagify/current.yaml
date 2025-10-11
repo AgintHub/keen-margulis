@@ -1,21 +1,27 @@
-dag_type: stub
+dag_type: shim
 description: Generated workflow from UI.
 name: simple_coffee_workflow
 nodes:
   boil_water:
     agent: false
-    code_node_type: stub
+    code_node_type: shim
     description: Simulates heating a supplied liquid (water, milk, tea, etc.) to its
       boiling point, recording the temperature reached, the duration of heating, and
       whether the liquid is ready for use in downstream processes.
-    implementation: "from pydantic import BaseModel, Field\n\n\nclass BoilWaterOutput(BaseModel):\n\
+    implementation: "from ._boil_water.extract_liquid_type import extract_liquid_type\n\
+      from ._boil_water.extract_volume import extract_volume\nfrom ._boil_water.validate_liquid_type\
+      \ import validate_liquid_type\nfrom ._boil_water.get_boiling_point import get_boiling_point\n\
+      from ._boil_water.get_heat_capacity import get_heat_capacity\nfrom ._boil_water.simulate_heating_process\
+      \ import simulate_heating_process\nfrom ._boil_water.check_boiling_status import\
+      \ check_boiling_status\n\nfrom pydantic import BaseModel, Field\n\n\nclass BoilWaterOutput(BaseModel):\n\
       \    \"\"\"Pydantic model for boil_water node outputs.\"\"\"\n    boiled: bool\
-      \ = (\n        Field(..., description=\"Whether the water has reached the boiling\
-      \ point and is ready for brewing.\")\n    )\n    temperature_celsius: float\
-      \ = (\n        Field(..., description=\"Current temperature of the water in\
-      \ degrees Celsius after boiling.\")\n    )\n    boil_time_seconds: int = (\n\
-      \        Field(..., description=\"Duration taken to bring the water to boiling\
-      \ temperature, measured in seconds.\")\n    )\n\n\ndef boil_water(general_input:\
+      \ = (\n        Field(..., description = (\n            \"Whether the water has\
+      \ reached the boiling point and is ready for brewing.\")\n        )\n    )\n\
+      \    temperature_celsius: float = (\n        Field(..., description = (\n  \
+      \          \"Current temperature of the water in degrees Celsius after boiling.\"\
+      )\n        )\n    )\n    boil_time_seconds: int = (\n        Field(..., description\
+      \ = (\n            \"Duration taken to bring the water to boiling temperature,\
+      \ measured in seconds.\")\n        )\n    )\n\n\ndef boil_water(general_input:\
       \ str, **kwargs) -> BoilWaterOutput:\n    \"\"\"\n    Heats a liquid to its\
       \ boiling point and returns the readiness status, final\n    temperature, and\
       \ heating duration.\n\n    Parameters\n    ----------\n    liquid_type : str\n\
@@ -28,8 +34,21 @@ nodes:
       \ within realistic\n        limits.\n\n    Examples\n    --------\n    >>> result\
       \ = boil_liquid(liquid_type='water', volume=0.5)\n    >>> print(result)\n  \
       \  {'boiled': True, 'temperature_celsius': 100.0, 'boil_time_seconds': 90}\n\
-      \n    \"\"\"\n    return BoilWaterOutput(\n        boiled=False,\n        temperature_celsius=0.0,\n\
-      \        boil_time_seconds=0,\n    )"
+      \n    \"\"\"\n    liquid_type: str = extract_liquid_type(general_input=general_input,\
+      \ kwargs=kwargs)\n    volume: float = extract_volume(general_input=general_input,\
+      \ kwargs=kwargs)\n    \n    is_supported: bool = validate_liquid_type(liquid_type=liquid_type)\n\
+      \    if not is_supported:\n        raise ValueError(f\"Unsupported liquid type:\
+      \ {liquid_type}\")\n    \n    boiling_point: float = get_boiling_point(liquid_type=liquid_type)\n\
+      \    heat_capacity: float = get_heat_capacity(liquid_type=liquid_type)\n   \
+      \ \n    heating_simulation: dict = simulate_heating_process(\n        volume=volume,\n\
+      \        target_temperature=boiling_point,\n        heat_capacity=heat_capacity\n\
+      \    )\n    \n    if not heating_simulation.get(\"converged\", False):\n   \
+      \     raise RuntimeError(\"Heating simulation failed to converge within realistic\
+      \ limits\")\n    \n    final_temperature: float = heating_simulation[\"final_temperature\"\
+      ]\n    boil_time: int = heating_simulation[\"time_seconds\"]\n    is_boiled:\
+      \ bool = check_boiling_status(temperature=final_temperature, boiling_point=boiling_point)\n\
+      \    \n    return BoilWaterOutput(\n        boiled=is_boiled,\n        temperature_celsius=final_temperature,\n\
+      \        boil_time_seconds=boil_time\n    )"
     name: boil_water
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -98,53 +117,548 @@ nodes:
       Return only the fields listed in `output_structure`.
 
       '
-    shims: []
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Extracts the liquid type from a given input string, ignoring any
+        volume or additional information.
+      implementation: "def extract_liquid_type(general_input: str, kwargs: str) ->\
+        \ str:\n    \"\"\"\n    Extracts the liquid type from a general input string,\
+        \ returning a\n    standardized lowercase string.\n\n    Parameters\n    ----------\n\
+        \    general_input : str\n        The raw input string that may contain a\
+        \ liquid type followed by\n        additional descriptors such as volume or\
+        \ units.\n    kwargs : str\n        Additional keyword arguments in string\
+        \ form; currently unused but\n        retained for API compatibility.\n\n\
+        \    Returns\n    -------\n    str\n        The liquid type extracted from\
+        \ the input, lowercased. Example:\n        'water', 'coffee', 'milk'.\n\n\
+        \    Raises\n    ------\n    ValueError\n        Raised when the liquid type\
+        \ cannot be determined from the input.\n    TypeError\n        Raised when\
+        \ either `general_input` or `kwargs` is not a string.\n\n    Examples\n  \
+        \  --------\n    >>> print(extract_liquid_type('Water 500ml', {}))\n    'water'\n\
+        \n    >>> print(extract_liquid_type('Coffee 300ml', {}))\n    'coffee'\n\n\
+        \    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node that\
+        \ needs to be implemented\")"
+      name: extract_liquid_type
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: general_input
+        type: str
+      - description: Input parameter of type str
+        key: kwargs
+        type: str
+      prd:
+        conceptual_info: This shim encapsulates the logic for parsing a liquid type
+          from arbitrary input strings, providing a standardized, validated output
+          that other nodes can rely upon.
+        docstring:
+          examples:
+          - lines:
+            - print(extract_liquid_type('Water 500ml', {}))
+            output: '''water'''
+          - lines:
+            - print(extract_liquid_type('Coffee 300ml', {}))
+            output: '''coffee'''
+          parameters:
+          - description: The raw input string that may contain a liquid type followed
+              by additional descriptors such as volume or units.
+            name: general_input
+            type: str
+          - description: Additional keyword arguments in string form; currently unused
+              but retained for API compatibility.
+            name: kwargs
+            type: str
+          raises:
+          - description: Raised when the liquid type cannot be determined from the
+              input.
+            type: ValueError
+          - description: Raised when either `general_input` or `kwargs` is not a string.
+            type: TypeError
+          returns:
+            description: 'The liquid type extracted from the input, lowercased. Example:
+              ''water'', ''coffee'', ''milk''.'
+            type: str
+          summary: Extracts the liquid type from a general input string, returning
+            a standardized lowercase string.
+      prompt: 'Implement a function `extract_liquid_type(general_input: str, kwargs:
+        str) -> str` that parses the liquid type from an arbitrary input string. The
+        function should return the liquid type as a lowercase string. It must raise
+        a `ValueError` if the liquid type cannot be determined and a `TypeError` if
+        any argument is not a string.'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Extracts a numeric volume value from the provided general input
+        string and keyword arguments.
+      implementation: "def extract_volume(general_input: str, kwargs: str) -> float:\n\
+        \    \"\"\"\n    Extracts a numeric volume value from a string or keyword\
+        \ arguments.\n\n    Parameters\n    ----------\n    general_input : str\n\
+        \        A string containing the volume information, e.g., '2L of water' or\n\
+        \        '1.5 liters'.\n    kwargs : dict\n        Optional keyword arguments\
+        \ that may supply the unit or override\n        default parsing behaviour\
+        \ (e.g., unit='liters').\n\n    Returns\n    -------\n    float\n        The\
+        \ numeric volume value expressed in liters.\n\n    Raises\n    ------\n  \
+        \  ValueError\n        Raised when no numeric volume can be extracted or when\
+        \ the unit is\n        unsupported.\n    TypeError\n        Raised when general_input\
+        \ is not a string or kwargs is not a\n        dictionary.\n\n    Examples\n\
+        \    --------\n    >>> extract_volume('water 2L')\n    2.0\n\n    >>> extract_volume('1.5\
+        \ liters of water', unit='liters')\n    1.5\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: extract_volume
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type float
+        key: output
+        type: float
+      - description: Input parameter of type str
+        key: general_input
+        type: str
+      - description: Input parameter of type str
+        key: kwargs
+        type: str
+      prd:
+        conceptual_info: The extract_volume shim parses textual or structured inputs
+          to retrieve a numeric volume measure, enabling downstream processes to quantify
+          liquid quantities accurately.
+        docstring:
+          examples:
+          - lines:
+            - extract_volume('water 2L')
+            output: '2.0'
+          - lines:
+            - extract_volume('1.5 liters of water', unit='liters')
+            output: '1.5'
+          parameters:
+          - description: A string containing the volume information, e.g., '2L of
+              water' or '1.5 liters'.
+            name: general_input
+            type: str
+          - description: Optional keyword arguments that may supply the unit or override
+              default parsing behaviour (e.g., unit='liters').
+            name: kwargs
+            type: dict
+          raises:
+          - description: Raised when no numeric volume can be extracted or when the
+              unit is unsupported.
+            type: ValueError
+          - description: Raised when general_input is not a string or kwargs is not
+              a dictionary.
+            type: TypeError
+          returns:
+            description: The numeric volume value expressed in liters.
+            type: float
+          summary: Extracts a numeric volume value from a string or keyword arguments.
+      prompt: 'Implement extract_volume(general_input: str, **kwargs) -> float'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates whether a given liquid type is supported for boiling
+        simulation.
+      implementation: "def validate_liquid_type(liquid_type: str) -> bool:\n    \"\
+        \"\"\n    Determines if the supplied liquid type is among the supported set\
+        \ for\n    boiling simulation.\n\n    Parameters\n    ----------\n    liquid_type\
+        \ : str\n        Name of the liquid (e.g., 'water', 'coffee', 'milk').\n\n\
+        \    Returns\n    -------\n    bool\n        True if the liquid_type is supported,\
+        \ False otherwise.\n\n    Raises\n    ------\n    TypeError\n        If liquid_type\
+        \ is not a string.\n    ValueError\n        If liquid_type is an empty string\
+        \ or contains only whitespace.\n\n    Examples\n    --------\n    >>> result\
+        \ = validate_liquid_type('water')\n    >>> print(result)\n    True\n\n   \
+        \ >>> result = validate_liquid_type('coffee')\n    >>> print(result)\n   \
+        \ False\n\n    >>> validate_liquid_type(123)\n    >>> print('This line will\
+        \ not be reached')\n    Traceback (most recent call last):\\n  File \"<stdin>\"\
+        , line 1, in\n    <module>\\nTypeError: liquid_type must be a string\n\n \
+        \   \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node that\
+        \ needs to be implemented\")"
+      name: validate_liquid_type
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type bool
+        key: output
+        type: bool
+      - description: Input parameter of type str
+        key: liquid_type
+        type: str
+      prd:
+        conceptual_info: This shim ensures the boiling simulation receives only liquid
+          types that have defined physical properties (boiling point and heat capacity).
+          It serves as a gatekeeper before any thermodynamic calculations are performed.
+        docstring:
+          examples:
+          - lines:
+            - result = validate_liquid_type('water')
+            - print(result)
+            output: 'True'
+          - lines:
+            - result = validate_liquid_type('coffee')
+            - print(result)
+            output: 'False'
+          - lines:
+            - validate_liquid_type(123)
+            - print('This line will not be reached')
+            output: 'Traceback (most recent call last):\n  File "<stdin>", line 1,
+              in <module>\nTypeError: liquid_type must be a string'
+          parameters:
+          - description: Name of the liquid (e.g., 'water', 'coffee', 'milk').
+            name: liquid_type
+            type: str
+          raises:
+          - description: If liquid_type is not a string.
+            type: TypeError
+          - description: If liquid_type is an empty string or contains only whitespace.
+            type: ValueError
+          returns:
+            description: True if the liquid_type is supported, False otherwise.
+            type: bool
+          summary: Determines if the supplied liquid type is among the supported set
+            for boiling simulation.
+      prompt: Validate if the provided liquid_type is supported by the boiling simulation
+        engine.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Returns the standard boiling point in degrees Celsius for a given
+        liquid type.
+      implementation: "def get_boiling_point(liquid_type: str) -> float:\n    \"\"\
+        \"\n    Return the standard boiling point of a liquid in degrees Celsius.\n\
+        \n    Parameters\n    ----------\n    liquid_type : str\n        The name\
+        \ of the liquid (e.g., 'water', 'ethanol').\n\n    Returns\n    -------\n\
+        \    float\n        The boiling point of the specified liquid in degrees Celsius.\n\
+        \n    Raises\n    ------\n    ValueError\n        Raised when the supplied\
+        \ liquid_type is not supported.\n    TypeError\n        Raised when liquid_type\
+        \ is not a string.\n\n    Examples\n    --------\n    >>> get_boiling_point('water')\n\
+        \    100.0\n\n    >>> get_boiling_point('ethanol')\n    78.37\n\n    \"\"\"\
+        \n    raise NotImplementedError(\"This is a virtual stub node that needs to\
+        \ be implemented\")"
+      name: get_boiling_point
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type float
+        key: output
+        type: float
+      - description: Input parameter of type str
+        key: liquid_type
+        type: str
+      prd:
+        conceptual_info: The get_boiling_point shim encapsulates the logic for retrieving
+          a liquid’s standard boiling point, serving as a lookup utility that other
+          nodes, such as boil_water, can depend on to perform temperature‑based calculations.
+        docstring:
+          examples:
+          - lines:
+            - get_boiling_point('water')
+            output: '100.0'
+          - lines:
+            - get_boiling_point('ethanol')
+            output: '78.37'
+          parameters:
+          - description: The name of the liquid (e.g., 'water', 'ethanol').
+            name: liquid_type
+            type: str
+          raises:
+          - description: Raised when the supplied liquid_type is not supported.
+            type: ValueError
+          - description: Raised when liquid_type is not a string.
+            type: TypeError
+          returns:
+            description: The boiling point of the specified liquid in degrees Celsius.
+            type: float
+          summary: Return the standard boiling point of a liquid in degrees Celsius.
+      prompt: 'Implement get_boiling_point(liquid_type: str) -> float that returns
+        the boiling point in Celsius for the given liquid type.'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Retrieves the specific heat capacity (in J/(kg·K)) of a specified
+        liquid at a standard temperature.
+      implementation: "def get_heat_capacity(liquid_type: str) -> float:\n    \"\"\
+        \"\n    Return the specific heat capacity of a given liquid.\n\n    Parameters\n\
+        \    ----------\n    liquid_type : str\n        Name of the liquid (e.g.,\
+        \ 'water', 'ethanol').\n\n    Returns\n    -------\n    float\n        Heat\
+        \ capacity of the liquid in J/(kg·K).\n\n    Raises\n    ------\n    ValueError\n\
+        \        Raised when the specified liquid type is not supported.\n    TypeError\n\
+        \        Raised when liquid_type is not a string.\n\n    Examples\n    --------\n\
+        \    >>> from get_heat_capacity import get_heat_capacity\n    >>> print(get_heat_capacity('water'))\n\
+        \    4186.0\n\n    >>> print(get_heat_capacity('ethanol'))\n    2420.0\n\n\
+        \    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node that\
+        \ needs to be implemented\")"
+      name: get_heat_capacity
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type float
+        key: output
+        type: float
+      - description: Input parameter of type str
+        key: liquid_type
+        type: str
+      prd:
+        conceptual_info: This shim provides a lookup for the specific heat capacity
+          of common brewing liquids, enabling downstream temperature simulations to
+          use accurate thermal properties.
+        docstring:
+          examples:
+          - lines:
+            - from get_heat_capacity import get_heat_capacity
+            - print(get_heat_capacity('water'))
+            output: '4186.0'
+          - lines:
+            - print(get_heat_capacity('ethanol'))
+            output: '2420.0'
+          parameters:
+          - description: Name of the liquid (e.g., 'water', 'ethanol').
+            name: liquid_type
+            type: str
+          raises:
+          - description: Raised when the specified liquid type is not supported.
+            type: ValueError
+          - description: Raised when liquid_type is not a string.
+            type: TypeError
+          returns:
+            description: Heat capacity of the liquid in J/(kg·K).
+            type: float
+          summary: Return the specific heat capacity of a given liquid.
+      prompt: 'Implement get_heat_capacity(liquid_type: str) -> float'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Simulates the heating of a liquid until it reaches a target temperature
+        and returns the simulation results as a JSON string.
+      implementation: "def simulate_heating_process(volume: str, target_temperature:\
+        \ str, heat_capacity: str) -> str:\n    \"\"\"\n    Simulate heating a liquid\
+        \ until it reaches a specified temperature.\n\n    Parameters\n    ----------\n\
+        \    volume : str\n        String representation of the liquid volume in liters.\n\
+        \    target_temperature : str\n        String representation of the desired\
+        \ final temperature in degrees\n        Celsius.\n    heat_capacity : str\n\
+        \        String representation of the specific heat capacity in J/(kg·K).\n\
+        \n    Returns\n    -------\n    str\n        A JSON string containing three\
+        \ keys: - 'converged' (bool): True if\n        the simulation reached the\
+        \ target temperature within realistic\n        limits. - 'final_temperature'\
+        \ (float): The temperature achieved at\n        the end of the simulation.\
+        \ - 'time_seconds' (int): The number of\n        seconds required to reach\
+        \ the target temperature.\n\n    Raises\n    ------\n    ValueError\n    \
+        \    Raised when volume or target_temperature is negative or zero, or if\n\
+        \        heat_capacity is non‑positive.\n    TypeError\n        Raised if\
+        \ any input is not a string that can be converted to a\n        numeric value.\n\
+        \n    Examples\n    --------\n    >>> simulate_heating_process(volume='0.5',\
+        \ target_temperature='100',\n    heat_capacity='4184')\n    {'converged':\
+        \ True, 'final_temperature': 100.0, 'time_seconds': 300}\n\n    >>> simulate_heating_process(volume='2',\
+        \ target_temperature='60',\n    heat_capacity='4184')\n    {'converged': True,\
+        \ 'final_temperature': 60.0, 'time_seconds': 150}\n\n    \"\"\"\n    raise\
+        \ NotImplementedError(\"This is a virtual stub node that needs to be implemented\"\
+        )"
+      name: simulate_heating_process
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type dict
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: volume
+        type: str
+      - description: Input parameter of type str
+        key: target_temperature
+        type: str
+      - description: Input parameter of type str
+        key: heat_capacity
+        type: str
+      prd:
+        conceptual_info: This shim encapsulates the physics of heating a liquid, modeling
+          how the temperature rises over time given its volume and specific heat capacity.
+          The simulation returns whether it converged, the final temperature reached,
+          and the time taken, allowing downstream nodes to decide brewing readiness.
+        docstring:
+          examples:
+          - lines:
+            - simulate_heating_process(volume='0.5', target_temperature='100', heat_capacity='4184')
+            output: '{''converged'': True, ''final_temperature'': 100.0, ''time_seconds'':
+              300}'
+          - lines:
+            - simulate_heating_process(volume='2', target_temperature='60', heat_capacity='4184')
+            output: '{''converged'': True, ''final_temperature'': 60.0, ''time_seconds'':
+              150}'
+          parameters:
+          - description: String representation of the liquid volume in liters.
+            name: volume
+            type: str
+          - description: String representation of the desired final temperature in
+              degrees Celsius.
+            name: target_temperature
+            type: str
+          - description: String representation of the specific heat capacity in J/(kg·K).
+            name: heat_capacity
+            type: str
+          raises:
+          - description: Raised when volume or target_temperature is negative or zero,
+              or if heat_capacity is non‑positive.
+            type: ValueError
+          - description: Raised if any input is not a string that can be converted
+              to a numeric value.
+            type: TypeError
+          returns:
+            description: 'A JSON string containing three keys:
+
+              - ''converged'' (bool): True if the simulation reached the target temperature
+              within realistic limits.
+
+              - ''final_temperature'' (float): The temperature achieved at the end
+              of the simulation.
+
+              - ''time_seconds'' (int): The number of seconds required to reach the
+              target temperature.'
+            type: str
+          summary: Simulate heating a liquid until it reaches a specified temperature.
+      prompt: '```python
+
+        # Simulate heating process for a liquid.
+
+        # Input: volume, target_temperature, heat_capacity (all as strings representing
+        numeric values).
+
+        # Output: JSON string with keys ''converged'' (bool), ''final_temperature''
+        (float), and ''time_seconds'' (int).
+
+        ```
+
+        '
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Check whether the supplied temperature has reached or exceeded
+        the boiling point.
+      implementation: "def check_boiling_status(temperature: str, boiling_point: str)\
+        \ -> bool:\n    \"\"\"\n    Determine if a liquid has reached its boiling\
+        \ point.\n\n    Parameters\n    ----------\n    temperature : float\n    \
+        \    Current temperature of the liquid in degrees Celsius.\n    boiling_point\
+        \ : float\n        Boiling point temperature of the liquid in degrees Celsius.\n\
+        \n    Returns\n    -------\n    bool\n        True if temperature is greater\
+        \ than or equal to boiling_point;\n        otherwise False.\n\n    Raises\n\
+        \    ------\n    ValueError\n        Raised when temperature or boiling_point\
+        \ is negative.\n    TypeError\n        Raised when either temperature or boiling_point\
+        \ is not a numeric\n        type.\n\n    Examples\n    --------\n    >>> check_boiling_status(temperature=100.0,\
+        \ boiling_point=100.0)\n    True\n\n    >>> check_boiling_status(temperature=90.0,\
+        \ boiling_point=100.0)\n    False\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: check_boiling_status
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type bool
+        key: output
+        type: bool
+      - description: Input parameter of type str
+        key: temperature
+        type: str
+      - description: Input parameter of type str
+        key: boiling_point
+        type: str
+      prd:
+        conceptual_info: Determines whether a liquid has reached its boiling point
+          based on its current temperature and the known boiling point for that liquid,
+          providing a boolean result that drives subsequent brewing logic.
+        docstring:
+          examples:
+          - lines:
+            - check_boiling_status(temperature=100.0, boiling_point=100.0)
+            output: 'True'
+          - lines:
+            - check_boiling_status(temperature=90.0, boiling_point=100.0)
+            output: 'False'
+          parameters:
+          - description: Current temperature of the liquid in degrees Celsius.
+            name: temperature
+            type: float
+          - description: Boiling point temperature of the liquid in degrees Celsius.
+            name: boiling_point
+            type: float
+          raises:
+          - description: Raised when temperature or boiling_point is negative.
+            type: ValueError
+          - description: Raised when either temperature or boiling_point is not a
+              numeric type.
+            type: TypeError
+          returns:
+            description: True if temperature is greater than or equal to boiling_point;
+              otherwise False.
+            type: bool
+          summary: Determine if a liquid has reached its boiling point.
+      prompt: Return True if the temperature has reached or surpassed the boiling
+        point, otherwise return False.
+      shims: []
   brew_coffee:
     agent: false
-    code_node_type: stub
+    code_node_type: shim
     description: Simulates heating a liquid (water, tea, or any beverage base) to
       its boiling point, measuring the duration taken and confirming readiness for
       downstream brewing or processing steps.
-    implementation: "from pydantic import BaseModel, Field\n\n\nclass BoilWaterOutput(BaseModel):\n\
+    implementation: "from ._brew_coffee.validate_brewing_readiness import validate_brewing_readiness\n\
+      from ._brew_coffee.get_current_timestamp import get_current_timestamp\nfrom\
+      \ ._brew_coffee.calculate_brewing_parameters import calculate_brewing_parameters\n\
+      from ._brew_coffee.execute_brewing_process import execute_brewing_process\n\
+      from ._brew_coffee.calculate_duration_seconds import calculate_duration_seconds\n\
+      from ._brew_coffee.measure_final_temperature import measure_final_temperature\n\
+      from ._brew_coffee.calculate_brewed_volume import calculate_brewed_volume\n\n\
+      from pydantic import BaseModel, Field\n\n\nclass BoilWaterOutput(BaseModel):\n\
       \    \"\"\"Pydantic model for boil_water node outputs.\"\"\"\n    boiled: bool\
-      \ = (\n        Field(..., description=\"Whether the water has reached the boiling\
-      \ point and is ready for brewing.\")\n    )\n    temperature_celsius: float\
-      \ = (\n        Field(..., description=\"Current temperature of the water in\
-      \ degrees Celsius after boiling.\")\n    )\n    boil_time_seconds: int = (\n\
-      \        Field(..., description=\"Duration taken to bring the water to boiling\
-      \ temperature, measured in seconds.\")\n    )\n\n\nclass PrepareCoffeeMakerOutput(BaseModel):\n\
+      \ = (\n        Field(..., description = (\n            \"Whether the water has\
+      \ reached the boiling point and is ready for brewing.\")\n        )\n    )\n\
+      \    temperature_celsius: float = (\n        Field(..., description = (\n  \
+      \          \"Current temperature of the water in degrees Celsius after boiling.\"\
+      )\n        )\n    )\n    boil_time_seconds: int = (\n        Field(..., description\
+      \ = (\n            \"Duration taken to bring the water to boiling temperature,\
+      \ measured in seconds.\")\n        )\n    )\n\n\nclass PrepareCoffeeMakerOutput(BaseModel):\n\
       \    \"\"\"Pydantic model for prepare_coffee_maker node outputs.\"\"\"\n   \
-      \ coffee_grounds_amount_g: float = (\n        Field(..., description=\"The amount\
-      \ of coffee grounds added to the coffee maker's filter in grams\")\n    )\n\
-      \    filter_prepared: bool = (\n        Field(..., description=\"Whether the\
-      \ filter is properly prepared and ready\")\n    )\n    coffee_maker_status:\
-      \ str = (\n        Field(..., description=\"Current status of the coffee maker\
-      \ (e.g., 'ready', 'error')\")\n    )\n\n\nclass BrewCoffeeOutput(BaseModel):\n\
-      \    \"\"\"Pydantic model for brew_coffee node outputs.\"\"\"\n    brew_start_timestamp:\
+      \ coffee_grounds_amount_g: float = (\n        Field(..., description = (\n \
+      \           \"The amount of coffee grounds added to the coffee maker's filter\
+      \ in grams\")\n        )\n    )\n    filter_prepared: bool = (\n        Field(...,\
+      \ description = (\n            \"Whether the filter is properly prepared and\
+      \ ready\")\n        )\n    )\n    coffee_maker_status: str = (\n        Field(...,\
+      \ description = (\n            \"Current status of the coffee maker (e.g., 'ready',\
+      \ 'error')\")\n        )\n    )\n\n\nclass BrewCoffeeOutput(BaseModel):\n  \
+      \  \"\"\"Pydantic model for brew_coffee node outputs.\"\"\"\n    brew_start_timestamp:\
       \ str = (\n        Field(..., description=\"ISO 8601 timestamp when brewing\
       \ started\")\n    )\n    brew_end_timestamp: str = (\n        Field(..., description=\"\
       ISO 8601 timestamp when brewing completed\")\n    )\n    brew_duration_seconds:\
-      \ float = (\n        Field(..., description=\"Total duration of the brewing\
-      \ process in seconds\")\n    )\n    brewed_volume_cups: int = (\n        Field(...,\
-      \ description=\"Number of cups of coffee brewed\")\n    )\n    brewed_success:\
-      \ bool = (\n        Field(..., description=\"Whether the brewing process completed\
-      \ successfully\")\n    )\n    final_temperature_c: float = (\n        Field(...,\
-      \ description=\"Final temperature of the brewed coffee in degrees Celsius\"\
-      )\n    )\n\n\ndef brew_coffee(boil_water_input: BoilWaterOutput, prepare_coffee_maker_input:\
-      \ PrepareCoffeeMakerOutput, **kwargs) -> BrewCoffeeOutput:\n    \"\"\"\n   \
-      \ Boil the specified liquid to its target boiling temperature and report\n \
-      \   readiness metrics.\n\n    Parameters\n    ----------\n    target_temperature_celsius\
-      \ : float\n        Desired boiling temperature for the liquid in degrees Celsius.\n\
-      \n    Returns\n    -------\n    dict\n        Dictionary containing boiled status,\
-      \ temperature, and boil time.\n\n    Raises\n    ------\n    ValueError\n  \
-      \      Raised if the liquid fails to reach the target temperature within\n \
-      \       the allowed timeframe.\n\n    Examples\n    --------\n    >>> result\
-      \ = boil_any_liquid(target_temperature_celsius=100.0)\n    >>> print(result['boiled'],\
-      \ result['temperature_celsius'],\n    result['boil_time_seconds'])\n    True\
-      \ 100.0 45\n\n    \"\"\"\n    return BrewCoffeeOutput(\n        brew_start_timestamp=\"\
-      \",\n        brew_end_timestamp=\"\",\n        brew_duration_seconds=0.0,\n\
-      \        brewed_volume_cups=0,\n        brewed_success=False,\n        final_temperature_c=0.0,\n\
-      \    )"
+      \ float = (\n        Field(..., description = (\n            \"Total duration\
+      \ of the brewing process in seconds\")\n        )\n    )\n    brewed_volume_cups:\
+      \ int = (\n        Field(..., description=\"Number of cups of coffee brewed\"\
+      )\n    )\n    brewed_success: bool = (\n        Field(..., description = (\n\
+      \            \"Whether the brewing process completed successfully\")\n     \
+      \   )\n    )\n    final_temperature_c: float = (\n        Field(..., description\
+      \ = (\n            \"Final temperature of the brewed coffee in degrees Celsius\"\
+      )\n        )\n    )\n\n\ndef brew_coffee(boil_water_input: BoilWaterOutput,\
+      \ prepare_coffee_maker_input: PrepareCoffeeMakerOutput, **kwargs) -> BrewCoffeeOutput:\n\
+      \    \"\"\"\n    Boil the specified liquid to its target boiling temperature\
+      \ and report\n    readiness metrics.\n\n    Parameters\n    ----------\n   \
+      \ target_temperature_celsius : float\n        Desired boiling temperature for\
+      \ the liquid in degrees Celsius.\n\n    Returns\n    -------\n    dict\n   \
+      \     Dictionary containing boiled status, temperature, and boil time.\n\n \
+      \   Raises\n    ------\n    ValueError\n        Raised if the liquid fails to\
+      \ reach the target temperature within\n        the allowed timeframe.\n\n  \
+      \  Examples\n    --------\n    >>> result = boil_any_liquid(target_temperature_celsius=100.0)\n\
+      \    >>> print(result['boiled'], result['temperature_celsius'],\n    result['boil_time_seconds'])\n\
+      \    True 100.0 45\n\n    \"\"\"\n    validate_brewing_readiness(water_status=boil_water_input,\
+      \ coffee_maker_status=prepare_coffee_maker_input)\n    \n    start_time: str\
+      \ = get_current_timestamp()\n    \n    brewing_parameters: dict = calculate_brewing_parameters(\n\
+      \        water_temp=boil_water_input.temperature_celsius,\n        coffee_amount=prepare_coffee_maker_input.coffee_grounds_amount_g\n\
+      \    )\n    \n    brew_success: bool = execute_brewing_process(\n        water_input=boil_water_input,\n\
+      \        coffee_maker_input=prepare_coffee_maker_input,\n        parameters=brewing_parameters\n\
+      \    )\n    \n    end_time: str = get_current_timestamp()\n    duration: float\
+      \ = calculate_duration_seconds(start_time=start_time, end_time=end_time)\n \
+      \   \n    final_temp: float = measure_final_temperature(success=brew_success,\
+      \ initial_temp=boil_water_input.temperature_celsius)\n    volume_cups: int =\
+      \ calculate_brewed_volume(coffee_amount=prepare_coffee_maker_input.coffee_grounds_amount_g)\n\
+      \    \n    return BrewCoffeeOutput(\n        brew_start_timestamp=start_time,\n\
+      \        brew_end_timestamp=end_time,\n        brew_duration_seconds=duration,\n\
+      \        brewed_volume_cups=volume_cups,\n        brewed_success=brew_success,\n\
+      \        final_temperature_c=final_temp\n    )"
     name: brew_coffee
     nodes_depended_on:
     - boil_water
@@ -195,35 +709,565 @@ nodes:
           readiness metrics.
     prompt: Boil the provided liquid to its target boiling temperature, ensuring it
       reaches the specified temperature before proceeding.
-    shims: []
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validate that boiled water and a ready coffee maker satisfy brewing
+        prerequisites and return a status message.
+      implementation: "def validate_brewing_readiness(water_status: str, coffee_maker_status:\
+        \ str) -> str:\n    \"\"\"\n    Validate the readiness of the brewing setup\
+        \ before starting coffee\n    production.\n\n    Parameters\n    ----------\n\
+        \    water_status : BoilWaterOutput\n        Object containing boiled status,\
+        \ temperature, and boil time of the\n        water.\n    coffee_maker_status\
+        \ : PrepareCoffeeMakerOutput\n        Object containing coffee grounds amount,\
+        \ filter preparation flag,\n        and overall maker status.\n\n    Returns\n\
+        \    -------\n    str\n        A human‑readable string indicating whether\
+        \ brewing can proceed or\n        why it cannot.\n\n    Raises\n    ------\n\
+        \    ValueError\n        Raised when the water is not boiled, the filter is\
+        \ not prepared, or\n        the coffee maker status is not 'ready'.\n    TypeError\n\
+        \        Raised when the provided arguments are not instances of\n       \
+        \ BoilWaterOutput and PrepareCoffeeMakerOutput.\n\n    Examples\n    --------\n\
+        \    >>> from pydantic import BaseModel, Field\n    >>> class BoilWaterOutput(BaseModel):\n\
+        \    ...     boiled: bool\n    ...     temperature_celsius: float\n    ...\
+        \     boil_time_seconds: int\n    >>> class PrepareCoffeeMakerOutput(BaseModel):\n\
+        \    ...     coffee_grounds_amount_g: float\n    ...     filter_prepared:\
+        \ bool\n    ...     coffee_maker_status: str\n    >>> water = BoilWaterOutput(boiled=True,\
+        \ temperature_celsius=100,\n    boil_time_seconds=60)\n    >>> maker = PrepareCoffeeMakerOutput(coffee_grounds_amount_g=15.0,\n\
+        \    filter_prepared=True, coffee_maker_status='ready')\n    >>> print(validate_brewing_readiness(water_status=water,\n\
+        \    coffee_maker_status=maker))\n    'Ready to brew'\n\n    >>> water_bad\
+        \ = BoilWaterOutput(boiled=False, temperature_celsius=90,\n    boil_time_seconds=30)\n\
+        \    >>> print(validate_brewing_readiness(water_status=water_bad,\n    coffee_maker_status=maker))\n\
+        \    ValueError: Water is not boiled or coffee maker not ready.\n\n    \"\"\
+        \"\n    raise NotImplementedError(\"This is a virtual stub node that needs\
+        \ to be implemented\")"
+      name: validate_brewing_readiness
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: water_status
+        type: str
+      - description: Input parameter of type str
+        key: coffee_maker_status
+        type: str
+      prd:
+        conceptual_info: Ensures that the brewing process only starts when the water
+          has reached boiling point and the coffee maker is prepared, providing clear
+          feedback for downstream nodes.
+        docstring:
+          examples:
+          - lines:
+            - from pydantic import BaseModel, Field
+            - 'class BoilWaterOutput(BaseModel):'
+            - '    boiled: bool'
+            - '    temperature_celsius: float'
+            - '    boil_time_seconds: int'
+            - 'class PrepareCoffeeMakerOutput(BaseModel):'
+            - '    coffee_grounds_amount_g: float'
+            - '    filter_prepared: bool'
+            - '    coffee_maker_status: str'
+            - water = BoilWaterOutput(boiled=True, temperature_celsius=100, boil_time_seconds=60)
+            - maker = PrepareCoffeeMakerOutput(coffee_grounds_amount_g=15.0, filter_prepared=True,
+              coffee_maker_status='ready')
+            - print(validate_brewing_readiness(water_status=water, coffee_maker_status=maker))
+            output: '''Ready to brew'''
+          - lines:
+            - water_bad = BoilWaterOutput(boiled=False, temperature_celsius=90, boil_time_seconds=30)
+            - print(validate_brewing_readiness(water_status=water_bad, coffee_maker_status=maker))
+            output: 'ValueError: Water is not boiled or coffee maker not ready.'
+          parameters:
+          - description: Object containing boiled status, temperature, and boil time
+              of the water.
+            name: water_status
+            type: BoilWaterOutput
+          - description: Object containing coffee grounds amount, filter preparation
+              flag, and overall maker status.
+            name: coffee_maker_status
+            type: PrepareCoffeeMakerOutput
+          raises:
+          - description: Raised when the water is not boiled, the filter is not prepared,
+              or the coffee maker status is not 'ready'.
+            type: ValueError
+          - description: Raised when the provided arguments are not instances of BoilWaterOutput
+              and PrepareCoffeeMakerOutput.
+            type: TypeError
+          returns:
+            description: A human‑readable string indicating whether brewing can proceed
+              or why it cannot.
+            type: str
+          summary: Validate the readiness of the brewing setup before starting coffee
+            production.
+      prompt: Check if water is boiled and coffee maker is ready; raise errors if
+        not, otherwise return readiness string.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Returns the current UTC timestamp as an ISO 8601 string.
+      implementation: "def get_current_timestamp() -> str:\n    \"\"\"\n    Return\
+        \ the current UTC time formatted as an ISO 8601 string.\n\n    Returns\n \
+        \   -------\n    str\n        ISO 8601 formatted string representing the current\
+        \ UTC timestamp.\n\n    Raises\n    ------\n    TypeError\n        If arguments\
+        \ are passed to the function.\n\n    Examples\n    --------\n    >>> timestamp\
+        \ = get_current_timestamp()\n    >>> print(timestamp)\n    \"2025-10-11T12:34:56+00:00\"\
+        \n\n    >>> print(get_current_timestamp())\n    \"2025-10-11T12:34:56+00:00\"\
+        \n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node\
+        \ that needs to be implemented\")"
+      name: get_current_timestamp
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      prd:
+        conceptual_info: Provides a consistent, timezone‑aware timestamp for use in
+          workflow steps that require a point in time.
+        docstring:
+          examples:
+          - lines:
+            - timestamp = get_current_timestamp()
+            - print(timestamp)
+            output: '"2025-10-11T12:34:56+00:00"'
+          - lines:
+            - print(get_current_timestamp())
+            output: '"2025-10-11T12:34:56+00:00"'
+          parameters: []
+          raises:
+          - description: If arguments are passed to the function.
+            type: TypeError
+          returns:
+            description: ISO 8601 formatted string representing the current UTC timestamp.
+            type: str
+          summary: Return the current UTC time formatted as an ISO 8601 string.
+      prompt: Implement get_current_timestamp() that returns the current UTC timestamp
+        as an ISO 8601 formatted string.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Calculates brewing parameters such as target brew temperature,
+        brew duration, and filter flow rate from the input water temperature and coffee
+        grounds amount.
+      implementation: "def calculate_brewing_parameters(water_temp: str, coffee_amount:\
+        \ str) -> str:\n    \"\"\"\n    Compute brewing parameters for coffee based\
+        \ on water temperature and coffee\n    grounds amount.\n\n    Parameters\n\
+        \    ----------\n    water_temp : str\n        Water temperature in degrees\
+        \ Celsius represented as a string (e.g.,\n        \"90\").\n    coffee_amount\
+        \ : str\n        Amount of coffee grounds in grams represented as a string\
+        \ (e.g.,\n        \"20\").\n\n    Returns\n    -------\n    str\n        A\
+        \ JSON-formatted string describing the brewing parameters. The\n        dictionary\
+        \ contains keys such as `target_temperature_c`,\n        `brew_time_seconds`,\
+        \ and `filter_flow_rate`.\n\n    Raises\n    ------\n    ValueError\n    \
+        \    Raised when the string inputs cannot be converted to positive\n     \
+        \   floats.\n    TypeError\n        Raised when the inputs are not of type\
+        \ string.\n\n    Examples\n    --------\n    >>> from calculate_brewing_parameters\
+        \ import calculate_brewing_parameters\n    >>> # Example 1: Typical brewing\
+        \ scenario\n    >>> params = calculate_brewing_parameters(water_temp=\"93\"\
+        ,\n    coffee_amount=\"18\")\n    >>> print(params)\n    \"{\\\"target_temperature_c\\\
+        \": 93, \\\"brew_time_seconds\\\": 240,\n    \\\"filter_flow_rate\\\": \\\"\
+        medium\\\"}\"\n\n    >>> # Example 2: Error handling – non‑numeric input\n\
+        \    >>> try:\n    ...     calculate_brewing_parameters(water_temp=\"hot\"\
+        , coffee_amount=\"20\")\n    >>> except ValueError as e:\n    ...     print(e)\n\
+        \    \"Invalid numeric value for water_temp: 'hot'\"\n\n    \"\"\"\n    raise\
+        \ NotImplementedError(\"This is a virtual stub node that needs to be implemented\"\
+        )"
+      name: calculate_brewing_parameters
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type dict
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: water_temp
+        type: str
+      - description: Input parameter of type str
+        key: coffee_amount
+        type: str
+      prd:
+        conceptual_info: This shim computes the optimal brewing settings required
+          for a coffee maker to produce a consistent cup of coffee, taking into account
+          the initial water temperature and the amount of coffee grounds. It serves
+          as a bridge between raw sensor inputs and the brewing execution logic.
+        docstring:
+          examples:
+          - lines:
+            - from calculate_brewing_parameters import calculate_brewing_parameters
+            - '# Example 1: Typical brewing scenario'
+            - params = calculate_brewing_parameters(water_temp="93", coffee_amount="18")
+            - print(params)
+            output: '"{\"target_temperature_c\": 93, \"brew_time_seconds\": 240, \"filter_flow_rate\":
+              \"medium\"}"'
+          - lines:
+            - '# Example 2: Error handling – non‑numeric input'
+            - 'try:'
+            - '    calculate_brewing_parameters(water_temp="hot", coffee_amount="20")'
+            - 'except ValueError as e:'
+            - '    print(e)'
+            output: '"Invalid numeric value for water_temp: ''hot''"'
+          parameters:
+          - description: Water temperature in degrees Celsius represented as a string
+              (e.g., "90").
+            name: water_temp
+            type: str
+          - description: Amount of coffee grounds in grams represented as a string
+              (e.g., "20").
+            name: coffee_amount
+            type: str
+          raises:
+          - description: Raised when the string inputs cannot be converted to positive
+              floats.
+            type: ValueError
+          - description: Raised when the inputs are not of type string.
+            type: TypeError
+          returns:
+            description: A JSON-formatted string describing the brewing parameters.
+              The dictionary contains keys such as `target_temperature_c`, `brew_time_seconds`,
+              and `filter_flow_rate`.
+            type: str
+          summary: Compute brewing parameters for coffee based on water temperature
+            and coffee grounds amount.
+      prompt: Calculate brewing parameters for coffee based on supplied water temperature
+        and coffee grounds amount.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Executes the coffee brewing process and returns a boolean indicating
+        success.
+      implementation: "def execute_brewing_process(water_input: str, coffee_maker_input:\
+        \ str, parameters: str) -> bool:\n    \"\"\"\n    Executes the coffee brewing\
+        \ process for a given set of inputs and returns a\n    boolean indicating\
+        \ whether the brewing was successful.\n\n    Parameters\n    ----------\n\
+        \    water_input : str\n        A JSON‑encoded string containing boiled water\
+        \ information\n        (temperature, boiled status, etc.).\n    coffee_maker_input\
+        \ : str\n        A JSON‑encoded string containing coffee maker status and\
+        \ grounds\n        amount.\n    parameters : str\n        A JSON‑encoded string\
+        \ of brewing parameters such as brew time and\n        coffee‑to‑water ratio.\n\
+        \n    Returns\n    -------\n    bool\n        True if the brewing process\
+        \ completed successfully; otherwise False.\n\n    Raises\n    ------\n   \
+        \ ValueError\n        Raised when any of the input JSON strings is missing\
+        \ required fields\n        or contains invalid values.\n    TypeError\n  \
+        \      Raised when any of the input parameters is not a string.\n\n    Examples\n\
+        \    --------\n    >>> water_input = '{\"boiled\": true, \"temperature_celsius\"\
+        : 100}'\n    >>> coffee_maker_input = '{\"coffee_grounds_amount_g\": 20, \"\
+        filter_prepared\":\n    true, \"coffee_maker_status\": \"ready\"}'\n    >>>\
+        \ parameters = '{\"brew_time_seconds\": 240}'\n    >>> success = execute_brewing_process(water_input,\
+        \ coffee_maker_input,\n    parameters)\n    >>> print(success)\n    True\n\
+        \n    >>> water_input = '{\"boiled\": false, \"temperature_celsius\": 85}'\n\
+        \    >>> coffee_maker_input = '{\"coffee_grounds_amount_g\": 20, \"filter_prepared\"\
+        :\n    true, \"coffee_maker_status\": \"ready\"}'\n    >>> parameters = '{\"\
+        brew_time_seconds\": 240}'\n    >>> try:\n    ...     execute_brewing_process(water_input,\
+        \ coffee_maker_input, parameters)\n    >>> except ValueError as e:\n    ...\
+        \     print(str(e))\n    \"Boiled water required for brewing\"\n\n    \"\"\
+        \"\n    raise NotImplementedError(\"This is a virtual stub node that needs\
+        \ to be implemented\")"
+      name: execute_brewing_process
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type bool
+        key: output
+        type: bool
+      - description: Input parameter of type str
+        key: water_input
+        type: str
+      - description: Input parameter of type str
+        key: coffee_maker_input
+        type: str
+      - description: Input parameter of type str
+        key: parameters
+        type: str
+      prd:
+        conceptual_info: The execute_brewing_process shim orchestrates the brewing
+          step by validating water and coffee maker inputs, applying brewing parameters,
+          and returning a success flag that determines downstream coffee output.
+        docstring:
+          examples:
+          - lines:
+            - 'water_input = ''{"boiled": true, "temperature_celsius": 100}'''
+            - 'coffee_maker_input = ''{"coffee_grounds_amount_g": 20, "filter_prepared":
+              true, "coffee_maker_status": "ready"}'''
+            - 'parameters = ''{"brew_time_seconds": 240}'''
+            - success = execute_brewing_process(water_input, coffee_maker_input, parameters)
+            - print(success)
+            output: 'True'
+          - lines:
+            - 'water_input = ''{"boiled": false, "temperature_celsius": 85}'''
+            - 'coffee_maker_input = ''{"coffee_grounds_amount_g": 20, "filter_prepared":
+              true, "coffee_maker_status": "ready"}'''
+            - 'parameters = ''{"brew_time_seconds": 240}'''
+            - 'try:'
+            - '    execute_brewing_process(water_input, coffee_maker_input, parameters)'
+            - 'except ValueError as e:'
+            - '    print(str(e))'
+            output: '"Boiled water required for brewing"'
+          parameters:
+          - description: A JSON‑encoded string containing boiled water information
+              (temperature, boiled status, etc.).
+            name: water_input
+            type: str
+          - description: A JSON‑encoded string containing coffee maker status and
+              grounds amount.
+            name: coffee_maker_input
+            type: str
+          - description: A JSON‑encoded string of brewing parameters such as brew
+              time and coffee‑to‑water ratio.
+            name: parameters
+            type: str
+          raises:
+          - description: Raised when any of the input JSON strings is missing required
+              fields or contains invalid values.
+            type: ValueError
+          - description: Raised when any of the input parameters is not a string.
+            type: TypeError
+          returns:
+            description: True if the brewing process completed successfully; otherwise
+              False.
+            type: bool
+          summary: Executes the coffee brewing process for a given set of inputs and
+            returns a boolean indicating whether the brewing was successful.
+      prompt: 'Implement the core logic of execute_brewing_process: validate inputs,
+        simulate brewing, and return a boolean success flag.'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Calculates the elapsed duration in seconds between a start and
+        end ISO 8601 timestamp.
+      implementation: "def calculate_duration_seconds(start_time: str, end_time: str)\
+        \ -> float:\n    \"\"\"\n    Computes the elapsed time in seconds between\
+        \ two ISO 8601 timestamps.\n\n    Parameters\n    ----------\n    start_time\
+        \ : str\n        The start timestamp in ISO 8601 format.\n    end_time : str\n\
+        \        The end timestamp in ISO 8601 format.\n\n    Returns\n    -------\n\
+        \    float\n        The duration in seconds between start_time and end_time.\n\
+        \n    Raises\n    ------\n    ValueError\n        If end_time is earlier than\
+        \ start_time or if timestamps cannot be\n        parsed.\n    TypeError\n\
+        \        If either start_time or end_time is not a string.\n\n    Examples\n\
+        \    --------\n    >>> duration = calculate_duration_seconds('2023-01-01T12:00:00Z',\n\
+        \    '2023-01-01T12:05:00Z')\n    >>> duration\n    300.0\n\n    >>> calculate_duration_seconds('2023-01-01T12:05:00Z',\n\
+        \    '2023-01-01T12:00:00Z')\n    ValueError: End time must be after start\
+        \ time.\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub\
+        \ node that needs to be implemented\")"
+      name: calculate_duration_seconds
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type float
+        key: output
+        type: float
+      - description: Input parameter of type str
+        key: start_time
+        type: str
+      - description: Input parameter of type str
+        key: end_time
+        type: str
+      prd:
+        conceptual_info: This shim provides precise timing by computing the number
+          of seconds that elapse between a given start and end timestamp, enabling
+          accurate duration tracking in the brewing workflow.
+        docstring:
+          examples:
+          - lines:
+            - duration = calculate_duration_seconds('2023-01-01T12:00:00Z', '2023-01-01T12:05:00Z')
+            - duration
+            output: '300.0'
+          - lines:
+            - calculate_duration_seconds('2023-01-01T12:05:00Z', '2023-01-01T12:00:00Z')
+            output: 'ValueError: End time must be after start time.'
+          parameters:
+          - description: The start timestamp in ISO 8601 format.
+            name: start_time
+            type: str
+          - description: The end timestamp in ISO 8601 format.
+            name: end_time
+            type: str
+          raises:
+          - description: If end_time is earlier than start_time or if timestamps cannot
+              be parsed.
+            type: ValueError
+          - description: If either start_time or end_time is not a string.
+            type: TypeError
+          returns:
+            description: The duration in seconds between start_time and end_time.
+            type: float
+          summary: Computes the elapsed time in seconds between two ISO 8601 timestamps.
+      prompt: Compute the duration in seconds between two ISO 8601 timestamps.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Calculates the final temperature of brewed coffee based on the
+        success flag and the initial water temperature.
+      implementation: "def measure_final_temperature(success: str, initial_temp: str)\
+        \ -> float:\n    \"\"\"\n    Return the final temperature of brewed coffee\
+        \ based on whether the brewing\n    process succeeded and the initial temperature\
+        \ of the boiled water.\n\n    Parameters\n    ----------\n    success : str\n\
+        \        Indicates if the brewing process completed successfully. Expected\n\
+        \        values are the string literals \"True\" or \"False\".\n    initial_temp\
+        \ : str\n        The temperature of the boiled water in degrees Celsius, provided\
+        \ as\n        a numeric string.\n\n    Returns\n    -------\n    float\n \
+        \       The final temperature of the brewed coffee in degrees Celsius. If\n\
+        \        the brew was successful, the temperature is calculated as\n     \
+        \   `float(initial_temp) - 15.0`. If unsuccessful, it defaults to `0.0`.\n\
+        \n    Raises\n    ------\n    ValueError\n        Raised when `success` is\
+        \ not \"True\" or \"False\", or when\n        `initial_temp` cannot be converted\
+        \ to a float.\n    TypeError\n        Raised when `success` or `initial_temp`\
+        \ is not of type `str`.\n\n    Examples\n    --------\n    >>> output = measure_final_temperature('True',\
+        \ '100')\n    >>> print(output)\n    85.0\n\n    >>> output = measure_final_temperature('False',\
+        \ '90')\n    >>> print(output)\n    0.0\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: measure_final_temperature
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type float
+        key: output
+        type: float
+      - description: Input parameter of type str
+        key: success
+        type: str
+      - description: Input parameter of type str
+        key: initial_temp
+        type: str
+      prd:
+        conceptual_info: The shim simulates the physical cooling of brewed coffee.
+          It receives the brewing success status and the initial temperature of the
+          boiled water, and returns a float representing the temperature of the coffee
+          once brewing completes. The calculation is intentionally simple to allow
+          future refinement.
+        docstring:
+          examples:
+          - lines:
+            - output = measure_final_temperature('True', '100')
+            - print(output)
+            output: '85.0'
+          - lines:
+            - output = measure_final_temperature('False', '90')
+            - print(output)
+            output: '0.0'
+          parameters:
+          - description: Indicates if the brewing process completed successfully.
+              Expected values are the string literals "True" or "False".
+            name: success
+            type: str
+          - description: The temperature of the boiled water in degrees Celsius, provided
+              as a numeric string.
+            name: initial_temp
+            type: str
+          raises:
+          - description: Raised when `success` is not "True" or "False", or when `initial_temp`
+              cannot be converted to a float.
+            type: ValueError
+          - description: Raised when `success` or `initial_temp` is not of type `str`.
+            type: TypeError
+          returns:
+            description: The final temperature of the brewed coffee in degrees Celsius.
+              If the brew was successful, the temperature is calculated as `float(initial_temp)
+              - 15.0`. If unsuccessful, it defaults to `0.0`.
+            type: float
+          summary: Return the final temperature of brewed coffee based on whether
+            the brewing process succeeded and the initial temperature of the boiled
+            water.
+      prompt: 'Implement the function `measure_final_temperature(success: str, initial_temp:
+        str) -> float` that returns the final brewed coffee temperature in Celsius.'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Calculates the number of coffee cups that can be brewed from a
+        given amount of coffee grounds.
+      implementation: "def calculate_brewed_volume(coffee_amount: str) -> int:\n \
+        \   \"\"\"\n    Returns the number of standard cups of coffee that can be\
+        \ brewed from the\n    given coffee amount in grams.\n\n    Parameters\n \
+        \   ----------\n    coffee_amount : str\n        String representation of\
+        \ the coffee grounds weight in grams.\n\n    Returns\n    -------\n    int\n\
+        \        Integer count of coffee cups that can be brewed.\n\n    Raises\n\
+        \    ------\n    ValueError\n        Raised when the coffee_amount cannot\
+        \ be converted to a positive\n        numeric value.\n    TypeError\n    \
+        \    Raised when coffee_amount is not a string.\n\n    Examples\n    --------\n\
+        \    >>> calculate_brewed_volume('7.5')\n    1\n\n    >>> calculate_brewed_volume('15')\n\
+        \    2\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub\
+        \ node that needs to be implemented\")"
+      name: calculate_brewed_volume
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type int
+        key: output
+        type: int
+      - description: Input parameter of type str
+        key: coffee_amount
+        type: str
+      prd:
+        conceptual_info: The shim determines how many standard cups of coffee can
+          be produced from a specified amount of coffee grounds, enabling downstream
+          logic to anticipate volume and resource usage.
+        docstring:
+          examples:
+          - lines:
+            - calculate_brewed_volume('7.5')
+            output: '1'
+          - lines:
+            - calculate_brewed_volume('15')
+            output: '2'
+          parameters:
+          - description: String representation of the coffee grounds weight in grams.
+            name: coffee_amount
+            type: str
+          raises:
+          - description: Raised when the coffee_amount cannot be converted to a positive
+              numeric value.
+            type: ValueError
+          - description: Raised when coffee_amount is not a string.
+            type: TypeError
+          returns:
+            description: Integer count of coffee cups that can be brewed.
+            type: int
+          summary: Returns the number of standard cups of coffee that can be brewed
+            from the given coffee amount in grams.
+      prompt: 'Calculate brewed volume: given coffee_amount in grams, return integer
+        cups.'
+      shims: []
   measure_coffee:
     agent: false
-    code_node_type: stub
+    code_node_type: shim
     description: Measure the coffee grounds
-    implementation: "from pydantic import BaseModel, Field\n\n\nclass MeasureCoffeeOutput(BaseModel):\n\
-      \    \"\"\"Pydantic model for measure_coffee node outputs.\"\"\"\n    ground_amount_grams:\
-      \ float = (\n        Field(..., description=\"Amount of coffee grounds measured\
-      \ in grams\")\n    )\n    desired_cup_count: int = (\n        Field(..., description=\"\
-      Number of coffee cups to be brewed\")\n    )\n    grounds_type: str = (\n  \
-      \      Field(..., description=\"Type of coffee grounds used (e.g., medium grind,\
-      \ dark roast)\")\n    )\n    measurement_valid: bool = (\n        Field(...,\
-      \ description=\"Indicates whether the measurement was performed correctly\"\
-      )\n    )\n\n\ndef measure_coffee(general_input: str, **kwargs) -> MeasureCoffeeOutput:\n\
-      \    \"\"\"\n    Calculate and verify the amount of coffee grounds needed for\
-      \ a given number\n    of cups.\n\n    Parameters\n    ----------\n    desired_cup_count\
-      \ : int\n        The target number of coffee cups to brew.\n    grounds_type\
-      \ : str\n        The type of coffee grounds (e.g., 'medium grind', 'dark roast').\n\
-      \n    Returns\n    -------\n    dict\n        Dictionary containing `ground_amount_grams`\
-      \ (float),\n        `desired_cup_count` (int), `grounds_type` (str), and\n \
-      \       `measurement_valid` (bool).\n\n    Raises\n    ------\n    ValueError\n\
-      \        If `desired_cup_count` is not a positive integer or `grounds_type`\n\
-      \        is not among the supported types.\n\n    Examples\n    --------\n \
-      \   >>> measure_coffee(3, 'medium grind')\n    {'ground_amount_grams': 18.0,\
-      \ 'desired_cup_count': 3, 'grounds_type':\n    'medium grind', 'measurement_valid':\
+    implementation: "from ._measure_coffee.extract_cup_count_from_input import extract_cup_count_from_input\n\
+      from ._measure_coffee.extract_grounds_type_from_input import extract_grounds_type_from_input\n\
+      from ._measure_coffee.validate_cup_count import validate_cup_count\nfrom ._measure_coffee.validate_grounds_type\
+      \ import validate_grounds_type\nfrom ._measure_coffee.calculate_grounds_amount\
+      \ import calculate_grounds_amount\nfrom ._measure_coffee.verify_measurement_accuracy\
+      \ import verify_measurement_accuracy\n\nfrom pydantic import BaseModel, Field\n\
+      \n\nclass MeasureCoffeeOutput(BaseModel):\n    \"\"\"Pydantic model for measure_coffee\
+      \ node outputs.\"\"\"\n    ground_amount_grams: float = (\n        Field(...,\
+      \ description=\"Amount of coffee grounds measured in grams\")\n    )\n    desired_cup_count:\
+      \ int = (\n        Field(..., description=\"Number of coffee cups to be brewed\"\
+      )\n    )\n    grounds_type: str = (\n        Field(..., description = (\n  \
+      \          \"Type of coffee grounds used (e.g., medium grind, dark roast)\"\
+      )\n        )\n    )\n    measurement_valid: bool = (\n        Field(..., description\
+      \ = (\n            \"Indicates whether the measurement was performed correctly\"\
+      )\n        )\n    )\n\n\ndef measure_coffee(general_input: str, **kwargs) ->\
+      \ MeasureCoffeeOutput:\n    \"\"\"\n    Calculate and verify the amount of coffee\
+      \ grounds needed for a given number\n    of cups.\n\n    Parameters\n    ----------\n\
+      \    desired_cup_count : int\n        The target number of coffee cups to brew.\n\
+      \    grounds_type : str\n        The type of coffee grounds (e.g., 'medium grind',\
+      \ 'dark roast').\n\n    Returns\n    -------\n    dict\n        Dictionary containing\
+      \ `ground_amount_grams` (float),\n        `desired_cup_count` (int), `grounds_type`\
+      \ (str), and\n        `measurement_valid` (bool).\n\n    Raises\n    ------\n\
+      \    ValueError\n        If `desired_cup_count` is not a positive integer or\
+      \ `grounds_type`\n        is not among the supported types.\n\n    Examples\n\
+      \    --------\n    >>> measure_coffee(3, 'medium grind')\n    {'ground_amount_grams':\
+      \ 18.0, 'desired_cup_count': 3, 'grounds_type':\n    'medium grind', 'measurement_valid':\
       \ True}\n\n    >>> measure_coffee(0, 'dark roast')\n    ValueError: desired_cup_count\
-      \ must be a positive integer.\n\n    \"\"\"\n    return MeasureCoffeeOutput(\n\
-      \        ground_amount_grams=0.0,\n        desired_cup_count=0,\n        grounds_type=\"\
-      \",\n        measurement_valid=False,\n    )"
+      \ must be a positive integer.\n\n    \"\"\"\n    desired_cup_count: int = extract_cup_count_from_input(general_input=general_input,\
+      \ kwargs=kwargs)\n    grounds_type: str = extract_grounds_type_from_input(general_input=general_input,\
+      \ kwargs=kwargs)\n    \n    validate_cup_count(desired_cup_count=desired_cup_count)\n\
+      \    validate_grounds_type(grounds_type=grounds_type)\n    \n    ground_amount_grams:\
+      \ float = calculate_grounds_amount(desired_cup_count=desired_cup_count, grounds_type=grounds_type)\n\
+      \    measurement_valid: bool = verify_measurement_accuracy(ground_amount_grams=ground_amount_grams,\
+      \ desired_cup_count=desired_cup_count)\n    \n    return MeasureCoffeeOutput(\n\
+      \        ground_amount_grams=ground_amount_grams,\n        desired_cup_count=desired_cup_count,\n\
+      \        grounds_type=grounds_type,\n        measurement_valid=measurement_valid\n\
+      \    )"
     name: measure_coffee
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -273,27 +1317,429 @@ nodes:
           number of cups.
     prompt: Measure the appropriate amount of coffee grounds for the desired number
       of cups.
-    shims: []
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Extracts the desired cup count from a general input string or keyword
+        arguments for coffee brewing.
+      implementation: "def extract_cup_count_from_input(general_input: str, kwargs:\
+        \ str) -> int:\n    \"\"\"\n    Parse an integer cup count from a general\
+        \ input string or optional keyword\n    arguments for coffee brewing.\n\n\
+        \    Parameters\n    ----------\n    general_input : str\n        Free‑form\
+        \ string that may contain a numeric cup count, e.g., \"Please\n        brew\
+        \ 2 cups\".\n    kwargs : dict\n        Optional keyword arguments; if a key\
+        \ named 'cup_count' is present,\n        its value is used directly.\n\n \
+        \   Returns\n    -------\n    int\n        The integer number of cups extracted\
+        \ from the input.\n\n    Raises\n    ------\n    ValueError\n        Raised\
+        \ when no numeric cup count can be found in the input and no\n        valid\
+        \ 'cup_count' is supplied in kwargs.\n    TypeError\n        Raised when 'general_input'\
+        \ is not a string or 'kwargs' values are\n        not convertible to int.\n\
+        \n    Examples\n    --------\n    >>> extract_cup_count_from_input('Please\
+        \ brew 2 cups')\n    2\n\n    >>> extract_cup_count_from_input('Just 5 cups',\
+        \ cup_count=5)\n    5\n\n    \"\"\"\n    raise NotImplementedError(\"This\
+        \ is a virtual stub node that needs to be implemented\")"
+      name: extract_cup_count_from_input
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type int
+        key: output
+        type: int
+      - description: Input parameter of type str
+        key: general_input
+        type: str
+      - description: Input parameter of type str
+        key: kwargs
+        type: str
+      prd:
+        conceptual_info: This shim isolates the logic for parsing a coffee cup count
+          from free‑form input or keyword arguments, ensuring consistent downstream
+          consumption of the desired number of cups.
+        docstring:
+          examples:
+          - lines:
+            - extract_cup_count_from_input('Please brew 2 cups')
+            output: '2'
+          - lines:
+            - extract_cup_count_from_input('Just 5 cups', cup_count=5)
+            output: '5'
+          parameters:
+          - description: Free‑form string that may contain a numeric cup count, e.g.,
+              "Please brew 2 cups".
+            name: general_input
+            type: str
+          - description: Optional keyword arguments; if a key named 'cup_count' is
+              present, its value is used directly.
+            name: kwargs
+            type: dict
+          raises:
+          - description: Raised when no numeric cup count can be found in the input
+              and no valid 'cup_count' is supplied in kwargs.
+            type: ValueError
+          - description: Raised when 'general_input' is not a string or 'kwargs' values
+              are not convertible to int.
+            type: TypeError
+          returns:
+            description: The integer number of cups extracted from the input.
+            type: int
+          summary: Parse an integer cup count from a general input string or optional
+            keyword arguments for coffee brewing.
+      prompt: Extract cup count from general_input and optional kwargs. Return an
+        integer cup count; raise ValueError if none is found or invalid; raise TypeError
+        if inputs are of incorrect type.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Extracts the coffee grounds type from the input string and optional
+        kwargs.
+      implementation: "def extract_grounds_type_from_input(general_input: str, kwargs:\
+        \ str) -> str:\n    \"\"\"\n    Extracts the coffee grounds type from a general\
+        \ input string and optional\n    keyword arguments.\n\n    Parameters\n  \
+        \  ----------\n    general_input : str\n        Free‑form text containing\
+        \ information about the desired coffee\n        grounds and cup count.\n \
+        \   kwargs : str\n        Optional JSON or key/value string that may directly\
+        \ specify the\n        grounds_type.\n\n    Returns\n    -------\n    str\n\
+        \        A lowercase string identifying the coffee grounds type (e.g.,\n \
+        \       \"medium grind\" or \"dark roast\").\n\n    Raises\n    ------\n \
+        \   ValueError\n        Raised when no recognizable grounds type can be extracted\
+        \ from\n        either `kwargs` or `general_input`.\n    TypeError\n     \
+        \   Raised if either `general_input` or `kwargs` is not of type `str`.\n\n\
+        \    Examples\n    --------\n    >>> extract_grounds_type_from_input(\"I need\
+        \ 2 cups with medium grind\", \"\")\n    \"medium grind\"\n\n    >>> extract_grounds_type_from_input(\"\
+        Use dark roast for 3 cups\",\n    \"grounds_type=dark roast\")\n    \"dark\
+        \ roast\"\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")"
+      name: extract_grounds_type_from_input
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: general_input
+        type: str
+      - description: Input parameter of type str
+        key: kwargs
+        type: str
+      prd:
+        conceptual_info: This shim isolates the logic needed to determine the coffee
+          grounds type from user‑provided text or keyword arguments, enabling the
+          coffee measurement workflow to use a consistent and validated grounds type
+          value.
+        docstring:
+          examples:
+          - lines:
+            - extract_grounds_type_from_input("I need 2 cups with medium grind", "")
+            output: '"medium grind"'
+          - lines:
+            - extract_grounds_type_from_input("Use dark roast for 3 cups", "grounds_type=dark
+              roast")
+            output: '"dark roast"'
+          parameters:
+          - description: Free‑form text containing information about the desired coffee
+              grounds and cup count.
+            name: general_input
+            type: str
+          - description: Optional JSON or key/value string that may directly specify
+              the grounds_type.
+            name: kwargs
+            type: str
+          raises:
+          - description: Raised when no recognizable grounds type can be extracted
+              from either `kwargs` or `general_input`.
+            type: ValueError
+          - description: Raised if either `general_input` or `kwargs` is not of type
+              `str`.
+            type: TypeError
+          returns:
+            description: A lowercase string identifying the coffee grounds type (e.g.,
+              "medium grind" or "dark roast").
+            type: str
+          summary: Extracts the coffee grounds type from a general input string and
+            optional keyword arguments.
+      prompt: 'Implement the function `extract_grounds_type_from_input(general_input:
+        str, kwargs: str) -> str` that parses the coffee grounds type from a natural
+        language input. It should first look for the grounds type in the `kwargs`
+        string (if present) and, if not found, infer it from the `general_input`.
+        Supported types include "fine grind", "medium grind", "coarse grind", "dark
+        roast", and "light roast". Raise a `ValueError` when no grounds type can be
+        identified and a `TypeError` when the inputs are not strings.'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates that the desired cup count is a positive integer and
+        returns a confirmation message.
+      implementation: "def validate_cup_count(desired_cup_count: str) -> str:\n  \
+        \  \"\"\"\n    Checks that the desired cup count is a positive integer and\
+        \ returns a\n    confirmation string.\n\n    Parameters\n    ----------\n\
+        \    desired_cup_count : int\n        Number of coffee cups intended to brew.\
+        \ Must be a positive integer.\n\n    Returns\n    -------\n    str\n     \
+        \   A confirmation message indicating the cup count is valid.\n\n    Raises\n\
+        \    ------\n    ValueError\n        If desired_cup_count is less than or\
+        \ equal to zero.\n    TypeError\n        If desired_cup_count is not an integer.\n\
+        \n    Examples\n    --------\n    >>> validate_cup_count(5)\n    'Cup count\
+        \ 5 validated successfully.'\n\n    >>> validate_cup_count(-3)\n    ValueError:\
+        \ Cup count must be a positive integer.\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: validate_cup_count
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: desired_cup_count
+        type: str
+      prd:
+        conceptual_info: This shim ensures the cup count provided for brewing coffee
+          is valid, preventing downstream errors in the measurement process.
+        docstring:
+          examples:
+          - lines:
+            - validate_cup_count(5)
+            output: '''Cup count 5 validated successfully.'''
+          - lines:
+            - validate_cup_count(-3)
+            output: 'ValueError: Cup count must be a positive integer.'
+          parameters:
+          - description: Number of coffee cups intended to brew. Must be a positive
+              integer.
+            name: desired_cup_count
+            type: int
+          raises:
+          - description: If desired_cup_count is less than or equal to zero.
+            type: ValueError
+          - description: If desired_cup_count is not an integer.
+            type: TypeError
+          returns:
+            description: A confirmation message indicating the cup count is valid.
+            type: str
+          summary: Checks that the desired cup count is a positive integer and returns
+            a confirmation string.
+      prompt: 'Validate cup count: {desired_cup_count}'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates the provided coffee grounds type string against a predefined
+        set of allowed ground types, returning a confirmation string or raising an
+        error if invalid.
+      implementation: "def validate_grounds_type(grounds_type: str) -> str:\n    \"\
+        \"\"\n    Checks whether the supplied grounds_type string is one of the accepted\n\
+        \    coffee ground types and returns a confirmation message or raises an error.\n\
+        \n    Parameters\n    ----------\n    grounds_type : str\n        The coffee\
+        \ grounds type to be validated (e.g., 'medium grind', 'dark\n        roast').\n\
+        \n    Returns\n    -------\n    str\n        A string confirming the validity\
+        \ of the grounds_type, e.g., \"medium\n        grind is valid.\"\n\n    Raises\n\
+        \    ------\n    ValueError\n        Raised when the grounds_type is not among\
+        \ the supported types.\n    TypeError\n        Raised when the grounds_type\
+        \ argument is not a string.\n\n    Examples\n    --------\n    >>> validate_grounds_type('medium\
+        \ grind')\n    \"medium grind is valid.\"\n\n    >>> validate_grounds_type('super\
+        \ fine')\n    \"ValueError: Unsupported grounds type 'super fine'\"\n\n  \
+        \  \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node that\
+        \ needs to be implemented\")"
+      name: validate_grounds_type
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: grounds_type
+        type: str
+      prd:
+        conceptual_info: This shim function ensures that the grounds_type supplied
+          by the user or previous node is among the supported coffee ground types.
+          It serves as a guardrail before any calculations that depend on the ground
+          type are performed.
+        docstring:
+          examples:
+          - lines:
+            - validate_grounds_type('medium grind')
+            output: '"medium grind is valid."'
+          - lines:
+            - validate_grounds_type('super fine')
+            output: '"ValueError: Unsupported grounds type ''super fine''"'
+          parameters:
+          - description: The coffee grounds type to be validated (e.g., 'medium grind',
+              'dark roast').
+            name: grounds_type
+            type: str
+          raises:
+          - description: Raised when the grounds_type is not among the supported types.
+            type: ValueError
+          - description: Raised when the grounds_type argument is not a string.
+            type: TypeError
+          returns:
+            description: A string confirming the validity of the grounds_type, e.g.,
+              "medium grind is valid."
+            type: str
+          summary: Checks whether the supplied grounds_type string is one of the accepted
+            coffee ground types and returns a confirmation message or raises an error.
+      prompt: 'Validate the provided grounds_type against the list of supported ground
+        types: {allowed_values}'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Calculates the required amount of coffee grounds in grams based
+        on desired cup count and grounds type.
+      implementation: "def calculate_grounds_amount(desired_cup_count: str, grounds_type:\
+        \ str) -> float:\n    \"\"\"\n    Compute the grams of coffee grounds needed\
+        \ for a given cup count and grounds\n    type.\n\n    Parameters\n    ----------\n\
+        \    desired_cup_count : int\n        Number of cups to brew; must be a positive\
+        \ integer.\n    grounds_type : str\n        Coffee grounds type (e.g., 'medium',\
+        \ 'dark', 'light') that\n        determines the grams-per-cup ratio.\n\n \
+        \   Returns\n    -------\n    float\n        Total grams of coffee grounds\
+        \ required.\n\n    Raises\n    ------\n    ValueError\n        Raised when\
+        \ desired_cup_count is not a positive integer or\n        grounds_type is\
+        \ unsupported.\n    TypeError\n        Raised when inputs are of incorrect\
+        \ types.\n\n    Examples\n    --------\n    >>> calculate_grounds_amount(desired_cup_count=4,\
+        \ grounds_type='medium')\n    10.0\n\n    >>> calculate_grounds_amount(desired_cup_count=2,\
+        \ grounds_type='dark')\n    6.0\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: calculate_grounds_amount
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type float
+        key: output
+        type: float
+      - description: Input parameter of type str
+        key: desired_cup_count
+        type: str
+      - description: Input parameter of type str
+        key: grounds_type
+        type: str
+      prd:
+        conceptual_info: This shim computes the precise quantity of coffee grounds
+          required for a specified number of cups and grounds type, enabling downstream
+          processes such as measuring and validation to operate with accurate data.
+        docstring:
+          examples:
+          - lines:
+            - calculate_grounds_amount(desired_cup_count=4, grounds_type='medium')
+            output: '10.0'
+          - lines:
+            - calculate_grounds_amount(desired_cup_count=2, grounds_type='dark')
+            output: '6.0'
+          parameters:
+          - description: Number of cups to brew; must be a positive integer.
+            name: desired_cup_count
+            type: int
+          - description: Coffee grounds type (e.g., 'medium', 'dark', 'light') that
+              determines the grams-per-cup ratio.
+            name: grounds_type
+            type: str
+          raises:
+          - description: Raised when desired_cup_count is not a positive integer or
+              grounds_type is unsupported.
+            type: ValueError
+          - description: Raised when inputs are of incorrect types.
+            type: TypeError
+          returns:
+            description: Total grams of coffee grounds required.
+            type: float
+          summary: Compute the grams of coffee grounds needed for a given cup count
+            and grounds type.
+      prompt: Calculate the amount of coffee grounds needed for {desired_cup_count}
+        cups using {grounds_type} grounds.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Verifies that the measured amount of coffee grounds matches the
+        desired cup count within acceptable tolerance.
+      implementation: "def verify_measurement_accuracy(ground_amount_grams: str, desired_cup_count:\
+        \ str) -> bool:\n    \"\"\"\n    Verifies that the measured coffee grounds\
+        \ amount aligns with the desired\n    number of cups, allowing for a predefined\
+        \ tolerance.\n\n    Parameters\n    ----------\n    ground_amount_grams :\
+        \ float\n        The measured weight of coffee grounds in grams.\n    desired_cup_count\
+        \ : int\n        The number of coffee cups the user intends to brew.\n\n \
+        \   Returns\n    -------\n    bool\n        True if the measured amount is\
+        \ within the acceptable tolerance for\n        the desired cup count; otherwise\
+        \ False.\n\n    Raises\n    ------\n    ValueError\n        If either ground_amount_grams\
+        \ or desired_cup_count is non‑positive.\n    TypeError\n        If the input\
+        \ types do not match the expected float and int\n        signatures.\n\n \
+        \   Examples\n    --------\n    >>> verify_measurement_accuracy(ground_amount_grams=12.0,\n\
+        \    desired_cup_count=2)\n    True\n\n    >>> verify_measurement_accuracy(ground_amount_grams=10.0,\n\
+        \    desired_cup_count=2)\n    False\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: verify_measurement_accuracy
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type bool
+        key: output
+        type: bool
+      - description: Input parameter of type str
+        key: ground_amount_grams
+        type: str
+      - description: Input parameter of type str
+        key: desired_cup_count
+        type: str
+      prd:
+        conceptual_info: This shim function is responsible for determining if the
+          amount of coffee grounds measured in grams is suitable for brewing the requested
+          number of cups. It applies a tolerance rule to allow for small variations
+          in measurement and returns a boolean flag that the calling workflow uses
+          to confirm the validity of the measurement step.
+        docstring:
+          examples:
+          - lines:
+            - verify_measurement_accuracy(ground_amount_grams=12.0, desired_cup_count=2)
+            output: 'True'
+          - lines:
+            - verify_measurement_accuracy(ground_amount_grams=10.0, desired_cup_count=2)
+            output: 'False'
+          parameters:
+          - description: The measured weight of coffee grounds in grams.
+            name: ground_amount_grams
+            type: float
+          - description: The number of coffee cups the user intends to brew.
+            name: desired_cup_count
+            type: int
+          raises:
+          - description: If either ground_amount_grams or desired_cup_count is non‑positive.
+            type: ValueError
+          - description: If the input types do not match the expected float and int
+              signatures.
+            type: TypeError
+          returns:
+            description: True if the measured amount is within the acceptable tolerance
+              for the desired cup count; otherwise False.
+            type: bool
+          summary: Verifies that the measured coffee grounds amount aligns with the
+            desired number of cups, allowing for a predefined tolerance.
+      prompt: Implement measurement verification logic based on ground_amount_grams
+        and desired_cup_count.
+      shims: []
   prepare_coffee_maker:
     agent: false
-    code_node_type: stub
+    code_node_type: shim
     description: Prepare the coffee maker
-    implementation: "from pydantic import BaseModel, Field\n\n\nclass MeasureCoffeeOutput(BaseModel):\n\
-      \    \"\"\"Pydantic model for measure_coffee node outputs.\"\"\"\n    ground_amount_grams:\
-      \ float = (\n        Field(..., description=\"Amount of coffee grounds measured\
-      \ in grams\")\n    )\n    desired_cup_count: int = (\n        Field(..., description=\"\
-      Number of coffee cups to be brewed\")\n    )\n    grounds_type: str = (\n  \
-      \      Field(..., description=\"Type of coffee grounds used (e.g., medium grind,\
-      \ dark roast)\")\n    )\n    measurement_valid: bool = (\n        Field(...,\
-      \ description=\"Indicates whether the measurement was performed correctly\"\
-      )\n    )\n\n\nclass PrepareCoffeeMakerOutput(BaseModel):\n    \"\"\"Pydantic\
-      \ model for prepare_coffee_maker node outputs.\"\"\"\n    coffee_grounds_amount_g:\
-      \ float = (\n        Field(..., description=\"The amount of coffee grounds added\
-      \ to the coffee maker's filter in grams\")\n    )\n    filter_prepared: bool\
-      \ = (\n        Field(..., description=\"Whether the filter is properly prepared\
-      \ and ready\")\n    )\n    coffee_maker_status: str = (\n        Field(...,\
-      \ description=\"Current status of the coffee maker (e.g., 'ready', 'error')\"\
-      )\n    )\n\n\ndef prepare_coffee_maker(measure_coffee_input: MeasureCoffeeOutput,\
+    implementation: "from ._prepare_coffee_maker.validate_measurement_inputs import\
+      \ validate_measurement_inputs\nfrom ._prepare_coffee_maker.load_grounds_into_filter\
+      \ import load_grounds_into_filter\nfrom ._prepare_coffee_maker.verify_filter_readiness\
+      \ import verify_filter_readiness\nfrom ._prepare_coffee_maker.check_coffee_maker_status\
+      \ import check_coffee_maker_status\n\nfrom pydantic import BaseModel, Field\n\
+      \n\nclass MeasureCoffeeOutput(BaseModel):\n    \"\"\"Pydantic model for measure_coffee\
+      \ node outputs.\"\"\"\n    ground_amount_grams: float = (\n        Field(...,\
+      \ description=\"Amount of coffee grounds measured in grams\")\n    )\n    desired_cup_count:\
+      \ int = (\n        Field(..., description=\"Number of coffee cups to be brewed\"\
+      )\n    )\n    grounds_type: str = (\n        Field(..., description = (\n  \
+      \          \"Type of coffee grounds used (e.g., medium grind, dark roast)\"\
+      )\n        )\n    )\n    measurement_valid: bool = (\n        Field(..., description\
+      \ = (\n            \"Indicates whether the measurement was performed correctly\"\
+      )\n        )\n    )\n\n\nclass PrepareCoffeeMakerOutput(BaseModel):\n    \"\"\
+      \"Pydantic model for prepare_coffee_maker node outputs.\"\"\"\n    coffee_grounds_amount_g:\
+      \ float = (\n        Field(..., description = (\n            \"The amount of\
+      \ coffee grounds added to the coffee maker's filter in grams\")\n        )\n\
+      \    )\n    filter_prepared: bool = (\n        Field(..., description = (\n\
+      \            \"Whether the filter is properly prepared and ready\")\n      \
+      \  )\n    )\n    coffee_maker_status: str = (\n        Field(..., description\
+      \ = (\n            \"Current status of the coffee maker (e.g., 'ready', 'error')\"\
+      )\n        )\n    )\n\n\ndef prepare_coffee_maker(measure_coffee_input: MeasureCoffeeOutput,\
       \ **kwargs) -> PrepareCoffeeMakerOutput:\n    \"\"\"\n    Adds the specified\
       \ amount of coffee grounds into the coffee maker's filter,\n    validates the\
       \ measurement, and reports the amount added, filter status, and\n    overall\
@@ -315,8 +1761,17 @@ nodes:
       \    ...         desired_cup_count=2,\n    ...         grounds_type='medium',\n\
       \    ...         measurement_valid=False)\n    >>> except ValueError as e:\n\
       \    ...     print(e)\n    Invalid measurement: measurement_valid is False\n\
-      \n    \"\"\"\n    return PrepareCoffeeMakerOutput(\n        coffee_grounds_amount_g=0.0,\n\
-      \        filter_prepared=False,\n        coffee_maker_status=\"\",\n    )"
+      \n    \"\"\"\n    validate_measurement_inputs(\n        measurement_valid=measure_coffee_input.measurement_valid,\n\
+      \        ground_amount_grams=measure_coffee_input.ground_amount_grams\n    )\n\
+      \    \n    load_grounds_into_filter(\n        amount_grams=measure_coffee_input.ground_amount_grams,\n\
+      \        grounds_type=measure_coffee_input.grounds_type\n    )\n    \n    filter_status:\
+      \ bool = verify_filter_readiness(\n        expected_amount=measure_coffee_input.ground_amount_grams,\n\
+      \        cup_count=measure_coffee_input.desired_cup_count\n    )\n    \n   \
+      \ maker_status: str = check_coffee_maker_status(\n        filter_prepared=filter_status,\n\
+      \        grounds_loaded=True\n    )\n    \n    return PrepareCoffeeMakerOutput(\n\
+      \        coffee_grounds_amount_g=measure_coffee_input.ground_amount_grams,\n\
+      \        filter_prepared=filter_status,\n        coffee_maker_status=maker_status\n\
+      \    )"
     name: prepare_coffee_maker
     nodes_depended_on:
     - measure_coffee
@@ -382,27 +1837,304 @@ nodes:
           filter, validates the measurement, and reports the amount added, filter
           status, and overall maker status.
     prompt: Put the measured coffee grounds into the coffee maker's filter.
-    shims: []
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Checks that a measurement is flagged as valid and the ground amount
+        is positive, returning a success message or raising an error.
+      implementation: "def validate_measurement_inputs(measurement_valid: str, ground_amount_grams:\
+        \ str) -> str:\n    \"\"\"\n    Validates measurement inputs for coffee preparation.\n\
+        \n    Parameters\n    ----------\n    measurement_valid : bool\n        True\
+        \ if the measurement was performed correctly, otherwise False.\n    ground_amount_grams\
+        \ : float\n        Amount of coffee grounds measured in grams.\n\n    Returns\n\
+        \    -------\n    str\n        A status message confirming that the inputs\
+        \ are valid.\n\n    Raises\n    ------\n    ValueError\n        Raised when\
+        \ measurement_valid is False or ground_amount_grams is not\n        a positive\
+        \ number.\n    TypeError\n        Raised when measurement_valid is not a bool\
+        \ or ground_amount_grams\n        is not a numeric type.\n\n    Examples\n\
+        \    --------\n    >>> result = validate_measurement_inputs(measurement_valid=True,\n\
+        \    ground_amount_grams=20.5)\n    >>> print(result)\n    Inputs are valid\n\
+        \n    >>> validate_measurement_inputs(measurement_valid=False,\n    ground_amount_grams=10)\n\
+        \    ValueError: Measurement is marked invalid.\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: validate_measurement_inputs
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: measurement_valid
+        type: str
+      - description: Input parameter of type str
+        key: ground_amount_grams
+        type: str
+      prd:
+        conceptual_info: This shim validates the inputs from the coffee measuring
+          step before allowing the coffee maker to proceed, ensuring that only correct
+          and meaningful data is passed downstream.
+        docstring:
+          examples:
+          - lines:
+            - result = validate_measurement_inputs(measurement_valid=True, ground_amount_grams=20.5)
+            - print(result)
+            output: Inputs are valid
+          - lines:
+            - validate_measurement_inputs(measurement_valid=False, ground_amount_grams=10)
+            output: 'ValueError: Measurement is marked invalid.'
+          parameters:
+          - description: True if the measurement was performed correctly, otherwise
+              False.
+            name: measurement_valid
+            type: bool
+          - description: Amount of coffee grounds measured in grams.
+            name: ground_amount_grams
+            type: float
+          raises:
+          - description: Raised when measurement_valid is False or ground_amount_grams
+              is not a positive number.
+            type: ValueError
+          - description: Raised when measurement_valid is not a bool or ground_amount_grams
+              is not a numeric type.
+            type: TypeError
+          returns:
+            description: A status message confirming that the inputs are valid.
+            type: str
+          summary: Validates measurement inputs for coffee preparation.
+      prompt: 'Implement validate_measurement_inputs(measurement_valid: bool, ground_amount_grams:
+        float) -> str'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Loads the specified amount and type of coffee grounds into the
+        coffee maker's filter and returns a status message.
+      implementation: "def load_grounds_into_filter(amount_grams: str, grounds_type:\
+        \ str) -> str:\n    \"\"\"\n    Loads coffee grounds into the coffee maker's\
+        \ filter.\n\n    Parameters\n    ----------\n    amount_grams : str\n    \
+        \    String representation of the quantity of coffee grounds to load,\n  \
+        \      e.g., '15'.\n    grounds_type : str\n        Descriptive type of the\
+        \ coffee grounds, e.g., 'medium grind'.\n\n    Returns\n    -------\n    str\n\
+        \        A human‑readable status message confirming the loaded amount and\n\
+        \        type.\n\n    Raises\n    ------\n    ValueError\n        If amount_grams\
+        \ cannot be converted to a positive number.\n    TypeError\n        If either\
+        \ argument is not a string.\n\n    Examples\n    --------\n    >>> load_grounds_into_filter('15',\
+        \ 'medium grind')\n    'Loaded 15 grams of medium grind coffee grounds into\
+        \ the filter.'\n\n    >>> load_grounds_into_filter('9', 'dark roast')\n  \
+        \  'Loaded 9 grams of dark roast coffee grounds into the filter.'\n\n    \"\
+        \"\"\n    raise NotImplementedError(\"This is a virtual stub node that needs\
+        \ to be implemented\")"
+      name: load_grounds_into_filter
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: amount_grams
+        type: str
+      - description: Input parameter of type str
+        key: grounds_type
+        type: str
+      prd:
+        conceptual_info: This shim abstracts the mechanical process of adding coffee
+          grounds to the filter, handling input validation, and communicating the
+          outcome.
+        docstring:
+          examples:
+          - lines:
+            - load_grounds_into_filter('15', 'medium grind')
+            output: '''Loaded 15 grams of medium grind coffee grounds into the filter.'''
+          - lines:
+            - load_grounds_into_filter('9', 'dark roast')
+            output: '''Loaded 9 grams of dark roast coffee grounds into the filter.'''
+          parameters:
+          - description: String representation of the quantity of coffee grounds to
+              load, e.g., '15'.
+            name: amount_grams
+            type: str
+          - description: Descriptive type of the coffee grounds, e.g., 'medium grind'.
+            name: grounds_type
+            type: str
+          raises:
+          - description: If amount_grams cannot be converted to a positive number.
+            type: ValueError
+          - description: If either argument is not a string.
+            type: TypeError
+          returns:
+            description: A human‑readable status message confirming the loaded amount
+              and type.
+            type: str
+          summary: Loads coffee grounds into the coffee maker's filter.
+      prompt: 'Implement the function `load_grounds_into_filter(amount_grams: str,
+        grounds_type: str) -> str` that validates inputs, loads the grounds, and returns
+        a status string.'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Verifies that the filter is ready to receive the expected amount
+        of grounds based on the cup count.
+      implementation: "def verify_filter_readiness(expected_amount: str, cup_count:\
+        \ str) -> bool:\n    \"\"\"\n    Verifies that the filter can accommodate\
+        \ the expected amount of coffee\n    grounds based on the cup count.\n\n \
+        \   Parameters\n    ----------\n    expected_amount : str\n        The expected\
+        \ amount of coffee grounds in grams, provided as a string\n        that can\
+        \ be parsed to a float.\n    cup_count : str\n        The desired number of\
+        \ cups to brew, provided as a string that can be\n        parsed to an integer.\n\
+        \n    Returns\n    -------\n    bool\n        True if the filter can handle\
+        \ the specified amount of grounds for\n        the given cup count, otherwise\
+        \ False.\n\n    Raises\n    ------\n    ValueError\n        Raised when the\
+        \ parsed amount or cup count is not a positive number.\n    TypeError\n  \
+        \      Raised when either expected_amount or cup_count is not a string.\n\n\
+        \    Examples\n    --------\n    >>> ready = verify_filter_readiness(expected_amount='50',\
+        \ cup_count='5')\n    >>> print(ready)\n    True\n\n    >>> ready = verify_filter_readiness(expected_amount='10',\
+        \ cup_count='10')\n    >>> print(ready)\n    False\n\n    \"\"\"\n    raise\
+        \ NotImplementedError(\"This is a virtual stub node that needs to be implemented\"\
+        )"
+      name: verify_filter_readiness
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type bool
+        key: output
+        type: bool
+      - description: Input parameter of type str
+        key: expected_amount
+        type: str
+      - description: Input parameter of type str
+        key: cup_count
+        type: str
+      prd:
+        conceptual_info: Ensures the coffee filter is prepared to hold the correct
+          quantity of grounds for the desired number of cups.
+        docstring:
+          examples:
+          - lines:
+            - ready = verify_filter_readiness(expected_amount='50', cup_count='5')
+            - print(ready)
+            output: 'True'
+          - lines:
+            - ready = verify_filter_readiness(expected_amount='10', cup_count='10')
+            - print(ready)
+            output: 'False'
+          parameters:
+          - description: The expected amount of coffee grounds in grams, provided
+              as a string that can be parsed to a float.
+            name: expected_amount
+            type: str
+          - description: The desired number of cups to brew, provided as a string
+              that can be parsed to an integer.
+            name: cup_count
+            type: str
+          raises:
+          - description: Raised when the parsed amount or cup count is not a positive
+              number.
+            type: ValueError
+          - description: Raised when either expected_amount or cup_count is not a
+              string.
+            type: TypeError
+          returns:
+            description: True if the filter can handle the specified amount of grounds
+              for the given cup count, otherwise False.
+            type: bool
+          summary: Verifies that the filter can accommodate the expected amount of
+            coffee grounds based on the cup count.
+      prompt: Implement verify_filter_readiness to compare the expected amount of
+        grounds (in grams) with the cup count, ensuring the filter can accommodate
+        the grounds. The function should return a boolean indicating readiness.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Determines the coffee maker's status string based on filter readiness
+        and grounds presence.
+      implementation: "def check_coffee_maker_status(filter_prepared: str, grounds_loaded:\
+        \ str) -> str:\n    \"\"\"\n    Return a status string based on filter readiness\
+        \ and ground loading.\n\n    Parameters\n    ----------\n    filter_prepared\
+        \ : bool\n        True if the filter is properly prepared and ready for use.\n\
+        \    grounds_loaded : bool\n        True if coffee grounds have been loaded\
+        \ into the filter.\n\n    Returns\n    -------\n    str\n        A status\
+        \ string describing the current state of the coffee maker.\n\n    Raises\n\
+        \    ------\n    ValueError\n        Raised when an invalid combination of\
+        \ filter_prepared and\n        grounds_loaded is detected, such as both being\
+        \ False.\n    TypeError\n        Raised if either argument is not a boolean.\n\
+        \n    Examples\n    --------\n    >>> status = check_coffee_maker_status(filter_prepared=True,\n\
+        \    grounds_loaded=True)\n    'ready'\n\n    >>> status = check_coffee_maker_status(filter_prepared=False,\n\
+        \    grounds_loaded=True)\n    'error: filter not prepared'\n\n    \"\"\"\n\
+        \    raise NotImplementedError(\"This is a virtual stub node that needs to\
+        \ be implemented\")"
+      name: check_coffee_maker_status
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: filter_prepared
+        type: str
+      - description: Input parameter of type str
+        key: grounds_loaded
+        type: str
+      prd:
+        conceptual_info: The shim encapsulates the logic that translates the internal
+          state of the coffee maker—specifically whether the filter is prepared and
+          whether grounds have been loaded—into a user‑friendly status string. It
+          is a single‑point interface for status reporting, decoupling status determination
+          from the lower‑level hardware checks.
+        docstring:
+          examples:
+          - lines:
+            - status = check_coffee_maker_status(filter_prepared=True, grounds_loaded=True)
+            output: '''ready'''
+          - lines:
+            - status = check_coffee_maker_status(filter_prepared=False, grounds_loaded=True)
+            output: '''error: filter not prepared'''
+          parameters:
+          - description: True if the filter is properly prepared and ready for use.
+            name: filter_prepared
+            type: bool
+          - description: True if coffee grounds have been loaded into the filter.
+            name: grounds_loaded
+            type: bool
+          raises:
+          - description: Raised when an invalid combination of filter_prepared and
+              grounds_loaded is detected, such as both being False.
+            type: ValueError
+          - description: Raised if either argument is not a boolean.
+            type: TypeError
+          returns:
+            description: A status string describing the current state of the coffee
+              maker.
+            type: str
+          summary: Return a status string based on filter readiness and ground loading.
+      prompt: 'check_coffee_maker_status(filter_prepared: bool, grounds_loaded: bool)
+        -> str'
+      shims: []
   serve_coffee:
     agent: false
-    code_node_type: stub
+    code_node_type: shim
     description: Serve the coffee
-    implementation: "from pydantic import BaseModel, Field\n\n\nclass BrewCoffeeOutput(BaseModel):\n\
-      \    \"\"\"Pydantic model for brew_coffee node outputs.\"\"\"\n    brew_start_timestamp:\
+    implementation: "from ._serve_coffee.verify_brewing_success import verify_brewing_success\n\
+      from ._serve_coffee.convert_cups_to_ml import convert_cups_to_ml\nfrom ._serve_coffee.simulate_pour_coffee\
+      \ import simulate_pour_coffee\n\nfrom pydantic import BaseModel, Field\n\n\n\
+      class BrewCoffeeOutput(BaseModel):\n    \"\"\"Pydantic model for brew_coffee\
+      \ node outputs.\"\"\"\n    brew_start_timestamp: str = (\n        Field(...,\
+      \ description=\"ISO 8601 timestamp when brewing started\")\n    )\n    brew_end_timestamp:\
       \ str = (\n        Field(..., description=\"ISO 8601 timestamp when brewing\
-      \ started\")\n    )\n    brew_end_timestamp: str = (\n        Field(..., description=\"\
-      ISO 8601 timestamp when brewing completed\")\n    )\n    brew_duration_seconds:\
-      \ float = (\n        Field(..., description=\"Total duration of the brewing\
-      \ process in seconds\")\n    )\n    brewed_volume_cups: int = (\n        Field(...,\
-      \ description=\"Number of cups of coffee brewed\")\n    )\n    brewed_success:\
-      \ bool = (\n        Field(..., description=\"Whether the brewing process completed\
-      \ successfully\")\n    )\n    final_temperature_c: float = (\n        Field(...,\
-      \ description=\"Final temperature of the brewed coffee in degrees Celsius\"\
-      )\n    )\n\n\nclass ServeCoffeeOutput(BaseModel):\n    \"\"\"Pydantic model\
-      \ for serve_coffee node outputs.\"\"\"\n    served: bool = (\n        Field(...,\
-      \ description=\"Whether the coffee has been successfully served into a cup\"\
-      )\n    )\n    temperature_c: float = (\n        Field(..., description=\"The\
-      \ temperature of the served coffee in degrees Celsius\")\n    )\n    volume_ml:\
+      \ completed\")\n    )\n    brew_duration_seconds: float = (\n        Field(...,\
+      \ description = (\n            \"Total duration of the brewing process in seconds\"\
+      )\n        )\n    )\n    brewed_volume_cups: int = (\n        Field(..., description=\"\
+      Number of cups of coffee brewed\")\n    )\n    brewed_success: bool = (\n  \
+      \      Field(..., description = (\n            \"Whether the brewing process\
+      \ completed successfully\")\n        )\n    )\n    final_temperature_c: float\
+      \ = (\n        Field(..., description = (\n            \"Final temperature of\
+      \ the brewed coffee in degrees Celsius\")\n        )\n    )\n\n\nclass ServeCoffeeOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for serve_coffee node outputs.\"\"\"\n    served:\
+      \ bool = (\n        Field(..., description = (\n            \"Whether the coffee\
+      \ has been successfully served into a cup\")\n        )\n    )\n    temperature_c:\
+      \ float = (\n        Field(..., description = (\n            \"The temperature\
+      \ of the served coffee in degrees Celsius\")\n        )\n    )\n    volume_ml:\
       \ int = (\n        Field(..., description=\"The volume of the served coffee\
       \ in milliliters\")\n    )\n\n\ndef serve_coffee(brew_coffee_input: BrewCoffeeOutput,\
       \ **kwargs) -> ServeCoffeeOutput:\n    \"\"\"\n    Serve freshly brewed coffee\
@@ -428,8 +2160,11 @@ nodes:
       2025-10-11T10:12:00Z\",\n    ...     brew_duration_seconds=120.0,\n    ... \
       \    brewed_volume_cups=1,\n    ...     brewed_success=False,\n    ...     final_temperature_c=85.0)\n\
       \    ValueError: Brewed coffee is not successful; cannot serve.\n\n    \"\"\"\
-      \n    return ServeCoffeeOutput(\n        served=False,\n        temperature_c=0.0,\n\
-      \        volume_ml=0,\n    )"
+      \n    verify_brewing_success(brewed_success=brew_coffee_input.brewed_success)\n\
+      \    volume_ml: int = convert_cups_to_ml(volume_cups=brew_coffee_input.brewed_volume_cups)\n\
+      \    serving_temperature: float = simulate_pour_coffee(temperature_c=brew_coffee_input.final_temperature_c)\n\
+      \    return ServeCoffeeOutput(\n        served=True,\n        temperature_c=serving_temperature,\n\
+      \        volume_ml=volume_ml\n    )"
     name: serve_coffee
     nodes_depended_on:
     - brew_coffee
@@ -499,4 +2234,167 @@ nodes:
           type: dict
         summary: Serve freshly brewed coffee into a cup based on brewing results.
     prompt: Pour the freshly brewed coffee into a cup and serve.
-    shims: []
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Verifies whether the brewing process was successful and returns
+        a status string.
+      implementation: "def verify_brewing_success(brewed_success: str) -> str:\n \
+        \   \"\"\"\n    Check brewing success and return a status message.\n\n   \
+        \ Parameters\n    ----------\n    brewed_success : bool\n        Boolean indicating\
+        \ if the brewing process completed successfully.\n\n    Returns\n    -------\n\
+        \    str\n        A message: 'Brewing succeeded' when brewed_success is True,\n\
+        \        otherwise 'Brewing failed'.\n\n    Raises\n    ------\n    ValueError\n\
+        \        If brewed_success is None.\n    TypeError\n        If brewed_success\
+        \ is not a boolean.\n\n    Examples\n    --------\n    >>> verify_brewing_success(brewed_success=True)\n\
+        \    'Brewing succeeded'\n\n    >>> verify_brewing_success(brewed_success=False)\n\
+        \    'Brewing failed'\n\n    \"\"\"\n    raise NotImplementedError(\"This\
+        \ is a virtual stub node that needs to be implemented\")"
+      name: verify_brewing_success
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: brewed_success
+        type: str
+      prd:
+        conceptual_info: This shim checks the brewing success flag and provides a
+          human‑readable status message, allowing downstream nodes to act accordingly.
+        docstring:
+          examples:
+          - lines:
+            - verify_brewing_success(brewed_success=True)
+            output: '''Brewing succeeded'''
+          - lines:
+            - verify_brewing_success(brewed_success=False)
+            output: '''Brewing failed'''
+          parameters:
+          - description: Boolean indicating if the brewing process completed successfully.
+            name: brewed_success
+            type: bool
+          raises:
+          - description: If brewed_success is None.
+            type: ValueError
+          - description: If brewed_success is not a boolean.
+            type: TypeError
+          returns:
+            description: 'A message: ''Brewing succeeded'' when brewed_success is
+              True, otherwise ''Brewing failed''.'
+            type: str
+          summary: Check brewing success and return a status message.
+      prompt: Implement the verify_brewing_success function that accepts a boolean
+        brewed_success and returns a string indicating success or failure.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Converts a given volume in cups to its equivalent in milliliters.
+      implementation: "def convert_cups_to_ml(volume_cups: str) -> int:\n    \"\"\"\
+        \n    Converts a volume measurement from cups to milliliters using the standard\n\
+        \    conversion factor of 236.588 ml per cup.\n\n    Parameters\n    ----------\n\
+        \    volume_cups : int\n        The number of cups to be converted; must be\
+        \ a non‑negative integer.\n\n    Returns\n    -------\n    int\n        The\
+        \ equivalent volume in milliliters, rounded to the nearest\n        integer.\n\
+        \n    Raises\n    ------\n    ValueError\n        Raised if `volume_cups`\
+        \ is negative.\n    TypeError\n        Raised if `volume_cups` is not an integer.\n\
+        \n    Examples\n    --------\n    >>> convert_cups_to_ml(2)\n    473\n\n \
+        \   >>> convert_cups_to_ml(0)\n    0\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: convert_cups_to_ml
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type int
+        key: output
+        type: int
+      - description: Input parameter of type str
+        key: volume_cups
+        type: str
+      prd:
+        conceptual_info: This shim provides a standardized conversion from cups to
+          milliliters, enabling the coffee brewing system to express volumes in metric
+          units for consistency.
+        docstring:
+          examples:
+          - lines:
+            - convert_cups_to_ml(2)
+            output: '473'
+          - lines:
+            - convert_cups_to_ml(0)
+            output: '0'
+          parameters:
+          - description: The number of cups to be converted; must be a non‑negative
+              integer.
+            name: volume_cups
+            type: int
+          raises:
+          - description: Raised if `volume_cups` is negative.
+            type: ValueError
+          - description: Raised if `volume_cups` is not an integer.
+            type: TypeError
+          returns:
+            description: The equivalent volume in milliliters, rounded to the nearest
+              integer.
+            type: int
+          summary: Converts a volume measurement from cups to milliliters using the
+            standard conversion factor of 236.588 ml per cup.
+      prompt: Convert {volume_cups} cups to milliliters.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Simulates the temperature of coffee after it is poured into a cup
+        and returns the resulting temperature in degrees Celsius.
+      implementation: "def simulate_pour_coffee(temperature_c: str) -> float:\n  \
+        \  \"\"\"\n    Simulates the temperature of coffee after pouring into a cup.\n\
+        \n    Parameters\n    ----------\n    temperature_c : float\n        The temperature\
+        \ of the coffee before pouring, expressed in degrees\n        Celsius.\n\n\
+        \    Returns\n    -------\n    float\n        The temperature of the coffee\
+        \ after pouring, in degrees Celsius.\n\n    Raises\n    ------\n    ValueError\n\
+        \        Raised when the input temperature is outside the physically\n   \
+        \     realistic range of -10°C to 100°C.\n    TypeError\n        Raised when\
+        \ the input temperature is not a float or int.\n\n    Examples\n    --------\n\
+        \    >>> simulate_pour_coffee(temperature_c=95.0)\n    90.0\n\n    >>> simulate_pour_coffee(temperature_c=60.0)\n\
+        \    58.0\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")"
+      name: simulate_pour_coffee
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type float
+        key: output
+        type: float
+      - description: Input parameter of type str
+        key: temperature_c
+        type: str
+      prd:
+        conceptual_info: This shim models the heat loss that occurs when coffee is
+          poured from a pot into a cup, providing a realistic temperature for downstream
+          nodes that handle serving or consuming the coffee.
+        docstring:
+          examples:
+          - lines:
+            - simulate_pour_coffee(temperature_c=95.0)
+            output: '90.0'
+          - lines:
+            - simulate_pour_coffee(temperature_c=60.0)
+            output: '58.0'
+          parameters:
+          - description: The temperature of the coffee before pouring, expressed in
+              degrees Celsius.
+            name: temperature_c
+            type: float
+          raises:
+          - description: Raised when the input temperature is outside the physically
+              realistic range of -10°C to 100°C.
+            type: ValueError
+          - description: Raised when the input temperature is not a float or int.
+            type: TypeError
+          returns:
+            description: The temperature of the coffee after pouring, in degrees Celsius.
+            type: float
+          summary: Simulates the temperature of coffee after pouring into a cup.
+      prompt: Simulate pouring coffee at {temperature_c}°C and return the resulting
+        temperature in °C.
+      shims: []
