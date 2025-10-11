@@ -1,66 +1,44 @@
+import logging
 from pydantic import BaseModel, Field
-from typing import List
 
+
+logger = logging.getLogger(__name__)
 
 class DefineWorkflowObjectiveOutput(BaseModel):
-    """Pydantic model for define_workflow_objective node outputs."""
     objective: str = (
         Field(..., description="Primary goal statement of the workflow")
     )
 
-
-class DecomposeObjectiveIntoTasksOutput(BaseModel):
-    """Pydantic model for decompose_objective_into_tasks node outputs."""
-    task_names: List[str] = (
-        Field(..., description="List of task names identified by decomposition.")
-    )
-    task_descriptions: List[str] = (
-        Field(..., description="Brief descriptions for each corresponding task.")
-    )
-    num_tasks: int = Field(..., description="Total number of tasks identified.")
-
-
-def decompose_objective_into_tasks(define_workflow_objective_input: DefineWorkflowObjectiveOutput, **kwargs) -> DecomposeObjectiveIntoTasksOutput:
+def define_workflow_objective(general_input: str, **kwargs) -> DefineWorkflowObjectiveOutput:
     """
-    Decomposes a workflow objective string into a list of task names,
-    descriptions, and a task count.
+    Return a validated objective string.
 
     Parameters
     ----------
-    objective : str
-        Primary goal statement of the workflow provided by
-        `define_workflow_objective`.
+    general_input : str
+        Human‑readable description of the desired workflow.
 
     Returns
     -------
-    tuple[List[str], List[str], int]
-        A tuple containing: 1) list of task names, 2) list of brief task
-        descriptions, 3) integer count of tasks.
+    DefineWorkflowObjectiveOutput
+        A pydantic model containing the validated objective.
 
     Raises
     ------
     ValueError
-        Raised when the `objective` string is empty or cannot be parsed into
-        distinct tasks.
+        If the input is empty, non‑string, or only whitespace.
 
     Examples
     --------
-    >>> result = decompose_objective_into_tasks("Process customer orders and
-    generate invoices")
-    {'task_names': ['Process orders', 'Generate invoices'], 'task_descriptions':
-    ['Handle incoming orders from sales', 'Create and send invoices to
-    customers'], 'num_tasks': 2}
-
-    >>> result = decompose_objective_into_tasks("Collect data, clean data, and
-    train a machine learning model")
-    {'task_names': ['Collect data', 'Clean data', 'Train ML model'],
-    'task_descriptions': ['Gather raw data from sources', 'Perform data cleaning
-    and preprocessing', 'Train a predictive model on cleaned data'],
-    'num_tasks': 3}
+    >>> from your_package import define_workflow_objective
+    >>> objective_output = define_workflow_objective("Automate the ingestion,
+    transformation, and reporting of sales data.")
+    >>> print(objective_output.objective)
+    "Automate the ingestion, transformation, and reporting of sales data."
 
     """
-    return DecomposeObjectiveIntoTasksOutput(
-        task_names=[],
-        task_descriptions=[],
-        num_tasks=0,
-    )
+    if not isinstance(general_input, str) or not general_input.strip():
+        logger.error("Input objective is empty or not a string")
+        raise ValueError("Input objective must be a non-empty string")
+    objective = general_input.strip()
+    return DefineWorkflowObjectiveOutput(objective=objective)

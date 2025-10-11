@@ -1,77 +1,83 @@
-from pydantic import BaseModel, Field
+import logging
+import re
 from typing import List
+
+from pydantic import BaseModel  # noqa: E0611
 
 
 class DecomposeObjectiveIntoTasksOutput(BaseModel):
-    """Pydantic model for decompose_objective_into_tasks node outputs."""
-    task_names: List[str] = (
-        Field(..., description="List of task names identified by decomposition.")
-    )
-    task_descriptions: List[str] = (
-        Field(..., description="Brief descriptions for each corresponding task.")
-    )
-    num_tasks: int = Field(..., description="Total number of tasks identified.")
-
+    task_names: List[str]
+    task_descriptions: List[str]
+    num_tasks: int
 
 class IdentifyTaskDependenciesOutput(BaseModel):
-    """Pydantic model for identify_task_dependencies node outputs."""
-    task_names: List[str] = (
-        Field(..., description="List of all task names identified from decomposition.")
-    )
-    dependency_pairs: List[str] = (
-        Field(..., description="List of dependency relationships in the format 'TaskA -> TaskB' indicating TaskA must be completed before TaskB can start.")
-    )
-    dependency_count: int = (
-        Field(..., description="Total number of dependency relationships identified.")
-    )
-
+    task_names: List[str]
+    dependency_pairs: List[str]
+    dependency_count: int
 
 def identify_task_dependencies(decompose_objective_into_tasks_input: DecomposeObjectiveIntoTasksOutput, **kwargs) -> IdentifyTaskDependenciesOutput:
     """
-    Identify dependencies between decomposed tasks and return a list of
-    dependency pairs.
+    Detects precedence relationships among decomposed tasks using text‑matching
+    heuristics.
 
     Parameters
     ----------
-    task_names : List[str]
-        Names of the individual tasks produced by the decomposition step.
-    task_descriptions : List[str]
-        Brief textual descriptions of each task corresponding to task_names.
+    decompose_objective_into_tasks_input : DecomposeObjectiveIntoTasksOutput
+        Pydantic model containing task names and their descriptions.
 
     Returns
     -------
-    Dict[str, Any]
-        A dictionary containing three keys:  - 'task_names' (List[str]): The
-        original list of task names. - 'dependency_pairs' (List[str]):
-        Explicit dependencies formatted as 'TaskA -> TaskB'. -
-        'dependency_count' (int): Total number of dependencies identified.
+    IdentifyTaskDependenciesOutput
+        Model with the original task list, a list of dependency pairs, and
+        their count.
 
     Raises
     ------
     ValueError
-        If task_names and task_descriptions are of different lengths, or if
-        either list is empty.
+        If input lists are empty or mis‑aligned.
 
     Examples
     --------
-    >>> task_names = ['Collect Data', 'Clean Data', 'Analyze Data']
-    >>> task_descriptions = ['Gather raw data', 'Remove noise', 'Run statistical
-    models']
-    >>> result = identify_task_dependencies(task_names, task_descriptions)
-    >>> print(result['dependency_pairs'])
+    >>> from typing import List
+    >>> class DecomposeObjectiveIntoTasksOutput(BaseModel):
+    ...     task_names: List[str]
+    ...     task_descriptions: List[str]
+    ...     num_tasks: int
+    >>> class IdentifyTaskDependenciesOutput(BaseModel):
+    ...     task_names: List[str]
+    ...     dependency_pairs: List[str]
+    ...     dependency_count: int
+    >>> input_data = DecomposeObjectiveIntoTasksOutput(**{
+    ...     'task_names': ['Collect Data', 'Clean Data', 'Analyze Data'],
+    ...     'task_descriptions': ['Gather raw data', 'Remove noise from
+    collected data', 'Run statistical models on cleaned data'],
+    ...     'num_tasks': 3
+    >>> })
+    >>> output = identify_task_dependencies(input_data)
+    >>> print(output.dependency_pairs)
     ['Collect Data -> Clean Data', 'Clean Data -> Analyze Data']
 
-    >>> task_names = ['Design Model', 'Train Model', 'Validate Model', 'Deploy
-    Model']
-    >>> task_descriptions = ['Create architecture', 'Fit parameters', 'Evaluate
-    performance', 'Release to production']
-    >>> result = identify_task_dependencies(task_names, task_descriptions)
-    >>> print(result['dependency_count'])
-    3
-
     """
+    logger = logging.getLogger(__name__)
+    task_names = decompose_objective_into_tasks_input.task_names
+    task_descriptions = decompose_objective_into_tasks_input.task_descriptions
+    if not task_names or not task_descriptions:
+        logger.error("Task lists cannot be empty")
+        raise ValueError("Task lists cannot be empty")
+    if len(task_names) != len(task_descriptions):
+        logger.error("Task names and descriptions list lengths differ")
+        raise ValueError("Task names and descriptions list lengths differ")
+    dependencies: List[str] = []
+    for i, (name_a, desc_a) in enumerate(zip(task_names, task_descriptions)):
+        for j, (name_b, desc_b) in enumerate(zip(task_names, task_descriptions)):
+            if i == j:
+                continue
+            if re.search(rf"\\b{re.escape(name_b)}\\b", desc_a, re.IGNORECASE):
+                pair = f"{name_a} -> {name_b}"
+                if pair not in dependencies:
+                    dependencies.append(pair)
     return IdentifyTaskDependenciesOutput(
-        task_names=[],
-        dependency_pairs=[],
-        dependency_count=0,
+        task_names=task_names,
+        dependency_pairs=dependencies,
+        dependency_count=len(dependencies)
     )

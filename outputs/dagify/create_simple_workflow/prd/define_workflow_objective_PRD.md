@@ -1,38 +1,34 @@
 # define_workflow_objective PRD
 
 ## Description
-Define the objective of the workflow
+Creates a clear, single-sentence statement that defines the primary goal of the entire workflow, serving as a guiding beacon for downstream task decomposition.
 
 
 ## Conceptual Info
 
-The node captures the high‑level purpose of the entire workflow, producing a single natural‑language sentence that guides downstream task decomposition.
+Captures the high-level purpose of the workflow in a single natural-language sentence, ensuring all downstream tasks align with a clear, actionable goal.
 
 ## Docstring
 
 ### Summary
-Generate a concise primary goal statement for the workflow.
+Defines the workflow’s primary objective statement.
+
+### Parameters
+
+- **general_input** (str): High‑level description or context used to generate the objective.
 
 ### Returns
 
-str: A natural‑language statement describing the workflow’s overall objective.
+DefineWorkflowObjectiveOutput: Object containing the primary goal sentence.
 
 ### Raises
 
-- ValueError: If the generated objective is empty or consists only of whitespace.
+- ValueError: If the input is empty or consists only of whitespace.
 
 ### Examples
 
 ```python
->>> # Example 1: Basic workflow objective
->>> objective = define_workflow_objective()
->>> print(objective)
-'Automate the ingestion, transformation, and reporting of sales data.'
-```
-
-```python
->>> # Example 2: High‑level objective for a data science pipeline
->>> objective = define_workflow_objective()
->>> print(objective)
-'Deliver actionable insights from customer behavior data through automated analysis and visualization.'
+>>> output = define_workflow_objective("automate data ingestion and reporting")
+>>> print(output.objective)
+"The primary objective of this workflow is to automate data ingestion and reporting."
 ```

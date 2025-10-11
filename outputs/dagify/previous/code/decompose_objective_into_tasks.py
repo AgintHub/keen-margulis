@@ -1,81 +1,66 @@
-from ._decompose_objective_into_tasks.validate_workflow_objective import validate_workflow_objective
-from ._decompose_objective_into_tasks.parse_objective_components import parse_objective_components
-from ._decompose_objective_into_tasks.generate_task_sequence import generate_task_sequence
-from ._decompose_objective_into_tasks.refine_task_descriptions import refine_task_descriptions
-
 from pydantic import BaseModel, Field
 from typing import List
 
 
 class DefineWorkflowObjectiveOutput(BaseModel):
     """Pydantic model for define_workflow_objective node outputs."""
-    workflow_objective: str = (
-        Field(..., description = (
-            "The primary goal of the workflow expressed as a concise statement.")
-        )
+    objective: str = (
+        Field(..., description="Primary goal statement of the workflow")
     )
 
 
 class DecomposeObjectiveIntoTasksOutput(BaseModel):
     """Pydantic model for decompose_objective_into_tasks node outputs."""
-    tasks: List[str] = (
-        Field(..., description = (
-            "List of task descriptions that represent the decomposed workflow objective")
-        )
+    task_names: List[str] = (
+        Field(..., description="List of task names identified by decomposition.")
     )
-    task_count: int = (
-        Field(..., description = (
-            "Number of tasks identified in the decomposition")
-        )
+    task_descriptions: List[str] = (
+        Field(..., description="Brief descriptions for each corresponding task.")
     )
+    num_tasks: int = Field(..., description="Total number of tasks identified.")
 
 
 def decompose_objective_into_tasks(define_workflow_objective_input: DefineWorkflowObjectiveOutput, **kwargs) -> DecomposeObjectiveIntoTasksOutput:
     """
-    Breaks down a workflow objective into discrete tasks.
+    Decomposes a workflow objective string into a list of task names,
+    descriptions, and a task count.
 
     Parameters
     ----------
-    workflow_objective : str
-        A concise statement describing the primary goal of the workflow.
+    objective : str
+        Primary goal statement of the workflow provided by
+        `define_workflow_objective`.
 
     Returns
     -------
-    Tuple[List[str], int]
-        A tuple containing (1) a list of task descriptions and (2) the count
-        of tasks.
+    tuple[List[str], List[str], int]
+        A tuple containing: 1) list of task names, 2) list of brief task
+        descriptions, 3) integer count of tasks.
 
     Raises
     ------
     ValueError
-        Raised when `workflow_objective` is empty or consists only of
-        whitespace.
+        Raised when the `objective` string is empty or cannot be parsed into
+        distinct tasks.
 
     Examples
     --------
-    >>> tasks, count = decompose_objective_into_tasks('Build a machine learning
-    pipeline for predicting house prices')
-    (['Collect and clean data', 'Split dataset', 'Select model', 'Train model',
-    'Evaluate model', 'Deploy model'], 6)
+    >>> result = decompose_objective_into_tasks("Process customer orders and
+    generate invoices")
+    {'task_names': ['Process orders', 'Generate invoices'], 'task_descriptions':
+    ['Handle incoming orders from sales', 'Create and send invoices to
+    customers'], 'num_tasks': 2}
 
-    >>> tasks, count = decompose_objective_into_tasks('Write a report')
-    (['Plan report structure', 'Collect data', 'Write draft', 'Revise',
-    'Finalize'], 5)
+    >>> result = decompose_objective_into_tasks("Collect data, clean data, and
+    train a machine learning model")
+    {'task_names': ['Collect data', 'Clean data', 'Train ML model'],
+    'task_descriptions': ['Gather raw data from sources', 'Perform data cleaning
+    and preprocessing', 'Train a predictive model on cleaned data'],
+    'num_tasks': 3}
 
     """
-    workflow_objective = define_workflow_objective_input.workflow_objective
-    
-    validated_objective: str = validate_workflow_objective(objective=workflow_objective)
-    
-    parsed_components: List[str] = parse_objective_components(objective=validated_objective)
-    
-    task_list: List[str] = generate_task_sequence(components=parsed_components, objective=validated_objective)
-    
-    refined_tasks: List[str] = refine_task_descriptions(tasks=task_list)
-    
-    task_count: int = len(refined_tasks)
-    
     return DecomposeObjectiveIntoTasksOutput(
-        tasks=refined_tasks,
-        task_count=task_count
+        task_names=[],
+        task_descriptions=[],
+        num_tasks=0,
     )

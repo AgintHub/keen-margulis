@@ -1,7 +1,7 @@
 # create_task_dag PRD
 
 ## Description
-Create a Directed Acyclic Graph (DAG) of tasks.
+Constructs a directed acyclic graph (DAG) from explicit dependency pairs, performs a topological sort to produce a deterministic execution order, and validates that the graph contains no cycles. The node returns the ordered task list, the dependency edge list in compact form, and a boolean flag indicating acyclicity.
 
 
 ## Conceptual Info
@@ -11,38 +11,31 @@ Builds a topological representation of tasks based on identified dependencies, e
 ## Docstring
 
 ### Summary
-Constructs a Directed Acyclic Graph (DAG) of tasks from dependency information, returning an ordered list of tasks, the edge list, and an acyclicity flag.
+Creates a DAG from dependency pairs and returns an execution order.
 
 ### Parameters
 
-- **task_names** (List[str]): All task identifiers identified from decomposition.
-- **dependency_pairs** (List[str]): Dependency relationships in the format 'TaskA -> TaskB', indicating TaskA must complete before TaskB.
-- **dependency_count** (int): Total number of dependency relationships identified.
+- **identify_task_dependencies_input** (IdentifyTaskDependenciesOutput): Output from the identify_task_dependencies node containing task names and dependency pairs.
+- **kwargs** (dict): Additional keyword arguments for future extensions.
 
 ### Returns
 
-Tuple[List[str], List[str], bool]: A tuple containing the ordered list of tasks, the formatted edge list, and a boolean indicating if the DAG is acyclic.
+CreateTaskDagOutput: Dataclass containing the ordered task list, edge list, and acyclicity flag.
 
 ### Raises
 
-- ValueError: If the provided dependencies contain a cycle or if input lists are inconsistent.
+- ValueError: If input validation fails or a cycle is detected in the dependency graph.
 
 ### Examples
 
 ```python
->>> dag_nodes, dag_edges, is_acyclic = create_task_dag(
-    ['A', 'B', 'C'],
-    ['A -> B', 'B -> C'],
-    2
-)
->>> print(dag_nodes, dag_edges, is_acyclic)
-(['A', 'B', 'C'], ['A->B', 'B->C'], True)
-```
-
-```python
->>> try:
-...     create_task_dag(['A', 'B'], ['A -> B', 'B -> A'], 2)
->>> except ValueError as e:
-...     print(e)
-"Cycle detected in task dependencies: ['A -> B', 'B -> A']"
+>>> from your_module import create_task_dag, IdentifyTaskDependenciesOutput
+>>> input_data = IdentifyTaskDependenciesOutput(
+...     task_names=["A", "B", "C"],
+...     dependency_pairs=["A -> B", "B -> C"],
+...     dependency_count=2
+>>> )
+>>> output = create_task_dag(input_data)
+>>> print(output.dag_nodes, output.dag_edges, output.is_acyclic)
+["A", "B", "C"] ['A->B', 'B->C'] True
 ```

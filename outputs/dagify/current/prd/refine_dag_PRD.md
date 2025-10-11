@@ -1,48 +1,35 @@
 # refine_dag PRD
 
 ## Description
-Refine the DAG to maximize concurrency and ensure acyclicity.
+Refines an existing task DAG to maximize parallel execution by computing level-wise execution groups, ensuring the graph remains acyclic, and producing metrics that indicate potential concurrency.
 
 
 ## Conceptual Info
 
-This node takes a previously constructed DAG and optimizes it for maximum concurrent execution by reordering independent tasks and ensuring no cycles.
+This node takes a pre‑built DAG and reorganizes it to expose parallelism while guaranteeing that all dependency constraints are honored and that the graph remains a DAG.
 
 ## Docstring
 
 ### Summary
-Optimizes a DAG for maximum concurrency while preserving acyclicity.
+Compute level‑based execution plan and concurrency statistics for a task DAG.
 
 ### Parameters
 
-- **dag_nodes** (List[str]): Ordered list of task identifiers in the DAG.
-- **dag_edges** (List[str]): List of edges representing dependencies, formatted as "TaskA->TaskB".
-- **is_acyclic** (bool): Indicates whether the input DAG is acyclic.
+- **create_task_dag_input** (CreateTaskDagOutput): Output from the create_task_dag node containing nodes, edges, and acyclicity flag.
 
 ### Returns
 
-Tuple[List[str], bool, bool, int]: A tuple containing (refined_dag_edges, is_acyclic, is_concurrent, max_concurrency).
+RefineDagOutput: Refined DAG with reordered edges and concurrency metrics.
 
 ### Raises
 
-- ValueError: Raised if dag_edges is empty or if the input graph is cyclic.
+- ValueError: Raised when the input DAG is empty, malformed, or contains cycles.
 
 ### Examples
 
 ```python
->>> dag_nodes = ['A', 'B', 'C'],
->>> dag_edges = ['A->B', 'B->C'],
->>> is_acyclic = True,
->>> refined = refine_dag(dag_nodes, dag_edges, is_acyclic),
->>> print(refined)
-(['A->B', 'B->C'], True, False, 1)
-```
-
-```python
->>> dag_nodes = ['A', 'B', 'C'],
->>> dag_edges = ['A->C'],
->>> is_acyclic = True,
->>> refined = refine_dag(dag_nodes, dag_edges, is_acyclic),
->>> print(refined)
-(['A->C'], True, True, 2)
+>>> dag = CreateTaskDagOutput(dag_nodes=['A', 'B', 'C'], dag_edges=['A->C'], is_acyclic=True)
+>>> result = refine_dag(dag)
+>>> print(result.dag_edges, result.is_acyclic, result.is_concurrent, result.max_concurrency)
+['A->C'] True True 2
 ```
