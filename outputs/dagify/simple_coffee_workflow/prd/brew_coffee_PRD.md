@@ -1,60 +1,34 @@
 # brew_coffee PRD
 
 ## Description
-Brew the coffee by pouring boiled water into a pre‑prepared coffee maker, starting the brewing cycle, and collecting timing, volume, and temperature metrics.
+Simulates heating a liquid (water, tea, or any beverage base) to its boiling point, measuring the duration taken and confirming readiness for downstream brewing or processing steps.
 
 
 ## Conceptual Info
 
-The brew_coffee node simulates the physical act of brewing coffee. It takes the results of boiling water and preparing the coffee maker, pours the water into the machine, initiates the brew cycle, and measures key performance metrics such as start/end timestamps, duration, volume, success flag, and final temperature.
+The boil_any_liquid node models the physical process of heating a liquid to its boiling point, capturing key performance metrics such as time, temperature, and success status to inform subsequent brewing stages.
 
 ## Docstring
 
 ### Summary
-Start the brewing process by combining boiled water with a prepared coffee maker and record brewing metrics.
+Boil the specified liquid to its target boiling temperature and report readiness metrics.
 
 ### Parameters
 
-- **boiled** (bool): Indicates whether the water has reached boiling point and is ready for brewing.
-- **temperature_celsius** (float): Temperature of the water after boiling, in degrees Celsius.
-- **boil_time_seconds** (int): Duration taken to bring the water to boiling temperature, in seconds.
-- **coffee_grounds_amount_g** (float): Amount of coffee grounds added to the coffee maker's filter, in grams.
-- **filter_prepared** (bool): Whether the filter is properly prepared and ready.
-- **coffee_maker_status** (str): Current status of the coffee maker (e.g., 'ready', 'error').
-- **desired_cup_count** (int): Number of cups that should be brewed based on the coffee grounds measurement.
+- **target_temperature_celsius** (float): Desired boiling temperature for the liquid in degrees Celsius.
 
 ### Returns
 
-dict: Dictionary containing brewing timestamps, duration, volume, success flag, and final temperature.
+dict: Dictionary containing boiled status, temperature, and boil time.
 
 ### Raises
 
-- ValueError: Raised if the water is not boiled, the filter is not prepared, the coffee maker status is not 'ready', or any input values are invalid.
+- ValueError: Raised if the liquid fails to reach the target temperature within the allowed timeframe.
 
 ### Examples
 
 ```python
->>> brew_coffee(
-...     boiled=True,
-...     temperature_celsius=95.0,
-...     boil_time_seconds=120,
-...     coffee_grounds_amount_g=18.0,
-...     filter_prepared=True,
-...     coffee_maker_status='ready',
-...     desired_cup_count=2
->>> )
-{'brew_start_timestamp': '2025-10-11T08:00:00Z', 'brew_end_timestamp': '2025-10-11T08:03:45Z', 'brew_duration_seconds': 225.0, 'brewed_volume_cups': 2, 'brewed_success': True, 'final_temperature_c': 88.5}
-```
-
-```python
->>> brew_coffee(
-...     boiled=False,
-...     temperature_celsius=0.0,
-...     boil_time_seconds=0,
-...     coffee_grounds_amount_g=18.0,
-...     filter_prepared=True,
-...     coffee_maker_status='ready',
-...     desired_cup_count=2
->>> )
-ValueError: Water must be boiled before brewing.
+>>> result = boil_any_liquid(target_temperature_celsius=100.0)
+>>> print(result['boiled'], result['temperature_celsius'], result['boil_time_seconds'])
+True 100.0 45
 ```
