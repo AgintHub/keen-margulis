@@ -1,0 +1,3148 @@
+dag_type: shim
+description: Generated workflow from UI.
+name: create_simple_workflow
+nodes:
+  create_task_dag:
+    agent: false
+    code_node_type: shim
+    description: Create a DAG representing the tasks and their dependencies
+    implementation: "from ._create_task_dag.parse_dependency_strings import parse_dependency_strings\n\
+      from ._create_task_dag.validate_task_references import validate_task_references\n\
+      from ._create_task_dag.extract_edge_sources import extract_edge_sources\nfrom\
+      \ ._create_task_dag.extract_edge_destinations import extract_edge_destinations\n\
+      from ._create_task_dag.check_dag_acyclicity import check_dag_acyclicity\nfrom\
+      \ ._create_task_dag.format_task_list import format_task_list\nfrom ._create_task_dag.format_edge_list\
+      \ import format_edge_list\n\nfrom ._create_task_dag.parse_dependency_strings\
+      \ import parse_dependency_strings\nfrom ._create_task_dag.validate_task_references\
+      \ import validate_task_references\nfrom ._create_task_dag.extract_edge_sources\
+      \ import extract_edge_sources\nfrom ._create_task_dag.extract_edge_destinations\
+      \ import extract_edge_destinations\nfrom ._create_task_dag.check_dag_acyclicity\
+      \ import check_dag_acyclicity\nfrom ._create_task_dag.format_task_list import\
+      \ format_task_list\nfrom ._create_task_dag.format_edge_list import format_edge_list\n\
+      \nfrom pydantic import BaseModel, Field\nfrom typing import List\n\n\nclass\
+      \ IdentifyTaskDependenciesOutput(BaseModel):\n    \"\"\"Pydantic model for identify_task_dependencies\
+      \ node outputs.\"\"\"\n    tasks: List[str] = Field(..., description=\"List\
+      \ of identified task names.\")\n    dependencies: List[str] = (\n        Field(...,\
+      \ description = (\n            \"List of dependency relationships in the format\
+      \ 'TaskA depends on TaskB'.\")\n        )\n    )\n    dependency_exists: bool\
+      \ = (\n        Field(..., description = (\n            \"Indicates whether any\
+      \ dependencies were identified.\")\n        )\n    )\n\n\nclass CreateTaskDagOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for create_task_dag node outputs.\"\"\"\n    task_ids:\
+      \ str = (\n        Field(..., description = (\n            \"List of unique\
+      \ task identifiers used in the DAG\")\n        )\n    )\n    edge_sources: str\
+      \ = (\n        Field(..., description = (\n            \"List of source task\
+      \ identifiers for each directed edge in the DAG\")\n        )\n    )\n    edge_destinations:\
+      \ str = (\n        Field(..., description = (\n            \"List of destination\
+      \ task identifiers for each directed edge in the DAG\")\n        )\n    )\n\
+      \    is_valid: bool = (\n        Field(..., description = (\n            \"\
+      Indicates whether the constructed DAG is acyclic and complete\")\n        )\n\
+      \    )\n\n\ndef create_task_dag(identify_task_dependencies_input: IdentifyTaskDependenciesOutput,\
+      \ **kwargs) -> CreateTaskDagOutput:\n    \"\"\"\n    Constructs a DAG from given\
+      \ tasks and dependency relations.\n\n    Parameters\n    ----------\n    tasks\
+      \ : List[str]\n        A list of task identifiers that will become the DAG nodes.\n\
+      \    dependencies : List[str]\n        Each string represents a dependency in\
+      \ the format 'TaskA depends on\n        TaskB'.\n\n    Returns\n    -------\n\
+      \    dict\n        A dictionary with four keys: task_ids (List[str]), edge_sources\n\
+      \        (List[str]), edge_destinations (List[str]), and is_valid (bool).\n\n\
+      \    Raises\n    ------\n    ValueError\n        Raised when a dependency refers\
+      \ to a task not present in the `tasks`\n        list.\n    ValueError\n    \
+      \    Raised when a dependency string does not match the expected 'TaskA\n  \
+      \      depends on TaskB' pattern.\n\n    Examples\n    --------\n    >>> tasks\
+      \ = ['A', 'B', 'C']\n    >>> dependencies = ['B depends on A', 'C depends on\
+      \ B']\n    >>> result = create_task_dag(tasks, dependencies)\n    >>> print(result)\n\
+      \    {'task_ids': ['A', 'B', 'C'], 'edge_sources': ['A', 'B'],\n    'edge_destinations':\
+      \ ['B', 'C'], 'is_valid': True}\n\n    >>> tasks = ['A', 'B']\n    >>> dependencies\
+      \ = ['A depends on B', 'B depends on A']\n    >>> result = create_task_dag(tasks,\
+      \ dependencies)\n    >>> print(result)\n    {'task_ids': ['A', 'B'], 'edge_sources':\
+      \ ['B', 'A'], 'edge_destinations':\n    ['A', 'B'], 'is_valid': False}\n\n \
+      \   \"\"\"\n    tasks = identify_task_dependencies_input.tasks\n    dependencies\
+      \ = identify_task_dependencies_input.dependencies\n    \n    parsed_dependencies:\
+      \ List[tuple] = parse_dependency_strings(dependencies=dependencies)\n    \n\
+      \    validate_task_references(tasks=tasks, parsed_dependencies=parsed_dependencies)\n\
+      \    \n    edge_sources: List[str] = extract_edge_sources(parsed_dependencies=parsed_dependencies)\n\
+      \    edge_destinations: List[str] = extract_edge_destinations(parsed_dependencies=parsed_dependencies)\n\
+      \    \n    is_acyclic: bool = check_dag_acyclicity(tasks=tasks, edge_sources=edge_sources,\
+      \ edge_destinations=edge_destinations)\n    \n    task_ids_str: str = format_task_list(tasks=tasks)\n\
+      \    edge_sources_str: str = format_edge_list(edges=edge_sources)\n    edge_destinations_str:\
+      \ str = format_edge_list(edges=edge_destinations)\n    \n    return CreateTaskDagOutput(\n\
+      \        task_ids=task_ids_str,\n        edge_sources=edge_sources_str,\n  \
+      \      edge_destinations=edge_destinations_str,\n        is_valid=is_acyclic\n\
+      \    )"
+    name: create_task_dag
+    nodes_depended_on:
+    - identify_task_dependencies
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of unique task identifiers used in the DAG
+      key: task_ids
+      type: str
+    - description: List of source task identifiers for each directed edge in the DAG
+      key: edge_sources
+      type: str
+    - description: List of destination task identifiers for each directed edge in
+        the DAG
+      key: edge_destinations
+      type: str
+    - description: Indicates whether the constructed DAG is acyclic and complete
+      key: is_valid
+      type: bool
+    prd:
+      conceptual_info: Builds a directed acyclic graph (DAG) from a list of task identifiers
+        and dependency relations, producing node identifiers, edge lists, and a validity
+        flag.
+      docstring:
+        examples:
+        - lines:
+          - tasks = ['A', 'B', 'C']
+          - dependencies = ['B depends on A', 'C depends on B']
+          - result = create_task_dag(tasks, dependencies)
+          - print(result)
+          output: '{''task_ids'': [''A'', ''B'', ''C''], ''edge_sources'': [''A'',
+            ''B''], ''edge_destinations'': [''B'', ''C''], ''is_valid'': True}'
+        - lines:
+          - tasks = ['A', 'B']
+          - dependencies = ['A depends on B', 'B depends on A']
+          - result = create_task_dag(tasks, dependencies)
+          - print(result)
+          output: '{''task_ids'': [''A'', ''B''], ''edge_sources'': [''B'', ''A''],
+            ''edge_destinations'': [''A'', ''B''], ''is_valid'': False}'
+        parameters:
+        - description: A list of task identifiers that will become the DAG nodes.
+          name: tasks
+          type: List[str]
+        - description: Each string represents a dependency in the format 'TaskA depends
+            on TaskB'.
+          name: dependencies
+          type: List[str]
+        raises:
+        - description: Raised when a dependency refers to a task not present in the
+            `tasks` list.
+          type: ValueError
+        - description: Raised when a dependency string does not match the expected
+            'TaskA depends on TaskB' pattern.
+          type: ValueError
+        returns:
+          description: 'A dictionary with four keys: task_ids (List[str]), edge_sources
+            (List[str]), edge_destinations (List[str]), and is_valid (bool).'
+          type: dict
+        summary: Constructs a DAG from given tasks and dependency relations.
+    prompt: Using the tasks and their dependencies, construct a Directed Acyclic Graph
+      (DAG) that represents the workflow.
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Parses a string of dependency relationships into a list of task
+        source‑destination pairs.
+      implementation: "from typing import List\n\n\ndef parse_dependency_strings(dependencies:\
+        \ str) -> List[str]:\n    \"\"\"\n    Parse a multiline string of dependency\
+        \ relationships and return them as a\n    list of tuples.\n\n    Parameters\n\
+        \    ----------\n    dependencies : str\n        A string containing dependency\
+        \ descriptions, one per line. Each line\n        must follow the format \"\
+        SourceTask depends on TargetTask\" or\n        \"SourceTask,TargetTask\".\n\
+        \n    Returns\n    -------\n    List[Tuple[str, str]]\n        A list of tuples\
+        \ where each tuple contains the source task name and\n        the target task\
+        \ name.\n\n    Raises\n    ------\n    ValueError\n        Raised if a line\
+        \ in the input string does not conform to an expected\n        dependency\
+        \ format.\n    TypeError\n        Raised if the input `dependencies` is not\
+        \ of type `str`.\n\n    Examples\n    --------\n    >>> parse_dependency_strings('TaskA\
+        \ depends on TaskB\\nTaskB depends on\n    TaskC')\n    [('TaskA', 'TaskB'),\
+        \ ('TaskB', 'TaskC')]\n\n    >>> parse_dependency_strings('Task1,Task2\\nTask3,Task4')\n\
+        \    [('Task1', 'Task2'), ('Task3', 'Task4')]\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: parse_dependency_strings
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[tuple]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: dependencies
+        type: str
+      prd:
+        conceptual_info: The shim extracts structured dependency pairs from a plain
+          text description, enabling downstream DAG construction and validation.
+        docstring:
+          examples:
+          - lines:
+            - parse_dependency_strings('TaskA depends on TaskB\nTaskB depends on TaskC')
+            output: '[(''TaskA'', ''TaskB''), (''TaskB'', ''TaskC'')]'
+          - lines:
+            - parse_dependency_strings('Task1,Task2\nTask3,Task4')
+            output: '[(''Task1'', ''Task2''), (''Task3'', ''Task4'')]'
+          parameters:
+          - description: A string containing dependency descriptions, one per line.
+              Each line must follow the format "SourceTask depends on TargetTask"
+              or "SourceTask,TargetTask".
+            name: dependencies
+            type: str
+          raises:
+          - description: Raised if a line in the input string does not conform to
+              an expected dependency format.
+            type: ValueError
+          - description: Raised if the input `dependencies` is not of type `str`.
+            type: TypeError
+          returns:
+            description: A list of tuples where each tuple contains the source task
+              name and the target task name.
+            type: List[Tuple[str, str]]
+          summary: Parse a multiline string of dependency relationships and return
+            them as a list of tuples.
+      prompt: "def parse_dependency_strings(dependencies: str) -> List[Tuple[str,\
+        \ str]]:\n    \"\"\"\n    # Implementation here\n    \"\"\"\n"
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Checks that every task referenced in the parsed dependencies exists
+        in the provided task list and reports any missing references.
+      implementation: "def validate_task_references(tasks: str, parsed_dependencies:\
+        \ str) -> str:\n    \"\"\"\n    Validate that every task in `parsed_dependencies`\
+        \ exists in `tasks`. If any\n    reference is missing, a `ValueError` is raised.\n\
+        \n    Parameters\n    ----------\n    tasks : List[str]\n        A list of\
+        \ all task identifiers that are considered valid.\n    parsed_dependencies\
+        \ : List[Tuple[str, str]]\n        A list of dependency tuples in the form\
+        \ (source_task, target_task).\n\n    Returns\n    -------\n    str\n     \
+        \   A message stating that all references are valid, or a list of\n      \
+        \  missing task identifiers.\n\n    Raises\n    ------\n    ValueError\n \
+        \       If any task in a dependency tuple is not present in `tasks`.\n   \
+        \ TypeError\n        If the input arguments are not of the expected types\
+        \ (`list` of\n        `str` and `list` of `tuple`).\n\n    Examples\n    --------\n\
+        \    >>> validate_task_references(     tasks=['TaskA', 'TaskB', 'TaskC'],\n\
+        \    parsed_dependencies=[('TaskA', 'TaskB'), ('TaskB', 'TaskC')] )\n    'All\
+        \ task references are valid.'\n\n    >>> try:\n    ...     validate_task_references(\
+        \         tasks=['TaskA', 'TaskB'],\n    parsed_dependencies=[('TaskA', 'TaskC')]\
+        \     )\n    >>> except ValueError as e:\n    ...     print(e)\n    \"Missing\
+        \ task reference(s) found: TaskC\"\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: validate_task_references
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: tasks
+        type: str
+      - description: Input parameter of type str
+        key: parsed_dependencies
+        type: str
+      prd:
+        conceptual_info: Validates that all tasks referenced in dependency tuples
+          are defined in the task list, preventing dangling references before DAG
+          construction.
+        docstring:
+          examples:
+          - lines:
+            - "validate_task_references(\n    tasks=['TaskA', 'TaskB', 'TaskC'],\n\
+              \    parsed_dependencies=[('TaskA', 'TaskB'), ('TaskB', 'TaskC')]\n)"
+            output: '''All task references are valid.'''
+          - lines:
+            - 'try:'
+            - "    validate_task_references(\n    \ttasks=['TaskA', 'TaskB'],\n  \
+              \  \tparsed_dependencies=[('TaskA', 'TaskC')]\n    )"
+            - 'except ValueError as e:'
+            - '    print(e)'
+            output: '"Missing task reference(s) found: TaskC"'
+          parameters:
+          - description: A list of all task identifiers that are considered valid.
+            name: tasks
+            type: List[str]
+          - description: A list of dependency tuples in the form (source_task, target_task).
+            name: parsed_dependencies
+            type: List[Tuple[str, str]]
+          raises:
+          - description: If any task in a dependency tuple is not present in `tasks`.
+            type: ValueError
+          - description: If the input arguments are not of the expected types (`list`
+              of `str` and `list` of `tuple`).
+            type: TypeError
+          returns:
+            description: A message stating that all references are valid, or a list
+              of missing task identifiers.
+            type: str
+          summary: Validate that every task in `parsed_dependencies` exists in `tasks`.
+            If any reference is missing, a `ValueError` is raised.
+      prompt: 'Validate task references: ensure each dependency tuple contains only
+        tasks from the supplied task list.'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Extracts a list of source task identifiers from a string representation
+        of parsed dependency pairs.
+      implementation: "from typing import List\n\n\ndef extract_edge_sources(parsed_dependencies:\
+        \ str) -> List[str]:\n    \"\"\"\n    Parse a string of dependency tuples\
+        \ and return the list of source task\n    identifiers.\n\n    Parameters\n\
+        \    ----------\n    parsed_dependencies : str\n        A string containing\
+        \ comma‑separated tuples in the form \"('TaskA',\n        'TaskB'), ('TaskC',\
+        \ 'TaskD')\" or a similar format where each tuple\n        represents a dependency\
+        \ \"source\" → \"destination\".\n\n    Returns\n    -------\n    List[str]\n\
+        \        A list of the source task identifiers extracted from each dependency\n\
+        \        tuple.\n\n    Raises\n    ------\n    TypeError\n        If `parsed_dependencies`\
+        \ is not a string.\n    ValueError\n        If the input string cannot be\
+        \ parsed into a sequence of valid\n        two‑element tuples or if any tuple\
+        \ is malformed.\n\n    Examples\n    --------\n    >>> output = extract_edge_sources(\"\
+        ('TaskA', 'TaskB'), ('TaskC', 'TaskD')\")\n    ['TaskA', 'TaskC']\n\n    >>>\
+        \ output = extract_edge_sources(\"('Deploy', 'Test'), ('Build', 'Deploy')\"\
+        )\n    ['Deploy', 'Build']\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: extract_edge_sources
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: parsed_dependencies
+        type: str
+      prd:
+        conceptual_info: The shim isolates the logic for extracting source task names
+          from a dependency string, enabling reuse in DAG construction and simplifying
+          unit tests.
+        docstring:
+          examples:
+          - lines:
+            - output = extract_edge_sources("('TaskA', 'TaskB'), ('TaskC', 'TaskD')")
+            output: '[''TaskA'', ''TaskC'']'
+          - lines:
+            - output = extract_edge_sources("('Deploy', 'Test'), ('Build', 'Deploy')")
+            output: '[''Deploy'', ''Build'']'
+          parameters:
+          - description: A string containing comma‑separated tuples in the form "('TaskA',
+              'TaskB'), ('TaskC', 'TaskD')" or a similar format where each tuple represents
+              a dependency "source" → "destination".
+            name: parsed_dependencies
+            type: str
+          raises:
+          - description: If `parsed_dependencies` is not a string.
+            type: TypeError
+          - description: If the input string cannot be parsed into a sequence of valid
+              two‑element tuples or if any tuple is malformed.
+            type: ValueError
+          returns:
+            description: A list of the source task identifiers extracted from each
+              dependency tuple.
+            type: List[str]
+          summary: Parse a string of dependency tuples and return the list of source
+            task identifiers.
+      prompt: '## Shim implementation prompt
+
+
+        Implement a function `extract_edge_sources(parsed_dependencies: str) -> List[str]`
+        that parses the provided string of dependency tuples and returns a list of
+        the first element (source task) of each tuple. The function should validate
+        input format, raise appropriate errors, and follow the style guidelines of
+        the project.'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Extracts the destination task identifiers from a string representation
+        of parsed dependency tuples.
+      implementation: "from typing import List\n\n\ndef extract_edge_destinations(parsed_dependencies:\
+        \ str) -> List[str]:\n    \"\"\"\n    Extracts destination task identifiers\
+        \ from a string representation of parsed\n    dependency tuples.\n\n    Parameters\n\
+        \    ----------\n    parsed_dependencies : str\n        String representation\
+        \ of parsed dependency tuples, each tuple\n        containing a source and\
+        \ destination task identifier.\n\n    Returns\n    -------\n    LIST_STR\n\
+        \        A list of destination task identifiers (e.g., ['TaskB', 'TaskC'])\n\
+        \        extracted from the parsed dependencies.\n\n    Raises\n    ------\n\
+        \    ValueError\n        Raised when the input string cannot be parsed into\
+        \ a list of tuple\n        pairs.\n    TypeError\n        Raised when the\
+        \ input is not a string.\n\n    Examples\n    --------\n    >>> deps = \"\
+        [(\\'TaskA\\', \\'TaskB\\'), (\\'TaskB\\', \\'TaskC\\')]\"\n    >>> print(extract_edge_destinations(deps))\n\
+        \    ['TaskB', 'TaskC']\n\n    >>> deps = \"[]\"\n    >>> print(extract_edge_destinations(deps))\n\
+        \    []\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub\
+        \ node that needs to be implemented\")"
+      name: extract_edge_destinations
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: parsed_dependencies
+        type: str
+      prd:
+        conceptual_info: This shim serves as the bridge between parsed dependency
+          data and the DAG construction logic by isolating the extraction of destination
+          nodes from dependency tuples.
+        docstring:
+          examples:
+          - lines:
+            - deps = "[(\'TaskA\', \'TaskB\'), (\'TaskB\', \'TaskC\')]"
+            - print(extract_edge_destinations(deps))
+            output: '[''TaskB'', ''TaskC'']'
+          - lines:
+            - deps = "[]"
+            - print(extract_edge_destinations(deps))
+            output: '[]'
+          parameters:
+          - description: String representation of parsed dependency tuples, each tuple
+              containing a source and destination task identifier.
+            name: parsed_dependencies
+            type: str
+          raises:
+          - description: Raised when the input string cannot be parsed into a list
+              of tuple pairs.
+            type: ValueError
+          - description: Raised when the input is not a string.
+            type: TypeError
+          returns:
+            description: A list of destination task identifiers (e.g., ['TaskB', 'TaskC'])
+              extracted from the parsed dependencies.
+            type: LIST_STR
+          summary: Extracts destination task identifiers from a string representation
+            of parsed dependency tuples.
+      prompt: 'def extract_edge_destinations(parsed_dependencies: str) -> List[str]:'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Checks whether a directed graph defined by tasks and edge lists
+        contains any cycles, returning a boolean result.
+      implementation: "def check_dag_acyclicity(tasks: str, edge_sources: str, edge_destinations:\
+        \ str) -> bool:\n    \"\"\"\n    Determine if a directed graph, specified\
+        \ by tasks and edge lists, contains a\n    cycle.\n\n    Parameters\n    ----------\n\
+        \    tasks : List[str]\n        A list of unique task identifiers that form\
+        \ the nodes of the graph.\n    edge_sources : List[str]\n        A list of\
+        \ source task identifiers for each directed edge in the\n        graph.\n\
+        \    edge_destinations : List[str]\n        A list of destination task identifiers\
+        \ for each directed edge in the\n        graph.\n\n    Returns\n    -------\n\
+        \    bool\n        Returns True if the graph contains no cycles (is acyclic);\
+        \ otherwise\n        returns False.\n\n    Raises\n    ------\n    TypeError\n\
+        \        Raised when any of the arguments is not a list of strings.\n    ValueError\n\
+        \        Raised when the lengths of edge_sources and edge_destinations\n \
+        \       differ, or when a source/destination is not present in tasks.\n\n\
+        \    Examples\n    --------\n    >>> check_dag_acyclicity([\n    ...     \"\
+        A\", \"B\", \"C\"\n    >>> ], [\n    ...     \"A\", \"B\"\n    >>> ], [\n\
+        \    ...     \"B\", \"C\"\n    >>> ])\n    True\n\n    >>> check_dag_acyclicity([\n\
+        \    ...     \"A\", \"B\", \"C\"\n    >>> ], [\n    ...     \"A\", \"B\",\
+        \ \"C\"\n    >>> ], [\n    ...     \"B\", \"C\", \"A\"\n    >>> ])\n    False\n\
+        \n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node\
+        \ that needs to be implemented\")"
+      name: check_dag_acyclicity
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type bool
+        key: output
+        type: bool
+      - description: Input parameter of type str
+        key: tasks
+        type: str
+      - description: Input parameter of type str
+        key: edge_sources
+        type: str
+      - description: Input parameter of type str
+        key: edge_destinations
+        type: str
+      prd:
+        conceptual_info: This shim determines the acyclicity of a task dependency
+          DAG by examining the list of tasks and the corresponding source–destination
+          edge pairs.
+        docstring:
+          examples:
+          - lines:
+            - check_dag_acyclicity([
+            - '    "A", "B", "C"'
+            - '], ['
+            - '    "A", "B"'
+            - '], ['
+            - '    "B", "C"'
+            - '])'
+            output: 'True'
+          - lines:
+            - check_dag_acyclicity([
+            - '    "A", "B", "C"'
+            - '], ['
+            - '    "A", "B", "C"'
+            - '], ['
+            - '    "B", "C", "A"'
+            - '])'
+            output: 'False'
+          parameters:
+          - description: A list of unique task identifiers that form the nodes of
+              the graph.
+            name: tasks
+            type: List[str]
+          - description: A list of source task identifiers for each directed edge
+              in the graph.
+            name: edge_sources
+            type: List[str]
+          - description: A list of destination task identifiers for each directed
+              edge in the graph.
+            name: edge_destinations
+            type: List[str]
+          raises:
+          - description: Raised when any of the arguments is not a list of strings.
+            type: TypeError
+          - description: Raised when the lengths of edge_sources and edge_destinations
+              differ, or when a source/destination is not present in tasks.
+            type: ValueError
+          returns:
+            description: Returns True if the graph contains no cycles (is acyclic);
+              otherwise returns False.
+            type: bool
+          summary: Determine if a directed graph, specified by tasks and edge lists,
+            contains a cycle.
+      prompt: 'check_dag_acyclicity(tasks: List[str], edge_sources: List[str], edge_destinations:
+        List[str]) -> bool'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Converts a list of task names into a formatted string representation.
+      implementation: "def format_task_list(tasks: str) -> str:\n    \"\"\"\n    Formats\
+        \ a list of task names into a standardized string for downstream DAG\n   \
+        \ processing.\n\n    Parameters\n    ----------\n    tasks : list\n      \
+        \  A list of task names to format.\n\n    Returns\n    -------\n    str\n\
+        \        A string containing the task names formatted as a list.\n\n    Raises\n\
+        \    ------\n    ValueError\n        Raised when the input list is empty or\
+        \ contains non-string elements.\n    TypeError\n        Raised when the input\
+        \ is not a list or iterable.\n\n    Examples\n    --------\n    >>> result\
+        \ = format_task_list(['TaskA', 'TaskB', 'TaskC'])\n    >>> print(result)\n\
+        \    ['TaskA', 'TaskB', 'TaskC']\n\n    >>> format_task_list([])\n    ValueError:\
+        \ Input list cannot be empty.\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: format_task_list
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: tasks
+        type: str
+      prd:
+        conceptual_info: Provides a human-readable string representation of task identifiers
+          for DAG construction and validation.
+        docstring:
+          examples:
+          - lines:
+            - result = format_task_list(['TaskA', 'TaskB', 'TaskC'])
+            - print(result)
+            output: '[''TaskA'', ''TaskB'', ''TaskC'']'
+          - lines:
+            - format_task_list([])
+            output: 'ValueError: Input list cannot be empty.'
+          parameters:
+          - description: A list of task names to format.
+            name: tasks
+            type: list
+          raises:
+          - description: Raised when the input list is empty or contains non-string
+              elements.
+            type: ValueError
+          - description: Raised when the input is not a list or iterable.
+            type: TypeError
+          returns:
+            description: A string containing the task names formatted as a list.
+            type: str
+          summary: Formats a list of task names into a standardized string for downstream
+            DAG processing.
+      prompt: 'Implement a function `format_task_list(tasks: List[str]) -> str` that
+        takes a list of task names and returns a formatted string. The output should
+        be a comma‑separated list of task names enclosed in square brackets. If the
+        input is empty or contains non‑string elements, raise a ValueError.'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Formats a list of edge identifiers into a comma-separated string
+        representation.
+      implementation: "def format_edge_list(edges: str) -> str:\n    \"\"\"\n    Create\
+        \ a comma‑separated string from a list of edge identifiers.\n\n    Parameters\n\
+        \    ----------\n    edges : List[str]\n        A list of edge identifiers\
+        \ to format.\n\n    Returns\n    -------\n    str\n        A single string\
+        \ containing all edge identifiers separated by commas,\n        with no additional\
+        \ whitespace or delimiters.\n\n    Raises\n    ------\n    TypeError\n   \
+        \     Raised when `edges` is not a list.\n    ValueError\n        Raised when\
+        \ any element in `edges` is not a string.\n\n    Examples\n    --------\n\
+        \    >>> format_edge_list(['taskA', 'taskB', 'taskC'])\n    'taskA,taskB,taskC'\n\
+        \n    >>> format_edge_list([])\n    ''\n\n    >>> format_edge_list(['single'])\n\
+        \    'single'\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")"
+      name: format_edge_list
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: edges
+        type: str
+      prd:
+        conceptual_info: Converts a list of directed edge identifiers into a compact
+          string for serialization or display, ensuring consistent formatting across
+          the system.
+        docstring:
+          examples:
+          - lines:
+            - format_edge_list(['taskA', 'taskB', 'taskC'])
+            output: '''taskA,taskB,taskC'''
+          - lines:
+            - format_edge_list([])
+            output: ''''''
+          - lines:
+            - format_edge_list(['single'])
+            output: '''single'''
+          parameters:
+          - description: A list of edge identifiers to format.
+            name: edges
+            type: List[str]
+          raises:
+          - description: Raised when `edges` is not a list.
+            type: TypeError
+          - description: Raised when any element in `edges` is not a string.
+            type: ValueError
+          returns:
+            description: A single string containing all edge identifiers separated
+              by commas, with no additional whitespace or delimiters.
+            type: str
+          summary: Create a comma‑separated string from a list of edge identifiers.
+      prompt: 'The function should accept a list of edge identifiers and return a
+        single string with the identifiers joined by commas. No surrounding brackets
+        or quotes should appear in the output. Example: [''a'', ''b''] -> ''a,b''.'
+      shims: []
+  decompose_objective_into_tasks:
+    agent: false
+    code_node_type: shim
+    description: Break down the workflow objective into individual tasks
+    implementation: "from ._decompose_objective_into_tasks.validate_workflow_objective\
+      \ import validate_workflow_objective\nfrom ._decompose_objective_into_tasks.parse_objective_components\
+      \ import parse_objective_components\nfrom ._decompose_objective_into_tasks.generate_task_sequence\
+      \ import generate_task_sequence\nfrom ._decompose_objective_into_tasks.refine_task_descriptions\
+      \ import refine_task_descriptions\n\nfrom ._decompose_objective_into_tasks.validate_workflow_objective\
+      \ import validate_workflow_objective\nfrom ._decompose_objective_into_tasks.parse_objective_components\
+      \ import parse_objective_components\nfrom ._decompose_objective_into_tasks.generate_task_sequence\
+      \ import generate_task_sequence\nfrom ._decompose_objective_into_tasks.refine_task_descriptions\
+      \ import refine_task_descriptions\n\nfrom pydantic import BaseModel, Field\n\
+      from typing import List\n\n\nclass DefineWorkflowObjectiveOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for define_workflow_objective node outputs.\"\"\"\n\
+      \    workflow_objective: str = (\n        Field(..., description = (\n     \
+      \       \"The primary goal of the workflow expressed as a concise statement.\"\
+      )\n        )\n    )\n\n\nclass DecomposeObjectiveIntoTasksOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for decompose_objective_into_tasks node outputs.\"\
+      \"\"\n    tasks: List[str] = (\n        Field(..., description = (\n       \
+      \     \"List of task descriptions that represent the decomposed workflow objective\"\
+      )\n        )\n    )\n    task_count: int = (\n        Field(..., description\
+      \ = (\n            \"Number of tasks identified in the decomposition\")\n  \
+      \      )\n    )\n\n\ndef decompose_objective_into_tasks(define_workflow_objective_input:\
+      \ DefineWorkflowObjectiveOutput, **kwargs) -> DecomposeObjectiveIntoTasksOutput:\n\
+      \    \"\"\"\n    Breaks down a workflow objective into discrete tasks.\n\n \
+      \   Parameters\n    ----------\n    workflow_objective : str\n        A concise\
+      \ statement describing the primary goal of the workflow.\n\n    Returns\n  \
+      \  -------\n    Tuple[List[str], int]\n        A tuple containing (1) a list\
+      \ of task descriptions and (2) the count\n        of tasks.\n\n    Raises\n\
+      \    ------\n    ValueError\n        Raised when `workflow_objective` is empty\
+      \ or consists only of\n        whitespace.\n\n    Examples\n    --------\n \
+      \   >>> tasks, count = decompose_objective_into_tasks('Build a machine learning\n\
+      \    pipeline for predicting house prices')\n    (['Collect and clean data',\
+      \ 'Split dataset', 'Select model', 'Train model',\n    'Evaluate model', 'Deploy\
+      \ model'], 6)\n\n    >>> tasks, count = decompose_objective_into_tasks('Write\
+      \ a report')\n    (['Plan report structure', 'Collect data', 'Write draft',\
+      \ 'Revise',\n    'Finalize'], 5)\n\n    \"\"\"\n    workflow_objective = define_workflow_objective_input.workflow_objective\n\
+      \    \n    validated_objective: str = validate_workflow_objective(objective=workflow_objective)\n\
+      \    \n    parsed_components: List[str] = parse_objective_components(objective=validated_objective)\n\
+      \    \n    task_list: List[str] = generate_task_sequence(components=parsed_components,\
+      \ objective=validated_objective)\n    \n    refined_tasks: List[str] = refine_task_descriptions(tasks=task_list)\n\
+      \    \n    task_count: int = len(refined_tasks)\n    \n    return DecomposeObjectiveIntoTasksOutput(\n\
+      \        tasks=refined_tasks,\n        task_count=task_count\n    )"
+    name: decompose_objective_into_tasks
+    nodes_depended_on:
+    - define_workflow_objective
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of task descriptions that represent the decomposed workflow
+        objective
+      key: tasks
+      type: List[str]
+    - description: Number of tasks identified in the decomposition
+      key: task_count
+      type: int
+    prd:
+      conceptual_info: Transforms a high‑level workflow goal into a concrete sequence
+        of actionable tasks, enabling downstream dependency analysis and DAG construction.
+      docstring:
+        examples:
+        - lines:
+          - tasks, count = decompose_objective_into_tasks('Build a machine learning
+            pipeline for predicting house prices')
+          output: (['Collect and clean data', 'Split dataset', 'Select model', 'Train
+            model', 'Evaluate model', 'Deploy model'], 6)
+        - lines:
+          - tasks, count = decompose_objective_into_tasks('Write a report')
+          output: (['Plan report structure', 'Collect data', 'Write draft', 'Revise',
+            'Finalize'], 5)
+        parameters:
+        - description: A concise statement describing the primary goal of the workflow.
+          name: workflow_objective
+          type: str
+        raises:
+        - description: Raised when `workflow_objective` is empty or consists only
+            of whitespace.
+          type: ValueError
+        returns:
+          description: A tuple containing (1) a list of task descriptions and (2)
+            the count of tasks.
+          type: Tuple[List[str], int]
+        summary: Breaks down a workflow objective into discrete tasks.
+    prompt: Decompose the workflow objective into smaller, manageable tasks. List
+      them out.
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates and normalizes a workflow objective string.
+      implementation: "def validate_workflow_objective(objective: str) -> str:\n \
+        \   \"\"\"\n    Validate and normalize a workflow objective string.\n\n  \
+        \  Parameters\n    ----------\n    objective : str\n        The raw workflow\
+        \ objective string provided by the user.\n\n    Returns\n    -------\n   \
+        \ str\n        A trimmed, non‑empty objective string ready for further processing.\n\
+        \n    Raises\n    ------\n    ValueError\n        Raised when the objective\
+        \ is empty or fails validation checks.\n    TypeError\n        Raised when\
+        \ the provided objective is not of type `str`.\n\n    Examples\n    --------\n\
+        \    >>> validate_workflow_objective('Collect market data')\n    'Collect\
+        \ market data'\n\n    >>> validate_workflow_objective('  Plan project timeline\
+        \  ')\n    'Plan project timeline'\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: validate_workflow_objective
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: objective
+        type: str
+      prd:
+        conceptual_info: The shim serves as a gatekeeper that ensures workflow objectives
+          are well‑formed before they are used to generate tasks, preventing downstream
+          errors and improving overall workflow quality.
+        docstring:
+          examples:
+          - lines:
+            - validate_workflow_objective('Collect market data')
+            output: '''Collect market data'''
+          - lines:
+            - validate_workflow_objective('  Plan project timeline  ')
+            output: '''Plan project timeline'''
+          parameters:
+          - description: The raw workflow objective string provided by the user.
+            name: objective
+            type: str
+          raises:
+          - description: Raised when the objective is empty or fails validation checks.
+            type: ValueError
+          - description: Raised when the provided objective is not of type `str`.
+            type: TypeError
+          returns:
+            description: A trimmed, non‑empty objective string ready for further processing.
+            type: str
+          summary: Validate and normalize a workflow objective string.
+      prompt: Implement the function `validate_workflow_objective` that takes a string
+        `objective`, ensures it is non‑empty, trims whitespace, and returns a clean
+        objective string. Raise `ValueError` for empty or invalid objectives and `TypeError`
+        if the input is not a string.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Parses a workflow objective string into a list of its constituent
+        components.
+      implementation: "from typing import List\n\n\ndef parse_objective_components(objective:\
+        \ str) -> List[str]:\n    \"\"\"\n    Parses the provided objective string\
+        \ into a list of its constituent\n    components.\n\n    Parameters\n    ----------\n\
+        \    objective : str\n        A validated workflow objective string to be\
+        \ parsed.\n\n    Returns\n    -------\n    List[str]\n        A list of strings,\
+        \ each representing an actionable component of the\n        objective.\n\n\
+        \    Raises\n    ------\n    ValueError\n        Raised when the objective\
+        \ string cannot be parsed into any\n        component.\n    TypeError\n  \
+        \      Raised when the provided objective is not of type str.\n\n    Examples\n\
+        \    --------\n    >>> parsed = parse_objective_components('Build a web app\
+        \ that allows users\n    to upload photos and share them with friends')\n\
+        \    >>> print(parsed)\n    ['Build a web app', 'allow users to upload photos',\
+        \ 'share them with\n    friends']\n\n    >>> parsed = parse_objective_components('Create\
+        \ a financial model to\n    forecast quarterly earnings')\n    >>> print(parsed)\n\
+        \    ['Create a financial model', 'forecast quarterly earnings']\n\n    \"\
+        \"\"\n    raise NotImplementedError(\"This is a virtual stub node that needs\
+        \ to be implemented\")"
+      name: parse_objective_components
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: objective
+        type: str
+      prd:
+        conceptual_info: This shim takes a validated workflow objective string and
+          splits it into individual, actionable components that can later be used
+          to generate tasks.
+        docstring:
+          examples:
+          - lines:
+            - parsed = parse_objective_components('Build a web app that allows users
+              to upload photos and share them with friends')
+            - print(parsed)
+            output: '[''Build a web app'', ''allow users to upload photos'', ''share
+              them with friends'']'
+          - lines:
+            - parsed = parse_objective_components('Create a financial model to forecast
+              quarterly earnings')
+            - print(parsed)
+            output: '[''Create a financial model'', ''forecast quarterly earnings'']'
+          parameters:
+          - description: A validated workflow objective string to be parsed.
+            name: objective
+            type: str
+          raises:
+          - description: Raised when the objective string cannot be parsed into any
+              component.
+            type: ValueError
+          - description: Raised when the provided objective is not of type str.
+            type: TypeError
+          returns:
+            description: A list of strings, each representing an actionable component
+              of the objective.
+            type: List[str]
+          summary: Parses the provided objective string into a list of its constituent
+            components.
+      prompt: Extract discrete, actionable components from a validated workflow objective
+        string.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Generates a list of task descriptions from the given components
+        and high‑level objective.
+      implementation: "from typing import List\n\n\ndef generate_task_sequence(components:\
+        \ str, objective: str) -> List[str]:\n    \"\"\"\n    Generates a sequence\
+        \ of task descriptions based on input components and the\n    overarching\
+        \ objective.\n\n    Parameters\n    ----------\n    components : List[str]\n\
+        \        A list of strings describing sub‑components or steps that constitute\n\
+        \        the objective.\n    objective : str\n        A concise, high‑level\
+        \ statement of the goal to be achieved.\n\n    Returns\n    -------\n    List[str]\n\
+        \        A list of task descriptions, each string representing an actionable\n\
+        \        step toward the objective.\n\n    Raises\n    ------\n    ValueError\n\
+        \        Raised when either `components` or `objective` is empty.\n    TypeError\n\
+        \        Raised when `components` is not a list of strings or `objective`\
+        \ is\n        not a string.\n\n    Examples\n    --------\n    >>> components\
+        \ = [\"collect data\", \"clean data\", \"visualize results\"],\n    >>> objective\
+        \ = \"Produce a clean data set ready for analysis\",\n    >>> output = generate_task_sequence(components=components,\n\
+        \    objective=objective),\n    >>> print(output)\n    [\"Collect data from\
+        \ sources\", \"Clean the collected data\", \"Visualize the\n    cleaned data\"\
+        ]\n\n    >>> components = [\"draft email\", \"review email\"],\n    >>> objective\
+        \ = \"Send an email to the team\",\n    >>> output = generate_task_sequence(components=components,\n\
+        \    objective=objective),\n    >>> print(output)\n    [\"Draft the email\"\
+        , \"Review the email for accuracy\"]\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: generate_task_sequence
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: components
+        type: str
+      - description: Input parameter of type str
+        key: objective
+        type: str
+      prd:
+        conceptual_info: The generate_task_sequence shim translates a decomposed set
+          of components and an overall objective into actionable task descriptions,
+          forming a bridge between high‑level planning and low‑level execution steps.
+        docstring:
+          examples:
+          - lines:
+            - components = ["collect data", "clean data", "visualize results"],
+            - objective = "Produce a clean data set ready for analysis",
+            - output = generate_task_sequence(components=components, objective=objective),
+            - print(output)
+            output: '["Collect data from sources", "Clean the collected data", "Visualize
+              the cleaned data"]'
+          - lines:
+            - components = ["draft email", "review email"],
+            - objective = "Send an email to the team",
+            - output = generate_task_sequence(components=components, objective=objective),
+            - print(output)
+            output: '["Draft the email", "Review the email for accuracy"]'
+          parameters:
+          - description: A list of strings describing sub‑components or steps that
+              constitute the objective.
+            name: components
+            type: List[str]
+          - description: A concise, high‑level statement of the goal to be achieved.
+            name: objective
+            type: str
+          raises:
+          - description: Raised when either `components` or `objective` is empty.
+            type: ValueError
+          - description: Raised when `components` is not a list of strings or `objective`
+              is not a string.
+            type: TypeError
+          returns:
+            description: A list of task descriptions, each string representing an
+              actionable step toward the objective.
+            type: List[str]
+          summary: Generates a sequence of task descriptions based on input components
+            and the overarching objective.
+      prompt: "Generate a list of task descriptions based on the provided components\
+        \ and objective.\n\n**Parameters**\n- `components`: a list of strings describing\
+        \ sub‑components of the objective.\n- `objective`: the high‑level goal expressed\
+        \ as a sentence.\n\n**Return**\n- `output`: a list of strings, each string\
+        \ being a concrete task that collectively achieves the objective.\n\n**Raises**\n\
+        - `ValueError` if either `components` or `objective` is empty.\n- `TypeError`\
+        \ if inputs are not of the expected types.\n\n**Usage**\n```python\noutput\
+        \ = generate_task_sequence(\n    components=[\"collect data\", \"clean data\"\
+        , \"visualize results\"],\n    objective=\"Produce a clean data set ready\
+        \ for analysis\"\n)\nprint(output)\n```"
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Refines a list of task descriptions into clearer, more actionable
+        steps.
+      implementation: "from typing import List\n\n\ndef refine_task_descriptions(tasks:\
+        \ str) -> List[str]:\n    \"\"\"\n    Refines a list of task descriptions\
+        \ into more detailed, actionable steps.\n\n    Parameters\n    ----------\n\
+        \    tasks : List[str]\n        A list of task descriptions that represent\
+        \ the decomposed workflow\n        objective.\n\n    Returns\n    -------\n\
+        \    List[str]\n        A list of refined task descriptions, each more detailed\
+        \ and\n        actionable than the input.\n\n    Raises\n    ------\n    ValueError\n\
+        \        If any task description is empty or not a string.\n    TypeError\n\
+        \        If the input `tasks` is not a list of strings.\n\n    Examples\n\
+        \    --------\n    >>> tasks = ['Collect data', 'Process data']\n    >>> refined\
+        \ = refine_task_descriptions(tasks=tasks)\n    >>> print(refined)\n    ['Collect\
+        \ raw data from specified sources', 'Process collected data using\n    predefined\
+        \ transformation steps']\n\n    >>> tasks = ['Write report']\n    >>> refined\
+        \ = refine_task_descriptions(tasks=tasks)\n    >>> print(refined)\n    ['Write\
+        \ a comprehensive report detailing findings, methodology, and\n    recommendations']\n\
+        \n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node\
+        \ that needs to be implemented\")"
+      name: refine_task_descriptions
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: tasks
+        type: str
+      prd:
+        conceptual_info: The shim takes a sequence of high-level tasks and elaborates
+          them into detailed, actionable steps that can be directly executed.
+        docstring:
+          examples:
+          - lines:
+            - tasks = ['Collect data', 'Process data']
+            - refined = refine_task_descriptions(tasks=tasks)
+            - print(refined)
+            output: '[''Collect raw data from specified sources'', ''Process collected
+              data using predefined transformation steps'']'
+          - lines:
+            - tasks = ['Write report']
+            - refined = refine_task_descriptions(tasks=tasks)
+            - print(refined)
+            output: '[''Write a comprehensive report detailing findings, methodology,
+              and recommendations'']'
+          parameters:
+          - description: A list of task descriptions that represent the decomposed
+              workflow objective.
+            name: tasks
+            type: List[str]
+          raises:
+          - description: If any task description is empty or not a string.
+            type: ValueError
+          - description: If the input `tasks` is not a list of strings.
+            type: TypeError
+          returns:
+            description: A list of refined task descriptions, each more detailed and
+              actionable than the input.
+            type: List[str]
+          summary: Refines a list of task descriptions into more detailed, actionable
+            steps.
+      prompt: Refine the following list of task descriptions into clearer, more actionable
+        steps.
+      shims: []
+  define_workflow_objective:
+    agent: false
+    code_node_type: shim
+    description: Define the objective of the workflow
+    implementation: "from ._define_workflow_objective.parse_user_input import parse_user_input\n\
+      from ._define_workflow_objective.extract_requirements import extract_requirements\n\
+      from ._define_workflow_objective.identify_domain import identify_domain\nfrom\
+      \ ._define_workflow_objective.generate_objective_statement import generate_objective_statement\n\
+      from ._define_workflow_objective.validate_objective_length import validate_objective_length\n\
+      from ._define_workflow_objective.refine_objective_clarity import refine_objective_clarity\n\
+      \nfrom ._define_workflow_objective.parse_user_input import parse_user_input\n\
+      from ._define_workflow_objective.extract_requirements import extract_requirements\n\
+      from ._define_workflow_objective.identify_domain import identify_domain\nfrom\
+      \ ._define_workflow_objective.generate_objective_statement import generate_objective_statement\n\
+      from ._define_workflow_objective.validate_objective_length import validate_objective_length\n\
+      from ._define_workflow_objective.refine_objective_clarity import refine_objective_clarity\n\
+      \nfrom pydantic import BaseModel, Field\n\n\nclass DefineWorkflowObjectiveOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for define_workflow_objective node outputs.\"\"\"\n\
+      \    workflow_objective: str = (\n        Field(..., description = (\n     \
+      \       \"The primary goal of the workflow expressed as a concise statement.\"\
+      )\n        )\n    )\n\n\ndef define_workflow_objective(general_input: str, **kwargs)\
+      \ -> DefineWorkflowObjectiveOutput:\n    \"\"\"\n    Generate a concise objective\
+      \ statement for the workflow based on the user’s\n    intent.\n\n    Returns\n\
+      \    -------\n    str\n        Concise objective of the workflow.\n\n    Raises\n\
+      \    ------\n    ValueError\n        If the generated objective is empty or\
+      \ exceeds an acceptable length.\n\n    Examples\n    --------\n    >>> objective\
+      \ = define_workflow_objective()\n    'Implement an automated data ingestion\
+      \ pipeline for real‑time analytics'\n\n    >>> objective = define_workflow_objective()\n\
+      \    'Develop a user‑friendly mobile application for inventory management'\n\
+      \n    \"\"\"\n    parsed_user_intent: dict = parse_user_input(input_text=general_input)\n\
+      \    key_requirements: list = extract_requirements(parsed_intent=parsed_user_intent)\n\
+      \    domain_context: str = identify_domain(requirements=key_requirements)\n\
+      \    raw_objective: str = generate_objective_statement(requirements=key_requirements,\
+      \ domain=domain_context)\n    validated_objective: str = validate_objective_length(objective=raw_objective)\n\
+      \    if not validated_objective:\n        raise ValueError(\"Generated objective\
+      \ is empty\")\n    final_objective: str = refine_objective_clarity(objective=validated_objective)\n\
+      \    return DefineWorkflowObjectiveOutput(\n        workflow_objective=final_objective,\n\
+      \    )"
+    name: define_workflow_objective
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    output_structure:
+    - description: The primary goal of the workflow expressed as a concise statement.
+      key: workflow_objective
+      type: str
+    prd:
+      conceptual_info: Captures the high‑level purpose of the workflow, providing
+        a clear goal that drives the subsequent task decomposition, dependency analysis,
+        and DAG construction.
+      docstring:
+        examples:
+        - lines:
+          - objective = define_workflow_objective()
+          output: '''Implement an automated data ingestion pipeline for real‑time
+            analytics'''
+        - lines:
+          - objective = define_workflow_objective()
+          output: '''Develop a user‑friendly mobile application for inventory management'''
+        parameters: []
+        raises:
+        - description: If the generated objective is empty or exceeds an acceptable
+            length.
+          type: ValueError
+        returns:
+          description: Concise objective of the workflow.
+          type: str
+        summary: Generate a concise objective statement for the workflow based on
+          the user’s intent.
+    prompt: Clearly articulate the primary goal of the workflow. What is it intended
+      to achieve?
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Parses a raw user input string into a structured dictionary representation
+        of the user's intent for workflow generation.
+      implementation: "def parse_user_input(input_text: str) -> str:\n    \"\"\"\n\
+        \    Parse a user-provided text string into a JSON-formatted dictionary of\
+        \ intent\n    and parameters.\n\n    Parameters\n    ----------\n    input_text\
+        \ : str\n        The raw input text from the user to be parsed.\n\n    Returns\n\
+        \    -------\n    str\n        A JSON string that maps keys such as 'intent',\
+        \ 'parameters', etc.,\n        representing the parsed user intent.\n\n  \
+        \  Raises\n    ------\n    ValueError\n        Raised when the input text\
+        \ cannot be parsed into a valid intent\n        dictionary.\n    TypeError\n\
+        \        Raised when input_text is not of type str.\n\n    Examples\n    --------\n\
+        \    >>> parse_user_input('Book me a flight to Paris next Monday')\n    '{\"\
+        intent\": \"book_flight\", \"destination\": \"Paris\", \"date\": \"next Monday\"\
+        }'\n\n    >>> parse_user_input('Show me the weather in New York')\n    '{\"\
+        intent\": \"get_weather\", \"location\": \"New York\"}'\n\n    \"\"\"\n  \
+        \  raise NotImplementedError(\"This is a virtual stub node that needs to be\
+        \ implemented\")"
+      name: parse_user_input
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type dict
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: input_text
+        type: str
+      prd:
+        conceptual_info: This shim function serves as the initial natural language
+          processing step, converting free-text user input into a structured dictionary
+          that downstream workflow components can consume.
+        docstring:
+          examples:
+          - lines:
+            - parse_user_input('Book me a flight to Paris next Monday')
+            output: '''{"intent": "book_flight", "destination": "Paris", "date": "next
+              Monday"}'''
+          - lines:
+            - parse_user_input('Show me the weather in New York')
+            output: '''{"intent": "get_weather", "location": "New York"}'''
+          parameters:
+          - description: The raw input text from the user to be parsed.
+            name: input_text
+            type: str
+          raises:
+          - description: Raised when the input text cannot be parsed into a valid
+              intent dictionary.
+            type: ValueError
+          - description: Raised when input_text is not of type str.
+            type: TypeError
+          returns:
+            description: A JSON string that maps keys such as 'intent', 'parameters',
+              etc., representing the parsed user intent.
+            type: str
+          summary: Parse a user-provided text string into a JSON-formatted dictionary
+            of intent and parameters.
+      prompt: Given a raw user input string, parse it and return a JSON-formatted
+        dictionary representing the user's intent, including intent type and relevant
+        parameters.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Extracts a list of key requirements from a parsed user intent dictionary.
+      implementation: "def extract_requirements(parsed_intent: str) -> str:\n    \"\
+        \"\"\n    Extracts key requirement statements from the parsed intent dictionary.\n\
+        \n    Parameters\n    ----------\n    parsed_intent : dict\n        A dictionary\
+        \ representation of the user input that has already been\n        parsed by\
+        \ the `parse_user_input` function.\n\n    Returns\n    -------\n    list[str]\n\
+        \        A list of strings, each representing a distinct requirement derived\n\
+        \        from the parsed intent.\n\n    Raises\n    ------\n    TypeError\n\
+        \        Raised if `parsed_intent` is not a dictionary.\n    ValueError\n\
+        \        Raised if no valid requirements can be extracted from the input.\n\
+        \n    Examples\n    --------\n    >>> parsed_user_intent = {\n    ...    \
+        \ 'intent': 'Book a flight',\n    ...     'entities': {\n    ...         'destination':\
+        \ 'New York',\n    ...         'departure_date': '2025-08-15',\n    ...  \
+        \       'return_date': '2025-08-20' }\n    >>> } \n    >>> requirements =\
+        \ extract_requirements(parsed_user_intent)\n    ['Destination: New York',\
+        \ 'Departure date: 2025-08-15', 'Return date:\n    2025-08-20']\n\n    >>>\
+        \ extract_requirements({})\n    ValueError: No requirements extracted from\
+        \ the parsed intent.\n\n    \"\"\"\n    raise NotImplementedError(\"This is\
+        \ a virtual stub node that needs to be implemented\")"
+      name: extract_requirements
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type list
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: parsed_intent
+        type: str
+      prd:
+        conceptual_info: The shim analyzes the structure of a parsed user intent to
+          pull out actionable requirement statements, which are later used to identify
+          domain context and generate objective statements.
+        docstring:
+          examples:
+          - lines:
+            - parsed_user_intent = {
+            - '    ''intent'': ''Book a flight'','
+            - '    ''entities'': {'
+            - '        ''destination'': ''New York'','
+            - '        ''departure_date'': ''2025-08-15'','
+            - '        ''return_date'': ''2025-08-20'' }'
+            - '} '
+            - requirements = extract_requirements(parsed_user_intent)
+            output: '[''Destination: New York'', ''Departure date: 2025-08-15'', ''Return
+              date: 2025-08-20'']'
+          - lines:
+            - extract_requirements({})
+            output: 'ValueError: No requirements extracted from the parsed intent.'
+          parameters:
+          - description: A dictionary representation of the user input that has already
+              been parsed by the `parse_user_input` function.
+            name: parsed_intent
+            type: dict
+          raises:
+          - description: Raised if `parsed_intent` is not a dictionary.
+            type: TypeError
+          - description: Raised if no valid requirements can be extracted from the
+              input.
+            type: ValueError
+          returns:
+            description: A list of strings, each representing a distinct requirement
+              derived from the parsed intent.
+            type: list[str]
+          summary: Extracts key requirement statements from the parsed intent dictionary.
+      prompt: Implement a function that accepts a parsed user intent dictionary and
+        returns a list of strings describing the key requirements needed to fulfill
+        the user's intent.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Identifies the domain context from a list of key requirements.
+      implementation: "def identify_domain(requirements: str) -> str:\n    \"\"\"\n\
+        \    Determines the domain of a workflow from a list of requirement strings.\n\
+        \n    Parameters\n    ----------\n    requirements : List[str]\n        A\
+        \ list of textual requirement statements extracted from the user\n       \
+        \ intent.\n\n    Returns\n    -------\n    str\n        A concise domain context\
+        \ string (e.g., \"Web Development\", \"Business\n        Intelligence\") derived\
+        \ from the input requirements.\n\n    Raises\n    ------\n    ValueError\n\
+        \        Raised when the function cannot infer a domain or returns an empty\n\
+        \        string.\n    TypeError\n        Raised when the input is not a list\
+        \ of strings.\n\n    Examples\n    --------\n    >>> identify_domain(['develop\
+        \ a web application', 'implement user\n    authentication'])\n    'Web Development'\n\
+        \n    >>> identify_domain(['analyze market trends', 'create financial reports'])\n\
+        \    'Business Intelligence'\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: identify_domain
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: requirements
+        type: str
+      prd:
+        conceptual_info: The `identify_domain` shim is a critical intermediary that
+          interprets a set of key requirements extracted from user intent and translates
+          them into a high‑level domain context string. This domain context is subsequently
+          used by downstream functions to generate and validate objective statements
+          within the correct domain.
+        docstring:
+          examples:
+          - lines:
+            - identify_domain(['develop a web application', 'implement user authentication'])
+            output: '''Web Development'''
+          - lines:
+            - identify_domain(['analyze market trends', 'create financial reports'])
+            output: '''Business Intelligence'''
+          parameters:
+          - description: A list of textual requirement statements extracted from the
+              user intent.
+            name: requirements
+            type: List[str]
+          raises:
+          - description: Raised when the function cannot infer a domain or returns
+              an empty string.
+            type: ValueError
+          - description: Raised when the input is not a list of strings.
+            type: TypeError
+          returns:
+            description: A concise domain context string (e.g., "Web Development",
+              "Business Intelligence") derived from the input requirements.
+            type: str
+          summary: Determines the domain of a workflow from a list of requirement
+            strings.
+      prompt: 'Given the following list of key requirements, identify the domain context:
+        **{requirements}**'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Generates a concise objective statement for a workflow given a
+        list of requirements and a domain context.
+      implementation: "def generate_objective_statement(requirements: str, domain:\
+        \ str) -> str:\n    \"\"\"\n    Generate a concise objective statement for\
+        \ a workflow from given\n    requirements and domain.\n\n    Parameters\n\
+        \    ----------\n    requirements : str\n        A string (or stringified\
+        \ list) representing the key requirements\n        that the objective must\
+        \ satisfy.\n    domain : str\n        The domain or context within which the\
+        \ workflow operates, used to\n        tailor the objective language.\n\n \
+        \   Returns\n    -------\n    str\n        A single sentence that succinctly\
+        \ describes the primary goal of the\n        workflow.\n\n    Raises\n   \
+        \ ------\n    ValueError\n        Raised when the generated objective statement\
+        \ is empty or contains\n        only whitespace.\n    TypeError\n        Raised\
+        \ if either 'requirements' or 'domain' is not a string.\n\n    Examples\n\
+        \    --------\n    >>> output = generate_objective_statement(requirements='Build\
+        \ an API',\n    domain='Software Development')\n    'Develop a scalable REST\
+        \ API for user authentication.'\n\n    >>> output = generate_objective_statement(requirements='Improve\
+        \ customer\n    onboarding', domain='E-commerce')\n    'Streamline the onboarding\
+        \ process to reduce drop‑off rates by 30% in the\n    e‑commerce platform.'\n\
+        \n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node\
+        \ that needs to be implemented\")"
+      name: generate_objective_statement
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: requirements
+        type: str
+      - description: Input parameter of type str
+        key: domain
+        type: str
+      prd:
+        conceptual_info: This shim produces a high‑level goal statement for a workflow.
+          It takes the extracted requirements and the identified domain, then synthesizes
+          a clear, actionable objective that guides the subsequent steps of the workflow.
+        docstring:
+          examples:
+          - lines:
+            - output = generate_objective_statement(requirements='Build an API', domain='Software
+              Development')
+            output: '''Develop a scalable REST API for user authentication.'''
+          - lines:
+            - output = generate_objective_statement(requirements='Improve customer
+              onboarding', domain='E-commerce')
+            output: '''Streamline the onboarding process to reduce drop‑off rates
+              by 30% in the e‑commerce platform.'''
+          parameters:
+          - description: A string (or stringified list) representing the key requirements
+              that the objective must satisfy.
+            name: requirements
+            type: str
+          - description: The domain or context within which the workflow operates,
+              used to tailor the objective language.
+            name: domain
+            type: str
+          raises:
+          - description: Raised when the generated objective statement is empty or
+              contains only whitespace.
+            type: ValueError
+          - description: Raised if either 'requirements' or 'domain' is not a string.
+            type: TypeError
+          returns:
+            description: A single sentence that succinctly describes the primary goal
+              of the workflow.
+            type: str
+          summary: Generate a concise objective statement for a workflow from given
+            requirements and domain.
+      prompt: Given a list of requirements and a domain context, generate a concise
+        objective statement that captures the primary goal of the workflow.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates that a provided objective string meets predefined length
+        constraints and returns it unchanged or an empty string if invalid.
+      implementation: "def validate_objective_length(objective: str) -> str:\n   \
+        \ \"\"\"\n    Validates that an objective string satisfies minimum and maximum\
+        \ length\n    constraints and returns the string if valid, or an empty string\
+        \ otherwise.\n\n    Parameters\n    ----------\n    objective : str\n    \
+        \    The objective statement to validate.\n\n    Returns\n    -------\n  \
+        \  str\n        The validated objective string if it meets length constraints;\n\
+        \        otherwise an empty string.\n\n    Raises\n    ------\n    TypeError\n\
+        \        Raised when the input `objective` is not of type `str`.\n    ValueError\n\
+        \        Raised when the input `objective` is `None`.\n\n    Examples\n  \
+        \  --------\n    >>> validate_objective_length('Develop a comprehensive data\
+        \ pipeline')\n    'Develop a comprehensive data pipeline'\n\n    >>> validate_objective_length('Short')\n\
+        \    ''\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub\
+        \ node that needs to be implemented\")"
+      name: validate_objective_length
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: objective
+        type: str
+      prd:
+        conceptual_info: The shim ensures that any objective statement produced by
+          upstream generation logic conforms to length constraints before further
+          processing, acting as a safety net against malformed or overly brief objectives.
+        docstring:
+          examples:
+          - lines:
+            - validate_objective_length('Develop a comprehensive data pipeline')
+            output: '''Develop a comprehensive data pipeline'''
+          - lines:
+            - validate_objective_length('Short')
+            output: ''''''
+          parameters:
+          - description: The objective statement to validate.
+            name: objective
+            type: str
+          raises:
+          - description: Raised when the input `objective` is not of type `str`.
+            type: TypeError
+          - description: Raised when the input `objective` is `None`.
+            type: ValueError
+          returns:
+            description: The validated objective string if it meets length constraints;
+              otherwise an empty string.
+            type: str
+          summary: Validates that an objective string satisfies minimum and maximum
+            length constraints and returns the string if valid, or an empty string
+            otherwise.
+      prompt: Implement a function `validate_objective_length` that accepts a single
+        string argument `objective`. The function should return the original string
+        if its length is between MIN_LENGTH and MAX_LENGTH characters inclusive; otherwise
+        it should return an empty string. The function must raise a TypeError if the
+        input is not a string and a ValueError if the input is None.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Refines a workflow objective statement to be clearer, more concise,
+        and grammatically correct.
+      implementation: "def refine_objective_clarity(objective: str) -> str:\n    \"\
+        \"\"\n    Refine the clarity of an objective statement.\n\n    Parameters\n\
+        \    ----------\n    objective : str\n        The objective statement to refine.\n\
+        \n    Returns\n    -------\n    str\n        A refined, concise version of\
+        \ the original objective.\n\n    Raises\n    ------\n    ValueError\n    \
+        \    If the input objective is an empty string after stripping.\n    TypeError\n\
+        \        If the input is not a string.\n\n    Examples\n    --------\n   \
+        \ >>> refine_objective_clarity('Improve the user experience and increase the\n\
+        \    engagement rates in the next quarter.')\n    'Improve user experience\
+        \ and increase engagement rates by the next quarter.'\n\n    >>> refine_objective_clarity('Ensure\
+        \ the objective is clear.')\n    'Ensure the objective is clear.'\n\n    \"\
+        \"\"\n    raise NotImplementedError(\"This is a virtual stub node that needs\
+        \ to be implemented\")"
+      name: refine_objective_clarity
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: objective
+        type: str
+      prd:
+        conceptual_info: The shim improves the readability and precision of an objective
+          string, making it suitable for final workflow documentation.
+        docstring:
+          examples:
+          - lines:
+            - refine_objective_clarity('Improve the user experience and increase the
+              engagement rates in the next quarter.')
+            output: '''Improve user experience and increase engagement rates by the
+              next quarter.'''
+          - lines:
+            - refine_objective_clarity('Ensure the objective is clear.')
+            output: '''Ensure the objective is clear.'''
+          parameters:
+          - description: The objective statement to refine.
+            name: objective
+            type: str
+          raises:
+          - description: If the input objective is an empty string after stripping.
+            type: ValueError
+          - description: If the input is not a string.
+            type: TypeError
+          returns:
+            description: A refined, concise version of the original objective.
+            type: str
+          summary: Refine the clarity of an objective statement.
+      prompt: Refine the clarity of the given objective string by ensuring it is concise,
+        unambiguous, and grammatically correct.
+      shims: []
+  finalize_workflow:
+    agent: false
+    code_node_type: shim
+    description: Finalize the workflow DAG
+    implementation: "from ._finalize_workflow.parse_cycles_from_string import parse_cycles_from_string\n\
+      from ._finalize_workflow.parse_missing_dependencies_from_string import parse_missing_dependencies_from_string\n\
+      from ._finalize_workflow.remove_cycles_from_dag import remove_cycles_from_dag\n\
+      from ._finalize_workflow.generate_cycle_removal_warnings import generate_cycle_removal_warnings\n\
+      from ._finalize_workflow.resolve_missing_dependencies import resolve_missing_dependencies\n\
+      from ._finalize_workflow.generate_dependency_warnings import generate_dependency_warnings\n\
+      from ._finalize_workflow.topological_sort_tasks import topological_sort_tasks\n\
+      from ._finalize_workflow.generate_dag_representation import generate_dag_representation\n\
+      from ._finalize_workflow.check_final_dag_validity import check_final_dag_validity\n\
+      from ._finalize_workflow.generate_summary import generate_summary\nfrom ._finalize_workflow.serialize_task_list\
+      \ import serialize_task_list\nfrom ._finalize_workflow.serialize_dependencies_list\
+      \ import serialize_dependencies_list\nfrom ._finalize_workflow.serialize_cycles_list\
+      \ import serialize_cycles_list\nfrom ._finalize_workflow.serialize_warnings_list\
+      \ import serialize_warnings_list\n\nfrom ._finalize_workflow.parse_cycles_from_string\
+      \ import parse_cycles_from_string\nfrom ._finalize_workflow.parse_missing_dependencies_from_string\
+      \ import parse_missing_dependencies_from_string\nfrom ._finalize_workflow.remove_cycles_from_dag\
+      \ import remove_cycles_from_dag\nfrom ._finalize_workflow.generate_cycle_removal_warnings\
+      \ import generate_cycle_removal_warnings\nfrom ._finalize_workflow.resolve_missing_dependencies\
+      \ import resolve_missing_dependencies\nfrom ._finalize_workflow.generate_dependency_warnings\
+      \ import generate_dependency_warnings\nfrom ._finalize_workflow.topological_sort_tasks\
+      \ import topological_sort_tasks\nfrom ._finalize_workflow.generate_dag_representation\
+      \ import generate_dag_representation\nfrom ._finalize_workflow.check_final_dag_validity\
+      \ import check_final_dag_validity\nfrom ._finalize_workflow.generate_summary\
+      \ import generate_summary\nfrom ._finalize_workflow.serialize_task_list import\
+      \ serialize_task_list\nfrom ._finalize_workflow.serialize_dependencies_list\
+      \ import serialize_dependencies_list\nfrom ._finalize_workflow.serialize_cycles_list\
+      \ import serialize_cycles_list\nfrom ._finalize_workflow.serialize_warnings_list\
+      \ import serialize_warnings_list\n\nfrom pydantic import BaseModel, Field\n\n\
+      \nclass ValidateDagOutput(BaseModel):\n    \"\"\"Pydantic model for validate_dag\
+      \ node outputs.\"\"\"\n    is_valid: bool = (\n        Field(..., description\
+      \ = (\n            \"Indicates whether the DAG passes all validation checks.\"\
+      )\n        )\n    )\n    node_count: int = (\n        Field(..., description=\"\
+      Total number of nodes present in the DAG.\")\n    )\n    edge_count: int = (\n\
+      \        Field(..., description=\"Total number of directed edges in the DAG.\"\
+      )\n    )\n    cycles_detected: str = (\n        Field(..., description = (\n\
+      \            \"List of cycle identifiers or descriptions found in the DAG (empty\
+      \ if none).\")\n        )\n    )\n    missing_dependencies: str = (\n      \
+      \  Field(..., description = (\n            \"List of node names that reference\
+      \ non\\u2011existent dependencies (empty if none).\")\n        )\n    )\n  \
+      \  errors: str = (\n        Field(..., description = (\n            \"Detailed\
+      \ error messages for any validation failures.\")\n        )\n    )\n\n\nclass\
+      \ FinalizeWorkflowOutput(BaseModel):\n    \"\"\"Pydantic model for finalize_workflow\
+      \ node outputs.\"\"\"\n    dag_representation: str = (\n        Field(..., description\
+      \ = (\n            \"String representation of the finalized DAG, e.g., serialized\
+      \ adjacency list or other format.\")\n        )\n    )\n    is_valid: bool =\
+      \ (\n        Field(..., description = (\n            \"Whether the finalized\
+      \ DAG is valid and acyclic.\")\n        )\n    )\n    adjustments_made: bool\
+      \ = (\n        Field(..., description = (\n            \"Whether any adjustments\
+      \ were made to the DAG during finalization.\")\n        )\n    )\n    adjusted_task_order:\
+      \ str = (\n        Field(..., description = (\n            \"Ordered list of\
+      \ task identifiers in the finalized DAG.\")\n        )\n    )\n    missing_dependencies:\
+      \ str = (\n        Field(..., description = (\n            \"List of task identifiers\
+      \ that have missing or unresolved dependencies.\")\n        )\n    )\n    cycles_detected:\
+      \ str = (\n        Field(..., description=\"List of detected cycles in the DAG,\
+      \ if any.\")\n    )\n    warnings: str = (\n        Field(..., description=\"\
+      Any warnings or notes about potential issues.\")\n    )\n    summary: str =\
+      \ (\n        Field(..., description = (\n            \"Short textual summary\
+      \ of the finalized workflow.\")\n        )\n    )\n\n\ndef finalize_workflow(validate_dag_input:\
+      \ ValidateDagOutput, **kwargs) -> FinalizeWorkflowOutput:\n    \"\"\"\n    Finalize\
+      \ a workflow DAG by validating its structure, resolving missing\n    dependencies,\
+      \ removing cycles, and ordering tasks.\n\n    Parameters\n    ----------\n \
+      \   task_ids : List[str]\n        Unique identifiers of all tasks in the DAG.\n\
+      \    edge_sources : List[str]\n        Source task identifiers for each directed\
+      \ edge.\n    edge_destinations : List[str]\n        Destination task identifiers\
+      \ for each directed edge.\n    is_valid : bool\n        Result of the validation\
+      \ step (True if the DAG passed all checks).\n    node_count : int\n        Total\
+      \ number of nodes in the DAG.\n    edge_count : int\n        Total number of\
+      \ directed edges in the DAG.\n    cycles_detected : List[str]\n        List\
+      \ of cycle identifiers found during validation.\n    missing_dependencies :\
+      \ List[str]\n        List of node names that reference non‑existent dependencies.\n\
+      \    errors : List[str]\n        Detailed error messages from the validation\
+      \ step.\n\n    Returns\n    -------\n    Dict[str, Any]\n        A dictionary\
+      \ containing the finalized DAG representation and\n        metadata: dag_representation\
+      \ (str), is_valid (bool),\n        adjustments_made (bool), adjusted_task_order\
+      \ (List[str]),\n        missing_dependencies (List[str]), cycles_detected (List[str]),\n\
+      \        warnings (List[str]), and summary (str).\n\n    Raises\n    ------\n\
+      \    ValueError\n        If any required input lists are empty or lengths of\
+      \ edge_sources and\n        edge_destinations mismatch.\n\n    Examples\n  \
+      \  --------\n    >>> dag = finalize_workflow(\n\n    ...     task_ids=['A',\
+      \ 'B', 'C'],\n\n    ...     edge_sources=['A', 'B'],\n\n    ...     edge_destinations=['B',\
+      \ 'C'],\n\n    ...     is_valid=True,\n\n    ...     node_count=3,\n\n    ...\
+      \     edge_count=2,\n\n    ...     cycles_detected=[],\n\n    ...     missing_dependencies=[],\n\
+      \n    ...     errors=[]\n\n    >>> )\n    {'dag_representation': 'A -> B ->\
+      \ C', 'is_valid': True, 'adjustments_made':\n    False, 'adjusted_task_order':\
+      \ ['A', 'B', 'C'], 'missing_dependencies': [],\n    'cycles_detected': [], 'warnings':\
+      \ [], 'summary': 'DAG finalized\n    successfully.'}\n\n    >>> dag = finalize_workflow(\n\
+      \n    ...     task_ids=['A', 'B', 'C'],\n\n    ...     edge_sources=['A', 'B',\
+      \ 'C'],\n\n    ...     edge_destinations=['B', 'C', 'A'],\n\n    ...     is_valid=False,\n\
+      \n    ...     node_count=3,\n\n    ...     edge_count=3,\n\n    ...     cycles_detected=['A->B->C->A'],\n\
+      \n    ...     missing_dependencies=[],\n\n    ...     errors=['Cycle detected']\n\
+      \n    >>> )\n    {'dag_representation': 'A -> B -> C', 'is_valid': False, 'adjustments_made':\n\
+      \    True, 'adjusted_task_order': ['A', 'B', 'C'], 'missing_dependencies': [],\n\
+      \    'cycles_detected': ['A->B->C->A'], 'warnings': ['Cycle removed:\n    A->B->C->A'],\
+      \ 'summary': 'DAG finalized with cycle removal.'}\n\n    \"\"\"\n    parsed_cycles:\
+      \ list = parse_cycles_from_string(cycles_str=validate_dag_input.cycles_detected)\n\
+      \    parsed_missing_deps: list = parse_missing_dependencies_from_string(deps_str=validate_dag_input.missing_dependencies)\n\
+      \    \n    adjustments_made: bool = False\n    warnings: list = []\n    \n \
+      \   if not validate_dag_input.is_valid:\n        if parsed_cycles:\n       \
+      \     remove_cycles_from_dag(cycles=parsed_cycles)\n            warnings.extend(generate_cycle_removal_warnings(cycles=parsed_cycles))\n\
+      \            adjustments_made = True\n        \n        if parsed_missing_deps:\n\
+      \            resolve_missing_dependencies(missing_deps=parsed_missing_deps)\n\
+      \            warnings.extend(generate_dependency_warnings(missing_deps=parsed_missing_deps))\n\
+      \            adjustments_made = True\n    \n    ordered_tasks: list = topological_sort_tasks(node_count=validate_dag_input.node_count,\
+      \ edge_count=validate_dag_input.edge_count)\n    dag_representation: str = generate_dag_representation(task_order=ordered_tasks)\n\
+      \    final_validity: bool = check_final_dag_validity(is_originally_valid=validate_dag_input.is_valid,\
+      \ adjustments_made=adjustments_made)\n    summary: str = generate_summary(is_valid=final_validity,\
+      \ adjustments_made=adjustments_made, cycles_removed=bool(parsed_cycles))\n \
+      \   \n    return FinalizeWorkflowOutput(\n        dag_representation=dag_representation,\n\
+      \        is_valid=final_validity,\n        adjustments_made=adjustments_made,\n\
+      \        adjusted_task_order=serialize_task_list(tasks=ordered_tasks),\n   \
+      \     missing_dependencies=serialize_dependencies_list(deps=parsed_missing_deps),\n\
+      \        cycles_detected=serialize_cycles_list(cycles=parsed_cycles),\n    \
+      \    warnings=serialize_warnings_list(warnings=warnings),\n        summary=summary\n\
+      \    )"
+    name: finalize_workflow
+    nodes_depended_on:
+    - validate_dag
+    nodes_dependent_on: []
+    output_structure:
+    - description: String representation of the finalized DAG, e.g., serialized adjacency
+        list or other format.
+      key: dag_representation
+      type: str
+    - description: Whether the finalized DAG is valid and acyclic.
+      key: is_valid
+      type: bool
+    - description: Whether any adjustments were made to the DAG during finalization.
+      key: adjustments_made
+      type: bool
+    - description: Ordered list of task identifiers in the finalized DAG.
+      key: adjusted_task_order
+      type: str
+    - description: List of task identifiers that have missing or unresolved dependencies.
+      key: missing_dependencies
+      type: str
+    - description: List of detected cycles in the DAG, if any.
+      key: cycles_detected
+      type: str
+    - description: Any warnings or notes about potential issues.
+      key: warnings
+      type: str
+    - description: Short textual summary of the finalized workflow.
+      key: summary
+      type: str
+    prd:
+      conceptual_info: The finalize_workflow node takes a validated DAG, checks for
+        any remaining inconsistencies such as missing dependencies or cycles, applies
+        necessary adjustments, and produces a clean, ordered representation ready
+        for execution.
+      docstring:
+        examples:
+        - lines:
+          - 'dag = finalize_workflow(
+
+            '
+          - '    task_ids=[''A'', ''B'', ''C''],
+
+            '
+          - '    edge_sources=[''A'', ''B''],
+
+            '
+          - '    edge_destinations=[''B'', ''C''],
+
+            '
+          - '    is_valid=True,
+
+            '
+          - '    node_count=3,
+
+            '
+          - '    edge_count=2,
+
+            '
+          - '    cycles_detected=[],
+
+            '
+          - '    missing_dependencies=[],
+
+            '
+          - '    errors=[]
+
+            '
+          - )
+          output: '{''dag_representation'': ''A -> B -> C'', ''is_valid'': True, ''adjustments_made'':
+            False, ''adjusted_task_order'': [''A'', ''B'', ''C''], ''missing_dependencies'':
+            [], ''cycles_detected'': [], ''warnings'': [], ''summary'': ''DAG finalized
+            successfully.''}'
+        - lines:
+          - 'dag = finalize_workflow(
+
+            '
+          - '    task_ids=[''A'', ''B'', ''C''],
+
+            '
+          - '    edge_sources=[''A'', ''B'', ''C''],
+
+            '
+          - '    edge_destinations=[''B'', ''C'', ''A''],
+
+            '
+          - '    is_valid=False,
+
+            '
+          - '    node_count=3,
+
+            '
+          - '    edge_count=3,
+
+            '
+          - '    cycles_detected=[''A->B->C->A''],
+
+            '
+          - '    missing_dependencies=[],
+
+            '
+          - '    errors=[''Cycle detected'']
+
+            '
+          - )
+          output: '{''dag_representation'': ''A -> B -> C'', ''is_valid'': False,
+            ''adjustments_made'': True, ''adjusted_task_order'': [''A'', ''B'', ''C''],
+            ''missing_dependencies'': [], ''cycles_detected'': [''A->B->C->A''], ''warnings'':
+            [''Cycle removed: A->B->C->A''], ''summary'': ''DAG finalized with cycle
+            removal.''}'
+        parameters:
+        - description: Unique identifiers of all tasks in the DAG.
+          name: task_ids
+          type: List[str]
+        - description: Source task identifiers for each directed edge.
+          name: edge_sources
+          type: List[str]
+        - description: Destination task identifiers for each directed edge.
+          name: edge_destinations
+          type: List[str]
+        - description: Result of the validation step (True if the DAG passed all checks).
+          name: is_valid
+          type: bool
+        - description: Total number of nodes in the DAG.
+          name: node_count
+          type: int
+        - description: Total number of directed edges in the DAG.
+          name: edge_count
+          type: int
+        - description: List of cycle identifiers found during validation.
+          name: cycles_detected
+          type: List[str]
+        - description: List of node names that reference non‑existent dependencies.
+          name: missing_dependencies
+          type: List[str]
+        - description: Detailed error messages from the validation step.
+          name: errors
+          type: List[str]
+        raises:
+        - description: If any required input lists are empty or lengths of edge_sources
+            and edge_destinations mismatch.
+          type: ValueError
+        returns:
+          description: 'A dictionary containing the finalized DAG representation and
+            metadata: dag_representation (str), is_valid (bool), adjustments_made
+            (bool), adjusted_task_order (List[str]), missing_dependencies (List[str]),
+            cycles_detected (List[str]), warnings (List[str]), and summary (str).'
+          type: Dict[str, Any]
+        summary: Finalize a workflow DAG by validating its structure, resolving missing
+          dependencies, removing cycles, and ordering tasks.
+    prompt: Review the workflow DAG for completeness and make any necessary adjustments.
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Parse a string representation of cycles into a list of cycle identifiers
+        or descriptions.
+      implementation: "def parse_cycles_from_string(cycles_str: str) -> str:\n   \
+        \ \"\"\"\n    Parse a string of cycle identifiers or descriptions into a list\
+        \ of\n    individual cycles.\n\n    Parameters\n    ----------\n    cycles_str\
+        \ : str\n        The string representation of cycles. It may contain comma‑separated\n\
+        \        cycle names, newline‑separated names, or be an empty string if no\n\
+        \        cycles are present.\n\n    Returns\n    -------\n    list[str]\n\
+        \        A list of cycle identifiers or descriptions extracted from the input\n\
+        \        string. The list is empty if the input is an empty string.\n\n  \
+        \  Raises\n    ------\n    ValueError\n        Raised when the input string\
+        \ contains malformed entries that cannot\n        be parsed into distinct\
+        \ cycle identifiers.\n    TypeError\n        Raised if the provided `cycles_str`\
+        \ is not of type `str`.\n\n    Examples\n    --------\n    >>> cycles = parse_cycles_from_string('cycleA,\
+        \ cycleB, cycleC')\n    ['cycleA', 'cycleB', 'cycleC']\n\n    >>> cycles =\
+        \ parse_cycles_from_string('')\n    []\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: parse_cycles_from_string
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type list
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: cycles_str
+        type: str
+      prd:
+        conceptual_info: This shim converts the `cycles_detected` string from `ValidateDagOutput`
+          into a list of cycle identifiers or descriptions so that downstream nodes
+          can perform cycle removal and generate warnings.
+        docstring:
+          examples:
+          - lines:
+            - cycles = parse_cycles_from_string('cycleA, cycleB, cycleC')
+            output: '[''cycleA'', ''cycleB'', ''cycleC'']'
+          - lines:
+            - cycles = parse_cycles_from_string('')
+            output: '[]'
+          parameters:
+          - description: The string representation of cycles. It may contain comma‑separated
+              cycle names, newline‑separated names, or be an empty string if no cycles
+              are present.
+            name: cycles_str
+            type: str
+          raises:
+          - description: Raised when the input string contains malformed entries that
+              cannot be parsed into distinct cycle identifiers.
+            type: ValueError
+          - description: Raised if the provided `cycles_str` is not of type `str`.
+            type: TypeError
+          returns:
+            description: A list of cycle identifiers or descriptions extracted from
+              the input string. The list is empty if the input is an empty string.
+            type: list[str]
+          summary: Parse a string of cycle identifiers or descriptions into a list
+            of individual cycles.
+      prompt: 'Implement a function parse_cycles_from_string(cycles_str: str) -> List[str]
+        that returns a list of cycle identifiers extracted from the input string.'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Parses a comma‑separated string of missing dependency names and
+        returns a list of cleaned dependency identifiers.
+      implementation: "def parse_missing_dependencies_from_string(deps_str: str) ->\
+        \ str:\n    \"\"\"\n    Parses a string of missing dependency names and returns\
+        \ them as a list of\n    cleaned strings.\n\n    Parameters\n    ----------\n\
+        \    deps_str : str\n        Comma‑separated string of missing dependency\
+        \ names, possibly with\n        surrounding whitespace.\n\n    Returns\n \
+        \   -------\n    List[str]\n        A list of dependency names with whitespace\
+        \ trimmed; an empty list if\n        the input is empty or contains only whitespace.\n\
+        \n    Raises\n    ------\n    ValueError\n        If the input string contains\
+        \ invalid characters (e.g., non‑printable\n        characters).\n    TypeError\n\
+        \        If deps_str is not of type str.\n\n    Examples\n    --------\n \
+        \   >>> parse_missing_dependencies_from_string('task_a, task_b, task_c')\n\
+        \    ['task_a', 'task_b', 'task_c']\n\n    >>> parse_missing_dependencies_from_string('\
+        \   ')\n    []\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")"
+      name: parse_missing_dependencies_from_string
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type list
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: deps_str
+        type: str
+      prd:
+        conceptual_info: This shim extracts and normalizes missing dependency identifiers
+          from a comma‑separated string representation provided by the DAG validation
+          step.
+        docstring:
+          examples:
+          - lines:
+            - parse_missing_dependencies_from_string('task_a, task_b, task_c')
+            output: '[''task_a'', ''task_b'', ''task_c'']'
+          - lines:
+            - parse_missing_dependencies_from_string('   ')
+            output: '[]'
+          parameters:
+          - description: Comma‑separated string of missing dependency names, possibly
+              with surrounding whitespace.
+            name: deps_str
+            type: str
+          raises:
+          - description: If the input string contains invalid characters (e.g., non‑printable
+              characters).
+            type: ValueError
+          - description: If deps_str is not of type str.
+            type: TypeError
+          returns:
+            description: A list of dependency names with whitespace trimmed; an empty
+              list if the input is empty or contains only whitespace.
+            type: List[str]
+          summary: Parses a string of missing dependency names and returns them as
+            a list of cleaned strings.
+      prompt: 'Implement parse_missing_dependencies_from_string(deps_str: str) ->
+        List[str] that parses a comma‑separated string and returns a list of dependency
+        names.'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Removes specified cycles from the DAG and returns a status message
+        indicating the number of cycles removed.
+      implementation: "def remove_cycles_from_dag(cycles: str) -> str:\n    \"\"\"\
+        \n    Removes cycles from the DAG and returns a status message.\n\n    Parameters\n\
+        \    ----------\n    cycles : list[str]\n        A list of string identifiers\
+        \ describing cycles to be removed from\n        the DAG. Each string should\
+        \ represent a distinct cycle (e.g.,\n        \"A->B->C->A\").\n\n    Returns\n\
+        \    -------\n    str\n        A status message indicating how many cycles\
+        \ were removed (e.g.,\n        \"Removed 3 cycle(s) from the DAG.\").\n\n\
+        \    Raises\n    ------\n    ValueError\n        If the cycles list is empty\
+        \ or None.\n    TypeError\n        If the cycles argument is not a list of\
+        \ strings.\n\n    Examples\n    --------\n    >>> result = remove_cycles_from_dag(['A->B->C->A'])\n\
+        \    >>> print(result)\n    \"Removed 1 cycle(s) from the DAG.\"\n\n    >>>\
+        \ result = remove_cycles_from_dag(['X->Y->Z->X', 'M->N->M'])\n    >>> print(result)\n\
+        \    \"Removed 2 cycle(s) from the DAG.\"\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: remove_cycles_from_dag
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: cycles
+        type: str
+      prd:
+        conceptual_info: The remove_cycles_from_dag shim is responsible for processing
+          a list of cycle identifiers, eliminating those cycles from the underlying
+          DAG structure, and returning a human‑readable message that reflects the
+          operation performed. It serves as a bridge between the cycle detection phase
+          and the subsequent DAG finalization steps.
+        docstring:
+          examples:
+          - lines:
+            - result = remove_cycles_from_dag(['A->B->C->A'])
+            - print(result)
+            output: '"Removed 1 cycle(s) from the DAG."'
+          - lines:
+            - result = remove_cycles_from_dag(['X->Y->Z->X', 'M->N->M'])
+            - print(result)
+            output: '"Removed 2 cycle(s) from the DAG."'
+          parameters:
+          - description: A list of string identifiers describing cycles to be removed
+              from the DAG. Each string should represent a distinct cycle (e.g., "A->B->C->A").
+            name: cycles
+            type: list[str]
+          raises:
+          - description: If the cycles list is empty or None.
+            type: ValueError
+          - description: If the cycles argument is not a list of strings.
+            type: TypeError
+          returns:
+            description: A status message indicating how many cycles were removed
+              (e.g., "Removed 3 cycle(s) from the DAG.").
+            type: str
+          summary: Removes cycles from the DAG and returns a status message.
+      prompt: 'def remove_cycles_from_dag(cycles: list[str]) -> str:'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Creates human‑readable warnings describing cycles that were removed
+        from a directed acyclic graph.
+      implementation: "def generate_cycle_removal_warnings(cycles: str) -> str:\n\
+        \    \"\"\"\n    Generate human‑readable warnings for cycles removed from\
+        \ a DAG.\n\n    Parameters\n    ----------\n    cycles : str\n        A comma‑separated\
+        \ string where each element represents a cycle\n        (e.g., \"A->B->A,\
+        \ C->D->E->C\").\n\n    Returns\n    -------\n    str\n        A single string\
+        \ containing one warning per cycle, formatted as\n        \"Warning: removed\
+        \ cycle [cycle]\".\n\n    Raises\n    ------\n    ValueError\n        Raised\
+        \ when `cycles` is an empty string or contains only whitespace.\n    TypeError\n\
+        \        Raised when `cycles` is not a string.\n\n    Examples\n    --------\n\
+        \    >>> warnings = generate_cycle_removal_warnings('A->B->A, C->D->E->C')\n\
+        \    >>> print(warnings)\n    \"Warning: removed cycle A->B->A\\nWarning:\
+        \ removed cycle C->D->E->C\"\n\n    >>> warnings = generate_cycle_removal_warnings('X->Y->Z->X')\n\
+        \    >>> print(warnings)\n    \"Warning: removed cycle X->Y->Z->X\"\n\n  \
+        \  \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node that\
+        \ needs to be implemented\")"
+      name: generate_cycle_removal_warnings
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: cycles
+        type: str
+      prd:
+        conceptual_info: This shim translates a list of removed cycle identifiers
+          into user‑friendly warning messages, ensuring downstream components are
+          informed of the adjustments made to the workflow graph.
+        docstring:
+          examples:
+          - lines:
+            - warnings = generate_cycle_removal_warnings('A->B->A, C->D->E->C')
+            - print(warnings)
+            output: '"Warning: removed cycle A->B->A\nWarning: removed cycle C->D->E->C"'
+          - lines:
+            - warnings = generate_cycle_removal_warnings('X->Y->Z->X')
+            - print(warnings)
+            output: '"Warning: removed cycle X->Y->Z->X"'
+          parameters:
+          - description: A comma‑separated string where each element represents a
+              cycle (e.g., "A->B->A, C->D->E->C").
+            name: cycles
+            type: str
+          raises:
+          - description: Raised when `cycles` is an empty string or contains only
+              whitespace.
+            type: ValueError
+          - description: Raised when `cycles` is not a string.
+            type: TypeError
+          returns:
+            description: 'A single string containing one warning per cycle, formatted
+              as "Warning: removed cycle [cycle]".'
+            type: str
+          summary: Generate human‑readable warnings for cycles removed from a DAG.
+      prompt: '## generate_cycle_removal_warnings
+
+
+        **Purpose**: Produce a warning message for each cycle removed from the DAG.
+
+
+        **Input**:
+
+        - `cycles` (str): A comma‑separated list of cycle identifiers or edge descriptions.
+
+
+        **Output**:
+
+        - `output` (str): Concatenated warning messages, one per cycle.
+
+
+        ```python
+
+        generate_cycle_removal_warnings(cycles="A->B->A,C->D->E->C")
+
+        ```
+
+        '
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Resolves missing dependencies in a workflow by updating the graph
+        and returning a summary string.
+      implementation: "def resolve_missing_dependencies(missing_deps: str) -> str:\n\
+        \    \"\"\"\n    Resolve missing dependencies in a DAG and return a summary\
+        \ string.\n\n    Parameters\n    ----------\n    missing_deps : str\n    \
+        \    A comma‑separated string of dependency identifiers that were found\n\
+        \        missing during DAG validation.\n\n    Returns\n    -------\n    str\n\
+        \        A summary string in the format 'Resolved dependencies: <dep1>,\n\
+        \        <dep2>, ...'. If no dependencies were resolved, returns an empty\n\
+        \        string.\n\n    Raises\n    ------\n    ValueError\n        Raised\
+        \ when `missing_deps` is an empty string or contains only\n        whitespace.\n\
+        \    TypeError\n        Raised when `missing_deps` is not a string.\n\n  \
+        \  Examples\n    --------\n    >>> result = resolve_missing_dependencies('A,B,C')\n\
+        \    'Resolved dependencies: A, B, C'\n\n    >>> try:\n    ...     resolve_missing_dependencies('')\n\
+        \    >>> except ValueError as e:\n    ...     print(e)\n    'missing_deps\
+        \ must be a non‑empty comma‑separated string'\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: resolve_missing_dependencies
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: missing_deps
+        type: str
+      prd:
+        conceptual_info: This shim is responsible for reconciling missing dependency
+          references in a directed acyclic graph (DAG). When the validation step identifies
+          tasks that refer to non‑existent nodes, this function attempts to add the
+          missing nodes or adjust edges to satisfy those dependencies, then reports
+          which dependencies were successfully handled.
+        docstring:
+          examples:
+          - lines:
+            - result = resolve_missing_dependencies('A,B,C')
+            output: '''Resolved dependencies: A, B, C'''
+          - lines:
+            - 'try:'
+            - '    resolve_missing_dependencies('''')'
+            - 'except ValueError as e:'
+            - '    print(e)'
+            output: '''missing_deps must be a non‑empty comma‑separated string'''
+          parameters:
+          - description: A comma‑separated string of dependency identifiers that were
+              found missing during DAG validation.
+            name: missing_deps
+            type: str
+          raises:
+          - description: Raised when `missing_deps` is an empty string or contains
+              only whitespace.
+            type: ValueError
+          - description: Raised when `missing_deps` is not a string.
+            type: TypeError
+          returns:
+            description: 'A summary string in the format ''Resolved dependencies:
+              <dep1>, <dep2>, ...''. If no dependencies were resolved, returns an
+              empty string.'
+            type: str
+          summary: Resolve missing dependencies in a DAG and return a summary string.
+      prompt: 'Implement `resolve_missing_dependencies(missing_deps: str) -> str`
+        that takes a comma‑separated string of missing dependency identifiers, updates
+        the workflow graph accordingly, and returns a human‑readable summary of the
+        resolved dependencies. The function should validate input types, handle empty
+        or malformed inputs by raising appropriate exceptions, and optionally log
+        or record any dependencies that could not be resolved.'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Generates warning messages for each missing dependency supplied
+        as a comma‑separated string.
+      implementation: "def generate_dependency_warnings(missing_deps: str) -> str:\n\
+        \    \"\"\"\n    Creates a newline‑separated string of warnings for each missing\
+        \ dependency\n    provided as a comma‑separated string.\n\n    Parameters\n\
+        \    ----------\n    missing_deps : str\n        A comma‑separated string\
+        \ of task identifiers that are missing\n        dependencies.\n\n    Returns\n\
+        \    -------\n    str\n        A string containing a warning for each missing\
+        \ dependency, one per\n        line.\n\n    Raises\n    ------\n    ValueError\n\
+        \        If missing_deps is an empty string or None.\n    TypeError\n    \
+        \    If missing_deps is not of type str.\n\n    Examples\n    --------\n \
+        \   >>> generate_dependency_warnings('task1,task2')\n    Warning: task1 has\
+        \ missing dependencies.\\nWarning: task2 has missing\n    dependencies.\n\n\
+        \    >>> generate_dependency_warnings('taskA')\n    Warning: taskA has missing\
+        \ dependencies.\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")"
+      name: generate_dependency_warnings
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: missing_deps
+        type: str
+      prd:
+        conceptual_info: This shim transforms a comma‑separated list of missing dependency
+          names into human‑readable warning messages that are later included in workflow
+          validation reports.
+        docstring:
+          examples:
+          - lines:
+            - generate_dependency_warnings('task1,task2')
+            output: 'Warning: task1 has missing dependencies.\nWarning: task2 has
+              missing dependencies.'
+          - lines:
+            - generate_dependency_warnings('taskA')
+            output: 'Warning: taskA has missing dependencies.'
+          parameters:
+          - description: A comma‑separated string of task identifiers that are missing
+              dependencies.
+            name: missing_deps
+            type: str
+          raises:
+          - description: If missing_deps is an empty string or None.
+            type: ValueError
+          - description: If missing_deps is not of type str.
+            type: TypeError
+          returns:
+            description: A string containing a warning for each missing dependency,
+              one per line.
+            type: str
+          summary: Creates a newline‑separated string of warnings for each missing
+            dependency provided as a comma‑separated string.
+      prompt: 'Implement generate_dependency_warnings(missing_deps: str) -> str that
+        returns a newline‑separated warning string for each missing dependency. Each
+        warning should follow the format: ''Warning: <dep> has missing dependencies.''
+        Raise ValueError if missing_deps is empty or None, and TypeError if the input
+        is not a string.'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Computes an ordered list of task identifiers for a DAG given node
+        and edge counts.
+      implementation: "def topological_sort_tasks(node_count: str, edge_count: str)\
+        \ -> str:\n    \"\"\"\n    Generate a topological ordering of task identifiers\
+        \ based on node and edge\n    counts.\n\n    Parameters\n    ----------\n\
+        \    node_count : str\n        Total number of nodes in the DAG, expressed\
+        \ as a string that can be\n        parsed into an integer.\n    edge_count\
+        \ : str\n        Total number of directed edges in the DAG, expressed as a\
+        \ string\n        that can be parsed into an integer.\n\n    Returns\n   \
+        \ -------\n    str\n        A string representation of a list of task identifiers\
+        \ sorted in\n        topological order. The list contains one identifier per\
+        \ node.\n\n    Raises\n    ------\n    ValueError\n        Raised when node_count\
+        \ or edge_count is negative or represents an\n        infeasible DAG configuration.\n\
+        \    TypeError\n        Raised when either node_count or edge_count is not\
+        \ convertible to an\n        integer.\n\n    Examples\n    --------\n    >>>\
+        \ topological_sort_tasks(node_count='3', edge_count='2')\n    ['task1', 'task2',\
+        \ 'task3']\n\n    >>> topological_sort_tasks(node_count='2', edge_count='1')\n\
+        \    ['taskA', 'taskB']\n\n    \"\"\"\n    raise NotImplementedError(\"This\
+        \ is a virtual stub node that needs to be implemented\")"
+      name: topological_sort_tasks
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type list
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: node_count
+        type: str
+      - description: Input parameter of type str
+        key: edge_count
+        type: str
+      prd:
+        conceptual_info: The topological_sort_tasks shim is responsible for translating
+          raw DAG metrics (node and edge counts) into a deterministic ordering of
+          tasks, which later steps use for serialization, validation, and dependency
+          resolution.
+        docstring:
+          examples:
+          - lines:
+            - topological_sort_tasks(node_count='3', edge_count='2')
+            output: '[''task1'', ''task2'', ''task3'']'
+          - lines:
+            - topological_sort_tasks(node_count='2', edge_count='1')
+            output: '[''taskA'', ''taskB'']'
+          parameters:
+          - description: Total number of nodes in the DAG, expressed as a string that
+              can be parsed into an integer.
+            name: node_count
+            type: str
+          - description: Total number of directed edges in the DAG, expressed as a
+              string that can be parsed into an integer.
+            name: edge_count
+            type: str
+          raises:
+          - description: Raised when node_count or edge_count is negative or represents
+              an infeasible DAG configuration.
+            type: ValueError
+          - description: Raised when either node_count or edge_count is not convertible
+              to an integer.
+            type: TypeError
+          returns:
+            description: A string representation of a list of task identifiers sorted
+              in topological order. The list contains one identifier per node.
+            type: str
+          summary: Generate a topological ordering of task identifiers based on node
+            and edge counts.
+      prompt: 'Implement topological_sort_tasks(node_count: str, edge_count: str)
+        -> str that returns a string representation of the topologically sorted task
+        identifiers.'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Creates a string representation of a directed acyclic graph from
+        a serialized task order.
+      implementation: "def generate_dag_representation(task_order: str) -> str:\n\
+        \    \"\"\"\n    Generate a string representation of a DAG from a comma‑separated\
+        \ task order.\n\n    Parameters\n    ----------\n    task_order : str\n  \
+        \      Comma‑separated list of task identifiers representing a topological\n\
+        \        ordering of the DAG.\n\n    Returns\n    -------\n    str\n     \
+        \   A string describing the DAG, formatted as an adjacency list where\n  \
+        \      each task points to its successors. Example: ``\"A->B, B->C, C->\"\
+        ``.\n\n    Raises\n    ------\n    ValueError\n        If `task_order` is\
+        \ an empty string or contains malformed entries\n        (e.g., consecutive\
+        \ commas or trailing commas).\n    TypeError\n        If `task_order` is not\
+        \ of type `str`.\n\n    Examples\n    --------\n    >>> generate_dag_representation('A,B,C')\n\
+        \    \"A->B, B->C, C->\"\n\n    >>> generate_dag_representation('X')\n   \
+        \ \"X->\"\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")"
+      name: generate_dag_representation
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: task_order
+        type: str
+      prd:
+        conceptual_info: The shim turns a serialized list of task identifiers into
+          a textual DAG representation that can be used by downstream nodes such as
+          `finalize_workflow`. It is responsible for interpreting the task order string,
+          validating its format, and producing a concise, machine‑readable description
+          of the graph structure.
+        docstring:
+          examples:
+          - lines:
+            - generate_dag_representation('A,B,C')
+            output: '"A->B, B->C, C->"'
+          - lines:
+            - generate_dag_representation('X')
+            output: '"X->"'
+          parameters:
+          - description: Comma‑separated list of task identifiers representing a topological
+              ordering of the DAG.
+            name: task_order
+            type: str
+          raises:
+          - description: If `task_order` is an empty string or contains malformed
+              entries (e.g., consecutive commas or trailing commas).
+            type: ValueError
+          - description: If `task_order` is not of type `str`.
+            type: TypeError
+          returns:
+            description: 'A string describing the DAG, formatted as an adjacency list
+              where each task points to its successors. Example: ``"A->B, B->C, C->"``.'
+            type: str
+          summary: Generate a string representation of a DAG from a comma‑separated
+            task order.
+      prompt: 'generate_dag_representation(task_order: str) -> str'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Determines the final validity of a DAG based on its original validity
+        and whether adjustments were made.
+      implementation: "def check_final_dag_validity(is_originally_valid: str, adjustments_made:\
+        \ str) -> bool:\n    \"\"\"\n    Return the final validity of a DAG based\
+        \ on its original validity and\n    whether adjustments were made.\n\n   \
+        \ Parameters\n    ----------\n    is_originally_valid : bool\n        Indicates\
+        \ if the DAG was valid before any adjustments were\n        attempted.\n \
+        \   adjustments_made : bool\n        True if any corrective changes (e.g.,\
+        \ cycle removal or missing\n        dependency resolution) were applied to\
+        \ the DAG.\n\n    Returns\n    -------\n    bool\n        True if the DAG\
+        \ is considered valid after adjustments; False\n        otherwise.\n\n   \
+        \ Raises\n    ------\n    ValueError\n        Raised when either input is\
+        \ not of boolean type.\n    TypeError\n        Raised when inputs are of incorrect\
+        \ type (not bool).\n\n    Examples\n    --------\n    >>> check_final_dag_validity(True,\
+        \ False)\n    True\n\n    >>> check_final_dag_validity(False, True)\n    True\n\
+        \n    >>> check_final_dag_validity(False, False)\n    False\n\n    \"\"\"\n\
+        \    raise NotImplementedError(\"This is a virtual stub node that needs to\
+        \ be implemented\")"
+      name: check_final_dag_validity
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type bool
+        key: output
+        type: bool
+      - description: Input parameter of type str
+        key: is_originally_valid
+        type: str
+      - description: Input parameter of type str
+        key: adjustments_made
+        type: str
+      prd:
+        conceptual_info: This shim evaluates whether a Directed Acyclic Graph (DAG)
+          remains valid after optional corrective operations. It accepts the original
+          validation status and a flag indicating if any adjustments were applied,
+          returning a single boolean that indicates the overall validity.
+        docstring:
+          examples:
+          - lines:
+            - check_final_dag_validity(True, False)
+            output: 'True'
+          - lines:
+            - check_final_dag_validity(False, True)
+            output: 'True'
+          - lines:
+            - check_final_dag_validity(False, False)
+            output: 'False'
+          parameters:
+          - description: Indicates if the DAG was valid before any adjustments were
+              attempted.
+            name: is_originally_valid
+            type: bool
+          - description: True if any corrective changes (e.g., cycle removal or missing
+              dependency resolution) were applied to the DAG.
+            name: adjustments_made
+            type: bool
+          raises:
+          - description: Raised when either input is not of boolean type.
+            type: ValueError
+          - description: Raised when inputs are of incorrect type (not bool).
+            type: TypeError
+          returns:
+            description: True if the DAG is considered valid after adjustments; False
+              otherwise.
+            type: bool
+          summary: Return the final validity of a DAG based on its original validity
+            and whether adjustments were made.
+      prompt: You are given two boolean inputs `is_originally_valid` and `adjustments_made`.
+        Return `True` if the DAG should be considered valid after possible adjustments,
+        otherwise return `False`.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Generates a short textual summary of the workflow based on its
+        validity, whether adjustments were made, and if cycles were removed.
+      implementation: "def generate_summary(is_valid: str, adjustments_made: str,\
+        \ cycles_removed: str) -> str:\n    \"\"\"\n    Create a summary string for\
+        \ a finalized workflow.\n\n    Parameters\n    ----------\n    is_valid :\
+        \ bool\n        True if the finalized workflow is valid (acyclic and all\n\
+        \        dependencies resolved).\n    adjustments_made : bool\n        True\
+        \ if any adjustments (e.g., cycle removal or dependency\n        resolution)\
+        \ were applied during finalization.\n    cycles_removed : bool\n        True\
+        \ if one or more cycles were detected and removed from the\n        original\
+        \ DAG.\n\n    Returns\n    -------\n    str\n        A human‑readable summary\
+        \ stating the workflow’s validity, whether\n        adjustments were made,\
+        \ and if cycles were removed.\n\n    Raises\n    ------\n    TypeError\n \
+        \       Raised when any of the arguments is not a bool.\n    ValueError\n\
+        \        Raised if any boolean argument is None.\n\n    Examples\n    --------\n\
+        \    >>> generate_summary(is_valid=True, adjustments_made=False,\n    cycles_removed=False)\n\
+        \    \"The workflow is valid. No adjustments were made.\"\n\n    >>> generate_summary(is_valid=False,\
+        \ adjustments_made=True,\n    cycles_removed=True)\n    \"The workflow is\
+        \ invalid. Adjustments were made: cycles removed.\"\n\n    \"\"\"\n    raise\
+        \ NotImplementedError(\"This is a virtual stub node that needs to be implemented\"\
+        )"
+      name: generate_summary
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: is_valid
+        type: str
+      - description: Input parameter of type str
+        key: adjustments_made
+        type: str
+      - description: Input parameter of type str
+        key: cycles_removed
+        type: str
+      prd:
+        conceptual_info: The shim encapsulates the logic for creating a concise human‑readable
+          description of the finalized workflow’s state. It takes three boolean flags
+          indicating whether the workflow is valid, whether any adjustments were performed
+          during finalization, and whether cycles were removed, and produces a single
+          string that summarizes these conditions in natural language.
+        docstring:
+          examples:
+          - lines:
+            - generate_summary(is_valid=True, adjustments_made=False, cycles_removed=False)
+            output: '"The workflow is valid. No adjustments were made."'
+          - lines:
+            - generate_summary(is_valid=False, adjustments_made=True, cycles_removed=True)
+            output: '"The workflow is invalid. Adjustments were made: cycles removed."'
+          parameters:
+          - description: True if the finalized workflow is valid (acyclic and all
+              dependencies resolved).
+            name: is_valid
+            type: bool
+          - description: True if any adjustments (e.g., cycle removal or dependency
+              resolution) were applied during finalization.
+            name: adjustments_made
+            type: bool
+          - description: True if one or more cycles were detected and removed from
+              the original DAG.
+            name: cycles_removed
+            type: bool
+          raises:
+          - description: Raised when any of the arguments is not a bool.
+            type: TypeError
+          - description: Raised if any boolean argument is None.
+            type: ValueError
+          returns:
+            description: A human‑readable summary stating the workflow’s validity,
+              whether adjustments were made, and if cycles were removed.
+            type: str
+          summary: Create a summary string for a finalized workflow.
+      prompt: Generate a short textual summary of the workflow based on its validity,
+        adjustments made, and cycle removal status.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Serializes a list of task identifiers into a single comma-separated
+        string.
+      implementation: "def serialize_task_list(tasks: str) -> str:\n    \"\"\"\n \
+        \   Converts a list of task identifiers into a single comma-separated string.\n\
+        \n    Parameters\n    ----------\n    tasks : List[str]\n        A list of\
+        \ task identifiers to serialize.\n\n    Returns\n    -------\n    str\n  \
+        \      A string containing the task identifiers joined by commas,\n      \
+        \  preserving the input order.\n\n    Raises\n    ------\n    TypeError\n\
+        \        If the input is not a list.\n    ValueError\n        If any element\
+        \ in the list is not a string.\n\n    Examples\n    --------\n    >>> output\
+        \ = serialize_task_list(['step1', 'step2', 'step3'])\n    'step1,step2,step3'\n\
+        \n    >>> output = serialize_task_list(['taskC', 'taskA', 'taskB'])\n    'taskC,taskA,taskB'\n\
+        \n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node\
+        \ that needs to be implemented\")"
+      name: serialize_task_list
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: tasks
+        type: str
+      prd:
+        conceptual_info: This shim turns a list of task names into a compact string
+          that can be stored or transmitted, maintaining the order of the tasks.
+        docstring:
+          examples:
+          - lines:
+            - output = serialize_task_list(['step1', 'step2', 'step3'])
+            output: '''step1,step2,step3'''
+          - lines:
+            - output = serialize_task_list(['taskC', 'taskA', 'taskB'])
+            output: '''taskC,taskA,taskB'''
+          parameters:
+          - description: A list of task identifiers to serialize.
+            name: tasks
+            type: List[str]
+          raises:
+          - description: If the input is not a list.
+            type: TypeError
+          - description: If any element in the list is not a string.
+            type: ValueError
+          returns:
+            description: A string containing the task identifiers joined by commas,
+              preserving the input order.
+            type: str
+          summary: Converts a list of task identifiers into a single comma-separated
+            string.
+      prompt: 'Provide a list of task identifiers to serialize.
+
+
+        **Input**:
+
+        ```json
+
+        {"tasks": ["task1", "task2", ...]}
+
+        ```
+
+
+        **Output**:
+
+        ```text
+
+        "task1,task2,..."
+
+        ```'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Serializes a list of dependency names into a single comma‑separated
+        string for workflow output.
+      implementation: "def serialize_dependencies_list(deps: str) -> str:\n    \"\"\
+        \"\n    Return a comma‑separated string representation of the input dependency\
+        \ list.\n\n    Parameters\n    ----------\n    deps : List[str]\n        A\
+        \ list of dependency names to be serialized.\n\n    Returns\n    -------\n\
+        \    str\n        A single string containing all dependency names joined by\
+        \ commas. If\n        the list is empty, an empty string is returned.\n\n\
+        \    Raises\n    ------\n    TypeError\n        If the `deps` argument is\
+        \ not a list.\n    ValueError\n        If any element in `deps` is not a string.\n\
+        \n    Examples\n    --------\n    >>> serialize_dependencies_list(['task_a',\
+        \ 'task_b', 'task_c'])\n    'task_a, task_b, task_c'\n\n    >>> serialize_dependencies_list([])\n\
+        \    ''\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub\
+        \ node that needs to be implemented\")"
+      name: serialize_dependencies_list
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: deps
+        type: str
+      prd:
+        conceptual_info: The shim converts a list of task dependencies into a human‑readable
+          string that can be embedded in the FinalizeWorkflowOutput model. It is used
+          after parsing missing dependencies or cycles to produce a concise representation
+          for logs, warnings, or display.
+        docstring:
+          examples:
+          - lines:
+            - serialize_dependencies_list(['task_a', 'task_b', 'task_c'])
+            output: '''task_a, task_b, task_c'''
+          - lines:
+            - serialize_dependencies_list([])
+            output: ''''''
+          parameters:
+          - description: A list of dependency names to be serialized.
+            name: deps
+            type: List[str]
+          raises:
+          - description: If the `deps` argument is not a list.
+            type: TypeError
+          - description: If any element in `deps` is not a string.
+            type: ValueError
+          returns:
+            description: A single string containing all dependency names joined by
+              commas. If the list is empty, an empty string is returned.
+            type: str
+          summary: Return a comma‑separated string representation of the input dependency
+            list.
+      prompt: 'Serialize dependencies list: `{deps}`'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Serializes a list of cycle identifiers into a comma-separated string.
+      implementation: "def serialize_cycles_list(cycles: str) -> str:\n    \"\"\"\n\
+        \    Serializes a list of cycle identifiers into a comma-separated string.\n\
+        \n    Parameters\n    ----------\n    cycles : List[str]\n        A list of\
+        \ cycle identifiers to serialize.\n\n    Returns\n    -------\n    str\n \
+        \       A comma-separated string representation of the cycles.\n\n    Raises\n\
+        \    ------\n    ValueError\n        Raised when the list contains non-string\
+        \ elements or is empty.\n    TypeError\n        Raised when the input is not\
+        \ a list.\n\n    Examples\n    --------\n    >>> serialize_cycles_list(['cycle1',\
+        \ 'cycle2', 'cycle3'])\n    'cycle1, cycle2, cycle3'\n\n    >>> serialize_cycles_list('not\
+        \ a list')\n    Traceback (most recent call last):\\n  File \"<stdin>\", line\
+        \ 1, in\n    <module>\\nTypeError: cycles must be a list of strings.\n\n \
+        \   \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node that\
+        \ needs to be implemented\")"
+      name: serialize_cycles_list
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: cycles
+        type: str
+      prd:
+        conceptual_info: This shim takes a list of cycle identifiers discovered during
+          DAG validation and produces a single string representation suitable for
+          storage or display in downstream nodes.
+        docstring:
+          examples:
+          - lines:
+            - serialize_cycles_list(['cycle1', 'cycle2', 'cycle3'])
+            output: '''cycle1, cycle2, cycle3'''
+          - lines:
+            - serialize_cycles_list('not a list')
+            output: 'Traceback (most recent call last):\n  File "<stdin>", line 1,
+              in <module>\nTypeError: cycles must be a list of strings.'
+          parameters:
+          - description: A list of cycle identifiers to serialize.
+            name: cycles
+            type: List[str]
+          raises:
+          - description: Raised when the list contains non-string elements or is empty.
+            type: ValueError
+          - description: Raised when the input is not a list.
+            type: TypeError
+          returns:
+            description: A comma-separated string representation of the cycles.
+            type: str
+          summary: Serializes a list of cycle identifiers into a comma-separated string.
+      prompt: 'def serialize_cycles_list(cycles: List[str]) -> str:'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Converts a list of warning messages into a single string, with
+        each warning separated by a newline.
+      implementation: "def serialize_warnings_list(warnings: str) -> str:\n    \"\"\
+        \"\n    Serialize a list of warning messages into a single newline‑separated\
+        \ string.\n\n    Parameters\n    ----------\n    warnings : List[str]\n  \
+        \      List of warning messages to be serialized.\n\n    Returns\n    -------\n\
+        \    str\n        A string containing all warning messages separated by newlines.\
+        \ If\n        the input list is empty, an empty string is returned.\n\n  \
+        \  Raises\n    ------\n    TypeError\n        If the input is not a list or\
+        \ if any element is not a string.\n    ValueError\n        If any warning\
+        \ message is an empty string.\n\n    Examples\n    --------\n    >>> warnings\
+        \ = ['Low disk space', 'Deprecated API used']\n    >>> result = serialize_warnings_list(warnings)\n\
+        \    >>> print(result)\n    \"Low disk space\\nDeprecated API used\"\n\n \
+        \   >>> warnings = ['All good']\n    >>> result = serialize_warnings_list(warnings)\n\
+        \    >>> print(result)\n    \"All good\"\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: serialize_warnings_list
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: warnings
+        type: str
+      prd:
+        conceptual_info: This shim serializes a collection of warning strings so that
+          they can be embedded in workflow summaries or logs.
+        docstring:
+          examples:
+          - lines:
+            - warnings = ['Low disk space', 'Deprecated API used']
+            - result = serialize_warnings_list(warnings)
+            - print(result)
+            output: '"Low disk space\nDeprecated API used"'
+          - lines:
+            - warnings = ['All good']
+            - result = serialize_warnings_list(warnings)
+            - print(result)
+            output: '"All good"'
+          parameters:
+          - description: List of warning messages to be serialized.
+            name: warnings
+            type: List[str]
+          raises:
+          - description: If the input is not a list or if any element is not a string.
+            type: TypeError
+          - description: If any warning message is an empty string.
+            type: ValueError
+          returns:
+            description: A string containing all warning messages separated by newlines.
+              If the input list is empty, an empty string is returned.
+            type: str
+          summary: Serialize a list of warning messages into a single newline‑separated
+            string.
+      prompt: 'Implement serialize_warnings_list(warnings: List[str]) -> str'
+      shims: []
+  identify_task_dependencies:
+    agent: false
+    code_node_type: shim
+    description: Identify dependencies between tasks
+    implementation: "from ._identify_task_dependencies.validate_tasks_input import\
+      \ validate_tasks_input\nfrom ._identify_task_dependencies.analyze_task_dependencies\
+      \ import analyze_task_dependencies\nfrom ._identify_task_dependencies.format_dependencies\
+      \ import format_dependencies\nfrom ._identify_task_dependencies.check_dependencies_exist\
+      \ import check_dependencies_exist\n\nfrom ._identify_task_dependencies.validate_tasks_input\
+      \ import validate_tasks_input\nfrom ._identify_task_dependencies.analyze_task_dependencies\
+      \ import analyze_task_dependencies\nfrom ._identify_task_dependencies.format_dependencies\
+      \ import format_dependencies\nfrom ._identify_task_dependencies.check_dependencies_exist\
+      \ import check_dependencies_exist\n\nfrom pydantic import BaseModel, Field\n\
+      from typing import List\n\n\nclass DecomposeObjectiveIntoTasksOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for decompose_objective_into_tasks node outputs.\"\
+      \"\"\n    tasks: List[str] = (\n        Field(..., description = (\n       \
+      \     \"List of task descriptions that represent the decomposed workflow objective\"\
+      )\n        )\n    )\n    task_count: int = (\n        Field(..., description\
+      \ = (\n            \"Number of tasks identified in the decomposition\")\n  \
+      \      )\n    )\n\n\nclass IdentifyTaskDependenciesOutput(BaseModel):\n    \"\
+      \"\"Pydantic model for identify_task_dependencies node outputs.\"\"\"\n    tasks:\
+      \ List[str] = Field(..., description=\"List of identified task names.\")\n \
+      \   dependencies: List[str] = (\n        Field(..., description = (\n      \
+      \      \"List of dependency relationships in the format 'TaskA depends on TaskB'.\"\
+      )\n        )\n    )\n    dependency_exists: bool = (\n        Field(..., description\
+      \ = (\n            \"Indicates whether any dependencies were identified.\")\n\
+      \        )\n    )\n\n\ndef identify_task_dependencies(decompose_objective_into_tasks_input:\
+      \ DecomposeObjectiveIntoTasksOutput, **kwargs) -> IdentifyTaskDependenciesOutput:\n\
+      \    \"\"\"\n    Infers direct dependencies between tasks from a list of task\
+      \ descriptions.\n\n    Parameters\n    ----------\n    tasks : List[str]\n \
+      \       Task descriptions generated by decompose_objective_into_tasks.\n\n \
+      \   Returns\n    -------\n    Dict[str, Any]\n        A dictionary with keys\
+      \ 'tasks', 'dependencies', and\n        'dependency_exists' matching the node's\
+      \ output structure.\n\n    Raises\n    ------\n    ValueError\n        If the\
+      \ input `tasks` is not a list of strings or is empty.\n\n    Examples\n    --------\n\
+      \    >>> tasks_input = [\"Collect data\", \"Preprocess data\", \"Train model\"\
+      ,\n    \"Evaluate model\"]\n    >>> # Assuming the following simple dependency\
+      \ logic:\n    >>> # 'Preprocess data' depends on 'Collect data'\n    >>> # 'Train\
+      \ model' depends on 'Preprocess data'\n    >>> # 'Evaluate model' depends on\
+      \ 'Train model'\n    >>> result = identify_task_dependencies(tasks_input)\n\
+      \    >>> print(result)\n    {'tasks': ['Collect data', 'Preprocess data', 'Train\
+      \ model', 'Evaluate\n    model'], 'dependencies': ['Preprocess data depends\
+      \ on Collect data', 'Train\n    model depends on Preprocess data', 'Evaluate\
+      \ model depends on Train model'],\n    'dependency_exists': True}\n\n    >>>\
+      \ tasks_input = [\"Generate report\", \"Publish report\"]\n    >>> # No explicit\
+      \ dependencies specified\n    >>> result = identify_task_dependencies(tasks_input)\n\
+      \    >>> print(result)\n    {'tasks': ['Generate report', 'Publish report'],\
+      \ 'dependencies': [],\n    'dependency_exists': False}\n\n    \"\"\"\n    tasks:\
+      \ List[str] = decompose_objective_into_tasks_input.tasks\n    \n    validated_tasks:\
+      \ List[str] = validate_tasks_input(tasks=tasks)\n    \n    dependency_pairs:\
+      \ List[tuple] = analyze_task_dependencies(tasks=validated_tasks)\n    \n   \
+      \ dependency_strings: List[str] = format_dependencies(dependency_pairs=dependency_pairs)\n\
+      \    \n    has_dependencies: bool = check_dependencies_exist(dependencies=dependency_strings)\n\
+      \    \n    return IdentifyTaskDependenciesOutput(\n        tasks=validated_tasks,\n\
+      \        dependencies=dependency_strings,\n        dependency_exists=has_dependencies\n\
+      \    )"
+    name: identify_task_dependencies
+    nodes_depended_on:
+    - decompose_objective_into_tasks
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of identified task names.
+      key: tasks
+      type: List[str]
+    - description: List of dependency relationships in the format 'TaskA depends on
+        TaskB'.
+      key: dependencies
+      type: List[str]
+    - description: Indicates whether any dependencies were identified.
+      key: dependency_exists
+      type: bool
+    prd:
+      conceptual_info: This node processes a list of task descriptions produced by
+        the decomposition step and infers direct dependencies between tasks. It returns
+        the original list of tasks, a concise list of dependency strings, and a flag
+        indicating whether any dependencies exist.
+      docstring:
+        examples:
+        - lines:
+          - tasks_input = ["Collect data", "Preprocess data", "Train model", "Evaluate
+            model"]
+          - '# Assuming the following simple dependency logic:'
+          - '# ''Preprocess data'' depends on ''Collect data'''
+          - '# ''Train model'' depends on ''Preprocess data'''
+          - '# ''Evaluate model'' depends on ''Train model'''
+          - result = identify_task_dependencies(tasks_input)
+          - print(result)
+          output: '{''tasks'': [''Collect data'', ''Preprocess data'', ''Train model'',
+            ''Evaluate model''], ''dependencies'': [''Preprocess data depends on Collect
+            data'', ''Train model depends on Preprocess data'', ''Evaluate model depends
+            on Train model''], ''dependency_exists'': True}'
+        - lines:
+          - tasks_input = ["Generate report", "Publish report"]
+          - '# No explicit dependencies specified'
+          - result = identify_task_dependencies(tasks_input)
+          - print(result)
+          output: '{''tasks'': [''Generate report'', ''Publish report''], ''dependencies'':
+            [], ''dependency_exists'': False}'
+        parameters:
+        - description: Task descriptions generated by decompose_objective_into_tasks.
+          name: tasks
+          type: List[str]
+        raises:
+        - description: If the input `tasks` is not a list of strings or is empty.
+          type: ValueError
+        returns:
+          description: A dictionary with keys 'tasks', 'dependencies', and 'dependency_exists'
+            matching the node's output structure.
+          type: Dict[str, Any]
+        summary: Infers direct dependencies between tasks from a list of task descriptions.
+    prompt: Analyze the tasks identified and determine their dependencies. Which tasks
+      depend on others?
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates and cleans a list of task descriptions, returning a sanitized
+        list.
+      implementation: "from typing import List\n\n\ndef validate_tasks_input(tasks:\
+        \ str) -> List[str]:\n    \"\"\"\n    Validate and clean a list of task descriptions.\n\
+        \n    Parameters\n    ----------\n    tasks : List[str]\n        A list of\
+        \ task description strings to validate and clean.\n\n    Returns\n    -------\n\
+        \    List[str]\n        A new list of cleaned task descriptions.\n\n    Raises\n\
+        \    ------\n    ValueError\n        Raised if any task description is empty\
+        \ after stripping.\n    TypeError\n        Raised if the input is not a list\
+        \ of strings.\n\n    Examples\n    --------\n    >>> validated = validate_tasks_input(['\
+        \  Task One  ', 'Task Two', '   '])\n    ValueError: Task description cannot\
+        \ be empty.\n\n    >>> validated = validate_tasks_input(['  Task One  ', 'Task\
+        \ Two'])\n    ['Task One', 'Task Two']\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: validate_tasks_input
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: tasks
+        type: str
+      prd:
+        conceptual_info: The shim ensures that the tasks passed into downstream processing
+          are well-formed strings, non-empty, and properly formatted, serving as a
+          gatekeeper for data quality.
+        docstring:
+          examples:
+          - lines:
+            - validated = validate_tasks_input(['  Task One  ', 'Task Two', '   '])
+            output: 'ValueError: Task description cannot be empty.'
+          - lines:
+            - validated = validate_tasks_input(['  Task One  ', 'Task Two'])
+            output: '[''Task One'', ''Task Two'']'
+          parameters:
+          - description: A list of task description strings to validate and clean.
+            name: tasks
+            type: List[str]
+          raises:
+          - description: Raised if any task description is empty after stripping.
+            type: ValueError
+          - description: Raised if the input is not a list of strings.
+            type: TypeError
+          returns:
+            description: A new list of cleaned task descriptions.
+            type: List[str]
+          summary: Validate and clean a list of task descriptions.
+      prompt: 'Validate and clean the list of task descriptions: remove leading/trailing
+        whitespace, reject empty tasks, and return a cleaned list.'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Analyzes a list of task names and returns dependency pairs indicating
+        the required execution order.
+      implementation: "from typing import List\n\n\ndef analyze_task_dependencies(tasks:\
+        \ str) -> List[str]:\n    \"\"\"\n    Analyze the provided list of task names\
+        \ and return a list of dependency\n    tuples indicating task execution order.\n\
+        \n    Parameters\n    ----------\n    tasks : List[str]\n        A list of\
+        \ unique task names to analyze. Each element must be a\n        non‑empty\
+        \ string.\n\n    Returns\n    -------\n    List[tuple]\n        A list of\
+        \ tuples (dependent_task, prerequisite_task) representing\n        the dependency\
+        \ relationships inferred from the task list.\n\n    Raises\n    ------\n \
+        \   TypeError\n        If `tasks` is not a list.\n    ValueError\n       \
+        \ If any element in `tasks` is not a non‑empty string, or if the list\n  \
+        \      is empty.\n\n    Examples\n    --------\n    >>> tasks = ['Build',\
+        \ 'Test', 'Deploy']\n    >>> deps = analyze_task_dependencies(tasks)\n   \
+        \ >>> print(deps)\n    [('Test', 'Build'), ('Deploy', 'Test')]\n\n    >>>\
+        \ tasks = ['A', 'B', 'C']\n    >>> deps = analyze_task_dependencies(tasks)\n\
+        \    >>> print(deps)\n    [('B', 'A'), ('C', 'B')]\n\n    \"\"\"\n    raise\
+        \ NotImplementedError(\"This is a virtual stub node that needs to be implemented\"\
+        )"
+      name: analyze_task_dependencies
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[tuple]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: tasks
+        type: str
+      prd:
+        conceptual_info: This shim performs dependency analysis on a list of task
+          descriptions, determining which tasks must precede others in the execution
+          flow. It is a core step in transforming a decomposed objective into an executable
+          workflow, enabling downstream components to schedule tasks correctly.
+        docstring:
+          examples:
+          - lines:
+            - tasks = ['Build', 'Test', 'Deploy']
+            - deps = analyze_task_dependencies(tasks)
+            - print(deps)
+            output: '[(''Test'', ''Build''), (''Deploy'', ''Test'')]'
+          - lines:
+            - tasks = ['A', 'B', 'C']
+            - deps = analyze_task_dependencies(tasks)
+            - print(deps)
+            output: '[(''B'', ''A''), (''C'', ''B'')]'
+          parameters:
+          - description: A list of unique task names to analyze. Each element must
+              be a non‑empty string.
+            name: tasks
+            type: List[str]
+          raises:
+          - description: If `tasks` is not a list.
+            type: TypeError
+          - description: If any element in `tasks` is not a non‑empty string, or if
+              the list is empty.
+            type: ValueError
+          returns:
+            description: A list of tuples (dependent_task, prerequisite_task) representing
+              the dependency relationships inferred from the task list.
+            type: List[tuple]
+          summary: Analyze the provided list of task names and return a list of dependency
+            tuples indicating task execution order.
+      prompt: 'Implement the function `analyze_task_dependencies(tasks: List[str])
+        -> List[tuple]` that validates the input and returns a list of tuples where
+        each tuple is (`dependent_task`, `prerequisite_task`). The function must raise
+        appropriate errors for invalid input.'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Formats a list of dependency tuples into human‑readable strings
+        describing task dependencies.
+      implementation: "from typing import List\n\n\ndef format_dependencies(dependency_pairs:\
+        \ str) -> List[str]:\n    \"\"\"\n    Converts a list of task dependency pairs\
+        \ into formatted strings.\n\n    Parameters\n    ----------\n    dependency_pairs\
+        \ : list[tuple[str, str]]\n        A list where each element is a 2‑tuple\
+        \ (TaskA, TaskB) indicating\n        that TaskA depends on TaskB.\n\n    Returns\n\
+        \    -------\n    list[str]\n        A list of strings, each in the form 'TaskA\
+        \ depends on TaskB',\n        preserving the order of the input pairs.\n\n\
+        \    Raises\n    ------\n    TypeError\n        If dependency_pairs is not\
+        \ a list or its elements are not tuples of\n        strings.\n    ValueError\n\
+        \        If any tuple does not contain exactly two elements.\n\n    Examples\n\
+        \    --------\n    >>> format_dependencies([('TaskA', 'TaskB'), ('TaskC',\
+        \ 'TaskD')])\n    ['TaskA depends on TaskB', 'TaskC depends on TaskD']\n\n\
+        \    >>> format_dependencies([])\n    []\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: format_dependencies
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: dependency_pairs
+        type: str
+      prd:
+        conceptual_info: The format_dependencies shim converts raw dependency pairs
+          into readable strings for downstream usage.
+        docstring:
+          examples:
+          - lines:
+            - format_dependencies([('TaskA', 'TaskB'), ('TaskC', 'TaskD')])
+            output: '[''TaskA depends on TaskB'', ''TaskC depends on TaskD'']'
+          - lines:
+            - format_dependencies([])
+            output: '[]'
+          parameters:
+          - description: A list where each element is a 2‑tuple (TaskA, TaskB) indicating
+              that TaskA depends on TaskB.
+            name: dependency_pairs
+            type: list[tuple[str, str]]
+          raises:
+          - description: If dependency_pairs is not a list or its elements are not
+              tuples of strings.
+            type: TypeError
+          - description: If any tuple does not contain exactly two elements.
+            type: ValueError
+          returns:
+            description: A list of strings, each in the form 'TaskA depends on TaskB',
+              preserving the order of the input pairs.
+            type: list[str]
+          summary: Converts a list of task dependency pairs into formatted strings.
+      prompt: Format the given list of dependency pairs into a list of strings where
+        each string describes the dependency relationship.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Returns True if any dependency relationships are present in the
+        provided list, otherwise returns False.
+      implementation: "def check_dependencies_exist(dependencies: str) -> bool:\n\
+        \    \"\"\"\n    Checks whether any dependency relationships exist in the\
+        \ given list.\n\n    Parameters\n    ----------\n    dependencies : List[str]\n\
+        \        A list of strings, each describing a dependency in the format 'TaskA\n\
+        \        depends on TaskB'.\n\n    Returns\n    -------\n    bool\n      \
+        \  True if the list contains at least one dependency string; otherwise\n \
+        \       False.\n\n    Raises\n    ------\n    TypeError\n        Raised if\
+        \ `dependencies` is not a list or contains non‑string\n        elements.\n\
+        \    ValueError\n        Raised if an element in `dependencies` is an empty\
+        \ string or\n        otherwise invalid.\n\n    Examples\n    --------\n  \
+        \  >>> result = check_dependencies_exist(dependencies=[\"TaskA depends on\n\
+        \    TaskB\", \"TaskC depends on TaskA\"])\n    >>> print(result)\n    True\n\
+        \n    >>> result = check_dependencies_exist(dependencies=[])\n    >>> print(result)\n\
+        \    False\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")"
+      name: check_dependencies_exist
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type bool
+        key: output
+        type: bool
+      - description: Input parameter of type str
+        key: dependencies
+        type: str
+      prd:
+        conceptual_info: This shim determines whether any dependency relationships
+          have been identified by the previous analysis step. It is a simple guard
+          that allows the workflow to decide if further dependency‑resolution steps
+          are necessary.
+        docstring:
+          examples:
+          - lines:
+            - result = check_dependencies_exist(dependencies=["TaskA depends on TaskB",
+              "TaskC depends on TaskA"])
+            - print(result)
+            output: 'True'
+          - lines:
+            - result = check_dependencies_exist(dependencies=[])
+            - print(result)
+            output: 'False'
+          parameters:
+          - description: A list of strings, each describing a dependency in the format
+              'TaskA depends on TaskB'.
+            name: dependencies
+            type: List[str]
+          raises:
+          - description: Raised if `dependencies` is not a list or contains non‑string
+              elements.
+            type: TypeError
+          - description: Raised if an element in `dependencies` is an empty string
+              or otherwise invalid.
+            type: ValueError
+          returns:
+            description: True if the list contains at least one dependency string;
+              otherwise False.
+            type: bool
+          summary: Checks whether any dependency relationships exist in the given
+            list.
+      prompt: Check if the provided list of dependencies is non‑empty. Return a boolean
+        indicating the presence of dependencies.
+      shims: []
+  validate_dag:
+    agent: false
+    code_node_type: stub
+    description: Validate the created DAG for correctness and acyclicity
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass CreateTaskDagOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for create_task_dag node outputs.\"\"\"\n    task_ids:\
+      \ str = (\n        Field(..., description = (\n            \"List of unique\
+      \ task identifiers used in the DAG\")\n        )\n    )\n    edge_sources: str\
+      \ = (\n        Field(..., description = (\n            \"List of source task\
+      \ identifiers for each directed edge in the DAG\")\n        )\n    )\n    edge_destinations:\
+      \ str = (\n        Field(..., description = (\n            \"List of destination\
+      \ task identifiers for each directed edge in the DAG\")\n        )\n    )\n\
+      \    is_valid: bool = (\n        Field(..., description = (\n            \"\
+      Indicates whether the constructed DAG is acyclic and complete\")\n        )\n\
+      \    )\n\n\nclass ValidateDagOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ validate_dag node outputs.\"\"\"\n    is_valid: bool = (\n        Field(...,\
+      \ description = (\n            \"Indicates whether the DAG passes all validation\
+      \ checks.\")\n        )\n    )\n    node_count: int = (\n        Field(...,\
+      \ description=\"Total number of nodes present in the DAG.\")\n    )\n    edge_count:\
+      \ int = (\n        Field(..., description=\"Total number of directed edges in\
+      \ the DAG.\")\n    )\n    cycles_detected: str = (\n        Field(..., description\
+      \ = (\n            \"List of cycle identifiers or descriptions found in the\
+      \ DAG (empty if none).\")\n        )\n    )\n    missing_dependencies: str =\
+      \ (\n        Field(..., description = (\n            \"List of node names that\
+      \ reference non\\u2011existent dependencies (empty if none).\")\n        )\n\
+      \    )\n    errors: str = (\n        Field(..., description = (\n          \
+      \  \"Detailed error messages for any validation failures.\")\n        )\n  \
+      \  )\n\n\ndef validate_dag(create_task_dag_input: CreateTaskDagOutput, **kwargs)\
+      \ -> ValidateDagOutput:\n    \"\"\"\n    Validates a Directed Acyclic Graph\
+      \ (DAG) representation for correctness,\n    acyclicity, and missing dependencies.\n\
+      \n    Parameters\n    ----------\n    task_ids : List[str]\n        List of\
+      \ unique identifiers for all tasks in the workflow.\n    edge_sources : List[str]\n\
+      \        List of task identifiers representing the source of each directed\n\
+      \        edge.\n    edge_destinations : List[str]\n        List of task identifiers\
+      \ representing the destination of each\n        directed edge.\n    is_valid_input\
+      \ : bool\n        (Optional) A flag from `create_task_dag` indicating preliminary\n\
+      \        validity. It is used only as a hint; full validation is performed\n\
+      \        regardless.\n\n    Returns\n    -------\n    dict\n        Dictionary\
+      \ containing validation results: - `is_valid` (bool):\n        Overall validity.\
+      \ - `node_count` (int): Number of nodes. -\n        `edge_count` (int): Number\
+      \ of directed edges. - `cycles_detected`\n        (List[str]): Descriptions\
+      \ of any detected cycles. -\n        `missing_dependencies` (List[str]): Tasks\
+      \ that reference undefined\n        dependencies. - `errors` (List[str]): Human‑readable\
+      \ error messages\n        for all failures.\n\n    Raises\n    ------\n    ValueError\n\
+      \        If `edge_sources` and `edge_destinations` lists are not of the same\n\
+      \        length.\n    ValueError\n        If `task_ids` contains duplicate identifiers.\n\
+      \n    Examples\n    --------\n    >>> task_ids = ['A', 'B', 'C']\n    >>> edge_sources\
+      \ = ['A', 'B']\n    >>> edge_destinations = ['B', 'C']\n    >>> result = validate_dag(task_ids,\
+      \ edge_sources, edge_destinations)\n    >>> print(result)\n    {'is_valid':\
+      \ True, 'node_count': 3, 'edge_count': 2, 'cycles_detected': [],\n    'missing_dependencies':\
+      \ [], 'errors': []}\n\n    >>> task_ids = ['A', 'B', 'C']\n    >>> edge_sources\
+      \ = ['A', 'B', 'C']\n    >>> edge_destinations = ['B', 'C', 'A']\n    >>> result\
+      \ = validate_dag(task_ids, edge_sources, edge_destinations)\n    >>> print(result)\n\
+      \    {'is_valid': False, 'node_count': 3, 'edge_count': 3, 'cycles_detected':\
+      \ ['A\n    -> B -> C -> A'], 'missing_dependencies': [], 'errors': ['Cycle detected:\
+      \ A\n    -> B -> C -> A']}\n\n    \"\"\"\n    return ValidateDagOutput(\n  \
+      \      is_valid=False,\n        node_count=0,\n        edge_count=0,\n     \
+      \   cycles_detected=\"\",\n        missing_dependencies=\"\",\n        errors=\"\
+      \",\n    )"
+    name: validate_dag
+    nodes_depended_on:
+    - create_task_dag
+    nodes_dependent_on: []
+    output_structure:
+    - description: Indicates whether the DAG passes all validation checks.
+      key: is_valid
+      type: bool
+    - description: Total number of nodes present in the DAG.
+      key: node_count
+      type: int
+    - description: Total number of directed edges in the DAG.
+      key: edge_count
+      type: int
+    - description: List of cycle identifiers or descriptions found in the DAG (empty
+        if none).
+      key: cycles_detected
+      type: str
+    - description: List of node names that reference non‑existent dependencies (empty
+        if none).
+      key: missing_dependencies
+      type: str
+    - description: Detailed error messages for any validation failures.
+      key: errors
+      type: str
+    prd:
+      conceptual_info: The `validate_dag` node verifies that a workflow DAG is well‑formed,
+        acyclic, and internally consistent. It acts as a safety net before the workflow
+        is finalized, catching missing dependencies and logical cycles that could
+        cause runtime failures.
+      docstring:
+        examples:
+        - lines:
+          - task_ids = ['A', 'B', 'C']
+          - edge_sources = ['A', 'B']
+          - edge_destinations = ['B', 'C']
+          - result = validate_dag(task_ids, edge_sources, edge_destinations)
+          - print(result)
+          output: '{''is_valid'': True, ''node_count'': 3, ''edge_count'': 2, ''cycles_detected'':
+            [], ''missing_dependencies'': [], ''errors'': []}'
+        - lines:
+          - task_ids = ['A', 'B', 'C']
+          - edge_sources = ['A', 'B', 'C']
+          - edge_destinations = ['B', 'C', 'A']
+          - result = validate_dag(task_ids, edge_sources, edge_destinations)
+          - print(result)
+          output: '{''is_valid'': False, ''node_count'': 3, ''edge_count'': 3, ''cycles_detected'':
+            [''A -> B -> C -> A''], ''missing_dependencies'': [], ''errors'': [''Cycle
+            detected: A -> B -> C -> A'']}'
+        parameters:
+        - description: List of unique identifiers for all tasks in the workflow.
+          name: task_ids
+          type: List[str]
+        - description: List of task identifiers representing the source of each directed
+            edge.
+          name: edge_sources
+          type: List[str]
+        - description: List of task identifiers representing the destination of each
+            directed edge.
+          name: edge_destinations
+          type: List[str]
+        - description: (Optional) A flag from `create_task_dag` indicating preliminary
+            validity. It is used only as a hint; full validation is performed regardless.
+          name: is_valid_input
+          type: bool
+        raises:
+        - description: If `edge_sources` and `edge_destinations` lists are not of
+            the same length.
+          type: ValueError
+        - description: If `task_ids` contains duplicate identifiers.
+          type: ValueError
+        returns:
+          description: 'Dictionary containing validation results:
+
+            - `is_valid` (bool): Overall validity.
+
+            - `node_count` (int): Number of nodes.
+
+            - `edge_count` (int): Number of directed edges.
+
+            - `cycles_detected` (List[str]): Descriptions of any detected cycles.
+
+            - `missing_dependencies` (List[str]): Tasks that reference undefined dependencies.
+
+            - `errors` (List[str]): Human‑readable error messages for all failures.'
+          type: dict
+        summary: Validates a Directed Acyclic Graph (DAG) representation for correctness,
+          acyclicity, and missing dependencies.
+    prompt: 'Given the lists of task identifiers (`task_ids`), directed edge sources
+      (`edge_sources`), and edge destinations (`edge_destinations`) produced by `create_task_dag`,
+      perform the following validation steps:
+
+      1. Ensure every source and destination refers to a valid task in `task_ids`.
+
+      2. Count the total number of nodes and edges.
+
+      3. Detect any cycles using a depth‑first search or topological sorting.
+
+      4. Record any missing dependencies and construct detailed error messages.
+
+      5. Return a dictionary containing `is_valid`, `node_count`, `edge_count`, `cycles_detected`,
+      `missing_dependencies`, and `errors` as described in the output structure.'
+    shims: []

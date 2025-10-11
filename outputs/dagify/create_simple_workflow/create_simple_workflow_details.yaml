@@ -1,5 +1,5 @@
-dag_type: plain_text
-description: A workflow for creating a simple workflow DAG
+dag_type: typed
+description: Generated workflow from UI.
 name: create_simple_workflow
 nodes:
   create_task_dag:
@@ -8,8 +8,17 @@ nodes:
     name: create_task_dag
     nodes_depended_on:
     - identify_task_dependencies
-    nodes_dependent_on:
-    - refine_dag
+    nodes_dependent_on: []
+    output_structure:
+    - description: Ordered list of task identifiers in the DAG
+      key: dag_nodes
+      type: List[str]
+    - description: List of edges representing dependencies, formatted as 'source->target'
+      key: dag_edges
+      type: List[str]
+    - description: Indicates whether the constructed DAG is acyclic
+      key: is_acyclic
+      type: bool
     prompt: Using the task dependencies, construct a DAG that represents the workflow.
       Ensure it is acyclic and properly ordered.
   decompose_objective_into_tasks:
@@ -18,8 +27,17 @@ nodes:
     name: decompose_objective_into_tasks
     nodes_depended_on:
     - define_workflow_objective
-    nodes_dependent_on:
-    - identify_task_dependencies
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of task names identified by decomposition.
+      key: task_names
+      type: List[str]
+    - description: List of brief descriptions for each corresponding task.
+      key: task_descriptions
+      type: List[str]
+    - description: Total number of tasks identified.
+      key: num_tasks
+      type: int
     prompt: Decompose the workflow objective into individual, self-contained tasks
       or steps.
   define_workflow_objective:
@@ -27,8 +45,11 @@ nodes:
     description: Define the objective of the workflow
     name: define_workflow_objective
     nodes_depended_on: []
-    nodes_dependent_on:
-    - decompose_objective_into_tasks
+    nodes_dependent_on: []
+    output_structure:
+    - description: Primary goal statement of the workflow
+      key: objective
+      type: str
     prompt: Clearly state the primary goal of the workflow. What is it intended to
       achieve?
   finalize_workflow:
@@ -38,6 +59,22 @@ nodes:
     nodes_depended_on:
     - refine_dag
     nodes_dependent_on: []
+    output_structure:
+    - description: Whether the DAG is fully defined and ready
+      key: dag_is_complete
+      type: bool
+    - description: Whether the DAG has maximized concurrency
+      key: dag_is_concurrent
+      type: bool
+    - description: Whether the DAG contains no cycles
+      key: dag_is_acyclic
+      type: bool
+    - description: List of node names that were adjusted during finalization
+      key: adjusted_node_list
+      type: List[str]
+    - description: Human-readable summary of the finalized DAG
+      key: dag_summary
+      type: str
     prompt: Confirm that the workflow DAG is complete, concurrent, and acyclic. Make
       any final adjustments as needed.
   identify_task_dependencies:
@@ -46,8 +83,18 @@ nodes:
     name: identify_task_dependencies
     nodes_depended_on:
     - decompose_objective_into_tasks
-    nodes_dependent_on:
-    - create_task_dag
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of all task names identified from decomposition
+      key: task_names
+      type: List[str]
+    - description: List of dependency relationships in the format 'TaskA -> TaskB'
+        indicating TaskA must be completed before TaskB can start
+      key: dependency_pairs
+      type: List[str]
+    - description: Total number of dependency relationships identified
+      key: dependency_count
+      type: int
     prompt: Analyze the tasks and identify any dependencies between them. Which tasks
       must be completed before others can start?
   refine_dag:
@@ -56,7 +103,21 @@ nodes:
     name: refine_dag
     nodes_depended_on:
     - create_task_dag
-    nodes_dependent_on:
-    - finalize_workflow
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of directed edges in the refined DAG, formatted as "TaskA->TaskB".
+      key: dag_edges
+      type: List[str]
+    - description: Indicates whether the refined DAG contains any cycles.
+      key: is_acyclic
+      type: bool
+    - description: Indicates whether the DAG has been adjusted to allow concurrent
+        execution of independent tasks.
+      key: is_concurrent
+      type: bool
+    - description: Maximum number of tasks that can run concurrently in the refined
+        DAG.
+      key: max_concurrency
+      type: int
     prompt: Review the DAG for opportunities to increase concurrency while maintaining
       acyclicity. Make any necessary adjustments.
