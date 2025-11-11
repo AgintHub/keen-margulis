@@ -5,285 +5,232 @@ PRDs for nodes in the 'create_workflow_dag' module.
 
 ## Table of Contents
 
-- [define_objective](#define_objective)
+- [create_dag_structure](#create_dag_structure)
 
-- [decompose_objective](#decompose_objective)
+- [decompose_task_into_subtasks](#decompose_task_into_subtasks)
 
-- [identify_dependencies](#identify_dependencies)
+- [define_node_prompts_and_descriptions](#define_node_prompts_and_descriptions)
 
-- [define_node_outputs](#define_node_outputs)
+- [define_task_objective](#define_task_objective)
 
-- [construct_dag](#construct_dag)
+- [finalize_dag_workflow](#finalize_dag_workflow)
 
-- [validate_dag](#validate_dag)
-
-- [finalize_workflow](#finalize_workflow)
+- [identify_dependencies_between_subtasks](#identify_dependencies_between_subtasks)
 
 
 
 ---
 
-## define_objective
+## create_dag_structure
 
 ### Description
-Clearly define the objective or task description that the workflow needs to achieve
+Create the DAG structure based on the subtasks and their dependencies.
 
 ### Conceptual Info
 
-This node is responsible for defining the objective or task description that the workflow is intended to achieve. It serves as the initial step in creating a workflow DAG.
+Constructs a Directed Acyclic Graph (DAG) from given subtasks and their dependencies.
 
 ### Docstring
 
-**Summary:** Defines the objective or task description for the workflow.
-
-**Returns:** str - The defined objective or task description.
-
-**Raises:**
-
-- ValueError: If the objective is not provided or is empty.
-**Examples:**
-
-```python
->>> define_objective()
-"Create a workflow to process customer orders"
-```
-
-```python
->>> define_objective()
-"Design a data pipeline for real-time analytics"
-```
-
-
-
----
-
-## decompose_objective
-
-### Description
-Decompose the objective into smaller, manageable tasks or steps
-
-### Conceptual Info
-
-This node takes the defined objective from its parent node 'define_objective' and breaks it down into smaller, manageable tasks or steps.
-
-### Docstring
-
-**Summary:** Decomposes the given objective into a list of tasks or steps.
+**Summary:** Creates a DAG structure based on subtasks and their dependencies.
 
 **Parameters:**
 
-- objective (str): The defined objective or task description obtained from the 'define_objective' node.
-**Returns:** List[str] - A list of decomposed tasks or steps derived from the objective.
+- subtasks (List[str]): List of subtask names.
+- dependencies (List[str]): List of dependencies between subtasks, where each dependency is represented as 'subtask_id_1 -> subtask_id_2'.
+**Returns:** {dag_nodes: List[str], dag_edges: List[str], root_nodes: List[str], is_valid_dag: bool} - A dictionary containing the DAG nodes, edges, root nodes, and a flag indicating whether the DAG is valid.
 
 **Raises:**
 
-- ValueError: If the objective is empty or not a string.
+- ValueError: If the dependencies form a cycle, making it impossible to create a valid DAG.
 **Examples:**
 
 ```python
->>> decompose_objective(objective='Create a workflow DAG')
-['Define objective', 'Decompose objective', 'Identify dependencies', 'Construct DAG']
-```
-
-```python
->>> decompose_objective(objective='Develop a machine learning model')
-['Collect data', 'Preprocess data', 'Train model', 'Evaluate model']
+>>> subtasks = ['A', 'B', 'C']
+>>> dependencies = ['A -> B', 'B -> C']
+>>> create_dag_structure(subtasks, dependencies)
+{'dag_nodes': ['A', 'B', 'C'], 'dag_edges': ['A->B', 'B->C'], 'root_nodes': ['A'], 'is_valid_dag': True}
 ```
 
 
 
 ---
 
-## identify_dependencies
+## decompose_task_into_subtasks
 
 ### Description
-Identify dependencies between the decomposed tasks
+Decompose the task into smaller components that can be executed concurrently or sequentially.
 
 ### Conceptual Info
 
-This node analyzes the decomposed tasks from the 'decompose_objective' node to identify dependencies between them, producing a dependency map.
+This node takes a task objective and breaks it down into smaller, manageable subtasks or steps.
 
 ### Docstring
 
-**Summary:** Identify dependencies between decomposed tasks.
+**Summary:** Decompose a task into smaller subtasks or steps.
 
 **Parameters:**
 
-- task_list (List[str]): List of decomposed tasks or steps from the 'decompose_objective' node.
-**Returns:** List[str] - List representing the dependency map between tasks.
+- task_objective (str): The primary objective or task that the workflow will accomplish.
+- task_description (str): A detailed description of the task or objective.
+**Returns:** dict - A dictionary containing the list of subtasks, the count of subtasks, and any sequencing requirements.
 
 **Raises:**
 
-- ValueError: If the task_list is empty or malformed.
+- ValueError: If the task objective or description is empty.
 **Examples:**
 
 ```python
->>> task_list = ['task1', 'task2', 'task3']
->>> dependency_map = identify_dependencies(task_list)
-['task1->task2', 'task2->task3']
-```
-
-```python
->>> task_list = ['init', 'process', 'finalize']
->>> dependency_map = identify_dependencies(task_list)
-['init->process', 'process->finalize']
+>>> decompose_task_into_subtasks(task_objective='Create a workflow', task_description='Create a workflow to automate a process')
+>>> print(result)
+{'subtask_list': ['Define task objective', 'Identify dependencies', 'Create DAG structure'], 'subtask_count': 3, 'sequencing_requirements': 'Sequential'}
 ```
 
 
 
 ---
 
-## define_node_outputs
+## define_node_prompts_and_descriptions
 
 ### Description
-Define the output structure for each node or task
+Specify the prompts and descriptions for each node in the DAG.
 
 ### Conceptual Info
 
-This node defines the output structure for each task or node in the workflow DAG.
+This node generates prompts and descriptions for each node in the DAG based on the structure defined by the parent node.
 
 ### Docstring
 
-**Summary:** Defines the output structure for each node based on the decomposed tasks.
+**Summary:** Generate node prompts and descriptions from the DAG structure.
 
 **Parameters:**
 
-- task_list (List[str]): List of decomposed tasks or steps from the decompose_objective node.
-**Returns:** List[str] - A list of output structures for each node in the workflow DAG.
+- dag_nodes (List[str]): List of node names from the DAG structure.
+- dag_edges (List[str]): List of edges in the DAG, represented as 'node1->node2'.
+- root_nodes (List[str]): List of root node names in the DAG.
+- is_valid_dag (bool): Whether the constructed DAG is valid.
+**Returns:** dict - A dictionary containing lists of node names, prompts, and descriptions.
 
 **Raises:**
 
-- ValueError: If the task_list is empty or not a list.
+- ValueError: If the input DAG structure is invalid or empty.
 **Examples:**
 
 ```python
->>> task_list = ['task1', 'task2']
->>> node_outputs = define_node_outputs(task_list)
-['{"task": "task1", "output_type": "str"}', '{"task": "task2", "output_type": "int"}']
-```
-
-```python
->>> task_list = ['data_ingestion', 'data_processing']
->>> node_outputs = define_node_outputs(task_list)
-['{"task": "data_ingestion", "output_type": "DataFrame"}', '{"task": "data_processing", "output_type": "DataFrame"}']
+>>> node_names = ['A', 'B', 'C']
+>>> node_prompts = ['Task A', 'Task B', 'Task C']
+>>> node_descriptions = ['Description A', 'Description B', 'Description C']
+>>> result = define_node_prompts_and_descriptions(node_names, node_prompts, node_descriptions)
+{'node_names': ['A', 'B', 'C'], 'node_prompts': ['Task A', 'Task B', 'Task C'], 'node_descriptions': ['Description A', 'Description B', 'Description C']}
 ```
 
 
 
 ---
 
-## construct_dag
+## define_task_objective
 
 ### Description
-Construct the workflow DAG using the decomposed tasks and their dependencies
+Define the primary objective or task that the workflow will accomplish.
 
 ### Conceptual Info
 
-This node constructs a Directed Acyclic Graph (DAG) representing the workflow based on the decomposed tasks, their dependencies, and output structures.
+This node is responsible for defining the primary task or objective of the workflow DAG.
 
 ### Docstring
 
-**Summary:** Constructs the workflow DAG using the task list, dependency map, and node outputs.
+**Summary:** This function takes no inputs and returns a task objective and its description based on user input.
 
-**Parameters:**
-
-- task_list (List[str]): List of decomposed tasks or steps derived from the objective.
-- dependency_map (List[str]): List representing the dependency map between tasks.
-- node_outputs (List[str]): List containing output structures for each node.
-**Returns:** str - The constructed workflow DAG structure represented as a string.
+**Returns:** dict - A dictionary containing the task objective and its description.
 
 **Raises:**
 
-- ValueError: If the task list, dependency map, or node outputs are inconsistent or malformed.
+- ValueError: If the user input is empty or invalid.
 **Examples:**
 
 ```python
->>> task_list = ['task1', 'task2', 'task3']
->>> dependency_map = [('task1', 'task2'), ('task2', 'task3')]
->>> node_outputs = [{'task1': 'output1'}, {'task2': 'output2'}, {'task3': 'output3'}]
->>> dag_structure = construct_dag(task_list, dependency_map, node_outputs)
-digraph G { task1 -> task2; task2 -> task3; }
-```
-
-```python
->>> task_list = ['A', 'B', 'C']
->>> dependency_map = [('A', 'B'), ('B', 'C')]
->>> node_outputs = [{'A': 'resultA'}, {'B': 'resultB'}, {'C': 'resultC'}]
->>> dag_structure = construct_dag(task_list, dependency_map, node_outputs)
-digraph G { A -> B; B -> C; }
+>>> task_objective = define_task_objective()
+>>> print(task_objective['task_objective'])  # Output: 'Train a machine learning model'
+>>> print(task_objective['task_description'])  # Output: 'The goal is to train a model that can predict user behavior.'
+{'task_objective': 'Train a machine learning model', 'task_description': 'The goal is to train a model that can predict user behavior.'}
 ```
 
 
 
 ---
 
-## validate_dag
+## finalize_dag_workflow
 
 ### Description
-Validate the constructed workflow DAG for correctness and acyclicity
+Finalize the DAG workflow, verifying its correctness and effectiveness.
 
 ### Conceptual Info
 
-This node validates the constructed workflow DAG for correctness and ensures it is acyclic.
+This node is responsible for reviewing and validating the constructed DAG workflow to ensure it meets the requirements and is efficient.
 
 ### Docstring
 
-**Summary:** Validate the constructed workflow DAG for correctness and acyclicity.
+**Summary:** Finalize the DAG workflow by validating its correctness and effectiveness.
 
 **Parameters:**
 
-- dag_structure (str): The constructed workflow DAG structure from the construct_dag node.
-**Returns:** bool - Whether the DAG is valid and acyclic.
+- node_names (List[str]): List of node names in the DAG
+- node_prompts (List[str]): List of prompts corresponding to each node name
+- node_descriptions (List[str]): List of descriptions corresponding to each node name
+**Returns:** Dict[str, Any] - A dictionary containing the validation result, details, and efficiency score
 
 **Raises:**
 
-- ValueError: If the DAG structure is malformed or contains cycles.
+- ValueError: If the input node names, prompts, or descriptions are invalid or inconsistent
 **Examples:**
 
 ```python
->>> validate_dag('A->B;B->C')
-True
-```
-
-```python
->>> validate_dag('A->B;B->A')
-False
+>>> node_names = ['node1', 'node2', 'node3']
+>>> node_prompts = ['prompt1', 'prompt2', 'prompt3']
+>>> node_descriptions = ['description1', 'description2', 'description3']
+>>> result = finalize_dag_workflow(node_names, node_prompts, node_descriptions)
+{'is_valid': True, 'validation_details': [], 'efficiency_score': 0.8}
 ```
 
 
 
 ---
 
-## finalize_workflow
+## identify_dependencies_between_subtasks
 
 ### Description
-Finalize the workflow by ensuring all nodes are connected and the DAG is valid
+Analyze the subtasks to identify any dependencies or prerequisites.
 
 ### Conceptual Info
 
-This node finalizes the workflow DAG by ensuring all nodes are connected and the DAG is valid, based on the validation result from its parent node.
+This node analyzes subtasks to identify dependencies, ensuring a valid workflow.
 
 ### Docstring
 
-**Summary:** Finalize the workflow DAG based on validation results.
+**Summary:** Identify dependencies between subtasks based on their prerequisites.
 
 **Parameters:**
 
-- validation_result (bool): The validation result from the validate_dag node indicating whether the DAG is valid and acyclic.
-**Returns:** str - The finalized workflow DAG as a string representation.
+- subtask_list (List[str]): List of subtasks or steps to achieve the task objective
+- sequencing_requirements (str): Description of any sequencing or ordering requirements between subtasks
+**Returns:** dict - Dictionary containing a boolean indicating whether dependencies exist and a list of dependencies
 
 **Raises:**
 
-- ValueError: If the validation result is False, indicating the DAG is not valid or contains cycles.
+- ValueError: If subtask_list is empty or sequencing_requirements is invalid
 **Examples:**
 
 ```python
->>> finalize_workflow(validation_result=True)
-'valid_dag_structure'
+>>> subtask_list = ['task1', 'task2', 'task3']
+>>> sequencing_requirements = 'task1 -> task2, task2 -> task3'
+>>> dependencies = identify_dependencies_between_subtasks(subtask_list, sequencing_requirements)
+{'dependencies_exist': True, 'dependency_list': ['task1 -> task2', 'task2 -> task3']}
 ```
 
 ```python
->>> finalize_workflow(validation_result=False)
-ValueError: 'DAG is not valid or contains cycles'
+>>> subtask_list = ['task1', 'task2']
+>>> sequencing_requirements = ''
+>>> dependencies = identify_dependencies_between_subtasks(subtask_list, sequencing_requirements)
+{'dependencies_exist': False, 'dependency_list': []}
 ```
 

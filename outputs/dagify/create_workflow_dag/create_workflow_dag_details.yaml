@@ -1,4 +1,4 @@
-dag_type: typed
+dag_type: spec
 description: Generated workflow from UI.
 name: create_workflow_dag
 nodes:
@@ -22,6 +22,35 @@ nodes:
     - description: Whether the constructed DAG is valid
       key: is_valid_dag
       type: bool
+    prd:
+      conceptual_info: Constructs a Directed Acyclic Graph (DAG) from given subtasks
+        and their dependencies.
+      docstring:
+        examples:
+        - lines:
+          - subtasks = ['A', 'B', 'C']
+          - dependencies = ['A -> B', 'B -> C']
+          - create_dag_structure(subtasks, dependencies)
+          output: '{''dag_nodes'': [''A'', ''B'', ''C''], ''dag_edges'': [''A->B'',
+            ''B->C''], ''root_nodes'': [''A''], ''is_valid_dag'': True}'
+        parameters:
+        - description: List of subtask names.
+          name: subtasks
+          type: List[str]
+        - description: List of dependencies between subtasks, where each dependency
+            is represented as 'subtask_id_1 -> subtask_id_2'.
+          name: dependencies
+          type: List[str]
+        raises:
+        - description: If the dependencies form a cycle, making it impossible to create
+            a valid DAG.
+          type: ValueError
+        returns:
+          description: A dictionary containing the DAG nodes, edges, root nodes, and
+            a flag indicating whether the DAG is valid.
+          type: '{dag_nodes: List[str], dag_edges: List[str], root_nodes: List[str],
+            is_valid_dag: bool}'
+        summary: Creates a DAG structure based on subtasks and their dependencies.
     prompt: Using the subtasks and their dependencies, construct a Directed Acyclic
       Graph (DAG) that represents the workflow.
   decompose_task_into_subtasks:
@@ -43,6 +72,33 @@ nodes:
         subtasks
       key: sequencing_requirements
       type: str
+    prd:
+      conceptual_info: This node takes a task objective and breaks it down into smaller,
+        manageable subtasks or steps.
+      docstring:
+        examples:
+        - lines:
+          - decompose_task_into_subtasks(task_objective='Create a workflow', task_description='Create
+            a workflow to automate a process')
+          - print(result)
+          output: '{''subtask_list'': [''Define task objective'', ''Identify dependencies'',
+            ''Create DAG structure''], ''subtask_count'': 3, ''sequencing_requirements'':
+            ''Sequential''}'
+        parameters:
+        - description: The primary objective or task that the workflow will accomplish.
+          name: task_objective
+          type: str
+        - description: A detailed description of the task or objective.
+          name: task_description
+          type: str
+        raises:
+        - description: If the task objective or description is empty.
+          type: ValueError
+        returns:
+          description: A dictionary containing the list of subtasks, the count of
+            subtasks, and any sequencing requirements.
+          type: dict
+        summary: Decompose a task into smaller subtasks or steps.
     prompt: Break down the task or objective into smaller, manageable subtasks or
       steps.
   define_node_prompts_and_descriptions:
@@ -62,6 +118,40 @@ nodes:
     - description: List of descriptions corresponding to each node name.
       key: node_descriptions
       type: List[str]
+    prd:
+      conceptual_info: This node generates prompts and descriptions for each node
+        in the DAG based on the structure defined by the parent node.
+      docstring:
+        examples:
+        - lines:
+          - node_names = ['A', 'B', 'C']
+          - node_prompts = ['Task A', 'Task B', 'Task C']
+          - node_descriptions = ['Description A', 'Description B', 'Description C']
+          - result = define_node_prompts_and_descriptions(node_names, node_prompts,
+            node_descriptions)
+          output: '{''node_names'': [''A'', ''B'', ''C''], ''node_prompts'': [''Task
+            A'', ''Task B'', ''Task C''], ''node_descriptions'': [''Description A'',
+            ''Description B'', ''Description C'']}'
+        parameters:
+        - description: List of node names from the DAG structure.
+          name: dag_nodes
+          type: List[str]
+        - description: List of edges in the DAG, represented as 'node1->node2'.
+          name: dag_edges
+          type: List[str]
+        - description: List of root node names in the DAG.
+          name: root_nodes
+          type: List[str]
+        - description: Whether the constructed DAG is valid.
+          name: is_valid_dag
+          type: bool
+        raises:
+        - description: If the input DAG structure is invalid or empty.
+          type: ValueError
+        returns:
+          description: A dictionary containing lists of node names, prompts, and descriptions.
+          type: dict
+        summary: Generate node prompts and descriptions from the DAG structure.
     prompt: For each node in the DAG, define a clear and concise prompt or description
       that outlines the task or action to be performed.
   define_task_objective:
@@ -77,6 +167,28 @@ nodes:
     - description: A detailed description of the task or objective.
       key: task_description
       type: str
+    prd:
+      conceptual_info: This node is responsible for defining the primary task or objective
+        of the workflow DAG.
+      docstring:
+        examples:
+        - lines:
+          - task_objective = define_task_objective()
+          - 'print(task_objective[''task_objective''])  # Output: ''Train a machine
+            learning model'''
+          - 'print(task_objective[''task_description''])  # Output: ''The goal is
+            to train a model that can predict user behavior.'''
+          output: '{''task_objective'': ''Train a machine learning model'', ''task_description'':
+            ''The goal is to train a model that can predict user behavior.''}'
+        parameters: []
+        raises:
+        - description: If the user input is empty or invalid.
+          type: ValueError
+        returns:
+          description: A dictionary containing the task objective and its description.
+          type: dict
+        summary: This function takes no inputs and returns a task objective and its
+          description based on user input.
     prompt: Clearly articulate the task or objective that the workflow DAG is intended
       to achieve.
   finalize_dag_workflow:
@@ -92,11 +204,42 @@ nodes:
       type: bool
     - description: List of details or issues found during validation
       key: validation_details
-      type: List[str]
+      type: str
     - description: A score indicating the efficiency of the workflow, ranging from
         0 to 1
       key: efficiency_score
       type: float
+    prd:
+      conceptual_info: This node is responsible for reviewing and validating the constructed
+        DAG workflow to ensure it meets the requirements and is efficient.
+      docstring:
+        examples:
+        - lines:
+          - node_names = ['node1', 'node2', 'node3']
+          - node_prompts = ['prompt1', 'prompt2', 'prompt3']
+          - node_descriptions = ['description1', 'description2', 'description3']
+          - result = finalize_dag_workflow(node_names, node_prompts, node_descriptions)
+          output: '{''is_valid'': True, ''validation_details'': [], ''efficiency_score'':
+            0.8}'
+        parameters:
+        - description: List of node names in the DAG
+          name: node_names
+          type: List[str]
+        - description: List of prompts corresponding to each node name
+          name: node_prompts
+          type: List[str]
+        - description: List of descriptions corresponding to each node name
+          name: node_descriptions
+          type: List[str]
+        raises:
+        - description: If the input node names, prompts, or descriptions are invalid
+            or inconsistent
+          type: ValueError
+        returns:
+          description: A dictionary containing the validation result, details, and
+            efficiency score
+          type: Dict[str, Any]
+        summary: Finalize the DAG workflow by validating its correctness and effectiveness.
     prompt: Review the constructed DAG workflow to ensure it is valid, efficient,
       and effectively achieves the original task or objective.
   identify_dependencies_between_subtasks:
@@ -113,6 +256,38 @@ nodes:
     - description: List of dependencies between subtasks, where each dependency is
         represented as 'subtask_id_1 -> subtask_id_2'
       key: dependency_list
-      type: List[str]
+      type: str
+    prd:
+      conceptual_info: This node analyzes subtasks to identify dependencies, ensuring
+        a valid workflow.
+      docstring:
+        examples:
+        - lines:
+          - subtask_list = ['task1', 'task2', 'task3']
+          - sequencing_requirements = 'task1 -> task2, task2 -> task3'
+          - dependencies = identify_dependencies_between_subtasks(subtask_list, sequencing_requirements)
+          output: '{''dependencies_exist'': True, ''dependency_list'': [''task1 ->
+            task2'', ''task2 -> task3'']}'
+        - lines:
+          - subtask_list = ['task1', 'task2']
+          - sequencing_requirements = ''
+          - dependencies = identify_dependencies_between_subtasks(subtask_list, sequencing_requirements)
+          output: '{''dependencies_exist'': False, ''dependency_list'': []}'
+        parameters:
+        - description: List of subtasks or steps to achieve the task objective
+          name: subtask_list
+          type: List[str]
+        - description: Description of any sequencing or ordering requirements between
+            subtasks
+          name: sequencing_requirements
+          type: str
+        raises:
+        - description: If subtask_list is empty or sequencing_requirements is invalid
+          type: ValueError
+        returns:
+          description: Dictionary containing a boolean indicating whether dependencies
+            exist and a list of dependencies
+          type: dict
+        summary: Identify dependencies between subtasks based on their prerequisites.
     prompt: Determine the dependencies between the subtasks, identifying which tasks
       must be completed before others can begin.
