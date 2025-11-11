@@ -1,6 +1,5 @@
-dag_type: plain_text
-description: A workflow to create a Directed Acyclic Graph (DAG) for a given task
-  or objective.
+dag_type: typed
+description: Generated workflow from UI.
 name: create_workflow_dag
 nodes:
   create_dag_structure:
@@ -9,8 +8,20 @@ nodes:
     name: create_dag_structure
     nodes_depended_on:
     - identify_dependencies_between_subtasks
-    nodes_dependent_on:
-    - define_node_prompts_and_descriptions
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of node names in the DAG
+      key: dag_nodes
+      type: List[str]
+    - description: List of edges in the DAG, represented as 'node1->node2'
+      key: dag_edges
+      type: List[str]
+    - description: List of root node names in the DAG
+      key: root_nodes
+      type: List[str]
+    - description: Whether the constructed DAG is valid
+      key: is_valid_dag
+      type: bool
     prompt: Using the subtasks and their dependencies, construct a Directed Acyclic
       Graph (DAG) that represents the workflow.
   decompose_task_into_subtasks:
@@ -20,8 +31,18 @@ nodes:
     name: decompose_task_into_subtasks
     nodes_depended_on:
     - define_task_objective
-    nodes_dependent_on:
-    - identify_dependencies_between_subtasks
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of subtasks or steps to achieve the task objective
+      key: subtask_list
+      type: List[str]
+    - description: Number of subtasks or steps generated
+      key: subtask_count
+      type: int
+    - description: Description of any sequencing or ordering requirements between
+        subtasks
+      key: sequencing_requirements
+      type: str
     prompt: Break down the task or objective into smaller, manageable subtasks or
       steps.
   define_node_prompts_and_descriptions:
@@ -30,8 +51,17 @@ nodes:
     name: define_node_prompts_and_descriptions
     nodes_depended_on:
     - create_dag_structure
-    nodes_dependent_on:
-    - finalize_dag_workflow
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of all node names in the DAG.
+      key: node_names
+      type: List[str]
+    - description: List of prompts corresponding to each node name.
+      key: node_prompts
+      type: List[str]
+    - description: List of descriptions corresponding to each node name.
+      key: node_descriptions
+      type: List[str]
     prompt: For each node in the DAG, define a clear and concise prompt or description
       that outlines the task or action to be performed.
   define_task_objective:
@@ -39,8 +69,14 @@ nodes:
     description: Define the primary objective or task that the workflow will accomplish.
     name: define_task_objective
     nodes_depended_on: []
-    nodes_dependent_on:
-    - decompose_task_into_subtasks
+    nodes_dependent_on: []
+    output_structure:
+    - description: The primary objective or task that the workflow will accomplish.
+      key: task_objective
+      type: str
+    - description: A detailed description of the task or objective.
+      key: task_description
+      type: str
     prompt: Clearly articulate the task or objective that the workflow DAG is intended
       to achieve.
   finalize_dag_workflow:
@@ -50,6 +86,17 @@ nodes:
     nodes_depended_on:
     - define_node_prompts_and_descriptions
     nodes_dependent_on: []
+    output_structure:
+    - description: Whether the DAG workflow is valid and effective
+      key: is_valid
+      type: bool
+    - description: List of details or issues found during validation
+      key: validation_details
+      type: List[str]
+    - description: A score indicating the efficiency of the workflow, ranging from
+        0 to 1
+      key: efficiency_score
+      type: float
     prompt: Review the constructed DAG workflow to ensure it is valid, efficient,
       and effectively achieves the original task or objective.
   identify_dependencies_between_subtasks:
@@ -58,7 +105,14 @@ nodes:
     name: identify_dependencies_between_subtasks
     nodes_depended_on:
     - decompose_task_into_subtasks
-    nodes_dependent_on:
-    - create_dag_structure
+    nodes_dependent_on: []
+    output_structure:
+    - description: Whether dependencies exist between subtasks
+      key: dependencies_exist
+      type: bool
+    - description: List of dependencies between subtasks, where each dependency is
+        represented as 'subtask_id_1 -> subtask_id_2'
+      key: dependency_list
+      type: List[str]
     prompt: Determine the dependencies between the subtasks, identifying which tasks
       must be completed before others can begin.
