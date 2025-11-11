@@ -16,7 +16,9 @@ class DecomposeObjectiveOutput(BaseModel):
 class IdentifyDependenciesOutput(BaseModel):
     """Pydantic model for identify_dependencies node outputs."""
     dependency_map: List[str] = (
-        Field(..., description="List representing the dependency map between tasks")
+        Field(..., description = (
+            "List representing the dependency map between tasks")
+        )
     )
 
 

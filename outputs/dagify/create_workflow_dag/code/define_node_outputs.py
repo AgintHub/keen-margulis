@@ -16,7 +16,9 @@ class DecomposeObjectiveOutput(BaseModel):
 class DefineNodeOutputsOutput(BaseModel):
     """Pydantic model for define_node_outputs node outputs."""
     node_outputs: List[str] = (
-        Field(..., description="List containing output structures for each node")
+        Field(..., description = (
+            "List containing output structures for each node")
+        )
     )
 
 

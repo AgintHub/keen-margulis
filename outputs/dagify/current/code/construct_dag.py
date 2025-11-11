@@ -12,14 +12,18 @@ from typing import List
 class IdentifyDependenciesOutput(BaseModel):
     """Pydantic model for identify_dependencies node outputs."""
     dependency_map: List[str] = (
-        Field(..., description="List representing the dependency map between tasks")
+        Field(..., description = (
+            "List representing the dependency map between tasks")
+        )
     )
 
 
 class DefineNodeOutputsOutput(BaseModel):
     """Pydantic model for define_node_outputs node outputs."""
     node_outputs: List[str] = (
-        Field(..., description="List containing output structures for each node")
+        Field(..., description = (
+            "List containing output structures for each node")
+        )
     )
 
 
