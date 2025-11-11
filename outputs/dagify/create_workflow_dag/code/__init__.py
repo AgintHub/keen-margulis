@@ -11,11 +11,17 @@ from .identify_dependencies import identify_dependencies
 from .finalize_workflow import finalize_workflow
 from .define_node_prompts_and_descriptions import define_node_prompts_and_descriptions
 from .construct_dag import construct_dag
+from . import _decompose_task_into_subtasks
 from . import _decompose_objective
 from . import _define_objective
 from . import _validate_dag
 from . import _define_node_outputs
+from . import _define_task_objective
+from . import _finalize_dag_workflow
+from . import _create_dag_structure
 from . import _identify_dependencies
+from . import _identify_dependencies_between_subtasks
+from . import _define_node_prompts_and_descriptions
 from . import _finalize_workflow
 from . import _construct_dag
 
@@ -34,11 +40,17 @@ __all__ = [
     'finalize_workflow',
     'define_node_prompts_and_descriptions',
     'construct_dag',
+    '_decompose_task_into_subtasks',
     '_decompose_objective',
     '_define_objective',
     '_validate_dag',
     '_define_node_outputs',
+    '_define_task_objective',
+    '_finalize_dag_workflow',
+    '_create_dag_structure',
     '_identify_dependencies',
+    '_identify_dependencies_between_subtasks',
+    '_define_node_prompts_and_descriptions',
     '_finalize_workflow',
     '_construct_dag'
 ]

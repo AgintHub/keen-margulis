@@ -1,10 +1,42 @@
-dag_type: spec
+dag_type: stub
 description: Generated workflow from UI.
 name: create_workflow_dag
 nodes:
   create_dag_structure:
     agent: false
+    code_node_type: stub
     description: Create the DAG structure based on the subtasks and their dependencies.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass IdentifyDependenciesBetweenSubtasksOutput(BaseModel):\n    \"\"\"\
+      Pydantic model for identify_dependencies_between_subtasks node outputs.\"\"\"\
+      \n    dependencies_exist: bool = (\n        Field(..., description=\"Whether\
+      \ dependencies exist between subtasks\")\n    )\n    dependency_list: str =\
+      \ (\n        Field(..., description=\"List of dependencies between subtasks,\
+      \ where each dependency is represented as 'subtask_id_1 -> subtask_id_2'\")\n\
+      \    )\n\n\nclass CreateDagStructureOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for create_dag_structure node outputs.\"\"\"\n    dag_nodes: List[str] = (\n\
+      \        Field(..., description=\"List of node names in the DAG\")\n    )\n\
+      \    dag_edges: List[str] = (\n        Field(..., description=\"List of edges\
+      \ in the DAG, represented as 'node1->node2'\")\n    )\n    root_nodes: List[str]\
+      \ = (\n        Field(..., description=\"List of root node names in the DAG\"\
+      )\n    )\n    is_valid_dag: bool = (\n        Field(..., description=\"Whether\
+      \ the constructed DAG is valid\")\n    )\n\n\ndef create_dag_structure(identify_dependencies_between_subtasks_input:\
+      \ IdentifyDependenciesBetweenSubtasksOutput, **kwargs) -> CreateDagStructureOutput:\n\
+      \    \"\"\"\n    Creates a DAG structure based on subtasks and their dependencies.\n\
+      \n    Parameters\n    ----------\n    subtasks : List[str]\n        List of\
+      \ subtask names.\n    dependencies : List[str]\n        List of dependencies\
+      \ between subtasks, where each dependency is\n        represented as 'subtask_id_1\
+      \ -> subtask_id_2'.\n\n    Returns\n    -------\n    {dag_nodes: List[str],\
+      \ dag_edges: List[str], root_nodes: List[str], is_valid_dag: bool}\n       \
+      \ A dictionary containing the DAG nodes, edges, root nodes, and a flag\n   \
+      \     indicating whether the DAG is valid.\n\n    Raises\n    ------\n    ValueError\n\
+      \        If the dependencies form a cycle, making it impossible to create a\n\
+      \        valid DAG.\n\n    Examples\n    --------\n    >>> subtasks = ['A',\
+      \ 'B', 'C']\n    >>> dependencies = ['A -> B', 'B -> C']\n    >>> create_dag_structure(subtasks,\
+      \ dependencies)\n    {'dag_nodes': ['A', 'B', 'C'], 'dag_edges': ['A->B', 'B->C'],\
+      \ 'root_nodes':\n    ['A'], 'is_valid_dag': True}\n\n    \"\"\"\n    return\
+      \ CreateDagStructureOutput(\n        dag_nodes=[],\n        dag_edges=[],\n\
+      \        root_nodes=[],\n        is_valid_dag=False,\n    )"
     name: create_dag_structure
     nodes_depended_on:
     - identify_dependencies_between_subtasks
@@ -53,10 +85,40 @@ nodes:
         summary: Creates a DAG structure based on subtasks and their dependencies.
     prompt: Using the subtasks and their dependencies, construct a Directed Acyclic
       Graph (DAG) that represents the workflow.
+    shims: []
   decompose_task_into_subtasks:
     agent: false
+    code_node_type: stub
     description: Decompose the task into smaller components that can be executed concurrently
       or sequentially.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DefineTaskObjectiveOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ define_task_objective node outputs.\"\"\"\n    task_objective: str = (\n \
+      \       Field(..., description=\"The primary objective or task that the workflow\
+      \ will accomplish.\")\n    )\n    task_description: str = (\n        Field(...,\
+      \ description=\"A detailed description of the task or objective.\")\n    )\n\
+      \n\nclass DecomposeTaskIntoSubtasksOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for decompose_task_into_subtasks node outputs.\"\"\"\n    subtask_list: List[str]\
+      \ = (\n        Field(..., description=\"List of subtasks or steps to achieve\
+      \ the task objective\")\n    )\n    subtask_count: int = (\n        Field(...,\
+      \ description=\"Number of subtasks or steps generated\")\n    )\n    sequencing_requirements:\
+      \ str = (\n        Field(..., description=\"Description of any sequencing or\
+      \ ordering requirements between subtasks\")\n    )\n\n\ndef decompose_task_into_subtasks(define_task_objective_input:\
+      \ DefineTaskObjectiveOutput, **kwargs) -> DecomposeTaskIntoSubtasksOutput:\n\
+      \    \"\"\"\n    Decompose a task into smaller subtasks or steps.\n\n    Parameters\n\
+      \    ----------\n    task_objective : str\n        The primary objective or\
+      \ task that the workflow will accomplish.\n    task_description : str\n    \
+      \    A detailed description of the task or objective.\n\n    Returns\n    -------\n\
+      \    dict\n        A dictionary containing the list of subtasks, the count of\
+      \ subtasks,\n        and any sequencing requirements.\n\n    Raises\n    ------\n\
+      \    ValueError\n        If the task objective or description is empty.\n\n\
+      \    Examples\n    --------\n    >>> decompose_task_into_subtasks(task_objective='Create\
+      \ a workflow',\n    task_description='Create a workflow to automate a process')\n\
+      \    >>> print(result)\n    {'subtask_list': ['Define task objective', 'Identify\
+      \ dependencies', 'Create\n    DAG structure'], 'subtask_count': 3, 'sequencing_requirements':\n\
+      \    'Sequential'}\n\n    \"\"\"\n    return DecomposeTaskIntoSubtasksOutput(\n\
+      \        subtask_list=[],\n        subtask_count=0,\n        sequencing_requirements=\"\
+      \",\n    )"
     name: decompose_task_into_subtasks
     nodes_depended_on:
     - define_task_objective
@@ -101,9 +163,44 @@ nodes:
         summary: Decompose a task into smaller subtasks or steps.
     prompt: Break down the task or objective into smaller, manageable subtasks or
       steps.
+    shims: []
   define_node_prompts_and_descriptions:
     agent: false
+    code_node_type: stub
     description: Specify the prompts and descriptions for each node in the DAG.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass CreateDagStructureOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ create_dag_structure node outputs.\"\"\"\n    dag_nodes: List[str] = (\n \
+      \       Field(..., description=\"List of node names in the DAG\")\n    )\n \
+      \   dag_edges: List[str] = (\n        Field(..., description=\"List of edges\
+      \ in the DAG, represented as 'node1->node2'\")\n    )\n    root_nodes: List[str]\
+      \ = (\n        Field(..., description=\"List of root node names in the DAG\"\
+      )\n    )\n    is_valid_dag: bool = (\n        Field(..., description=\"Whether\
+      \ the constructed DAG is valid\")\n    )\n\n\nclass DefineNodePromptsAndDescriptionsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for define_node_prompts_and_descriptions node outputs.\"\
+      \"\"\n    node_names: List[str] = (\n        Field(..., description=\"List of\
+      \ all node names in the DAG.\")\n    )\n    node_prompts: List[str] = (\n  \
+      \      Field(..., description=\"List of prompts corresponding to each node name.\"\
+      )\n    )\n    node_descriptions: List[str] = (\n        Field(..., description=\"\
+      List of descriptions corresponding to each node name.\")\n    )\n\n\ndef define_node_prompts_and_descriptions(create_dag_structure_input:\
+      \ CreateDagStructureOutput, **kwargs) -> DefineNodePromptsAndDescriptionsOutput:\n\
+      \    \"\"\"\n    Generate node prompts and descriptions from the DAG structure.\n\
+      \n    Parameters\n    ----------\n    dag_nodes : List[str]\n        List of\
+      \ node names from the DAG structure.\n    dag_edges : List[str]\n        List\
+      \ of edges in the DAG, represented as 'node1->node2'.\n    root_nodes : List[str]\n\
+      \        List of root node names in the DAG.\n    is_valid_dag : bool\n    \
+      \    Whether the constructed DAG is valid.\n\n    Returns\n    -------\n   \
+      \ dict\n        A dictionary containing lists of node names, prompts, and\n\
+      \        descriptions.\n\n    Raises\n    ------\n    ValueError\n        If\
+      \ the input DAG structure is invalid or empty.\n\n    Examples\n    --------\n\
+      \    >>> node_names = ['A', 'B', 'C']\n    >>> node_prompts = ['Task A', 'Task\
+      \ B', 'Task C']\n    >>> node_descriptions = ['Description A', 'Description\
+      \ B', 'Description C']\n    >>> result = define_node_prompts_and_descriptions(node_names,\
+      \ node_prompts,\n    node_descriptions)\n    {'node_names': ['A', 'B', 'C'],\
+      \ 'node_prompts': ['Task A', 'Task B', 'Task\n    C'], 'node_descriptions':\
+      \ ['Description A', 'Description B', 'Description\n    C']}\n\n    \"\"\"\n\
+      \    return DefineNodePromptsAndDescriptionsOutput(\n        node_names=[],\n\
+      \        node_prompts=[],\n        node_descriptions=[],\n    )"
     name: define_node_prompts_and_descriptions
     nodes_depended_on:
     - create_dag_structure
@@ -154,9 +251,29 @@ nodes:
         summary: Generate node prompts and descriptions from the DAG structure.
     prompt: For each node in the DAG, define a clear and concise prompt or description
       that outlines the task or action to be performed.
+    shims: []
   define_task_objective:
     agent: false
+    code_node_type: stub
     description: Define the primary objective or task that the workflow will accomplish.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass DefineTaskObjectiveOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for define_task_objective node outputs.\"\"\"\n  \
+      \  task_objective: str = (\n        Field(..., description=\"The primary objective\
+      \ or task that the workflow will accomplish.\")\n    )\n    task_description:\
+      \ str = (\n        Field(..., description=\"A detailed description of the task\
+      \ or objective.\")\n    )\n\n\ndef define_task_objective(general_input: str,\
+      \ **kwargs) -> DefineTaskObjectiveOutput:\n    \"\"\"\n    This function takes\
+      \ no inputs and returns a task objective and its\n    description based on user\
+      \ input.\n\n    Returns\n    -------\n    dict\n        A dictionary containing\
+      \ the task objective and its description.\n\n    Raises\n    ------\n    ValueError\n\
+      \        If the user input is empty or invalid.\n\n    Examples\n    --------\n\
+      \    >>> task_objective = define_task_objective()\n    >>> print(task_objective['task_objective'])\
+      \  # Output: 'Train a machine\n    learning model'\n    >>> print(task_objective['task_description'])\
+      \  # Output: 'The goal is to\n    train a model that can predict user behavior.'\n\
+      \    {'task_objective': 'Train a machine learning model', 'task_description':\n\
+      \    'The goal is to train a model that can predict user behavior.'}\n\n   \
+      \ \"\"\"\n    return DefineTaskObjectiveOutput(\n        task_objective=\"\"\
+      ,\n        task_description=\"\",\n    )"
     name: define_task_objective
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -191,9 +308,42 @@ nodes:
           description based on user input.
     prompt: Clearly articulate the task or objective that the workflow DAG is intended
       to achieve.
+    shims: []
   finalize_dag_workflow:
     agent: false
+    code_node_type: stub
     description: Finalize the DAG workflow, verifying its correctness and effectiveness.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DefineNodePromptsAndDescriptionsOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for define_node_prompts_and_descriptions node outputs.\"\"\"\n    node_names:\
+      \ List[str] = (\n        Field(..., description=\"List of all node names in\
+      \ the DAG.\")\n    )\n    node_prompts: List[str] = (\n        Field(..., description=\"\
+      List of prompts corresponding to each node name.\")\n    )\n    node_descriptions:\
+      \ List[str] = (\n        Field(..., description=\"List of descriptions corresponding\
+      \ to each node name.\")\n    )\n\n\nclass FinalizeDagWorkflowOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for finalize_dag_workflow node outputs.\"\"\"\n  \
+      \  is_valid: bool = (\n        Field(..., description=\"Whether the DAG workflow\
+      \ is valid and effective\")\n    )\n    validation_details: str = (\n      \
+      \  Field(..., description=\"List of details or issues found during validation\"\
+      )\n    )\n    efficiency_score: float = (\n        Field(..., description=\"\
+      A score indicating the efficiency of the workflow, ranging from 0 to 1\")\n\
+      \    )\n\n\ndef finalize_dag_workflow(define_node_prompts_and_descriptions_input:\
+      \ DefineNodePromptsAndDescriptionsOutput, **kwargs) -> FinalizeDagWorkflowOutput:\n\
+      \    \"\"\"\n    Finalize the DAG workflow by validating its correctness and\
+      \ effectiveness.\n\n    Parameters\n    ----------\n    node_names : List[str]\n\
+      \        List of node names in the DAG\n    node_prompts : List[str]\n     \
+      \   List of prompts corresponding to each node name\n    node_descriptions :\
+      \ List[str]\n        List of descriptions corresponding to each node name\n\n\
+      \    Returns\n    -------\n    Dict[str, Any]\n        A dictionary containing\
+      \ the validation result, details, and\n        efficiency score\n\n    Raises\n\
+      \    ------\n    ValueError\n        If the input node names, prompts, or descriptions\
+      \ are invalid or\n        inconsistent\n\n    Examples\n    --------\n    >>>\
+      \ node_names = ['node1', 'node2', 'node3']\n    >>> node_prompts = ['prompt1',\
+      \ 'prompt2', 'prompt3']\n    >>> node_descriptions = ['description1', 'description2',\
+      \ 'description3']\n    >>> result = finalize_dag_workflow(node_names, node_prompts,\n\
+      \    node_descriptions)\n    {'is_valid': True, 'validation_details': [], 'efficiency_score':\
+      \ 0.8}\n\n    \"\"\"\n    return FinalizeDagWorkflowOutput(\n        is_valid=False,\n\
+      \        validation_details=\"\",\n        efficiency_score=0.0,\n    )"
     name: finalize_dag_workflow
     nodes_depended_on:
     - define_node_prompts_and_descriptions
@@ -242,9 +392,42 @@ nodes:
         summary: Finalize the DAG workflow by validating its correctness and effectiveness.
     prompt: Review the constructed DAG workflow to ensure it is valid, efficient,
       and effectively achieves the original task or objective.
+    shims: []
   identify_dependencies_between_subtasks:
     agent: false
+    code_node_type: stub
     description: Analyze the subtasks to identify any dependencies or prerequisites.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DecomposeTaskIntoSubtasksOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for decompose_task_into_subtasks node outputs.\"\"\"\n    subtask_list: List[str]\
+      \ = (\n        Field(..., description=\"List of subtasks or steps to achieve\
+      \ the task objective\")\n    )\n    subtask_count: int = (\n        Field(...,\
+      \ description=\"Number of subtasks or steps generated\")\n    )\n    sequencing_requirements:\
+      \ str = (\n        Field(..., description=\"Description of any sequencing or\
+      \ ordering requirements between subtasks\")\n    )\n\n\nclass IdentifyDependenciesBetweenSubtasksOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for identify_dependencies_between_subtasks node outputs.\"\
+      \"\"\n    dependencies_exist: bool = (\n        Field(..., description=\"Whether\
+      \ dependencies exist between subtasks\")\n    )\n    dependency_list: str =\
+      \ (\n        Field(..., description=\"List of dependencies between subtasks,\
+      \ where each dependency is represented as 'subtask_id_1 -> subtask_id_2'\")\n\
+      \    )\n\n\ndef identify_dependencies_between_subtasks(decompose_task_into_subtasks_input:\
+      \ DecomposeTaskIntoSubtasksOutput, **kwargs) -> IdentifyDependenciesBetweenSubtasksOutput:\n\
+      \    \"\"\"\n    Identify dependencies between subtasks based on their prerequisites.\n\
+      \n    Parameters\n    ----------\n    subtask_list : List[str]\n        List\
+      \ of subtasks or steps to achieve the task objective\n    sequencing_requirements\
+      \ : str\n        Description of any sequencing or ordering requirements between\n\
+      \        subtasks\n\n    Returns\n    -------\n    dict\n        Dictionary\
+      \ containing a boolean indicating whether dependencies\n        exist and a\
+      \ list of dependencies\n\n    Raises\n    ------\n    ValueError\n        If\
+      \ subtask_list is empty or sequencing_requirements is invalid\n\n    Examples\n\
+      \    --------\n    >>> subtask_list = ['task1', 'task2', 'task3']\n    >>> sequencing_requirements\
+      \ = 'task1 -> task2, task2 -> task3'\n    >>> dependencies = identify_dependencies_between_subtasks(subtask_list,\n\
+      \    sequencing_requirements)\n    {'dependencies_exist': True, 'dependency_list':\
+      \ ['task1 -> task2', 'task2 ->\n    task3']}\n\n    >>> subtask_list = ['task1',\
+      \ 'task2']\n    >>> sequencing_requirements = ''\n    >>> dependencies = identify_dependencies_between_subtasks(subtask_list,\n\
+      \    sequencing_requirements)\n    {'dependencies_exist': False, 'dependency_list':\
+      \ []}\n\n    \"\"\"\n    return IdentifyDependenciesBetweenSubtasksOutput(\n\
+      \        dependencies_exist=False,\n        dependency_list=\"\",\n    )"
     name: identify_dependencies_between_subtasks
     nodes_depended_on:
     - decompose_task_into_subtasks
@@ -291,3 +474,4 @@ nodes:
         summary: Identify dependencies between subtasks based on their prerequisites.
     prompt: Determine the dependencies between the subtasks, identifying which tasks
       must be completed before others can begin.
+    shims: []

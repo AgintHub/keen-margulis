@@ -1,26 +1,32 @@
-dag_type: stub
+dag_type: shim
 description: Generated workflow from UI.
 name: create_workflow_dag
 nodes:
   create_dag_structure:
     agent: false
-    code_node_type: stub
+    code_node_type: shim
     description: Create the DAG structure based on the subtasks and their dependencies.
-    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass IdentifyDependenciesBetweenSubtasksOutput(BaseModel):\n    \"\"\"\
-      Pydantic model for identify_dependencies_between_subtasks node outputs.\"\"\"\
-      \n    dependencies_exist: bool = (\n        Field(..., description=\"Whether\
+    implementation: "from ._create_dag_structure.parse_dependency_string import parse_dependency_string\n\
+      from ._create_dag_structure.extract_unique_nodes import extract_unique_nodes\n\
+      from ._create_dag_structure.format_edges_for_output import format_edges_for_output\n\
+      from ._create_dag_structure.detect_cycles_in_graph import detect_cycles_in_graph\n\
+      from ._create_dag_structure.find_root_nodes import find_root_nodes\nfrom ._create_dag_structure.validate_dag_structure\
+      \ import validate_dag_structure\n\nfrom pydantic import BaseModel, Field\nfrom\
+      \ typing import List\n\n\nclass IdentifyDependenciesBetweenSubtasksOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for identify_dependencies_between_subtasks node outputs.\"\
+      \"\"\n    dependencies_exist: bool = (\n        Field(..., description=\"Whether\
       \ dependencies exist between subtasks\")\n    )\n    dependency_list: str =\
-      \ (\n        Field(..., description=\"List of dependencies between subtasks,\
-      \ where each dependency is represented as 'subtask_id_1 -> subtask_id_2'\")\n\
-      \    )\n\n\nclass CreateDagStructureOutput(BaseModel):\n    \"\"\"Pydantic model\
-      \ for create_dag_structure node outputs.\"\"\"\n    dag_nodes: List[str] = (\n\
-      \        Field(..., description=\"List of node names in the DAG\")\n    )\n\
-      \    dag_edges: List[str] = (\n        Field(..., description=\"List of edges\
-      \ in the DAG, represented as 'node1->node2'\")\n    )\n    root_nodes: List[str]\
-      \ = (\n        Field(..., description=\"List of root node names in the DAG\"\
-      )\n    )\n    is_valid_dag: bool = (\n        Field(..., description=\"Whether\
-      \ the constructed DAG is valid\")\n    )\n\n\ndef create_dag_structure(identify_dependencies_between_subtasks_input:\
+      \ (\n        Field(..., description = (\n            \"List of dependencies\
+      \ between subtasks, where each dependency is represented as 'subtask_id_1 ->\
+      \ subtask_id_2'\")\n        )\n    )\n\n\nclass CreateDagStructureOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for create_dag_structure node outputs.\"\"\"\n   \
+      \ dag_nodes: List[str] = (\n        Field(..., description=\"List of node names\
+      \ in the DAG\")\n    )\n    dag_edges: List[str] = (\n        Field(..., description\
+      \ = (\n            \"List of edges in the DAG, represented as 'node1->node2'\"\
+      )\n        )\n    )\n    root_nodes: List[str] = (\n        Field(..., description=\"\
+      List of root node names in the DAG\")\n    )\n    is_valid_dag: bool = (\n \
+      \       Field(..., description=\"Whether the constructed DAG is valid\")\n \
+      \   )\n\n\ndef create_dag_structure(identify_dependencies_between_subtasks_input:\
       \ IdentifyDependenciesBetweenSubtasksOutput, **kwargs) -> CreateDagStructureOutput:\n\
       \    \"\"\"\n    Creates a DAG structure based on subtasks and their dependencies.\n\
       \n    Parameters\n    ----------\n    subtasks : List[str]\n        List of\
@@ -34,9 +40,18 @@ nodes:
       \        valid DAG.\n\n    Examples\n    --------\n    >>> subtasks = ['A',\
       \ 'B', 'C']\n    >>> dependencies = ['A -> B', 'B -> C']\n    >>> create_dag_structure(subtasks,\
       \ dependencies)\n    {'dag_nodes': ['A', 'B', 'C'], 'dag_edges': ['A->B', 'B->C'],\
-      \ 'root_nodes':\n    ['A'], 'is_valid_dag': True}\n\n    \"\"\"\n    return\
-      \ CreateDagStructureOutput(\n        dag_nodes=[],\n        dag_edges=[],\n\
-      \        root_nodes=[],\n        is_valid_dag=False,\n    )"
+      \ 'root_nodes':\n    ['A'], 'is_valid_dag': True}\n\n    \"\"\"\n    parsed_dependencies:\
+      \ List[tuple] = parse_dependency_string(dependency_string=identify_dependencies_between_subtasks_input.dependency_list)\n\
+      \    \n    all_nodes: List[str] = extract_unique_nodes(dependencies=parsed_dependencies)\n\
+      \    \n    formatted_edges: List[str] = format_edges_for_output(dependencies=parsed_dependencies)\n\
+      \    \n    has_cycle: bool = detect_cycles_in_graph(nodes=all_nodes, dependencies=parsed_dependencies)\n\
+      \    \n    if has_cycle:\n        raise ValueError(\"Dependencies form a cycle,\
+      \ making it impossible to create a valid DAG\")\n    \n    root_node_list: List[str]\
+      \ = find_root_nodes(nodes=all_nodes, dependencies=parsed_dependencies)\n   \
+      \ \n    is_valid: bool = validate_dag_structure(nodes=all_nodes, edges=formatted_edges,\
+      \ roots=root_node_list)\n    \n    return CreateDagStructureOutput(\n      \
+      \  dag_nodes=all_nodes,\n        dag_edges=formatted_edges,\n        root_nodes=root_node_list,\n\
+      \        is_valid_dag=is_valid\n    )"
     name: create_dag_structure
     nodes_depended_on:
     - identify_dependencies_between_subtasks
@@ -85,40 +100,445 @@ nodes:
         summary: Creates a DAG structure based on subtasks and their dependencies.
     prompt: Using the subtasks and their dependencies, construct a Directed Acyclic
       Graph (DAG) that represents the workflow.
-    shims: []
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Parses a dependency string into a list of tuples representing the
+        dependencies.
+      implementation: "from typing import List\n\n\ndef parse_dependency_string(dependency_string:\
+        \ str) -> List[str]:\n    \"\"\"\n    Parses a dependency string into a list\
+        \ of tuples representing the\n    dependencies.\n\n    Parameters\n    ----------\n\
+        \    dependency_string : str\n        Input string representing the dependencies,\
+        \ where each dependency is\n        represented as 'subtask_id_1 -> subtask_id_2'.\n\
+        \n    Returns\n    -------\n    List[tuple]\n        List of tuples representing\
+        \ the dependencies, where each tuple\n        contains two strings representing\
+        \ the dependent and independent\n        tasks.\n\n    Raises\n    ------\n\
+        \    ValueError\n        When the input string is not in the correct format.\n\
+        \    TypeError\n        When the input is not a string.\n\n    Examples\n\
+        \    --------\n    >>> parse_dependency_string('A -> B, C -> D')\n    [('A',\
+        \ 'B'), ('C', 'D')]\n\n    >>> parse_dependency_string('E -> F, G -> H, I\
+        \ -> J')\n    [('E', 'F'), ('G', 'H'), ('I', 'J')]\n\n    \"\"\"\n    raise\
+        \ NotImplementedError(\"This is a virtual stub node that needs to be implemented\"\
+        )"
+      name: parse_dependency_string
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[tuple]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: dependency_string
+        type: str
+      prd:
+        conceptual_info: The parse_dependency_string shim function takes a string
+          representing dependencies between tasks and parses it into a structured
+          format that can be used for further processing.
+        docstring:
+          examples:
+          - lines:
+            - parse_dependency_string('A -> B, C -> D')
+            output: '[(''A'', ''B''), (''C'', ''D'')]'
+          - lines:
+            - parse_dependency_string('E -> F, G -> H, I -> J')
+            output: '[(''E'', ''F''), (''G'', ''H''), (''I'', ''J'')]'
+          parameters:
+          - description: Input string representing the dependencies, where each dependency
+              is represented as 'subtask_id_1 -> subtask_id_2'.
+            name: dependency_string
+            type: str
+          raises:
+          - description: When the input string is not in the correct format.
+            type: ValueError
+          - description: When the input is not a string.
+            type: TypeError
+          returns:
+            description: List of tuples representing the dependencies, where each
+              tuple contains two strings representing the dependent and independent
+              tasks.
+            type: List[tuple]
+          summary: Parses a dependency string into a list of tuples representing the
+            dependencies.
+      prompt: Parse a dependency string into a list of tuples
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Extracts a list of unique nodes from a given set of dependencies.
+      implementation: "from typing import List\n\n\ndef extract_unique_nodes(dependencies:\
+        \ str) -> List[str]:\n    \"\"\"\n    Extracts a list of unique nodes from\
+        \ a given set of dependencies.\n\n    Parameters\n    ----------\n    dependencies\
+        \ : List[tuple]\n        A list of tuples, where each tuple represents a dependency\
+        \ between\n        two nodes.\n\n    Returns\n    -------\n    List[str]\n\
+        \        A list of unique node names extracted from the dependencies.\n\n\
+        \    Raises\n    ------\n    TypeError\n        When the input dependencies\
+        \ are not in the expected format.\n    ValueError\n        When the input\
+        \ dependencies are invalid or malformed.\n\n    Examples\n    --------\n \
+        \   >>> dependencies = [('A', 'B'), ('B', 'C'), ('A', 'C')]\n    >>> extract_unique_nodes(dependencies=dependencies)\n\
+        \    ['A', 'B', 'C']\n\n    >>> dependencies = [('Node1', 'Node2'), ('Node2',\
+        \ 'Node3'), ('Node1',\n    'Node3')]\n    >>> extract_unique_nodes(dependencies=dependencies)\n\
+        \    ['Node1', 'Node2', 'Node3']\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: extract_unique_nodes
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: dependencies
+        type: str
+      prd:
+        conceptual_info: The extract_unique_nodes shim function takes a set of dependencies
+          as input and returns a list of unique nodes present in those dependencies.
+        docstring:
+          examples:
+          - lines:
+            - dependencies = [('A', 'B'), ('B', 'C'), ('A', 'C')]
+            - extract_unique_nodes(dependencies=dependencies)
+            output: '[''A'', ''B'', ''C'']'
+          - lines:
+            - dependencies = [('Node1', 'Node2'), ('Node2', 'Node3'), ('Node1', 'Node3')]
+            - extract_unique_nodes(dependencies=dependencies)
+            output: '[''Node1'', ''Node2'', ''Node3'']'
+          parameters:
+          - description: A list of tuples, where each tuple represents a dependency
+              between two nodes.
+            name: dependencies
+            type: List[tuple]
+          raises:
+          - description: When the input dependencies are not in the expected format.
+            type: TypeError
+          - description: When the input dependencies are invalid or malformed.
+            type: ValueError
+          returns:
+            description: A list of unique node names extracted from the dependencies.
+            type: List[str]
+          summary: Extracts a list of unique nodes from a given set of dependencies.
+      prompt: Extract unique nodes from dependencies
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Formats a list of parsed dependencies into a list of strings representing
+        edges in a DAG.
+      implementation: "from typing import List\n\n\ndef format_edges_for_output(dependencies:\
+        \ str) -> List[str]:\n    \"\"\"\n    Formats a list of parsed dependencies\
+        \ into a list of strings representing\n    edges in a DAG.\n\n    Parameters\n\
+        \    ----------\n    dependencies : str\n        A string representation of\
+        \ a list of parsed dependencies, where each\n        dependency is a tuple\
+        \ of two node names.\n\n    Returns\n    -------\n    List[str]\n        A\
+        \ list of strings representing edges in a DAG, where each edge is in\n   \
+        \     the format 'node1->node2'.\n\n    Raises\n    ------\n    ValueError\n\
+        \        When the input dependencies are invalid or malformed.\n    TypeError\n\
+        \        When the input dependencies are not of the correct type.\n\n    Examples\n\
+        \    --------\n    >>> format_edges_for_output(dependencies=[('A', 'B'), ('B',\
+        \ 'C')])\n    ['A->B', 'B->C']\n\n    >>> format_edges_for_output(dependencies=[('D',\
+        \ 'E'), ('E', 'F')])\n    ['D->E', 'E->F']\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: format_edges_for_output
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: dependencies
+        type: str
+      prd:
+        conceptual_info: The format_edges_for_output shim function takes a list of
+          parsed dependencies and formats them into a list of strings representing
+          edges in a DAG. This is necessary to provide a standardized output format
+          for the create_dag_structure function.
+        docstring:
+          examples:
+          - lines:
+            - format_edges_for_output(dependencies=[('A', 'B'), ('B', 'C')])
+            output: '[''A->B'', ''B->C'']'
+          - lines:
+            - format_edges_for_output(dependencies=[('D', 'E'), ('E', 'F')])
+            output: '[''D->E'', ''E->F'']'
+          parameters:
+          - description: A string representation of a list of parsed dependencies,
+              where each dependency is a tuple of two node names.
+            name: dependencies
+            type: str
+          raises:
+          - description: When the input dependencies are invalid or malformed.
+            type: ValueError
+          - description: When the input dependencies are not of the correct type.
+            type: TypeError
+          returns:
+            description: A list of strings representing edges in a DAG, where each
+              edge is in the format 'node1->node2'.
+            type: List[str]
+          summary: Formats a list of parsed dependencies into a list of strings representing
+            edges in a DAG.
+      prompt: Format edges for output
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: This shim detects whether a cycle exists in a graph represented
+        by a list of nodes and their dependencies.
+      implementation: "def detect_cycles_in_graph(nodes: str, dependencies: str) ->\
+        \ bool:\n    \"\"\"\n    Detects whether a cycle exists in a graph given its\
+        \ nodes and dependencies.\n\n    Parameters\n    ----------\n    nodes : List[str]\n\
+        \        List of node names in the graph.\n    dependencies : List[tuple]\n\
+        \        List of dependencies where each dependency is a tuple of two node\n\
+        \        names (node1, node2) indicating node1 -> node2.\n\n    Returns\n\
+        \    -------\n    bool\n        True if a cycle is detected in the graph,\
+        \ False otherwise.\n\n    Raises\n    ------\n    ValueError\n        If the\
+        \ input graph structure is invalid (e.g., a node references a\n        non-existent\
+        \ node).\n    TypeError\n        If the input types do not match the expected\
+        \ types (list of str for\n        nodes and list of tuples for dependencies).\n\
+        \n    Examples\n    --------\n    >>> detect_cycles_in_graph(['A', 'B', 'C'],\
+        \ [('A', 'B'), ('B', 'C')])\n    False\n\n    >>> detect_cycles_in_graph(['A',\
+        \ 'B', 'C'], [('A', 'B'), ('B', 'C'), ('C',\n    'A')])\n    True\n\n    \"\
+        \"\"\n    raise NotImplementedError(\"This is a virtual stub node that needs\
+        \ to be implemented\")"
+      name: detect_cycles_in_graph
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type bool
+        key: output
+        type: bool
+      - description: Input parameter of type str
+        key: nodes
+        type: str
+      - description: Input parameter of type str
+        key: dependencies
+        type: str
+      prd:
+        conceptual_info: The detect_cycles_in_graph shim is crucial for validating
+          the structure of a Directed Acyclic Graph (DAG), ensuring it does not contain
+          cycles which would prevent a valid topological sorting.
+        docstring:
+          examples:
+          - lines:
+            - detect_cycles_in_graph(['A', 'B', 'C'], [('A', 'B'), ('B', 'C')])
+            output: 'False'
+          - lines:
+            - detect_cycles_in_graph(['A', 'B', 'C'], [('A', 'B'), ('B', 'C'), ('C',
+              'A')])
+            output: 'True'
+          parameters:
+          - description: List of node names in the graph.
+            name: nodes
+            type: List[str]
+          - description: List of dependencies where each dependency is a tuple of
+              two node names (node1, node2) indicating node1 -> node2.
+            name: dependencies
+            type: List[tuple]
+          raises:
+          - description: If the input graph structure is invalid (e.g., a node references
+              a non-existent node).
+            type: ValueError
+          - description: If the input types do not match the expected types (list
+              of str for nodes and list of tuples for dependencies).
+            type: TypeError
+          returns:
+            description: True if a cycle is detected in the graph, False otherwise.
+            type: bool
+          summary: Detects whether a cycle exists in a graph given its nodes and dependencies.
+      prompt: Implement a function to detect cycles in a graph given its nodes and
+        dependencies.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: This shim identifies the root nodes in a directed acyclic graph
+        (DAG) given its nodes and dependencies.
+      implementation: "from typing import List\n\n\ndef find_root_nodes(nodes: str,\
+        \ dependencies: str) -> List[str]:\n    \"\"\"\n    Finds the root nodes in\
+        \ a DAG given its nodes and dependencies.\n\n    Parameters\n    ----------\n\
+        \    nodes : List[str]\n        A list of node names in the DAG.\n    dependencies\
+        \ : List[tuple]\n        A list of dependencies between nodes, where each\
+        \ dependency is a\n        tuple of two node names.\n\n    Returns\n    -------\n\
+        \    List[str]\n        A list of root node names in the DAG.\n\n    Raises\n\
+        \    ------\n    ValueError\n        If the input nodes or dependencies are\
+        \ invalid (e.g., a node has no\n        dependencies but is not a root node).\n\
+        \    TypeError\n        If the input types are incorrect (e.g., nodes is not\
+        \ a list of\n        strings, dependencies is not a list of tuples).\n\n \
+        \   Examples\n    --------\n    >>> nodes = ['A', 'B', 'C']\n    >>> dependencies\
+        \ = [('A', 'B'), ('B', 'C')]\n    >>> root_nodes = find_root_nodes(nodes,\
+        \ dependencies)\n    ['A']\n\n    >>> nodes = ['X', 'Y', 'Z']\n    >>> dependencies\
+        \ = [('X', 'Y'), ('Y', 'Z'), ('Z', 'X')]\n    >>> try:\n    ...     root_nodes\
+        \ = find_root_nodes(nodes, dependencies)\n    >>> except ValueError as e:\n\
+        \    ...     print(e)\n    Dependencies form a cycle, making it impossible\
+        \ to create a valid DAG\n\n    \"\"\"\n    raise NotImplementedError(\"This\
+        \ is a virtual stub node that needs to be implemented\")"
+      name: find_root_nodes
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: nodes
+        type: str
+      - description: Input parameter of type str
+        key: dependencies
+        type: str
+      prd:
+        conceptual_info: The find_root_nodes shim is crucial for constructing a valid
+          DAG by identifying nodes with no incoming edges, which are the starting
+          points of the graph.
+        docstring:
+          examples:
+          - lines:
+            - nodes = ['A', 'B', 'C']
+            - dependencies = [('A', 'B'), ('B', 'C')]
+            - root_nodes = find_root_nodes(nodes, dependencies)
+            output: '[''A'']'
+          - lines:
+            - nodes = ['X', 'Y', 'Z']
+            - dependencies = [('X', 'Y'), ('Y', 'Z'), ('Z', 'X')]
+            - 'try:'
+            - '    root_nodes = find_root_nodes(nodes, dependencies)'
+            - 'except ValueError as e:'
+            - '    print(e)'
+            output: Dependencies form a cycle, making it impossible to create a valid
+              DAG
+          parameters:
+          - description: A list of node names in the DAG.
+            name: nodes
+            type: List[str]
+          - description: A list of dependencies between nodes, where each dependency
+              is a tuple of two node names.
+            name: dependencies
+            type: List[tuple]
+          raises:
+          - description: If the input nodes or dependencies are invalid (e.g., a node
+              has no dependencies but is not a root node).
+            type: ValueError
+          - description: If the input types are incorrect (e.g., nodes is not a list
+              of strings, dependencies is not a list of tuples).
+            type: TypeError
+          returns:
+            description: A list of root node names in the DAG.
+            type: List[str]
+          summary: Finds the root nodes in a DAG given its nodes and dependencies.
+      prompt: Implement a function to find the root nodes in a DAG.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates the structure of a Directed Acyclic Graph (DAG) given
+        its nodes, edges, and root nodes.
+      implementation: "def validate_dag_structure(nodes: str, edges: str, roots: str)\
+        \ -> bool:\n    \"\"\"\n    Validates the structure of a Directed Acyclic\
+        \ Graph (DAG) given its nodes,\n    edges, and root nodes.\n\n    Parameters\n\
+        \    ----------\n    nodes : str\n        A string of comma-separated node\
+        \ names in the DAG\n    edges : str\n        A string of comma-separated edges\
+        \ in the DAG, represented as\n        'node1->node2'\n    roots : str\n  \
+        \      A string of comma-separated root node names in the DAG\n\n    Returns\n\
+        \    -------\n    bool\n        True if the DAG structure is valid, False\
+        \ otherwise\n\n    Raises\n    ------\n    ValueError\n        When input\
+        \ validation fails\n    TypeError\n        When input types are incorrect\n\
+        \n    Examples\n    --------\n    >>> validate_dag_structure(nodes='A,B,C',\
+        \ edges='A->B,B->C', roots='A')\n    True\n\n    >>> validate_dag_structure(nodes='A,B,C',\
+        \ edges='A->B,B->C,A->C', roots='A')\n    False\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: validate_dag_structure
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type bool
+        key: output
+        type: bool
+      - description: Input parameter of type str
+        key: nodes
+        type: str
+      - description: Input parameter of type str
+        key: edges
+        type: str
+      - description: Input parameter of type str
+        key: roots
+        type: str
+      prd:
+        conceptual_info: The validate_dag_structure shim function checks if a given
+          DAG structure, represented by its nodes, edges, and root nodes, is valid.
+          A valid DAG should not contain cycles and should have at least one root
+          node.
+        docstring:
+          examples:
+          - lines:
+            - validate_dag_structure(nodes='A,B,C', edges='A->B,B->C', roots='A')
+            output: 'True'
+          - lines:
+            - validate_dag_structure(nodes='A,B,C', edges='A->B,B->C,A->C', roots='A')
+            output: 'False'
+          parameters:
+          - description: A string of comma-separated node names in the DAG
+            name: nodes
+            type: str
+          - description: A string of comma-separated edges in the DAG, represented
+              as 'node1->node2'
+            name: edges
+            type: str
+          - description: A string of comma-separated root node names in the DAG
+            name: roots
+            type: str
+          raises:
+          - description: When input validation fails
+            type: ValueError
+          - description: When input types are incorrect
+            type: TypeError
+          returns:
+            description: True if the DAG structure is valid, False otherwise
+            type: bool
+          summary: Validates the structure of a Directed Acyclic Graph (DAG) given
+            its nodes, edges, and root nodes.
+      prompt: Implement validate_dag_structure to verify if a given DAG structure
+        is valid
+      shims: []
   decompose_task_into_subtasks:
     agent: false
-    code_node_type: stub
+    code_node_type: shim
     description: Decompose the task into smaller components that can be executed concurrently
       or sequentially.
-    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass DefineTaskObjectiveOutput(BaseModel):\n    \"\"\"Pydantic model for\
-      \ define_task_objective node outputs.\"\"\"\n    task_objective: str = (\n \
-      \       Field(..., description=\"The primary objective or task that the workflow\
-      \ will accomplish.\")\n    )\n    task_description: str = (\n        Field(...,\
-      \ description=\"A detailed description of the task or objective.\")\n    )\n\
-      \n\nclass DecomposeTaskIntoSubtasksOutput(BaseModel):\n    \"\"\"Pydantic model\
-      \ for decompose_task_into_subtasks node outputs.\"\"\"\n    subtask_list: List[str]\
-      \ = (\n        Field(..., description=\"List of subtasks or steps to achieve\
-      \ the task objective\")\n    )\n    subtask_count: int = (\n        Field(...,\
-      \ description=\"Number of subtasks or steps generated\")\n    )\n    sequencing_requirements:\
-      \ str = (\n        Field(..., description=\"Description of any sequencing or\
-      \ ordering requirements between subtasks\")\n    )\n\n\ndef decompose_task_into_subtasks(define_task_objective_input:\
-      \ DefineTaskObjectiveOutput, **kwargs) -> DecomposeTaskIntoSubtasksOutput:\n\
-      \    \"\"\"\n    Decompose a task into smaller subtasks or steps.\n\n    Parameters\n\
-      \    ----------\n    task_objective : str\n        The primary objective or\
-      \ task that the workflow will accomplish.\n    task_description : str\n    \
-      \    A detailed description of the task or objective.\n\n    Returns\n    -------\n\
-      \    dict\n        A dictionary containing the list of subtasks, the count of\
-      \ subtasks,\n        and any sequencing requirements.\n\n    Raises\n    ------\n\
-      \    ValueError\n        If the task objective or description is empty.\n\n\
-      \    Examples\n    --------\n    >>> decompose_task_into_subtasks(task_objective='Create\
-      \ a workflow',\n    task_description='Create a workflow to automate a process')\n\
-      \    >>> print(result)\n    {'subtask_list': ['Define task objective', 'Identify\
-      \ dependencies', 'Create\n    DAG structure'], 'subtask_count': 3, 'sequencing_requirements':\n\
-      \    'Sequential'}\n\n    \"\"\"\n    return DecomposeTaskIntoSubtasksOutput(\n\
-      \        subtask_list=[],\n        subtask_count=0,\n        sequencing_requirements=\"\
-      \",\n    )"
+    implementation: "from ._decompose_task_into_subtasks.validate_input_not_empty\
+      \ import validate_input_not_empty\nfrom ._decompose_task_into_subtasks.analyze_task_structure\
+      \ import analyze_task_structure\nfrom ._decompose_task_into_subtasks.generate_subtask_list\
+      \ import generate_subtask_list\nfrom ._decompose_task_into_subtasks.determine_sequencing_requirements\
+      \ import determine_sequencing_requirements\n\nfrom pydantic import BaseModel,\
+      \ Field\nfrom typing import List\n\n\nclass DefineTaskObjectiveOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for define_task_objective node outputs.\"\"\"\n  \
+      \  task_objective: str = (\n        Field(..., description = (\n           \
+      \ \"The primary objective or task that the workflow will accomplish.\")\n  \
+      \      )\n    )\n    task_description: str = (\n        Field(..., description\
+      \ = (\n            \"A detailed description of the task or objective.\")\n \
+      \       )\n    )\n\n\nclass DecomposeTaskIntoSubtasksOutput(BaseModel):\n  \
+      \  \"\"\"Pydantic model for decompose_task_into_subtasks node outputs.\"\"\"\
+      \n    subtask_list: List[str] = (\n        Field(..., description = (\n    \
+      \        \"List of subtasks or steps to achieve the task objective\")\n    \
+      \    )\n    )\n    subtask_count: int = (\n        Field(..., description=\"\
+      Number of subtasks or steps generated\")\n    )\n    sequencing_requirements:\
+      \ str = (\n        Field(..., description = (\n            \"Description of\
+      \ any sequencing or ordering requirements between subtasks\")\n        )\n \
+      \   )\n\n\ndef decompose_task_into_subtasks(define_task_objective_input: DefineTaskObjectiveOutput,\
+      \ **kwargs) -> DecomposeTaskIntoSubtasksOutput:\n    \"\"\"\n    Decompose a\
+      \ task into smaller subtasks or steps.\n\n    Parameters\n    ----------\n \
+      \   task_objective : str\n        The primary objective or task that the workflow\
+      \ will accomplish.\n    task_description : str\n        A detailed description\
+      \ of the task or objective.\n\n    Returns\n    -------\n    dict\n        A\
+      \ dictionary containing the list of subtasks, the count of subtasks,\n     \
+      \   and any sequencing requirements.\n\n    Raises\n    ------\n    ValueError\n\
+      \        If the task objective or description is empty.\n\n    Examples\n  \
+      \  --------\n    >>> decompose_task_into_subtasks(task_objective='Create a workflow',\n\
+      \    task_description='Create a workflow to automate a process')\n    >>> print(result)\n\
+      \    {'subtask_list': ['Define task objective', 'Identify dependencies', 'Create\n\
+      \    DAG structure'], 'subtask_count': 3, 'sequencing_requirements':\n    'Sequential'}\n\
+      \n    \"\"\"\n    validate_input_not_empty(task_objective=define_task_objective_input.task_objective,\
+      \ task_description=define_task_objective_input.task_description)\n    \n   \
+      \ parsed_task_components: dict = analyze_task_structure(objective=define_task_objective_input.task_objective,\
+      \ description=define_task_objective_input.task_description)\n    \n    generated_subtasks:\
+      \ List[str] = generate_subtask_list(task_components=parsed_task_components)\n\
+      \    \n    sequencing_analysis: str = determine_sequencing_requirements(subtasks=generated_subtasks,\
+      \ task_context=parsed_task_components)\n    \n    subtask_count: int = len(generated_subtasks)\n\
+      \    \n    return DecomposeTaskIntoSubtasksOutput(\n        subtask_list=generated_subtasks,\n\
+      \        subtask_count=subtask_count,\n        sequencing_requirements=sequencing_analysis\n\
+      \    )"
     name: decompose_task_into_subtasks
     nodes_depended_on:
     - define_task_objective
@@ -163,26 +583,294 @@ nodes:
         summary: Decompose a task into smaller subtasks or steps.
     prompt: Break down the task or objective into smaller, manageable subtasks or
       steps.
-    shims: []
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates that the input task objective and description are not
+        empty.
+      implementation: "def validate_input_not_empty(task_objective: str, task_description:\
+        \ str) -> str:\n    \"\"\"\n    Validates that the input task objective and\
+        \ description are not empty.\n\n    Parameters\n    ----------\n    task_objective\
+        \ : str\n        The primary objective or task that the workflow will accomplish.\n\
+        \    task_description : str\n        A detailed description of the task or\
+        \ objective.\n\n    Returns\n    -------\n    str\n        Output message\
+        \ indicating the result of the validation.\n\n    Raises\n    ------\n   \
+        \ ValueError\n        When either the task objective or description is empty.\n\
+        \    TypeError\n        When either the task objective or description is not\
+        \ a string.\n\n    Examples\n    --------\n    >>> validate_input_not_empty(task_objective='Example\
+        \ task',\n    task_description='This is an example task.')\n    'Validation\
+        \ successful'\n\n    >>> validate_input_not_empty(task_objective='', task_description='This\
+        \ is an\n    example task.')\n    Validation failed: Task objective cannot\
+        \ be empty.\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")"
+      name: validate_input_not_empty
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: task_objective
+        type: str
+      - description: Input parameter of type str
+        key: task_description
+        type: str
+      prd:
+        conceptual_info: The validate_input_not_empty shim ensures that the task objective
+          and description are not empty before proceeding with further processing.
+        docstring:
+          examples:
+          - lines:
+            - validate_input_not_empty(task_objective='Example task', task_description='This
+              is an example task.')
+            output: '''Validation successful'''
+          - lines:
+            - validate_input_not_empty(task_objective='', task_description='This is
+              an example task.')
+            output: 'Validation failed: Task objective cannot be empty.'
+          parameters:
+          - description: The primary objective or task that the workflow will accomplish.
+            name: task_objective
+            type: str
+          - description: A detailed description of the task or objective.
+            name: task_description
+            type: str
+          raises:
+          - description: When either the task objective or description is empty.
+            type: ValueError
+          - description: When either the task objective or description is not a string.
+            type: TypeError
+          returns:
+            description: Output message indicating the result of the validation.
+            type: str
+          summary: Validates that the input task objective and description are not
+            empty.
+      prompt: Validate that task objective and description are not empty
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Analyzes the structure of a task based on its objective and description.
+      implementation: "def analyze_task_structure(objective: str, description: str)\
+        \ -> str:\n    \"\"\"\n    Analyzes the structure of a task based on its objective\
+        \ and description.\n\n    Parameters\n    ----------\n    objective : str\n\
+        \        The primary objective or task that the workflow will accomplish.\n\
+        \    description : str\n        A detailed description of the task or objective.\n\
+        \n    Returns\n    -------\n    str\n        A dictionary representing the\
+        \ parsed task components.\n\n    Raises\n    ------\n    ValueError\n    \
+        \    When the input objective or description is empty or invalid.\n    TypeError\n\
+        \        When the input types are incorrect.\n\n    Examples\n    --------\n\
+        \    >>> analyze_task_structure(objective='Complete a project report',\n \
+        \   description='The report should include an introduction, methodology,\n\
+        \    results, and conclusion.')\n    {'task_type': 'report', 'sections': ['introduction',\
+        \ 'methodology',\n    'results', 'conclusion']}\n\n    >>> analyze_task_structure(objective='Develop\
+        \ a software feature',\n    description='The feature should allow users to\
+        \ login and view their profile\n    information.')\n    {'task_type': 'software\
+        \ development', 'functional_requirements': ['user\n    login', 'profile viewing']}\n\
+        \n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node\
+        \ that needs to be implemented\")"
+      name: analyze_task_structure
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type dict
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: objective
+        type: str
+      - description: Input parameter of type str
+        key: description
+        type: str
+      prd:
+        conceptual_info: The analyze_task_structure shim plays a crucial role in task
+          decomposition by parsing the task objective and description into its core
+          components, which are then used to generate subtasks and determine sequencing
+          requirements.
+        docstring:
+          examples:
+          - lines:
+            - analyze_task_structure(objective='Complete a project report', description='The
+              report should include an introduction, methodology, results, and conclusion.')
+            output: '{''task_type'': ''report'', ''sections'': [''introduction'',
+              ''methodology'', ''results'', ''conclusion'']}'
+          - lines:
+            - analyze_task_structure(objective='Develop a software feature', description='The
+              feature should allow users to login and view their profile information.')
+            output: '{''task_type'': ''software development'', ''functional_requirements'':
+              [''user login'', ''profile viewing'']}'
+          parameters:
+          - description: The primary objective or task that the workflow will accomplish.
+            name: objective
+            type: str
+          - description: A detailed description of the task or objective.
+            name: description
+            type: str
+          raises:
+          - description: When the input objective or description is empty or invalid.
+            type: ValueError
+          - description: When the input types are incorrect.
+            type: TypeError
+          returns:
+            description: A dictionary representing the parsed task components.
+            type: str
+          summary: Analyzes the structure of a task based on its objective and description.
+      prompt: Analyze the structure of a task with the given objective and description.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: A shim function that generates a list of subtasks based on the
+        task components.
+      implementation: "from typing import List\n\n\ndef generate_subtask_list(task_components:\
+        \ str) -> List[str]:\n    \"\"\"\n    Generate a list of subtasks based on\
+        \ the task components.\n\n    Parameters\n    ----------\n    task_components\
+        \ : str\n        A string representing the task components, which will be\
+        \ used to\n        generate the subtask list.\n\n    Returns\n    -------\n\
+        \    List[str]\n        A list of subtasks generated from the task components.\n\
+        \n    Raises\n    ------\n    ValueError\n        When the task components\
+        \ are empty or invalid.\n    TypeError\n        When the task components are\
+        \ not of type string.\n\n    Examples\n    --------\n    >>> generate_subtask_list(task_components='Task\
+        \ A, Task B, Task C')\n    ['Subtask A1', 'Subtask A2', 'Subtask B1', 'Subtask\
+        \ C1']\n\n    >>> generate_subtask_list(task_components='')\n    >>> # Raises\
+        \ ValueError\n    ValueError: Task components cannot be empty\n\n    \"\"\"\
+        \n    raise NotImplementedError(\"This is a virtual stub node that needs to\
+        \ be implemented\")"
+      name: generate_subtask_list
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: task_components
+        type: str
+      prd:
+        conceptual_info: The generate_subtask_list shim function plays a crucial role
+          in task decomposition by generating a list of subtasks from the given task
+          components.
+        docstring:
+          examples:
+          - lines:
+            - generate_subtask_list(task_components='Task A, Task B, Task C')
+            output: '[''Subtask A1'', ''Subtask A2'', ''Subtask B1'', ''Subtask C1'']'
+          - lines:
+            - generate_subtask_list(task_components='')
+            - '# Raises ValueError'
+            output: 'ValueError: Task components cannot be empty'
+          parameters:
+          - description: A string representing the task components, which will be
+              used to generate the subtask list.
+            name: task_components
+            type: str
+          raises:
+          - description: When the task components are empty or invalid.
+            type: ValueError
+          - description: When the task components are not of type string.
+            type: TypeError
+          returns:
+            description: A list of subtasks generated from the task components.
+            type: List[str]
+          summary: Generate a list of subtasks based on the task components.
+      prompt: 'generate_subtask_list(task_components: str) -> List[str]'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Determines the sequencing requirements between subtasks.
+      implementation: "def determine_sequencing_requirements(subtasks: str, task_context:\
+        \ str) -> str:\n    \"\"\"\n    Determines the sequencing requirements between\
+        \ subtasks based on their\n    dependencies and task context.\n\n    Parameters\n\
+        \    ----------\n    subtasks : str\n        A string representing the list\
+        \ of subtasks or steps to achieve the\n        task objective.\n    task_context\
+        \ : str\n        A string representing the task context, including the task\
+        \ objective\n        and description.\n\n    Returns\n    -------\n    str\n\
+        \        A string describing the sequencing or ordering requirements between\n\
+        \        subtasks.\n\n    Raises\n    ------\n    ValueError\n        When\
+        \ input validation fails, such as empty or malformed input\n        parameters.\n\
+        \    TypeError\n        When input types are incorrect, such as non-string\
+        \ inputs for\n        subtasks or task_context.\n\n    Examples\n    --------\n\
+        \    >>> determine_sequencing_requirements(subtasks='subtask1, subtask2,\n\
+        \    subtask3', task_context='task objective and description')\n    'sequencing\
+        \ requirements description'\n\n    >>> determine_sequencing_requirements(subtasks='subtaskA,\
+        \ subtaskB',\n    task_context='task objective and description')\n    'sequencing\
+        \ requirements description'\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: determine_sequencing_requirements
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: subtasks
+        type: str
+      - description: Input parameter of type str
+        key: task_context
+        type: str
+      prd:
+        conceptual_info: The determine_sequencing_requirements shim function analyzes
+          the provided subtasks and task context to identify any sequencing or ordering
+          requirements between the subtasks.
+        docstring:
+          examples:
+          - lines:
+            - determine_sequencing_requirements(subtasks='subtask1, subtask2, subtask3',
+              task_context='task objective and description')
+            output: '''sequencing requirements description'''
+          - lines:
+            - determine_sequencing_requirements(subtasks='subtaskA, subtaskB', task_context='task
+              objective and description')
+            output: '''sequencing requirements description'''
+          parameters:
+          - description: A string representing the list of subtasks or steps to achieve
+              the task objective.
+            name: subtasks
+            type: str
+          - description: A string representing the task context, including the task
+              objective and description.
+            name: task_context
+            type: str
+          raises:
+          - description: When input validation fails, such as empty or malformed input
+              parameters.
+            type: ValueError
+          - description: When input types are incorrect, such as non-string inputs
+              for subtasks or task_context.
+            type: TypeError
+          returns:
+            description: A string describing the sequencing or ordering requirements
+              between subtasks.
+            type: str
+          summary: Determines the sequencing requirements between subtasks based on
+            their dependencies and task context.
+      prompt: Determine the sequencing requirements between subtasks.
+      shims: []
   define_node_prompts_and_descriptions:
     agent: false
-    code_node_type: stub
+    code_node_type: shim
     description: Specify the prompts and descriptions for each node in the DAG.
-    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass CreateDagStructureOutput(BaseModel):\n    \"\"\"Pydantic model for\
-      \ create_dag_structure node outputs.\"\"\"\n    dag_nodes: List[str] = (\n \
-      \       Field(..., description=\"List of node names in the DAG\")\n    )\n \
-      \   dag_edges: List[str] = (\n        Field(..., description=\"List of edges\
-      \ in the DAG, represented as 'node1->node2'\")\n    )\n    root_nodes: List[str]\
-      \ = (\n        Field(..., description=\"List of root node names in the DAG\"\
-      )\n    )\n    is_valid_dag: bool = (\n        Field(..., description=\"Whether\
-      \ the constructed DAG is valid\")\n    )\n\n\nclass DefineNodePromptsAndDescriptionsOutput(BaseModel):\n\
-      \    \"\"\"Pydantic model for define_node_prompts_and_descriptions node outputs.\"\
-      \"\"\n    node_names: List[str] = (\n        Field(..., description=\"List of\
-      \ all node names in the DAG.\")\n    )\n    node_prompts: List[str] = (\n  \
-      \      Field(..., description=\"List of prompts corresponding to each node name.\"\
-      )\n    )\n    node_descriptions: List[str] = (\n        Field(..., description=\"\
-      List of descriptions corresponding to each node name.\")\n    )\n\n\ndef define_node_prompts_and_descriptions(create_dag_structure_input:\
+    implementation: "from ._define_node_prompts_and_descriptions.validate_dag_structure\
+      \ import validate_dag_structure\nfrom ._define_node_prompts_and_descriptions.analyze_node_context\
+      \ import analyze_node_context\nfrom ._define_node_prompts_and_descriptions.generate_node_prompts\
+      \ import generate_node_prompts\nfrom ._define_node_prompts_and_descriptions.generate_node_descriptions\
+      \ import generate_node_descriptions\n\nfrom pydantic import BaseModel, Field\n\
+      from typing import List\n\n\nclass CreateDagStructureOutput(BaseModel):\n  \
+      \  \"\"\"Pydantic model for create_dag_structure node outputs.\"\"\"\n    dag_nodes:\
+      \ List[str] = (\n        Field(..., description=\"List of node names in the\
+      \ DAG\")\n    )\n    dag_edges: List[str] = (\n        Field(..., description\
+      \ = (\n            \"List of edges in the DAG, represented as 'node1->node2'\"\
+      )\n        )\n    )\n    root_nodes: List[str] = (\n        Field(..., description=\"\
+      List of root node names in the DAG\")\n    )\n    is_valid_dag: bool = (\n \
+      \       Field(..., description=\"Whether the constructed DAG is valid\")\n \
+      \   )\n\n\nclass DefineNodePromptsAndDescriptionsOutput(BaseModel):\n    \"\"\
+      \"Pydantic model for define_node_prompts_and_descriptions node outputs.\"\"\"\
+      \n    node_names: List[str] = (\n        Field(..., description=\"List of all\
+      \ node names in the DAG.\")\n    )\n    node_prompts: List[str] = (\n      \
+      \  Field(..., description = (\n            \"List of prompts corresponding to\
+      \ each node name.\")\n        )\n    )\n    node_descriptions: List[str] = (\n\
+      \        Field(..., description = (\n            \"List of descriptions corresponding\
+      \ to each node name.\")\n        )\n    )\n\n\ndef define_node_prompts_and_descriptions(create_dag_structure_input:\
       \ CreateDagStructureOutput, **kwargs) -> DefineNodePromptsAndDescriptionsOutput:\n\
       \    \"\"\"\n    Generate node prompts and descriptions from the DAG structure.\n\
       \n    Parameters\n    ----------\n    dag_nodes : List[str]\n        List of\
@@ -199,8 +887,17 @@ nodes:
       \ node_prompts,\n    node_descriptions)\n    {'node_names': ['A', 'B', 'C'],\
       \ 'node_prompts': ['Task A', 'Task B', 'Task\n    C'], 'node_descriptions':\
       \ ['Description A', 'Description B', 'Description\n    C']}\n\n    \"\"\"\n\
-      \    return DefineNodePromptsAndDescriptionsOutput(\n        node_names=[],\n\
-      \        node_prompts=[],\n        node_descriptions=[],\n    )"
+      \    validate_dag_structure(dag_nodes=create_dag_structure_input.dag_nodes,\
+      \ is_valid_dag=create_dag_structure_input.is_valid_dag)\n    \n    node_context:\
+      \ dict = analyze_node_context(dag_nodes=create_dag_structure_input.dag_nodes,\
+      \ dag_edges=create_dag_structure_input.dag_edges, root_nodes=create_dag_structure_input.root_nodes)\n\
+      \    \n    generated_prompts: List[str] = generate_node_prompts(dag_nodes=create_dag_structure_input.dag_nodes,\
+      \ node_context=node_context)\n    \n    generated_descriptions: List[str] =\
+      \ generate_node_descriptions(dag_nodes=create_dag_structure_input.dag_nodes,\
+      \ node_context=node_context, dag_edges=create_dag_structure_input.dag_edges)\n\
+      \    \n    return DefineNodePromptsAndDescriptionsOutput(\n        node_names=create_dag_structure_input.dag_nodes,\n\
+      \        node_prompts=generated_prompts,\n        node_descriptions=generated_descriptions\n\
+      \    )"
     name: define_node_prompts_and_descriptions
     nodes_depended_on:
     - create_dag_structure
@@ -251,29 +948,295 @@ nodes:
         summary: Generate node prompts and descriptions from the DAG structure.
     prompt: For each node in the DAG, define a clear and concise prompt or description
       that outlines the task or action to be performed.
-    shims: []
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates the structure of a Directed Acyclic Graph (DAG) represented
+        by a list of nodes and a validity flag.
+      implementation: "def validate_dag_structure(dag_nodes: str, is_valid_dag: str)\
+        \ -> str:\n    \"\"\"\n    Validates the structure of a Directed Acyclic Graph\
+        \ (DAG) represented by a\n    list of nodes and a validity flag.\n\n    Parameters\n\
+        \    ----------\n    dag_nodes : str\n        A list of node names in the\
+        \ DAG.\n    is_valid_dag : str\n        A flag indicating whether the DAG\
+        \ is valid.\n\n    Returns\n    -------\n    str\n        An output message\
+        \ indicating the validation result.\n\n    Raises\n    ------\n    ValueError\n\
+        \        When the input validation fails.\n    TypeError\n        When the\
+        \ input types are incorrect.\n\n    Examples\n    --------\n    >>> validate_dag_structure(dag_nodes=['A',\
+        \ 'B', 'C'], is_valid_dag='True')\n    'The DAG is valid.'\n\n    >>> validate_dag_structure(dag_nodes=['A',\
+        \ 'B', 'C'], is_valid_dag='False')\n    'The DAG is invalid.'\n\n    \"\"\"\
+        \n    raise NotImplementedError(\"This is a virtual stub node that needs to\
+        \ be implemented\")"
+      name: validate_dag_structure
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: dag_nodes
+        type: str
+      - description: Input parameter of type str
+        key: is_valid_dag
+        type: str
+      prd:
+        conceptual_info: The validate_dag_structure shim function checks if a given
+          DAG structure, represented by a list of nodes and a validity flag, conforms
+          to the expected properties of a DAG.
+        docstring:
+          examples:
+          - lines:
+            - validate_dag_structure(dag_nodes=['A', 'B', 'C'], is_valid_dag='True')
+            output: '''The DAG is valid.'''
+          - lines:
+            - validate_dag_structure(dag_nodes=['A', 'B', 'C'], is_valid_dag='False')
+            output: '''The DAG is invalid.'''
+          parameters:
+          - description: A list of node names in the DAG.
+            name: dag_nodes
+            type: str
+          - description: A flag indicating whether the DAG is valid.
+            name: is_valid_dag
+            type: str
+          raises:
+          - description: When the input validation fails.
+            type: ValueError
+          - description: When the input types are incorrect.
+            type: TypeError
+          returns:
+            description: An output message indicating the validation result.
+            type: str
+          summary: Validates the structure of a Directed Acyclic Graph (DAG) represented
+            by a list of nodes and a validity flag.
+      prompt: 'validate_dag_structure: Please validate the DAG structure with the
+        given nodes and validity flag.'
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Analyzes the node context based on the provided DAG structure and
+        returns a dictionary containing the analysis results.
+      implementation: "def analyze_node_context(dag_nodes: str, dag_edges: str, root_nodes:\
+        \ str) -> str:\n    \"\"\"\n    Analyzes the node context based on the provided\
+        \ DAG structure and returns a\n    dictionary containing the analysis results.\n\
+        \n    Parameters\n    ----------\n    dag_nodes : str\n        A string representation\
+        \ of the list of node names in the DAG.\n    dag_edges : str\n        A string\
+        \ representation of the list of edges in the DAG, represented\n        as\
+        \ 'node1->node2'.\n    root_nodes : str\n        A string representation of\
+        \ the list of root node names in the DAG.\n\n    Returns\n    -------\n  \
+        \  dict\n        A dictionary containing the analysis results of the node\
+        \ context.\n\n    Raises\n    ------\n    ValueError\n        When the input\
+        \ DAG structure is invalid.\n    TypeError\n        When the input types are\
+        \ incorrect.\n\n    Examples\n    --------\n    >>> analyze_node_context(dag_nodes='node1,node2,node3',\n\
+        \    dag_edges='node1->node2,node2->node3', root_nodes='node1')\n    {\"node1\"\
+        : {\"type\": \"root\"}, \"node2\": {\"type\": \"child\"}, \"node3\": {\"type\"\
+        :\n    \"leaf\"}}\n\n    \"\"\"\n    raise NotImplementedError(\"This is a\
+        \ virtual stub node that needs to be implemented\")"
+      name: analyze_node_context
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type dict
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: dag_nodes
+        type: str
+      - description: Input parameter of type str
+        key: dag_edges
+        type: str
+      - description: Input parameter of type str
+        key: root_nodes
+        type: str
+      prd:
+        conceptual_info: The analyze_node_context shim function plays a crucial role
+          in analyzing the node context based on the provided DAG structure. It takes
+          the DAG nodes, edges, and root nodes as input and returns a dictionary containing
+          the analysis results.
+        docstring:
+          examples:
+          - lines:
+            - analyze_node_context(dag_nodes='node1,node2,node3', dag_edges='node1->node2,node2->node3',
+              root_nodes='node1')
+            output: '{"node1": {"type": "root"}, "node2": {"type": "child"}, "node3":
+              {"type": "leaf"}}'
+          parameters:
+          - description: A string representation of the list of node names in the
+              DAG.
+            name: dag_nodes
+            type: str
+          - description: A string representation of the list of edges in the DAG,
+              represented as 'node1->node2'.
+            name: dag_edges
+            type: str
+          - description: A string representation of the list of root node names in
+              the DAG.
+            name: root_nodes
+            type: str
+          raises:
+          - description: When the input DAG structure is invalid.
+            type: ValueError
+          - description: When the input types are incorrect.
+            type: TypeError
+          returns:
+            description: A dictionary containing the analysis results of the node
+              context.
+            type: dict
+          summary: Analyzes the node context based on the provided DAG structure and
+            returns a dictionary containing the analysis results.
+      prompt: Analyze node context for DAG structure
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Generates a list of prompts for nodes in a DAG based on the node
+        context.
+      implementation: "from typing import List\n\n\ndef generate_node_prompts(dag_nodes:\
+        \ str, node_context: str) -> List[str]:\n    \"\"\"\n    Generates a list\
+        \ of prompts for nodes in a DAG based on the node context.\n\n    Parameters\n\
+        \    ----------\n    dag_nodes : str\n        List of node names in the DAG.\n\
+        \    node_context : str\n        Node context used to generate prompts.\n\n\
+        \    Returns\n    -------\n    List[str]\n        List of generated prompts\
+        \ for the nodes in the DAG.\n\n    Raises\n    ------\n    ValueError\n  \
+        \      When input validation fails.\n    TypeError\n        When input types\
+        \ are incorrect.\n\n    Examples\n    --------\n    >>> generate_node_prompts(dag_nodes=['node1',\
+        \ 'node2'],\n    node_context='example_context')\n    ['prompt1', 'prompt2']\n\
+        \n    >>> generate_node_prompts(dag_nodes=['node3', 'node4'],\n    node_context='another_context')\n\
+        \    ['prompt3', 'prompt4']\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: generate_node_prompts
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: dag_nodes
+        type: str
+      - description: Input parameter of type str
+        key: node_context
+        type: str
+      prd:
+        conceptual_info: The generate_node_prompts shim function generates a list
+          of prompts for nodes in a DAG based on the provided node context. This function
+          plays a crucial role in defining node prompts and descriptions for the DAG.
+        docstring:
+          examples:
+          - lines:
+            - generate_node_prompts(dag_nodes=['node1', 'node2'], node_context='example_context')
+            output: '[''prompt1'', ''prompt2'']'
+          - lines:
+            - generate_node_prompts(dag_nodes=['node3', 'node4'], node_context='another_context')
+            output: '[''prompt3'', ''prompt4'']'
+          parameters:
+          - description: List of node names in the DAG.
+            name: dag_nodes
+            type: str
+          - description: Node context used to generate prompts.
+            name: node_context
+            type: str
+          raises:
+          - description: When input validation fails.
+            type: ValueError
+          - description: When input types are incorrect.
+            type: TypeError
+          returns:
+            description: List of generated prompts for the nodes in the DAG.
+            type: List[str]
+          summary: Generates a list of prompts for nodes in a DAG based on the node
+            context.
+      prompt: Generate node prompts based on the provided node context and DAG nodes.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Generates node descriptions for a given DAG structure.
+      implementation: "from typing import List\n\n\ndef generate_node_descriptions(dag_nodes:\
+        \ str, node_context: str, dag_edges: str) -> List[str]:\n    \"\"\"\n    Generates\
+        \ node descriptions for a given DAG structure.\n\n    Parameters\n    ----------\n\
+        \    dag_nodes : str\n        List of node names in the DAG.\n    node_context\
+        \ : str\n        Context information for the nodes in the DAG.\n    dag_edges\
+        \ : str\n        List of edges in the DAG, represented as 'node1->node2'.\n\
+        \n    Returns\n    -------\n    List[str]\n        List of node descriptions\
+        \ corresponding to each node name.\n\n    Raises\n    ------\n    ValueError\n\
+        \        When input validation fails.\n    TypeError\n        When input types\
+        \ are incorrect.\n\n    Examples\n    --------\n    >>> generate_node_descriptions(dag_nodes=['node1',\
+        \ 'node2'],\n    node_context='example_context', dag_edges=['node1->node2'])\n\
+        \    ['description1', 'description2']\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: generate_node_descriptions
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: dag_nodes
+        type: str
+      - description: Input parameter of type str
+        key: node_context
+        type: str
+      - description: Input parameter of type str
+        key: dag_edges
+        type: str
+      prd:
+        conceptual_info: This shim function generates node descriptions for a given
+          DAG structure, which is used to provide context for the nodes in the DAG.
+        docstring:
+          examples:
+          - lines:
+            - generate_node_descriptions(dag_nodes=['node1', 'node2'], node_context='example_context',
+              dag_edges=['node1->node2'])
+            output: '[''description1'', ''description2'']'
+          parameters:
+          - description: List of node names in the DAG.
+            name: dag_nodes
+            type: str
+          - description: Context information for the nodes in the DAG.
+            name: node_context
+            type: str
+          - description: List of edges in the DAG, represented as 'node1->node2'.
+            name: dag_edges
+            type: str
+          raises:
+          - description: When input validation fails.
+            type: ValueError
+          - description: When input types are incorrect.
+            type: TypeError
+          returns:
+            description: List of node descriptions corresponding to each node name.
+            type: List[str]
+          summary: Generates node descriptions for a given DAG structure.
+      prompt: generate_node_descriptions(dag_nodes, node_context, dag_edges)
+      shims: []
   define_task_objective:
     agent: false
-    code_node_type: stub
+    code_node_type: shim
     description: Define the primary objective or task that the workflow will accomplish.
-    implementation: "from pydantic import BaseModel, Field\n\n\nclass DefineTaskObjectiveOutput(BaseModel):\n\
+    implementation: "from ._define_task_objective.validate_user_input import validate_user_input\n\
+      from ._define_task_objective.extract_task_objective import extract_task_objective\n\
+      from ._define_task_objective.generate_task_description import generate_task_description\n\
+      \nfrom pydantic import BaseModel, Field\n\n\nclass DefineTaskObjectiveOutput(BaseModel):\n\
       \    \"\"\"Pydantic model for define_task_objective node outputs.\"\"\"\n  \
-      \  task_objective: str = (\n        Field(..., description=\"The primary objective\
-      \ or task that the workflow will accomplish.\")\n    )\n    task_description:\
-      \ str = (\n        Field(..., description=\"A detailed description of the task\
-      \ or objective.\")\n    )\n\n\ndef define_task_objective(general_input: str,\
-      \ **kwargs) -> DefineTaskObjectiveOutput:\n    \"\"\"\n    This function takes\
-      \ no inputs and returns a task objective and its\n    description based on user\
-      \ input.\n\n    Returns\n    -------\n    dict\n        A dictionary containing\
-      \ the task objective and its description.\n\n    Raises\n    ------\n    ValueError\n\
+      \  task_objective: str = (\n        Field(..., description = (\n           \
+      \ \"The primary objective or task that the workflow will accomplish.\")\n  \
+      \      )\n    )\n    task_description: str = (\n        Field(..., description\
+      \ = (\n            \"A detailed description of the task or objective.\")\n \
+      \       )\n    )\n\n\ndef define_task_objective(general_input: str, **kwargs)\
+      \ -> DefineTaskObjectiveOutput:\n    \"\"\"\n    This function takes no inputs\
+      \ and returns a task objective and its\n    description based on user input.\n\
+      \n    Returns\n    -------\n    dict\n        A dictionary containing the task\
+      \ objective and its description.\n\n    Raises\n    ------\n    ValueError\n\
       \        If the user input is empty or invalid.\n\n    Examples\n    --------\n\
       \    >>> task_objective = define_task_objective()\n    >>> print(task_objective['task_objective'])\
       \  # Output: 'Train a machine\n    learning model'\n    >>> print(task_objective['task_description'])\
       \  # Output: 'The goal is to\n    train a model that can predict user behavior.'\n\
       \    {'task_objective': 'Train a machine learning model', 'task_description':\n\
       \    'The goal is to train a model that can predict user behavior.'}\n\n   \
-      \ \"\"\"\n    return DefineTaskObjectiveOutput(\n        task_objective=\"\"\
-      ,\n        task_description=\"\",\n    )"
+      \ \"\"\"\n    validated_input: str = validate_user_input(input_text=general_input)\n\
+      \    parsed_objective: str = extract_task_objective(user_input=validated_input)\n\
+      \    generated_description: str = generate_task_description(objective=parsed_objective,\
+      \ context=validated_input)\n    return DefineTaskObjectiveOutput(\n        task_objective=parsed_objective,\n\
+      \        task_description=generated_description\n    )"
     name: define_task_objective
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -308,42 +1271,250 @@ nodes:
           description based on user input.
     prompt: Clearly articulate the task or objective that the workflow DAG is intended
       to achieve.
-    shims: []
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates user input to ensure it meets the required criteria.
+      implementation: "def validate_user_input(input_text: str) -> str:\n    \"\"\"\
+        \n    Validates user input to ensure it meets the required criteria.\n\n \
+        \   Parameters\n    ----------\n    input_text : str\n        The input text\
+        \ to be validated.\n\n    Returns\n    -------\n    str\n        The validated\
+        \ user input.\n\n    Raises\n    ------\n    ValueError\n        When input\
+        \ validation fails.\n    TypeError\n        When input types are incorrect.\n\
+        \n    Examples\n    --------\n    >>> validate_user_input('example input')\n\
+        \    'example input'\n\n    >>> validate_user_input('')\n    ''\n\n    \"\"\
+        \"\n    raise NotImplementedError(\"This is a virtual stub node that needs\
+        \ to be implemented\")"
+      name: validate_user_input
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: input_text
+        type: str
+      prd:
+        conceptual_info: The validate_user_input shim function is responsible for
+          validating user input to prevent potential security threats or errors.
+        docstring:
+          examples:
+          - lines:
+            - validate_user_input('example input')
+            output: '''example input'''
+          - lines:
+            - validate_user_input('')
+            output: ''''''
+          parameters:
+          - description: The input text to be validated.
+            name: input_text
+            type: str
+          raises:
+          - description: When input validation fails.
+            type: ValueError
+          - description: When input types are incorrect.
+            type: TypeError
+          returns:
+            description: The validated user input.
+            type: str
+          summary: Validates user input to ensure it meets the required criteria.
+      prompt: Validates user input to ensure it meets the required criteria.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Extracts the primary objective or task from a given user input
+        string.
+      implementation: "def extract_task_objective(user_input: str) -> str:\n    \"\
+        \"\"\n    Extracts the task objective from a user-provided input string, returning\
+        \ the\n    objective as a string.\n\n    Parameters\n    ----------\n    user_input\
+        \ : str\n        The input string from which the task objective will be extracted.\n\
+        \n    Returns\n    -------\n    str\n        The extracted task objective.\n\
+        \n    Raises\n    ------\n    ValueError\n        If the input string is empty\
+        \ or does not contain a valid task\n        objective.\n    TypeError\n  \
+        \      If the input is not a string.\n\n    Examples\n    --------\n    >>>\
+        \ extract_task_objective('The primary goal is to complete project X.')\n \
+        \   'complete project X'\n\n    >>> extract_task_objective('Objective: Finish\
+        \ all tasks by the end of the\n    week.')\n    'Finish all tasks by the end\
+        \ of the week'\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")"
+      name: extract_task_objective
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: user_input
+        type: str
+      prd:
+        conceptual_info: This shim function plays a crucial role in task definition
+          by identifying the primary objective from user-provided input, which is
+          essential for workflow initialization and execution.
+        docstring:
+          examples:
+          - lines:
+            - extract_task_objective('The primary goal is to complete project X.')
+            output: '''complete project X'''
+          - lines:
+            - 'extract_task_objective(''Objective: Finish all tasks by the end of
+              the week.'')'
+            output: '''Finish all tasks by the end of the week'''
+          parameters:
+          - description: The input string from which the task objective will be extracted.
+            name: user_input
+            type: str
+          raises:
+          - description: If the input string is empty or does not contain a valid
+              task objective.
+            type: ValueError
+          - description: If the input is not a string.
+            type: TypeError
+          returns:
+            description: The extracted task objective.
+            type: str
+          summary: Extracts the task objective from a user-provided input string,
+            returning the objective as a string.
+      prompt: Create a function to extract the task objective from user input.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: This shim generates a detailed description of a task based on its
+        objective and context.
+      implementation: "def generate_task_description(objective: str, context: str)\
+        \ -> str:\n    \"\"\"\n    Generate a detailed description of a task based\
+        \ on its objective and\n    context.\n\n    Parameters\n    ----------\n \
+        \   objective : str\n        The primary objective of the task.\n    context\
+        \ : str\n        The context in which the task is being performed.\n\n   \
+        \ Returns\n    -------\n    str\n        A detailed description of the task.\n\
+        \n    Raises\n    ------\n    ValueError\n        If the objective or context\
+        \ is empty or None.\n    TypeError\n        If the objective or context is\
+        \ not a string.\n\n    Examples\n    --------\n    >>> generate_task_description(objective='Create\
+        \ a new user account',\n    context='For a new employee')\n    'Create a new\
+        \ user account for the new employee, ensuring all necessary\n    permissions\
+        \ and access rights are assigned.'\n\n    >>> generate_task_description(objective='Develop\
+        \ a new software feature',\n    context='To improve user experience')\n  \
+        \  'Develop a new software feature to enhance user interface and experience,\n\
+        \    focusing on simplicity and efficiency.'\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: generate_task_description
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: objective
+        type: str
+      - description: Input parameter of type str
+        key: context
+        type: str
+      prd:
+        conceptual_info: The generate_task_description shim is designed to create
+          a detailed description of a task based on its objective and context, playing
+          a crucial role in defining task objectives within workflow definitions.
+        docstring:
+          examples:
+          - lines:
+            - generate_task_description(objective='Create a new user account', context='For
+              a new employee')
+            output: '''Create a new user account for the new employee, ensuring all
+              necessary permissions and access rights are assigned.'''
+          - lines:
+            - generate_task_description(objective='Develop a new software feature',
+              context='To improve user experience')
+            output: '''Develop a new software feature to enhance user interface and
+              experience, focusing on simplicity and efficiency.'''
+          parameters:
+          - description: The primary objective of the task.
+            name: objective
+            type: str
+          - description: The context in which the task is being performed.
+            name: context
+            type: str
+          raises:
+          - description: If the objective or context is empty or None.
+            type: ValueError
+          - description: If the objective or context is not a string.
+            type: TypeError
+          returns:
+            description: A detailed description of the task.
+            type: str
+          summary: Generate a detailed description of a task based on its objective
+            and context.
+      prompt: Create a function to generate a detailed task description based on the
+        provided objective and context.
+      shims: []
   finalize_dag_workflow:
     agent: false
-    code_node_type: stub
+    code_node_type: shim
     description: Finalize the DAG workflow, verifying its correctness and effectiveness.
-    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass DefineNodePromptsAndDescriptionsOutput(BaseModel):\n    \"\"\"Pydantic\
-      \ model for define_node_prompts_and_descriptions node outputs.\"\"\"\n    node_names:\
-      \ List[str] = (\n        Field(..., description=\"List of all node names in\
-      \ the DAG.\")\n    )\n    node_prompts: List[str] = (\n        Field(..., description=\"\
-      List of prompts corresponding to each node name.\")\n    )\n    node_descriptions:\
-      \ List[str] = (\n        Field(..., description=\"List of descriptions corresponding\
-      \ to each node name.\")\n    )\n\n\nclass FinalizeDagWorkflowOutput(BaseModel):\n\
+    implementation: "from ._finalize_dag_workflow.validate_input_consistency import\
+      \ validate_input_consistency\nfrom ._finalize_dag_workflow.raise_value_error\
+      \ import raise_value_error\nfrom ._finalize_dag_workflow.validate_dag_structure\
+      \ import validate_dag_structure\nfrom ._finalize_dag_workflow.evaluate_prompt_quality\
+      \ import evaluate_prompt_quality\nfrom ._finalize_dag_workflow.evaluate_description_completeness\
+      \ import evaluate_description_completeness\nfrom ._finalize_dag_workflow.calculate_workflow_efficiency\
+      \ import calculate_workflow_efficiency\nfrom ._finalize_dag_workflow.identify_validation_issues\
+      \ import identify_validation_issues\nfrom ._finalize_dag_workflow.determine_overall_validity\
+      \ import determine_overall_validity\nfrom ._finalize_dag_workflow.format_validation_details\
+      \ import format_validation_details\n\nfrom pydantic import BaseModel, Field\n\
+      from typing import List\n\n\nclass DefineNodePromptsAndDescriptionsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for define_node_prompts_and_descriptions node outputs.\"\
+      \"\"\n    node_names: List[str] = (\n        Field(..., description=\"List of\
+      \ all node names in the DAG.\")\n    )\n    node_prompts: List[str] = (\n  \
+      \      Field(..., description = (\n            \"List of prompts corresponding\
+      \ to each node name.\")\n        )\n    )\n    node_descriptions: List[str]\
+      \ = (\n        Field(..., description = (\n            \"List of descriptions\
+      \ corresponding to each node name.\")\n        )\n    )\n\n\nclass FinalizeDagWorkflowOutput(BaseModel):\n\
       \    \"\"\"Pydantic model for finalize_dag_workflow node outputs.\"\"\"\n  \
-      \  is_valid: bool = (\n        Field(..., description=\"Whether the DAG workflow\
-      \ is valid and effective\")\n    )\n    validation_details: str = (\n      \
-      \  Field(..., description=\"List of details or issues found during validation\"\
-      )\n    )\n    efficiency_score: float = (\n        Field(..., description=\"\
-      A score indicating the efficiency of the workflow, ranging from 0 to 1\")\n\
-      \    )\n\n\ndef finalize_dag_workflow(define_node_prompts_and_descriptions_input:\
-      \ DefineNodePromptsAndDescriptionsOutput, **kwargs) -> FinalizeDagWorkflowOutput:\n\
-      \    \"\"\"\n    Finalize the DAG workflow by validating its correctness and\
-      \ effectiveness.\n\n    Parameters\n    ----------\n    node_names : List[str]\n\
-      \        List of node names in the DAG\n    node_prompts : List[str]\n     \
-      \   List of prompts corresponding to each node name\n    node_descriptions :\
-      \ List[str]\n        List of descriptions corresponding to each node name\n\n\
-      \    Returns\n    -------\n    Dict[str, Any]\n        A dictionary containing\
-      \ the validation result, details, and\n        efficiency score\n\n    Raises\n\
-      \    ------\n    ValueError\n        If the input node names, prompts, or descriptions\
-      \ are invalid or\n        inconsistent\n\n    Examples\n    --------\n    >>>\
-      \ node_names = ['node1', 'node2', 'node3']\n    >>> node_prompts = ['prompt1',\
-      \ 'prompt2', 'prompt3']\n    >>> node_descriptions = ['description1', 'description2',\
-      \ 'description3']\n    >>> result = finalize_dag_workflow(node_names, node_prompts,\n\
-      \    node_descriptions)\n    {'is_valid': True, 'validation_details': [], 'efficiency_score':\
-      \ 0.8}\n\n    \"\"\"\n    return FinalizeDagWorkflowOutput(\n        is_valid=False,\n\
-      \        validation_details=\"\",\n        efficiency_score=0.0,\n    )"
+      \  is_valid: bool = (\n        Field(..., description = (\n            \"Whether\
+      \ the DAG workflow is valid and effective\")\n        )\n    )\n    validation_details:\
+      \ str = (\n        Field(..., description = (\n            \"List of details\
+      \ or issues found during validation\")\n        )\n    )\n    efficiency_score:\
+      \ float = (\n        Field(..., description = (\n            \"A score indicating\
+      \ the efficiency of the workflow, ranging from 0 to 1\")\n        )\n    )\n\
+      \n\ndef finalize_dag_workflow(define_node_prompts_and_descriptions_input: DefineNodePromptsAndDescriptionsOutput,\
+      \ **kwargs) -> FinalizeDagWorkflowOutput:\n    \"\"\"\n    Finalize the DAG\
+      \ workflow by validating its correctness and effectiveness.\n\n    Parameters\n\
+      \    ----------\n    node_names : List[str]\n        List of node names in the\
+      \ DAG\n    node_prompts : List[str]\n        List of prompts corresponding to\
+      \ each node name\n    node_descriptions : List[str]\n        List of descriptions\
+      \ corresponding to each node name\n\n    Returns\n    -------\n    Dict[str,\
+      \ Any]\n        A dictionary containing the validation result, details, and\n\
+      \        efficiency score\n\n    Raises\n    ------\n    ValueError\n      \
+      \  If the input node names, prompts, or descriptions are invalid or\n      \
+      \  inconsistent\n\n    Examples\n    --------\n    >>> node_names = ['node1',\
+      \ 'node2', 'node3']\n    >>> node_prompts = ['prompt1', 'prompt2', 'prompt3']\n\
+      \    >>> node_descriptions = ['description1', 'description2', 'description3']\n\
+      \    >>> result = finalize_dag_workflow(node_names, node_prompts,\n    node_descriptions)\n\
+      \    {'is_valid': True, 'validation_details': [], 'efficiency_score': 0.8}\n\
+      \n    \"\"\"\n    input_validation_result: bool = validate_input_consistency(\n\
+      \        node_names=define_node_prompts_and_descriptions_input.node_names,\n\
+      \        node_prompts=define_node_prompts_and_descriptions_input.node_prompts,\n\
+      \        node_descriptions=define_node_prompts_and_descriptions_input.node_descriptions\n\
+      \    )\n    \n    if not input_validation_result:\n        raise_value_error(message=\"\
+      Input node names, prompts, or descriptions are invalid or inconsistent\")\n\
+      \    \n    dag_structure_validation: bool = validate_dag_structure(\n      \
+      \  node_names=define_node_prompts_and_descriptions_input.node_names\n    )\n\
+      \    \n    prompt_quality_score: float = evaluate_prompt_quality(\n        node_prompts=define_node_prompts_and_descriptions_input.node_prompts\n\
+      \    )\n    \n    description_completeness_score: float = evaluate_description_completeness(\n\
+      \        node_descriptions=define_node_prompts_and_descriptions_input.node_descriptions\n\
+      \    )\n    \n    workflow_efficiency_score: float = calculate_workflow_efficiency(\n\
+      \        node_names=define_node_prompts_and_descriptions_input.node_names,\n\
+      \        node_prompts=define_node_prompts_and_descriptions_input.node_prompts,\n\
+      \        node_descriptions=define_node_prompts_and_descriptions_input.node_descriptions\n\
+      \    )\n    \n    validation_issues: List[str] = identify_validation_issues(\n\
+      \        dag_valid=dag_structure_validation,\n        prompt_score=prompt_quality_score,\n\
+      \        description_score=description_completeness_score\n    )\n    \n   \
+      \ is_workflow_valid: bool = determine_overall_validity(\n        dag_valid=dag_structure_validation,\n\
+      \        validation_issues=validation_issues\n    )\n    \n    validation_details_str:\
+      \ str = format_validation_details(validation_issues=validation_issues)\n   \
+      \ \n    return FinalizeDagWorkflowOutput(\n        is_valid=is_workflow_valid,\n\
+      \        validation_details=validation_details_str,\n        efficiency_score=workflow_efficiency_score\n\
+      \    )"
     name: finalize_dag_workflow
     nodes_depended_on:
     - define_node_prompts_and_descriptions
@@ -392,25 +1563,580 @@ nodes:
         summary: Finalize the DAG workflow by validating its correctness and effectiveness.
     prompt: Review the constructed DAG workflow to ensure it is valid, efficient,
       and effectively achieves the original task or objective.
-    shims: []
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates the consistency of input node names, prompts, and descriptions.
+      implementation: "def validate_input_consistency(node_names: str, node_prompts:\
+        \ str, node_descriptions: str) -> bool:\n    \"\"\"\n    Validates the consistency\
+        \ of input node names, prompts, and descriptions.\n\n    Parameters\n    ----------\n\
+        \    node_names : List[str]\n        List of node names.\n    node_prompts\
+        \ : List[str]\n        List of node prompts.\n    node_descriptions : List[str]\n\
+        \        List of node descriptions.\n\n    Returns\n    -------\n    bool\n\
+        \        True if the input is consistent, False otherwise.\n\n    Raises\n\
+        \    ------\n    ValueError\n        When input validation fails.\n    TypeError\n\
+        \        When input types are incorrect.\n\n    Examples\n    --------\n \
+        \   >>> node_names = ['node1', 'node2']\n    >>> node_prompts = ['prompt1',\
+        \ 'prompt2']\n    >>> node_descriptions = ['description1', 'description2']\n\
+        \    >>> validate_input_consistency(node_names, node_prompts, node_descriptions)\n\
+        \    True\n\n    >>> node_names = ['node1', 'node2']\n    >>> node_prompts\
+        \ = ['prompt1']\n    >>> node_descriptions = ['description1', 'description2']\n\
+        \    >>> validate_input_consistency(node_names, node_prompts, node_descriptions)\n\
+        \    False\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")"
+      name: validate_input_consistency
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type bool
+        key: output
+        type: bool
+      - description: Input parameter of type str
+        key: node_names
+        type: str
+      - description: Input parameter of type str
+        key: node_prompts
+        type: str
+      - description: Input parameter of type str
+        key: node_descriptions
+        type: str
+      prd:
+        conceptual_info: The validate_input_consistency shim function checks if the
+          input node names, prompts, and descriptions are consistent and valid.
+        docstring:
+          examples:
+          - lines:
+            - node_names = ['node1', 'node2']
+            - node_prompts = ['prompt1', 'prompt2']
+            - node_descriptions = ['description1', 'description2']
+            - validate_input_consistency(node_names, node_prompts, node_descriptions)
+            output: 'True'
+          - lines:
+            - node_names = ['node1', 'node2']
+            - node_prompts = ['prompt1']
+            - node_descriptions = ['description1', 'description2']
+            - validate_input_consistency(node_names, node_prompts, node_descriptions)
+            output: 'False'
+          parameters:
+          - description: List of node names.
+            name: node_names
+            type: List[str]
+          - description: List of node prompts.
+            name: node_prompts
+            type: List[str]
+          - description: List of node descriptions.
+            name: node_descriptions
+            type: List[str]
+          raises:
+          - description: When input validation fails.
+            type: ValueError
+          - description: When input types are incorrect.
+            type: TypeError
+          returns:
+            description: True if the input is consistent, False otherwise.
+            type: bool
+          summary: Validates the consistency of input node names, prompts, and descriptions.
+      prompt: Validates the consistency of input node names, prompts, and descriptions.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Raises a ValueError with a specified message.
+      implementation: "def raise_value_error(message: str) -> str:\n    \"\"\"\n \
+        \   Raises a ValueError with a specified message.\n\n    Parameters\n    ----------\n\
+        \    message : str\n        The message to be included in the ValueError.\n\
+        \n    Raises\n    ------\n    ValueError\n        Raised with the specified\
+        \ message.\n\n    Examples\n    --------\n    >>> raise_value_error(message='Input\
+        \ validation failed')\n    ValueError: Input validation failed\n\n    >>>\
+        \ try: raise_value_error(message='Invalid input')\n    >>> except ValueError\
+        \ as e: print(e)\n    Invalid input\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: raise_value_error
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: message
+        type: str
+      prd:
+        conceptual_info: The raise_value_error shim function is used to raise a ValueError
+          with a specified message, typically used for input validation and error
+          handling.
+        docstring:
+          examples:
+          - lines:
+            - raise_value_error(message='Input validation failed')
+            output: 'ValueError: Input validation failed'
+          - lines:
+            - 'try: raise_value_error(message=''Invalid input'')'
+            - 'except ValueError as e: print(e)'
+            output: Invalid input
+          parameters:
+          - description: The message to be included in the ValueError.
+            name: message
+            type: str
+          raises:
+          - description: Raised with the specified message.
+            type: ValueError
+          returns: null
+          summary: Raises a ValueError with a specified message.
+      prompt: Implement raise_value_error shim function
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates the structure of a directed acyclic graph (DAG) based
+        on a list of node names.
+      implementation: "def validate_dag_structure(node_names: str) -> bool:\n    \"\
+        \"\"\n    Validates the structure of a directed acyclic graph (DAG) based\
+        \ on a list of\n    node names.\n\n    Parameters\n    ----------\n    node_names\
+        \ : str\n        A list of node names representing the nodes in the DAG.\n\
+        \n    Returns\n    -------\n    bool\n        True if the DAG structure is\
+        \ valid, False otherwise.\n\n    Raises\n    ------\n    ValueError\n    \
+        \    When input validation fails due to inconsistent or invalid node\n   \
+        \     names.\n    TypeError\n        When the input type is incorrect.\n\n\
+        \    Examples\n    --------\n    >>> validate_dag_structure(node_names=['A',\
+        \ 'B', 'C'])\n    True\n\n    >>> validate_dag_structure(node_names=['A',\
+        \ 'B', 'A'])\n    False\n\n    \"\"\"\n    raise NotImplementedError(\"This\
+        \ is a virtual stub node that needs to be implemented\")"
+      name: validate_dag_structure
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type bool
+        key: output
+        type: bool
+      - description: Input parameter of type str
+        key: node_names
+        type: str
+      prd:
+        conceptual_info: The validate_dag_structure shim is responsible for verifying
+          that a given list of node names forms a valid directed acyclic graph (DAG)
+          structure. This is crucial for ensuring the integrity and efficiency of
+          workflows represented by these graphs.
+        docstring:
+          examples:
+          - lines:
+            - validate_dag_structure(node_names=['A', 'B', 'C'])
+            output: 'True'
+          - lines:
+            - validate_dag_structure(node_names=['A', 'B', 'A'])
+            output: 'False'
+          parameters:
+          - description: A list of node names representing the nodes in the DAG.
+            name: node_names
+            type: str
+          raises:
+          - description: When input validation fails due to inconsistent or invalid
+              node names.
+            type: ValueError
+          - description: When the input type is incorrect.
+            type: TypeError
+          returns:
+            description: True if the DAG structure is valid, False otherwise.
+            type: bool
+          summary: Validates the structure of a directed acyclic graph (DAG) based
+            on a list of node names.
+      prompt: the right prompt for the shim implementation
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Evaluates the quality of a given prompt and returns a score.
+      implementation: "def evaluate_prompt_quality(node_prompts: str) -> float:\n\
+        \    \"\"\"\n    Evaluates the quality of a given prompt and returns a score.\n\
+        \n    Parameters\n    ----------\n    node_prompts : str\n        The input\
+        \ prompt to be evaluated.\n\n    Returns\n    -------\n    float\n       \
+        \ A float score representing the quality of the prompt, ranging from 0\n \
+        \       to 1.\n\n    Raises\n    ------\n    ValueError\n        When the\
+        \ input prompt is empty or invalid.\n    TypeError\n        When the input\
+        \ prompt is not a string.\n\n    Examples\n    --------\n    >>> evaluate_prompt_quality(node_prompts='This\
+        \ is a well-written prompt.')\n    >>> print(output)\n    0.9\n\n    >>> evaluate_prompt_quality(node_prompts='This\
+        \ prompt is unclear.')\n    >>> print(output)\n    0.2\n\n    \"\"\"\n   \
+        \ raise NotImplementedError(\"This is a virtual stub node that needs to be\
+        \ implemented\")"
+      name: evaluate_prompt_quality
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type float
+        key: output
+        type: float
+      - description: Input parameter of type str
+        key: node_prompts
+        type: str
+      prd:
+        conceptual_info: The evaluate_prompt_quality shim function assesses the quality
+          of a given prompt, providing a score that reflects its clarity, coherence,
+          and relevance.
+        docstring:
+          examples:
+          - lines:
+            - evaluate_prompt_quality(node_prompts='This is a well-written prompt.')
+            - print(output)
+            output: '0.9'
+          - lines:
+            - evaluate_prompt_quality(node_prompts='This prompt is unclear.')
+            - print(output)
+            output: '0.2'
+          parameters:
+          - description: The input prompt to be evaluated.
+            name: node_prompts
+            type: str
+          raises:
+          - description: When the input prompt is empty or invalid.
+            type: ValueError
+          - description: When the input prompt is not a string.
+            type: TypeError
+          returns:
+            description: A float score representing the quality of the prompt, ranging
+              from 0 to 1.
+            type: float
+          summary: Evaluates the quality of a given prompt and returns a score.
+      prompt: Evaluate the quality of a given prompt.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Evaluates the completeness of node descriptions.
+      implementation: "def evaluate_description_completeness(node_descriptions: str)\
+        \ -> float:\n    \"\"\"\n    Evaluates the completeness of node descriptions.\n\
+        \n    Parameters\n    ----------\n    node_descriptions : str\n        A string\
+        \ containing node descriptions.\n\n    Returns\n    -------\n    float\n \
+        \       A score indicating the completeness of node descriptions, ranging\n\
+        \        from 0 to 1.\n\n    Raises\n    ------\n    ValueError\n        When\
+        \ input validation fails.\n    TypeError\n        When input types are incorrect.\n\
+        \n    Examples\n    --------\n    >>> evaluate_description_completeness(node_descriptions='This\
+        \ is a complete\n    description.')\n    0.9\n\n    >>> evaluate_description_completeness(node_descriptions='Incomplete')\n\
+        \    0.2\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")"
+      name: evaluate_description_completeness
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type float
+        key: output
+        type: float
+      - description: Input parameter of type str
+        key: node_descriptions
+        type: str
+      prd:
+        conceptual_info: This shim function assesses the completeness of node descriptions,
+          providing a score that indicates how well the descriptions cover the necessary
+          information.
+        docstring:
+          examples:
+          - lines:
+            - evaluate_description_completeness(node_descriptions='This is a complete
+              description.')
+            output: '0.9'
+          - lines:
+            - evaluate_description_completeness(node_descriptions='Incomplete')
+            output: '0.2'
+          parameters:
+          - description: A string containing node descriptions.
+            name: node_descriptions
+            type: str
+          raises:
+          - description: When input validation fails.
+            type: ValueError
+          - description: When input types are incorrect.
+            type: TypeError
+          returns:
+            description: A score indicating the completeness of node descriptions,
+              ranging from 0 to 1.
+            type: float
+          summary: Evaluates the completeness of node descriptions.
+      prompt: Evaluate the completeness of node descriptions.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Calculates the efficiency of a workflow given node names, prompts,
+        and descriptions.
+      implementation: "def calculate_workflow_efficiency(node_names: str, node_prompts:\
+        \ str, node_descriptions: str) -> float:\n    \"\"\"\n    Calculates the efficiency\
+        \ of a workflow given node names, prompts, and\n    descriptions.\n\n    Parameters\n\
+        \    ----------\n    node_names : str\n        A string containing node names.\n\
+        \    node_prompts : str\n        A string containing node prompts.\n    node_descriptions\
+        \ : str\n        A string containing node descriptions.\n\n    Returns\n \
+        \   -------\n    float\n        The efficiency score of the workflow, ranging\
+        \ from 0 to 1.\n\n    Raises\n    ------\n    ValueError\n        When input\
+        \ validation fails.\n    TypeError\n        When input types are incorrect.\n\
+        \n    Examples\n    --------\n    >>> calculate_workflow_efficiency(node_names='node1,node2,node3',\n\
+        \    node_prompts='prompt1,prompt2,prompt3',\n    node_descriptions='description1,description2,description3')\n\
+        \    0.8\n\n    >>> calculate_workflow_efficiency(node_names='node4,node5',\n\
+        \    node_prompts='prompt4,prompt5',\n    node_descriptions='description4,description5')\n\
+        \    0.9\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual\
+        \ stub node that needs to be implemented\")"
+      name: calculate_workflow_efficiency
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type float
+        key: output
+        type: float
+      - description: Input parameter of type str
+        key: node_names
+        type: str
+      - description: Input parameter of type str
+        key: node_prompts
+        type: str
+      - description: Input parameter of type str
+        key: node_descriptions
+        type: str
+      prd:
+        conceptual_info: The calculate_workflow_efficiency shim function calculates
+          the efficiency of a workflow given node names, prompts, and descriptions.
+          It is used to evaluate the effectiveness of a workflow in the larger system.
+        docstring:
+          examples:
+          - lines:
+            - calculate_workflow_efficiency(node_names='node1,node2,node3', node_prompts='prompt1,prompt2,prompt3',
+              node_descriptions='description1,description2,description3')
+            output: '0.8'
+          - lines:
+            - calculate_workflow_efficiency(node_names='node4,node5', node_prompts='prompt4,prompt5',
+              node_descriptions='description4,description5')
+            output: '0.9'
+          parameters:
+          - description: A string containing node names.
+            name: node_names
+            type: str
+          - description: A string containing node prompts.
+            name: node_prompts
+            type: str
+          - description: A string containing node descriptions.
+            name: node_descriptions
+            type: str
+          raises:
+          - description: When input validation fails.
+            type: ValueError
+          - description: When input types are incorrect.
+            type: TypeError
+          returns:
+            description: The efficiency score of the workflow, ranging from 0 to 1.
+            type: float
+          summary: Calculates the efficiency of a workflow given node names, prompts,
+            and descriptions.
+      prompt: Calculate the efficiency of a workflow given node names, prompts, and
+        descriptions.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: This shim function identifies validation issues based on the DAG
+        structure validation result, prompt quality score, and description completeness
+        score.
+      implementation: "from typing import List\n\n\ndef identify_validation_issues(dag_valid:\
+        \ str, prompt_score: str, description_score: str) -> List[str]:\n    \"\"\"\
+        \n    Identifies validation issues based on the DAG structure validation result,\n\
+        \    prompt quality score, and description completeness score.\n\n    Parameters\n\
+        \    ----------\n    dag_valid : str\n        A string indicating whether\
+        \ the DAG structure is valid.\n    prompt_score : str\n        A string representing\
+        \ the prompt quality score.\n    description_score : str\n        A string\
+        \ representing the description completeness score.\n\n    Returns\n    -------\n\
+        \    List[str]\n        A list of strings representing the validation issues\
+        \ found.\n\n    Raises\n    ------\n    ValueError\n        If the input parameters\
+        \ are invalid or inconsistent.\n    TypeError\n        If the input parameters\
+        \ are of incorrect type.\n\n    Examples\n    --------\n    >>> validation_issues\
+        \ = identify_validation_issues(dag_valid='True',\n    prompt_score='0.8',\
+        \ description_score='0.9')\n    ['No issues found']\n\n    >>> validation_issues\
+        \ = identify_validation_issues(dag_valid='False',\n    prompt_score='0.2',\
+        \ description_score='0.1')\n    ['DAG structure is invalid', 'Prompt quality\
+        \ score is low', 'Description\n    completeness score is low']\n\n    \"\"\
+        \"\n    raise NotImplementedError(\"This is a virtual stub node that needs\
+        \ to be implemented\")"
+      name: identify_validation_issues
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: dag_valid
+        type: str
+      - description: Input parameter of type str
+        key: prompt_score
+        type: str
+      - description: Input parameter of type str
+        key: description_score
+        type: str
+      prd:
+        conceptual_info: The identify_validation_issues shim plays a crucial role
+          in the workflow validation process by analyzing the DAG structure, prompt
+          quality, and description completeness to identify potential issues.
+        docstring:
+          examples:
+          - lines:
+            - validation_issues = identify_validation_issues(dag_valid='True', prompt_score='0.8',
+              description_score='0.9')
+            output: '[''No issues found'']'
+          - lines:
+            - validation_issues = identify_validation_issues(dag_valid='False', prompt_score='0.2',
+              description_score='0.1')
+            output: '[''DAG structure is invalid'', ''Prompt quality score is low'',
+              ''Description completeness score is low'']'
+          parameters:
+          - description: A string indicating whether the DAG structure is valid.
+            name: dag_valid
+            type: str
+          - description: A string representing the prompt quality score.
+            name: prompt_score
+            type: str
+          - description: A string representing the description completeness score.
+            name: description_score
+            type: str
+          raises:
+          - description: If the input parameters are invalid or inconsistent.
+            type: ValueError
+          - description: If the input parameters are of incorrect type.
+            type: TypeError
+          returns:
+            description: A list of strings representing the validation issues found.
+            type: List[str]
+          summary: Identifies validation issues based on the DAG structure validation
+            result, prompt quality score, and description completeness score.
+      prompt: Identify validation issues based on DAG structure validation, prompt
+        quality score, and description completeness score.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Determines the overall validity of a DAG workflow based on its
+        structure and validation issues.
+      implementation: "def determine_overall_validity(dag_valid: str, validation_issues:\
+        \ str) -> bool:\n    \"\"\"\n    Determines the overall validity of a DAG\
+        \ workflow based on its structure and\n    validation issues.\n\n    Parameters\n\
+        \    ----------\n    dag_valid : str\n        The validity of the DAG structure\n\
+        \    validation_issues : str\n        A list of validation issues found in\
+        \ the DAG workflow\n\n    Returns\n    -------\n    bool\n        The overall\
+        \ validity of the DAG workflow\n\n    Raises\n    ------\n    ValueError\n\
+        \        When the input validation fails\n    TypeError\n        When the\
+        \ input types are incorrect\n\n    Examples\n    --------\n    >>> determine_overall_validity(dag_valid='True',\
+        \ validation_issues='[]')\n    True\n\n    >>> determine_overall_validity(dag_valid='False',\n\
+        \    validation_issues='[\"issue1\", \"issue2\"]')\n    False\n\n    \"\"\"\
+        \n    raise NotImplementedError(\"This is a virtual stub node that needs to\
+        \ be implemented\")"
+      name: determine_overall_validity
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type bool
+        key: output
+        type: bool
+      - description: Input parameter of type str
+        key: dag_valid
+        type: str
+      - description: Input parameter of type str
+        key: validation_issues
+        type: str
+      prd:
+        conceptual_info: This shim function determines the overall validity of a DAG
+          workflow by considering its structure and validation issues.
+        docstring:
+          examples:
+          - lines:
+            - determine_overall_validity(dag_valid='True', validation_issues='[]')
+            output: 'True'
+          - lines:
+            - determine_overall_validity(dag_valid='False', validation_issues='["issue1",
+              "issue2"]')
+            output: 'False'
+          parameters:
+          - description: The validity of the DAG structure
+            name: dag_valid
+            type: str
+          - description: A list of validation issues found in the DAG workflow
+            name: validation_issues
+            type: str
+          raises:
+          - description: When the input validation fails
+            type: ValueError
+          - description: When the input types are incorrect
+            type: TypeError
+          returns:
+            description: The overall validity of the DAG workflow
+            type: bool
+          summary: Determines the overall validity of a DAG workflow based on its
+            structure and validation issues.
+      prompt: Determine the overall validity of a DAG workflow
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Formats a list of validation issues into a human-readable string.
+      implementation: "def format_validation_details(validation_issues: str) -> str:\n\
+        \    \"\"\"\n    Formats a list of validation issues into a human-readable\
+        \ string.\n\n    Parameters\n    ----------\n    validation_issues : str\n\
+        \        A string containing the validation issues to be formatted.\n\n  \
+        \  Returns\n    -------\n    str\n        A human-readable string representing\
+        \ the validation issues.\n\n    Raises\n    ------\n    ValueError\n     \
+        \   When input validation fails.\n    TypeError\n        When input types\
+        \ are incorrect.\n\n    Examples\n    --------\n    >>> format_validation_details(validation_issues='issue1,\
+        \ issue2, issue3')\n    'Validation issues: issue1, issue2, issue3'\n\n  \
+        \  >>> format_validation_details(validation_issues='')\n    ''\n\n    \"\"\
+        \"\n    raise NotImplementedError(\"This is a virtual stub node that needs\
+        \ to be implemented\")"
+      name: format_validation_details
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: validation_issues
+        type: str
+      prd:
+        conceptual_info: The format_validation_details shim is responsible for taking
+          a list of validation issues and formatting them into a human-readable string.
+          This string is then used to provide detailed feedback on the validation
+          process.
+        docstring:
+          examples:
+          - lines:
+            - format_validation_details(validation_issues='issue1, issue2, issue3')
+            output: '''Validation issues: issue1, issue2, issue3'''
+          - lines:
+            - format_validation_details(validation_issues='')
+            output: ''''''
+          parameters:
+          - description: A string containing the validation issues to be formatted.
+            name: validation_issues
+            type: str
+          raises:
+          - description: When input validation fails.
+            type: ValueError
+          - description: When input types are incorrect.
+            type: TypeError
+          returns:
+            description: A human-readable string representing the validation issues.
+            type: str
+          summary: Formats a list of validation issues into a human-readable string.
+      prompt: Format validation issues into a human-readable string
+      shims: []
   identify_dependencies_between_subtasks:
     agent: false
-    code_node_type: stub
+    code_node_type: shim
     description: Analyze the subtasks to identify any dependencies or prerequisites.
-    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
-      \n\nclass DecomposeTaskIntoSubtasksOutput(BaseModel):\n    \"\"\"Pydantic model\
-      \ for decompose_task_into_subtasks node outputs.\"\"\"\n    subtask_list: List[str]\
-      \ = (\n        Field(..., description=\"List of subtasks or steps to achieve\
-      \ the task objective\")\n    )\n    subtask_count: int = (\n        Field(...,\
-      \ description=\"Number of subtasks or steps generated\")\n    )\n    sequencing_requirements:\
-      \ str = (\n        Field(..., description=\"Description of any sequencing or\
-      \ ordering requirements between subtasks\")\n    )\n\n\nclass IdentifyDependenciesBetweenSubtasksOutput(BaseModel):\n\
-      \    \"\"\"Pydantic model for identify_dependencies_between_subtasks node outputs.\"\
+    implementation: "from ._identify_dependencies_between_subtasks.validate_input_parameters\
+      \ import validate_input_parameters\nfrom ._identify_dependencies_between_subtasks.parse_sequencing_requirements\
+      \ import parse_sequencing_requirements\nfrom ._identify_dependencies_between_subtasks.validate_dependencies_against_subtasks\
+      \ import validate_dependencies_against_subtasks\nfrom ._identify_dependencies_between_subtasks.check_dependencies_exist\
+      \ import check_dependencies_exist\nfrom ._identify_dependencies_between_subtasks.format_dependency_list\
+      \ import format_dependency_list\n\nfrom pydantic import BaseModel, Field\nfrom\
+      \ typing import List\n\n\nclass DecomposeTaskIntoSubtasksOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for decompose_task_into_subtasks node outputs.\"\"\
+      \"\n    subtask_list: List[str] = (\n        Field(..., description = (\n  \
+      \          \"List of subtasks or steps to achieve the task objective\")\n  \
+      \      )\n    )\n    subtask_count: int = (\n        Field(..., description=\"\
+      Number of subtasks or steps generated\")\n    )\n    sequencing_requirements:\
+      \ str = (\n        Field(..., description = (\n            \"Description of\
+      \ any sequencing or ordering requirements between subtasks\")\n        )\n \
+      \   )\n\n\nclass IdentifyDependenciesBetweenSubtasksOutput(BaseModel):\n   \
+      \ \"\"\"Pydantic model for identify_dependencies_between_subtasks node outputs.\"\
       \"\"\n    dependencies_exist: bool = (\n        Field(..., description=\"Whether\
       \ dependencies exist between subtasks\")\n    )\n    dependency_list: str =\
-      \ (\n        Field(..., description=\"List of dependencies between subtasks,\
-      \ where each dependency is represented as 'subtask_id_1 -> subtask_id_2'\")\n\
-      \    )\n\n\ndef identify_dependencies_between_subtasks(decompose_task_into_subtasks_input:\
+      \ (\n        Field(..., description = (\n            \"List of dependencies\
+      \ between subtasks, where each dependency is represented as 'subtask_id_1 ->\
+      \ subtask_id_2'\")\n        )\n    )\n\n\ndef identify_dependencies_between_subtasks(decompose_task_into_subtasks_input:\
       \ DecomposeTaskIntoSubtasksOutput, **kwargs) -> IdentifyDependenciesBetweenSubtasksOutput:\n\
       \    \"\"\"\n    Identify dependencies between subtasks based on their prerequisites.\n\
       \n    Parameters\n    ----------\n    subtask_list : List[str]\n        List\
@@ -426,8 +2152,15 @@ nodes:
       \ ['task1 -> task2', 'task2 ->\n    task3']}\n\n    >>> subtask_list = ['task1',\
       \ 'task2']\n    >>> sequencing_requirements = ''\n    >>> dependencies = identify_dependencies_between_subtasks(subtask_list,\n\
       \    sequencing_requirements)\n    {'dependencies_exist': False, 'dependency_list':\
-      \ []}\n\n    \"\"\"\n    return IdentifyDependenciesBetweenSubtasksOutput(\n\
-      \        dependencies_exist=False,\n        dependency_list=\"\",\n    )"
+      \ []}\n\n    \"\"\"\n    validate_input_parameters(subtask_list=decompose_task_into_subtasks_input.subtask_list,\
+      \ sequencing_requirements=decompose_task_into_subtasks_input.sequencing_requirements)\n\
+      \    \n    parsed_dependencies: List[str] = parse_sequencing_requirements(sequencing_requirements=decompose_task_into_subtasks_input.sequencing_requirements)\n\
+      \    \n    validated_dependencies: List[str] = validate_dependencies_against_subtasks(dependencies=parsed_dependencies,\
+      \ subtask_list=decompose_task_into_subtasks_input.subtask_list)\n    \n    dependencies_exist:\
+      \ bool = check_dependencies_exist(dependencies=validated_dependencies)\n   \
+      \ \n    formatted_dependency_list: str = format_dependency_list(dependencies=validated_dependencies)\n\
+      \    \n    return IdentifyDependenciesBetweenSubtasksOutput(\n        dependencies_exist=dependencies_exist,\n\
+      \        dependency_list=formatted_dependency_list,\n    )"
     name: identify_dependencies_between_subtasks
     nodes_depended_on:
     - decompose_task_into_subtasks
@@ -474,4 +2207,286 @@ nodes:
         summary: Identify dependencies between subtasks based on their prerequisites.
     prompt: Determine the dependencies between the subtasks, identifying which tasks
       must be completed before others can begin.
-    shims: []
+    shims:
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates the input parameters subtask_list and sequencing_requirements
+        to ensure they are in the correct format and contain the necessary information.
+      implementation: "def validate_input_parameters(subtask_list: str, sequencing_requirements:\
+        \ str) -> str:\n    \"\"\"\n    Validate the input parameters subtask_list\
+        \ and sequencing_requirements.\n\n    Parameters\n    ----------\n    subtask_list\
+        \ : list[str]\n        List of subtasks or steps to achieve the task objective.\n\
+        \    sequencing_requirements : str\n        Description of any sequencing\
+        \ or ordering requirements between\n        subtasks.\n\n    Returns\n   \
+        \ -------\n    str\n        Output indicating whether the input parameters\
+        \ are valid or not.\n\n    Raises\n    ------\n    ValueError\n        When\
+        \ input validation fails due to incorrect format or missing\n        information.\n\
+        \    TypeError\n        When input types are incorrect.\n\n    Examples\n\
+        \    --------\n    >>> validate_input_parameters(subtask_list=['task1', 'task2'],\n\
+        \    sequencing_requirements='task1 -> task2')\n    'Input parameters are\
+        \ valid'\n\n    >>> validate_input_parameters(subtask_list=[], sequencing_requirements='')\n\
+        \    'Input parameters are invalid'\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: validate_input_parameters
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type Any
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: subtask_list
+        type: str
+      - description: Input parameter of type str
+        key: sequencing_requirements
+        type: str
+      prd:
+        conceptual_info: The validate_input_parameters shim is responsible for validating
+          the input parameters to ensure they are in the correct format and contain
+          the necessary information for the subsequent nodes to function correctly.
+        docstring:
+          examples:
+          - lines:
+            - validate_input_parameters(subtask_list=['task1', 'task2'], sequencing_requirements='task1
+              -> task2')
+            output: '''Input parameters are valid'''
+          - lines:
+            - validate_input_parameters(subtask_list=[], sequencing_requirements='')
+            output: '''Input parameters are invalid'''
+          parameters:
+          - description: List of subtasks or steps to achieve the task objective.
+            name: subtask_list
+            type: list[str]
+          - description: Description of any sequencing or ordering requirements between
+              subtasks.
+            name: sequencing_requirements
+            type: str
+          raises:
+          - description: When input validation fails due to incorrect format or missing
+              information.
+            type: ValueError
+          - description: When input types are incorrect.
+            type: TypeError
+          returns:
+            description: Output indicating whether the input parameters are valid
+              or not.
+            type: str
+          summary: Validate the input parameters subtask_list and sequencing_requirements.
+      prompt: Implement a function to validate input parameters for subtask list and
+        sequencing requirements.
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Parses sequencing requirements from a string into a list of dependencies.
+      implementation: "from typing import List\n\n\ndef parse_sequencing_requirements(sequencing_requirements:\
+        \ str) -> List[str]:\n    \"\"\"\n    Parses sequencing requirements from\
+        \ a string into a list of dependencies.\n\n    Parameters\n    ----------\n\
+        \    sequencing_requirements : str\n        Input string containing sequencing\
+        \ requirements.\n\n    Returns\n    -------\n    List[str]\n        List of\
+        \ parsed dependencies.\n\n    Raises\n    ------\n    ValueError\n       \
+        \ When input validation fails.\n    TypeError\n        When input types are\
+        \ incorrect.\n\n    Examples\n    --------\n    >>> parse_sequencing_requirements('Task\
+        \ A must be completed before Task B')\n    ['Task A -> Task B']\n\n    >>>\
+        \ parse_sequencing_requirements('Task C and Task D are independent')\n   \
+        \ []\n\n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub\
+        \ node that needs to be implemented\")"
+      name: parse_sequencing_requirements
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: sequencing_requirements
+        type: str
+      prd:
+        conceptual_info: The parse_sequencing_requirements shim function takes a string
+          describing sequencing requirements and returns a list of dependencies.
+        docstring:
+          examples:
+          - lines:
+            - parse_sequencing_requirements('Task A must be completed before Task
+              B')
+            output: '[''Task A -> Task B'']'
+          - lines:
+            - parse_sequencing_requirements('Task C and Task D are independent')
+            output: '[]'
+          parameters:
+          - description: Input string containing sequencing requirements.
+            name: sequencing_requirements
+            type: str
+          raises:
+          - description: When input validation fails.
+            type: ValueError
+          - description: When input types are incorrect.
+            type: TypeError
+          returns:
+            description: List of parsed dependencies.
+            type: List[str]
+          summary: Parses sequencing requirements from a string into a list of dependencies.
+      prompt: Parse sequencing requirements
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Validates a list of dependencies against a list of subtasks to
+        ensure they are valid and properly formatted.
+      implementation: "from typing import List\n\n\ndef validate_dependencies_against_subtasks(dependencies:\
+        \ str, subtask_list: str) -> List[str]:\n    \"\"\"\n    Validates a list\
+        \ of dependencies against a list of subtasks.\n\n    Parameters\n    ----------\n\
+        \    dependencies : str\n        A string representation of a list of dependencies,\
+        \ where each\n        dependency is represented as 'subtask_id_1 -> subtask_id_2'\n\
+        \    subtask_list : str\n        A string representation of a list of subtasks\n\
+        \n    Returns\n    -------\n    List[str]\n        A list of validated dependencies\n\
+        \n    Raises\n    ------\n    ValueError\n        When a dependency is invalid\
+        \ or does not exist in the subtask list\n    TypeError\n        When the input\
+        \ types are incorrect\n\n    Examples\n    --------\n    >>> validate_dependencies_against_subtasks(dependencies='A\
+        \ -> B',\n    subtask_list='A,B,C')\n    ['A -> B']\n\n    >>> validate_dependencies_against_subtasks(dependencies='A\
+        \ -> D',\n    subtask_list='A,B,C')\n    []\n\n    \"\"\"\n    raise NotImplementedError(\"\
+        This is a virtual stub node that needs to be implemented\")"
+      name: validate_dependencies_against_subtasks
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type List[str]
+        key: output
+        type: List[str]
+      - description: Input parameter of type str
+        key: dependencies
+        type: str
+      - description: Input parameter of type str
+        key: subtask_list
+        type: str
+      prd:
+        conceptual_info: This shim function validates a list of dependencies against
+          a list of subtasks to ensure they are valid and properly formatted.
+        docstring:
+          examples:
+          - lines:
+            - validate_dependencies_against_subtasks(dependencies='A -> B', subtask_list='A,B,C')
+            output: '[''A -> B'']'
+          - lines:
+            - validate_dependencies_against_subtasks(dependencies='A -> D', subtask_list='A,B,C')
+            output: '[]'
+          parameters:
+          - description: A string representation of a list of dependencies, where
+              each dependency is represented as 'subtask_id_1 -> subtask_id_2'
+            name: dependencies
+            type: str
+          - description: A string representation of a list of subtasks
+            name: subtask_list
+            type: str
+          raises:
+          - description: When a dependency is invalid or does not exist in the subtask
+              list
+            type: ValueError
+          - description: When the input types are incorrect
+            type: TypeError
+          returns:
+            description: A list of validated dependencies
+            type: List[str]
+          summary: Validates a list of dependencies against a list of subtasks.
+      prompt: validate_dependencies_against_subtasks
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Checks if dependencies exist between subtasks.
+      implementation: "def check_dependencies_exist(dependencies: str) -> bool:\n\
+        \    \"\"\"\n    Checks if dependencies exist between subtasks.\n\n    Parameters\n\
+        \    ----------\n    dependencies : str\n        A string representing dependencies\
+        \ between subtasks.\n\n    Returns\n    -------\n    bool\n        True if\
+        \ dependencies exist, False otherwise.\n\n    Raises\n    ------\n    ValueError\n\
+        \        When input validation fails.\n    TypeError\n        When input types\
+        \ are incorrect.\n\n    Examples\n    --------\n    >>> check_dependencies_exist('subtask1\
+        \ -> subtask2')\n    True\n\n    >>> check_dependencies_exist('')\n    False\n\
+        \n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node\
+        \ that needs to be implemented\")"
+      name: check_dependencies_exist
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type bool
+        key: output
+        type: bool
+      - description: Input parameter of type str
+        key: dependencies
+        type: str
+      prd:
+        conceptual_info: The check_dependencies_exist shim function checks if there
+          are any dependencies between subtasks.
+        docstring:
+          examples:
+          - lines:
+            - check_dependencies_exist('subtask1 -> subtask2')
+            output: 'True'
+          - lines:
+            - check_dependencies_exist('')
+            output: 'False'
+          parameters:
+          - description: A string representing dependencies between subtasks.
+            name: dependencies
+            type: str
+          raises:
+          - description: When input validation fails.
+            type: ValueError
+          - description: When input types are incorrect.
+            type: TypeError
+          returns:
+            description: True if dependencies exist, False otherwise.
+            type: bool
+          summary: Checks if dependencies exist between subtasks.
+      prompt: Check if dependencies exist between subtasks
+      shims: []
+    - agent: false
+      code_node_type: virtual-stub
+      description: Formats a list of dependencies into a string representation.
+      implementation: "def format_dependency_list(dependencies: str) -> str:\n   \
+        \ \"\"\"\n    Formats a list of dependencies into a string representation.\n\
+        \n    Parameters\n    ----------\n    dependencies : str\n        A list of\
+        \ dependencies where each dependency is represented as\n        'subtask_id_1\
+        \ -> subtask_id_2'.\n\n    Returns\n    -------\n    str\n        The formatted\
+        \ dependency list as a string.\n\n    Raises\n    ------\n    ValueError\n\
+        \        When the input dependencies are invalid or empty.\n    TypeError\n\
+        \        When the input type is incorrect.\n\n    Examples\n    --------\n\
+        \    >>> format_dependency_list(dependencies=['A -> B', 'B -> C'])\n    'A\
+        \ -> B, B -> C'\n\n    >>> format_dependency_list(dependencies=[])\n    ''\n\
+        \n    \"\"\"\n    raise NotImplementedError(\"This is a virtual stub node\
+        \ that needs to be implemented\")"
+      name: format_dependency_list
+      nodes_depended_on: []
+      nodes_dependent_on: []
+      output_structure:
+      - description: Output of type str
+        key: output
+        type: str
+      - description: Input parameter of type str
+        key: dependencies
+        type: str
+      prd:
+        conceptual_info: The format_dependency_list shim function formats a list of
+          dependencies into a string representation, which can be used to describe
+          the dependencies between subtasks.
+        docstring:
+          examples:
+          - lines:
+            - format_dependency_list(dependencies=['A -> B', 'B -> C'])
+            output: '''A -> B, B -> C'''
+          - lines:
+            - format_dependency_list(dependencies=[])
+            output: ''''''
+          parameters:
+          - description: A list of dependencies where each dependency is represented
+              as 'subtask_id_1 -> subtask_id_2'.
+            name: dependencies
+            type: str
+          raises:
+          - description: When the input dependencies are invalid or empty.
+            type: ValueError
+          - description: When the input type is incorrect.
+            type: TypeError
+          returns:
+            description: The formatted dependency list as a string.
+            type: str
+          summary: Formats a list of dependencies into a string representation.
+      prompt: Format a list of dependencies into a string
+      shims: []
