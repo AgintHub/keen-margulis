@@ -1,40 +1,39 @@
 # generate_objective_statement PRD
 
 ## Description
-Generates a concise objective statement for a workflow given a list of requirements and a domain context.
+Generates a concise objective statement from a cleaned description of a workflow.
 
 
 ## Conceptual Info
 
-This shim produces a high‑level goal statement for a workflow. It takes the extracted requirements and the identified domain, then synthesizes a clear, actionable objective that guides the subsequent steps of the workflow.
+This shim transforms a cleaned textual description of a workflow into a short, actionable objective statement that serves as the primary goal for subsequent workflow steps.
 
 ## Docstring
 
 ### Summary
-Generate a concise objective statement for a workflow from given requirements and domain.
+Generate a concise objective statement from a cleaned description of a workflow.
 
 ### Parameters
 
-- **requirements** (str): A string (or stringified list) representing the key requirements that the objective must satisfy.
-- **domain** (str): The domain or context within which the workflow operates, used to tailor the objective language.
+- **cleaned_description** (str): A pre‑processed, normalized description of the workflow that should be used to create the objective statement.
 
 ### Returns
 
-str: A single sentence that succinctly describes the primary goal of the workflow.
+str: A short, clear objective statement that summarizes the primary goal of the workflow.
 
 ### Raises
 
-- ValueError: Raised when the generated objective statement is empty or contains only whitespace.
-- TypeError: Raised if either 'requirements' or 'domain' is not a string.
+- ValueError: Raised when `cleaned_description` is an empty string or contains only whitespace.
+- TypeError: Raised when `cleaned_description` is not of type `str`.
 
 ### Examples
 
 ```python
->>> output = generate_objective_statement(requirements='Build an API', domain='Software Development')
-'Develop a scalable REST API for user authentication.'
+>>> generate_objective_statement('Process sales data and generate a report')
+'Process sales data and generate a report'
 ```
 
 ```python
->>> output = generate_objective_statement(requirements='Improve customer onboarding', domain='E-commerce')
-'Streamline the onboarding process to reduce drop‑off rates by 30% in the e‑commerce platform.'
+>>> generate_objective_statement('Conduct a market analysis and produce insights for the Q4 strategy')
+'Conduct a market analysis and produce insights for the Q4 strategy'
 ```

@@ -5,265 +5,160 @@ PRDs for nodes in the '_finalize_workflow' module.
 
 ## Table of Contents
 
-- [validate_dag_edges](#validate_dag_edges)
+- [retrieve_current_dag_structure](#retrieve_current_dag_structure)
 
-- [extract_nodes_from_edges](#extract_nodes_from_edges)
+- [ensure_all_nodes_connected](#ensure_all_nodes_connected)
 
-- [check_dag_completeness](#check_dag_completeness)
+- [optimize_dag_performance](#optimize_dag_performance)
 
-- [determine_adjustments](#determine_adjustments)
-
-- [generate_dag_summary](#generate_dag_summary)
-
-- [log_finalization_results](#log_finalization_results)
+- [generate_final_dag_representation](#generate_final_dag_representation)
 
 
 
 ---
 
-## validate_dag_edges
+## retrieve_current_dag_structure
 
 ### Description
-Validates a list of directed edges for syntax, uniqueness, and acyclicity, returning a cleaned list of edges.
+Retrieves the current DAG structure as a string representation.
 
 ### Conceptual Info
 
-The validate_dag_edges shim ensures that the edges supplied to the workflow refinement process conform to the expected syntax and represent an acyclic graph, providing a safe set of edges for subsequent processing.
+This shim function is responsible for retrieving the current DAG (Directed Acyclic Graph) structure, which is essential for further processing and validation in the workflow.
 
 ### Docstring
 
-**Summary:** Validate a list of directed edges, ensuring each edge is formatted correctly, unique, and that the resulting graph is acyclic. Returns a cleaned list of edges or raises an error if validation fails.
+**Summary:** Retrieve the current DAG structure as a string.
 
-**Parameters:**
-
-- edges (list[str]): A list of edge strings formatted as 'NodeA->NodeB'.
-- logger (logging.Logger): Logger instance used for debug and error logging.
-**Returns:** List[str] - A list of validated edge strings, deduplicated and in the same order as the first appearance.
+**Returns:** str - A string representation of the current DAG structure.
 
 **Raises:**
 
-- ValueError: Raised when an edge is malformed, refers to an undefined node, or if the edge set introduces a cycle.
-- TypeError: Raised when the `edges` argument is not a list of strings or the `logger` is not a logging.Logger instance.
+- RuntimeError: If there's an issue retrieving the current DAG structure.
 **Examples:**
 
 ```python
->>> edges = ['Task1->Task2', 'Task2->Task3']
->>> validated = validate_dag_edges(edges, logger)
->>> print(validated)
-['Task1->Task2', 'Task2->Task3']
-```
-
-```python
->>> edges = ['Task1->Task2', 'Task2->Task1']
->>> validate_dag_edges(edges, logger)
-ValueError: Cyclic dependency detected in edges.
+>>> dag_structure = retrieve_current_dag_structure()
+'digraph G { ... }'
 ```
 
 
 
 ---
 
-## extract_nodes_from_edges
+## ensure_all_nodes_connected
 
 ### Description
-Extracts a set of unique node names from a comma‑separated string of directed DAG edges in the format 'NodeA->NodeB'.
+Ensures all nodes in the provided DAG structure are connected.
 
 ### Conceptual Info
 
-This shim is responsible for parsing DAG edge definitions and identifying all participating nodes to support downstream DAG validation and optimization.
+This shim ensures that all nodes in the DAG are connected, playing a crucial role in validating and preparing the DAG for further processing.
 
 ### Docstring
 
-**Summary:** Extracts node names from a string of DAG edges.
+**Summary:** Ensures all nodes in the DAG are connected and returns the connected DAG structure.
 
 **Parameters:**
 
-- edges (str): A comma‑separated string of directed edges formatted as 'NodeA->NodeB'.
-**Returns:** set - A set of unique node names found in the input edges.
+- dag_structure (str): The input DAG structure represented as a string.
+**Returns:** str - The connected DAG structure represented as a string.
 
 **Raises:**
 
-- ValueError: If any edge does not contain the '->' separator or the input string is empty but not None.
-- TypeError: If the input `edges` is not a string.
+- ValueError: If the input DAG structure is invalid or contains unconnected nodes that cannot be connected.
+- TypeError: If the input type is not a string.
 **Examples:**
 
 ```python
->>> edges = 'TaskA->TaskB,TaskB->TaskC,TaskC->TaskD'
->>> nodes = extract_nodes_from_edges(edges)
->>> print(nodes)
-{'TaskA', 'TaskB', 'TaskC', 'TaskD'}
+>>> dag_structure = '{ "nodes": [{"id": 1}, {"id": 2}], "edges": [{"source": 1, "target": 2}] }'
+>>> connected_dag = ensure_all_nodes_connected(dag_structure=dag_structure)
+'{ "nodes": [{"id": 1}, {"id": 2}], "edges": [{"source": 1, "target": 2}] }'
 ```
 
 ```python
->>> edges = ''
->>> nodes = extract_nodes_from_edges(edges)
->>> print(nodes)
-{}
+>>> dag_structure = '{ "nodes": [{"id": 1}, {"id": 2}, {"id": 3}], "edges": [{"source": 1, "target": 2}] }'
+>>> connected_dag = ensure_all_nodes_connected(dag_structure=dag_structure)
+'{ "nodes": [{"id": 1}, {"id": 2}, {"id": 3}], "edges": [{"source": 1, "target": 2}, {"source": 2, "target": 3}] }'
 ```
 
 
 
 ---
 
-## check_dag_completeness
+## optimize_dag_performance
 
 ### Description
-Determines whether a directed graph with the given number of nodes and edges is complete (contains the maximum possible edges).
+Optimizes the performance of a given DAG structure.
 
 ### Conceptual Info
 
-This shim verifies that the DAG is fully defined by ensuring the number of edges equals the maximum possible for a directed graph of the specified node count, indicating that every potential task relationship has been specified.
+This shim node is responsible for optimizing the performance of a Directed Acyclic Graph (DAG) structure. It takes a DAG representation as input and returns an optimized version of it.
 
 ### Docstring
 
-**Summary:** Check if a directed graph is complete based on node and edge counts.
+**Summary:** Optimizes the performance of a given DAG.
 
 **Parameters:**
 
-- node_count (int): The number of unique nodes in the DAG.
-- edge_count (int): The number of directed edges present in the DAG.
-**Returns:** bool - True when edge_count equals node_count * (node_count - 1) (i.e., the graph is complete), otherwise False.
+- dag (str): The input DAG structure as a string.
+**Returns:** str - The optimized DAG structure as a string.
 
 **Raises:**
 
-- ValueError: Raised if edge_count is negative or greater than the maximum possible for the given node_count.
-- TypeError: Raised if node_count or edge_count are not integers.
+- ValueError: If the input DAG is not valid or contains cycles.
+- TypeError: If the input DAG is not a string.
 **Examples:**
 
 ```python
->>> check_dag_completeness(3, 6)
-True
+>>> optimized_dag = optimize_dag_performance(dag="A->B->C")
+>>> print(optimized_dag)
+"A->B->C"
 ```
 
 ```python
->>> check_dag_completeness(4, 10)
-False
-```
-
-```python
->>> check_dag_completeness(-1, 5)
-ValueError: edge_count cannot be negative
+>>> optimized_dag = optimize_dag_performance(dag="A->C->B")
+>>> print(optimized_dag)
+"A->B->C"
 ```
 
 
 
 ---
 
-## determine_adjustments
+## generate_final_dag_representation
 
 ### Description
-Determines which nodes need adjustment based on concurrency and acyclicity flags.
+This shim generates the final string representation of the DAG after optimization.
 
 ### Conceptual Info
 
-This shim is responsible for deciding which workflow nodes must be modified when the DAG is either intended to run concurrently or must remain acyclic. The function receives the concurrency and acyclicity flags, validates them, and returns a list of node identifiers that require adjustment.
+This shim is responsible for generating the final string representation of the DAG after it has been optimized.
 
 ### Docstring
 
-**Summary:** Return a list of node names that require adjustment based on the `is_concurrent` and `is_acyclic` flags.
+**Summary:** Generates the final DAG representation as a string based on the input DAG structure.
 
 **Parameters:**
 
-- is_concurrent (str): Flag indicating whether the DAG should allow concurrent execution. Expected values: 'True' or 'False'.
-- is_acyclic (str): Flag indicating whether the DAG is acyclic. Expected values: 'True' or 'False'.
-**Returns:** LIST_STR - A list of node names (strings) that need to be adjusted. If no adjustments are necessary, an empty list is returned.
+- dag (str): The input DAG structure that needs to be represented as a string.
+**Returns:** str - The final DAG representation as a string.
 
 **Raises:**
 
-- ValueError: Raised when either `is_concurrent` or `is_acyclic` is not one of the accepted string values ('True', 'False').
-- TypeError: Raised when either `is_concurrent` or `is_acyclic` is not a string.
+- ValueError: If the input DAG is not a valid string representation.
+- TypeError: If the input DAG is not of type string.
 **Examples:**
 
 ```python
->>> determine_adjustments("True", "True")
-[]
+>>> final_dag = generate_final_dag_representation(dag='node1->node2;node2->node3')
+>>> print(final_dag)
+'digraph { node1 -> node2; node2 -> node3; }'
 ```
 
 ```python
->>> determine_adjustments("False", "True")
-["Task1", "Task2"]
-```
-
-
-
----
-
-## generate_dag_summary
-
-### Description
-Creates a concise, human‑readable summary of a directed acyclic graph based on node and edge counts, acyclicity, and concurrency status.
-
-### Conceptual Info
-
-This shim generates a natural‑language description of a DAG’s structure and properties, allowing downstream components to report or log the DAG state without needing to parse raw metrics.
-
-### Docstring
-
-**Summary:** Generate a concise, human‑readable summary of a directed acyclic graph based on its node count, edge count, acyclicity, and concurrency status.
-
-**Parameters:**
-
-- node_count (int): Total number of nodes in the DAG.
-- edge_count (int): Total number of directed edges in the DAG.
-- is_acyclic (bool): True if the DAG contains no cycles; False otherwise.
-- is_concurrent (bool): True if the DAG is configured to allow concurrent execution of independent tasks; False otherwise.
-**Returns:** str - A string summarizing the DAG, e.g., "The DAG contains 5 nodes and 4 directed edges, is acyclic, and does not support concurrent execution."
-
-**Raises:**
-
-- ValueError: Raised when node_count or edge_count is negative or not an integer.
-- TypeError: Raised when any input parameter is of an incorrect type.
-**Examples:**
-
-```python
->>> summary = generate_dag_summary(node_count=5, edge_count=4, is_acyclic=True, is_concurrent=False)
-"The DAG contains 5 nodes and 4 directed edges, is acyclic, and does not support concurrent execution."
-```
-
-```python
->>> summary = generate_dag_summary(node_count=10, edge_count=9, is_acyclic=True, is_concurrent=True)
-"The DAG contains 10 nodes and 9 directed edges, is acyclic, and supports concurrent execution."
-```
-
-
-
----
-
-## log_finalization_results
-
-### Description
-Logs the finalization summary and adjustments of a workflow DAG and returns a concise message.
-
-### Conceptual Info
-
-This shim abstracts the logging of workflow DAG finalization details, allowing downstream components to capture and record the outcome without depending on a concrete logging implementation.
-
-### Docstring
-
-**Summary:** Logs the finalization summary and list of adjustments for a workflow DAG and returns a formatted string containing both.
-
-**Parameters:**
-
-- logger (str): Name of the logger to use for outputting the finalization results.
-- summary (str): Human‑readable summary of the finalized DAG.
-- adjustments (List[str]): List of node names that were adjusted during finalization.
-**Returns:** str - A single string in the form "Log summary: {summary}. Adjustments made: {adjustments}" where adjustments are comma‑separated.
-
-**Raises:**
-
-- ValueError: If `summary` is an empty string or `adjustments` contains non‑string elements.
-- TypeError: If any argument is of an incorrect type.
-**Examples:**
-
-```python
->>> result = log_finalization_results(logger='root', summary='All tasks completed.', adjustments=['NodeA', 'NodeB'])
->>> print(result)
-"Log summary: All tasks completed. Adjustments made: NodeA, NodeB"
-```
-
-```python
->>> result = log_finalization_results(logger='workflow', summary='DAG is acyclic.', adjustments=[])
->>> print(result)
-"Log summary: DAG is acyclic. Adjustments made: "
+>>> generate_final_dag_representation(dag='invalid_dag_structure')
+>>> print(final_dag)
+ValueError: Invalid DAG structure
 ```
 

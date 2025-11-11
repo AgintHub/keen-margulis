@@ -5,137 +5,93 @@ PRDs for nodes in the '_define_workflow_objective' module.
 
 ## Table of Contents
 
-- [parse_user_input](#parse_user_input)
+- [validate_input_string](#validate_input_string)
 
-- [extract_requirements](#extract_requirements)
-
-- [identify_domain](#identify_domain)
+- [clean_and_normalize_input](#clean_and_normalize_input)
 
 - [generate_objective_statement](#generate_objective_statement)
 
-- [validate_objective_length](#validate_objective_length)
-
-- [refine_objective_clarity](#refine_objective_clarity)
+- [create_output_model](#create_output_model)
 
 
 
 ---
 
-## parse_user_input
+## validate_input_string
 
 ### Description
-Parses a raw user input string into a structured dictionary representation of the user's intent for workflow generation.
+Validates and normalizes a string input for the workflow objective function.
 
 ### Conceptual Info
 
-This shim function serves as the initial natural language processing step, converting free-text user input into a structured dictionary that downstream workflow components can consume.
+The shim ensures that raw user-provided strings are safe and usable for downstream natural language processing, preventing empty or malformed inputs from propagating through the workflow.
 
 ### Docstring
 
-**Summary:** Parse a user-provided text string into a JSON-formatted dictionary of intent and parameters.
+**Summary:** Validate a string input, ensuring it is non-empty and contains meaningful content, then strip extraneous whitespace.
 
 **Parameters:**
 
-- input_text (str): The raw input text from the user to be parsed.
-**Returns:** str - A JSON string that maps keys such as 'intent', 'parameters', etc., representing the parsed user intent.
+- input_value (str): The raw string provided by the user.
+**Returns:** str - A clean, non-empty string with leading and trailing whitespace removed.
 
 **Raises:**
 
-- ValueError: Raised when the input text cannot be parsed into a valid intent dictionary.
-- TypeError: Raised when input_text is not of type str.
+- ValueError: Raised when the input is an empty string or contains only whitespace.
+- TypeError: Raised when the input is not of type `str`.
 **Examples:**
 
 ```python
->>> parse_user_input('Book me a flight to Paris next Monday')
-'{"intent": "book_flight", "destination": "Paris", "date": "next Monday"}'
+>>> validated = validate_input_string('  Hello, Workflow!  ')
+'Hello, Workflow!'
 ```
 
 ```python
->>> parse_user_input('Show me the weather in New York')
-'{"intent": "get_weather", "location": "New York"}'
-```
-
-
-
----
-
-## extract_requirements
-
-### Description
-Extracts a list of key requirements from a parsed user intent dictionary.
-
-### Conceptual Info
-
-The shim analyzes the structure of a parsed user intent to pull out actionable requirement statements, which are later used to identify domain context and generate objective statements.
-
-### Docstring
-
-**Summary:** Extracts key requirement statements from the parsed intent dictionary.
-
-**Parameters:**
-
-- parsed_intent (dict): A dictionary representation of the user input that has already been parsed by the `parse_user_input` function.
-**Returns:** list[str] - A list of strings, each representing a distinct requirement derived from the parsed intent.
-
-**Raises:**
-
-- TypeError: Raised if `parsed_intent` is not a dictionary.
-- ValueError: Raised if no valid requirements can be extracted from the input.
-**Examples:**
-
-```python
->>> parsed_user_intent = {
-...     'intent': 'Book a flight',
-...     'entities': {
-...         'destination': 'New York',
-...         'departure_date': '2025-08-15',
-...         'return_date': '2025-08-20' }
->>> } 
->>> requirements = extract_requirements(parsed_user_intent)
-['Destination: New York', 'Departure date: 2025-08-15', 'Return date: 2025-08-20']
+>>> validate_input_string('   ')
+ValueError: Input string must contain at least one non-whitespace character
 ```
 
 ```python
->>> extract_requirements({})
-ValueError: No requirements extracted from the parsed intent.
+>>> validate_input_string(42)
+TypeError: input_value must be a string
 ```
 
 
 
 ---
 
-## identify_domain
+## clean_and_normalize_input
 
 ### Description
-Identifies the domain context from a list of key requirements.
+Cleans and normalizes raw text input by trimming whitespace, converting to lowercase, removing extraneous punctuation, and standardizing spacing for downstream processing.
 
 ### Conceptual Info
 
-The `identify_domain` shim is a critical intermediary that interprets a set of key requirements extracted from user intent and translates them into a high‑level domain context string. This domain context is subsequently used by downstream functions to generate and validate objective statements within the correct domain.
+This shim sanitizes raw text input to ensure consistency for downstream NLP components, removing noise such as leading/trailing whitespace, punctuation, and inconsistent casing.
 
 ### Docstring
 
-**Summary:** Determines the domain of a workflow from a list of requirement strings.
+**Summary:** Cleans and normalizes a raw input string for further processing.
 
 **Parameters:**
 
-- requirements (List[str]): A list of textual requirement statements extracted from the user intent.
-**Returns:** str - A concise domain context string (e.g., "Web Development", "Business Intelligence") derived from the input requirements.
+- raw_input (str): The original raw text to be cleaned and normalized.
+**Returns:** str - A lowercase, whitespace-normalized string with punctuation removed.
 
 **Raises:**
 
-- ValueError: Raised when the function cannot infer a domain or returns an empty string.
-- TypeError: Raised when the input is not a list of strings.
+- ValueError: If the input string is empty or only whitespace after stripping.
+- TypeError: If the provided input is not of type str.
 **Examples:**
 
 ```python
->>> identify_domain(['develop a web application', 'implement user authentication'])
-'Web Development'
+>>> clean_and_normalize_input('   Hello, World!   ')
+'hello world'
 ```
 
 ```python
->>> identify_domain(['analyze market trends', 'create financial reports'])
-'Business Intelligence'
+>>> clean_and_normalize_input('Test input: 123.')
+'test input 123'
 ```
 
 
@@ -145,111 +101,75 @@ The `identify_domain` shim is a critical intermediary that interprets a set of k
 ## generate_objective_statement
 
 ### Description
-Generates a concise objective statement for a workflow given a list of requirements and a domain context.
+Generates a concise objective statement from a cleaned description of a workflow.
 
 ### Conceptual Info
 
-This shim produces a high‑level goal statement for a workflow. It takes the extracted requirements and the identified domain, then synthesizes a clear, actionable objective that guides the subsequent steps of the workflow.
+This shim transforms a cleaned textual description of a workflow into a short, actionable objective statement that serves as the primary goal for subsequent workflow steps.
 
 ### Docstring
 
-**Summary:** Generate a concise objective statement for a workflow from given requirements and domain.
+**Summary:** Generate a concise objective statement from a cleaned description of a workflow.
 
 **Parameters:**
 
-- requirements (str): A string (or stringified list) representing the key requirements that the objective must satisfy.
-- domain (str): The domain or context within which the workflow operates, used to tailor the objective language.
-**Returns:** str - A single sentence that succinctly describes the primary goal of the workflow.
+- cleaned_description (str): A pre‑processed, normalized description of the workflow that should be used to create the objective statement.
+**Returns:** str - A short, clear objective statement that summarizes the primary goal of the workflow.
 
 **Raises:**
 
-- ValueError: Raised when the generated objective statement is empty or contains only whitespace.
-- TypeError: Raised if either 'requirements' or 'domain' is not a string.
+- ValueError: Raised when `cleaned_description` is an empty string or contains only whitespace.
+- TypeError: Raised when `cleaned_description` is not of type `str`.
 **Examples:**
 
 ```python
->>> output = generate_objective_statement(requirements='Build an API', domain='Software Development')
-'Develop a scalable REST API for user authentication.'
+>>> generate_objective_statement('Process sales data and generate a report')
+'Process sales data and generate a report'
 ```
 
 ```python
->>> output = generate_objective_statement(requirements='Improve customer onboarding', domain='E-commerce')
-'Streamline the onboarding process to reduce drop‑off rates by 30% in the e‑commerce platform.'
+>>> generate_objective_statement('Conduct a market analysis and produce insights for the Q4 strategy')
+'Conduct a market analysis and produce insights for the Q4 strategy'
 ```
 
 
 
 ---
 
-## validate_objective_length
+## create_output_model
 
 ### Description
-Validates that a provided objective string meets predefined length constraints and returns it unchanged or an empty string if invalid.
+Creates a DefineWorkflowObjectiveOutput model instance from an objective string.
 
 ### Conceptual Info
 
-The shim ensures that any objective statement produced by upstream generation logic conforms to length constraints before further processing, acting as a safety net against malformed or overly brief objectives.
+The shim encapsulates the creation of a standardized objective output model, ensuring consistent structure and validation across the workflow.
 
 ### Docstring
 
-**Summary:** Validates that an objective string satisfies minimum and maximum length constraints and returns the string if valid, or an empty string otherwise.
+**Summary:** Instantiate a DefineWorkflowObjectiveOutput from a validated objective string.
 
 **Parameters:**
 
-- objective (str): The objective statement to validate.
-**Returns:** str - The validated objective string if it meets length constraints; otherwise an empty string.
+- objective (str): The primary goal statement that will populate the objective field of the output model.
+**Returns:** str - A JSON string that represents a DefineWorkflowObjectiveOutput instance, e.g. {'objective':'...'}.
 
 **Raises:**
 
-- TypeError: Raised when the input `objective` is not of type `str`.
-- ValueError: Raised when the input `objective` is `None`.
+- ValueError: Raised when the objective string is empty or contains only whitespace.
+- TypeError: Raised when the objective argument is not of type str.
 **Examples:**
 
 ```python
->>> validate_objective_length('Develop a comprehensive data pipeline')
-'Develop a comprehensive data pipeline'
+>>> output_json = create_output_model('Launch the new product line')
+"{\"objective\": \"Launch the new product line\"}"
 ```
 
 ```python
->>> validate_objective_length('Short')
-''
-```
-
-
-
----
-
-## refine_objective_clarity
-
-### Description
-Refines a workflow objective statement to be clearer, more concise, and grammatically correct.
-
-### Conceptual Info
-
-The shim improves the readability and precision of an objective string, making it suitable for final workflow documentation.
-
-### Docstring
-
-**Summary:** Refine the clarity of an objective statement.
-
-**Parameters:**
-
-- objective (str): The objective statement to refine.
-**Returns:** str - A refined, concise version of the original objective.
-
-**Raises:**
-
-- ValueError: If the input objective is an empty string after stripping.
-- TypeError: If the input is not a string.
-**Examples:**
-
-```python
->>> refine_objective_clarity('Improve the user experience and increase the engagement rates in the next quarter.')
-'Improve user experience and increase engagement rates by the next quarter.'
-```
-
-```python
->>> refine_objective_clarity('Ensure the objective is clear.')
-'Ensure the objective is clear.'
+>>> try:
+...     create_output_model(123)
+>>> except Exception as e:
+...     print(repr(e))
+"TypeError: objective must be a string"
 ```
 
